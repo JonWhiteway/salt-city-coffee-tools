@@ -1,0 +1,2111 @@
+<title>Salt City Command Deck</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============================= TOKENS ============================= */
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --serious:#C15A34; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --nav-w:248px; --radius:10px; --radius-sm:6px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 6px 20px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+    --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+
+/* ============================= BASE ============================= */
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body);
+  font-size:14.5px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:600; margin:0; text-wrap:balance; color:var(--ink);}
+a{color:inherit;}
+button{font-family:inherit;}
+::selection{background:var(--accent-soft); color:var(--ink);}
+.tabular{font-variant-numeric:tabular-nums;}
+.mono{font-family:var(--font-mono);}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+.nav-item:focus-visible{outline-offset:-2px;}
+
+/* ============================= APP SHELL ============================= */
+.app{display:flex; min-height:100vh;}
+
+/* ---- Sidebar: a deliberate fixed dark zone, same in both themes ---- */
+.sidebar{
+  width:var(--nav-w); flex:0 0 var(--nav-w); background:#191410; color:#EDE3D2;
+  position:sticky; top:0; height:100vh; overflow-y:auto; padding:20px 14px 24px;
+  border-right:1px solid #2B2318;
+}
+.brand{display:flex; align-items:center; gap:10px; padding:6px 8px 18px; border-bottom:1px solid #2B2318; margin-bottom:14px;}
+.brand-mark{
+  width:34px; height:34px; border-radius:8px; background:linear-gradient(155deg,#F0824C,#B9852E);
+  display:flex; align-items:center; justify-content:center; color:#191410; font-family:var(--font-display);
+  font-weight:700; font-size:16px; flex:0 0 auto;
+}
+.brand-text{display:flex; flex-direction:column; line-height:1.25;}
+.brand-text strong{font-family:var(--font-display); font-size:15px; font-weight:600; color:#FBF6EB;}
+.brand-text span{font-size:11px; color:#B7A98E; letter-spacing:.02em;}
+.nav-group-label{font-size:10.5px; text-transform:uppercase; letter-spacing:.09em; color:#8C7F65; padding:14px 10px 6px;}
+.nav-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px;}
+.nav-item{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:8px 10px;
+  border-radius:7px; background:transparent; border:none; color:#D9CDB4; cursor:pointer;
+  font-size:13.3px; font-weight:500; position:relative;
+}
+.nav-item:hover{background:#241D14; color:#FBF6EB;}
+.nav-item.active{background:#2C2115; color:#FBF6EB;}
+.nav-item.active::before{content:""; position:absolute; left:-14px; top:6px; bottom:6px; width:3px; border-radius:2px; background:#F0824C;}
+.nav-dot{width:6px; height:6px; border-radius:50%; background:#8C7F65; flex:0 0 auto;}
+.nav-item.active .nav-dot{background:#F0824C;}
+.sidebar-foot{margin-top:18px; padding:12px 10px; border-top:1px solid #2B2318; font-size:11.5px; color:#8C7F65; line-height:1.5;}
+.sidebar-foot b{color:#D9CDB4;}
+
+/* ---- Main ---- */
+.main{flex:1 1 auto; min-width:0;}
+.topbar{
+  position:sticky; top:0; z-index:5; background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(8px); border-bottom:1px solid var(--border-soft);
+  padding:16px 32px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+}
+.topbar h1{font-size:22px;}
+.topbar .sub{color:var(--ink-2); font-size:13px; margin-top:3px;}
+.topbar-right{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+.sample-pill{
+  display:inline-flex; align-items:center; gap:6px; background:var(--warn-soft); color:var(--warn);
+  border:1px solid color-mix(in srgb, var(--warn) 35%, transparent); font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:5px 10px; border-radius:99px; white-space:nowrap;
+}
+.sample-pill svg{width:11px; height:11px;}
+.sample-pill.is-live{ background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb, var(--good) 35%, transparent); }
+.sample-pill.is-editable{ background:var(--surface-alt); color:var(--ink-2); border-color:var(--border); }
+.asof{font-size:12px; color:var(--ink-3); white-space:nowrap;}
+.content{padding:24px 32px 64px;}
+.panel{display:none;}
+.panel.active{display:block; animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;}}
+
+/* ---- shared building blocks ---- */
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:28px 0 14px;}
+.section-head:first-child{margin-top:0;}
+.section-head h2{font-size:16.5px;}
+.section-head .hint{font-size:12px; color:var(--ink-3);}
+.grid{display:grid; gap:14px;}
+.kpi-row{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));}
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:var(--shadow-1); padding:16px;
+}
+.kpi{padding:14px 16px;}
+.kpi .label{font-size:11.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+.kpi .value{font-family:var(--font-mono); font-size:23px; font-weight:600; margin-top:6px; letter-spacing:-.01em;}
+.kpi .delta{font-size:12px; margin-top:4px; display:flex; align-items:center; gap:4px;}
+.delta.up{color:var(--good);} .delta.down{color:var(--critical);} .delta.flat{color:var(--ink-3);}
+.kpi .target{font-size:11px; color:var(--ink-3); margin-top:2px;}
+
+.chip{
+  display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px;
+  border-radius:99px; white-space:nowrap; letter-spacing:.01em;
+}
+/* Status is never color alone (red/green colorblind-safe): each state gets its
+   own SHAPE, not just a hue, so it reads without distinguishing color at all. */
+.chip::before{content:""; width:8px; height:8px; flex:0 0 auto; background:currentColor;}
+.chip.good{background:var(--good-soft); color:var(--good);}
+.chip.good::before{border-radius:50%;} /* circle */
+.chip.warn{background:var(--warn-soft); color:var(--warn);}
+.chip.warn::before{border-radius:1.5px; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);} /* triangle */
+.chip.serious{background:var(--serious-soft); color:var(--serious);}
+.chip.serious::before{border-radius:1.5px; clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);} /* diamond */
+.chip.critical{background:var(--critical-soft); color:var(--critical);}
+.chip.critical::before{border-radius:1.5px; clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);} /* octagon — stop-sign shape */
+.chip.neutral{background:var(--surface-alt); color:var(--ink-2);}
+.chip.neutral::before{border-radius:1.5px; transform:rotate(45deg);} /* diamond-square, low-alarm */
+
+.btn{
+  display:inline-flex; align-items:center; gap:7px; border-radius:8px; border:1px solid var(--border);
+  background:var(--surface); color:var(--ink); font-size:13px; font-weight:600; padding:8px 13px; cursor:pointer;
+}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.btn.primary:hover{filter:brightness(1.05);}
+.btn.ghost{background:transparent; border-color:transparent; color:var(--ink-2); padding:6px 8px;}
+.btn.ghost:hover{background:var(--surface-alt); color:var(--ink);}
+.btn.sm{padding:5px 9px; font-size:12px;}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+
+table{width:100%; border-collapse:collapse; font-size:13px;}
+th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); font-weight:700; padding:0 10px 8px; border-bottom:1px solid var(--border);}
+td{padding:10px 10px; border-bottom:1px solid var(--border-soft); vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.table-wrap{overflow-x:auto; border-radius:var(--radius); border:1px solid var(--border); background:var(--surface);}
+.table-wrap table{min-width:640px;}
+.num{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+.right{text-align:right;}
+
+.progress{height:7px; border-radius:99px; background:var(--surface-alt); overflow:hidden;}
+.progress > span{display:block; height:100%; background:var(--accent); border-radius:99px;}
+.progress.thin{height:5px;}
+
+.link-card{
+  display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 20px;
+  border-radius:var(--radius); border:1px solid var(--border); background:linear-gradient(135deg,var(--accent-soft),var(--surface));
+  cursor:pointer; text-decoration:none;
+}
+.link-card:hover{box-shadow:var(--shadow-2);}
+.link-card .lc-title{font-family:var(--font-display); font-size:16px; font-weight:600;}
+.link-card .lc-sub{font-size:12.5px; color:var(--ink-2); margin-top:3px;}
+.link-card .arrow{font-size:20px; color:var(--accent); flex:0 0 auto;}
+
+.empty-note{font-size:12px; color:var(--ink-3); font-style:italic; padding:8px 2px;}
+
+/* ---- location cards (Overview) ---- */
+.loc-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
+.loc-card{
+  text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:10px;
+  background:var(--surface); transition:box-shadow .15s, border-color .15s;
+}
+.loc-card:hover{box-shadow:var(--shadow-2); border-color:var(--accent);}
+.loc-card .lc-head{display:flex; align-items:flex-start; justify-content:space-between; gap:8px;}
+.loc-card h3{font-size:15px;}
+.loc-card .lm{font-size:12px; color:var(--ink-2); margin-top:2px;}
+.loc-card .lc-stats{display:flex; gap:16px; margin-top:2px;}
+.loc-card .lc-stat .n{font-family:var(--font-mono); font-size:16.5px; font-weight:600;}
+.loc-card .lc-stat .l{font-size:10.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em;}
+.loc-card .lc-foot{font-size:11.5px; color:var(--accent); font-weight:600; display:flex; align-items:center; gap:4px; margin-top:auto;}
+
+/* ---- bars (simple magnitude bars) ---- */
+.barlist{display:flex; flex-direction:column; gap:10px;}
+.barlist .row{display:grid; grid-template-columns:110px 1fr 74px; align-items:center; gap:10px; font-size:12.5px;}
+.barlist .row .name{color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.barlist .track{height:10px; border-radius:99px; background:var(--surface-alt); overflow:visible; position:relative;}
+.barlist .track > span{display:block; height:100%; border-radius:99px; background:var(--series-2); overflow:hidden;}
+.barlist .track .target-tick{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--ink); opacity:.5; z-index:2;}
+.barlist .val{font-family:var(--font-mono); text-align:right; display:flex; align-items:center; justify-content:flex-end; gap:5px;}
+.barlist .val .mark{width:12px; height:12px; flex:0 0 auto;}
+.barlist .val .mark.over{color:var(--critical);}
+.barlist .val .mark.under{color:var(--good);}
+
+/* ---- funnel (customer journey) ---- */
+.funnel{display:flex; flex-direction:column; gap:6px;}
+.funnel .step{display:grid; grid-template-columns:150px 1fr 90px; align-items:center; gap:10px;}
+.funnel .step .label{font-size:12.5px; color:var(--ink-2);}
+.funnel .step .bar-bg{height:22px; border-radius:5px; background:var(--surface-alt); position:relative; overflow:hidden;}
+.funnel .step .bar-fill{position:absolute; inset:0; border-radius:5px; background:var(--series-1); width:var(--w,50%);}
+.funnel .step .count{font-family:var(--font-mono); font-size:12.5px; text-align:right;}
+
+/* ---- donut ---- */
+.donut-wrap{display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
+.legend{display:flex; flex-direction:column; gap:8px;}
+.legend .li{display:flex; align-items:center; gap:8px; font-size:12.5px;}
+.legend .sw{width:10px; height:10px; border-radius:3px; flex:0 0 auto;}
+.legend .li .amt{font-family:var(--font-mono); color:var(--ink-2); margin-left:auto; padding-left:14px;}
+
+/* ---- kanban (product dev) ---- */
+.kanban{display:grid; grid-template-columns:repeat(5,minmax(170px,1fr)); gap:12px; overflow-x:auto;}
+.kanban-col{background:var(--surface-alt); border-radius:var(--radius); padding:10px; display:flex; flex-direction:column; gap:8px; min-width:170px;}
+.kanban-col h4{font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-2); padding:2px 4px 0;}
+.kcard{background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:9px 10px; font-size:12.5px; box-shadow:var(--shadow-1);}
+.kcard .k-owner{font-size:11px; color:var(--ink-3); margin-top:5px;}
+
+/* ---- events / calendar list ---- */
+.event-list{display:flex; flex-direction:column;}
+.event-row{display:grid; grid-template-columns:64px 1fr auto; gap:14px; align-items:center; padding:11px 4px; border-bottom:1px solid var(--border-soft);}
+.event-row:last-child{border-bottom:none;}
+.event-date{text-align:center; background:var(--surface-alt); border-radius:8px; padding:6px 4px;}
+.event-date .d{font-family:var(--font-mono); font-size:16px; font-weight:600; line-height:1;}
+.event-date .m{font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3);}
+.event-title{font-size:13.3px; font-weight:600;}
+.event-meta{font-size:11.5px; color:var(--ink-3); margin-top:2px;}
+
+/* ---- priorities (editable/checkable) ---- */
+.pr-list{display:flex; flex-direction:column; gap:8px;}
+.pr-row{display:flex; align-items:flex-start; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:10px 12px;}
+.pr-row.done{opacity:.55;}
+.pr-check{
+  width:19px; height:19px; border-radius:6px; border:1.6px solid var(--border); flex:0 0 auto; margin-top:1px;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; background:var(--surface);
+}
+.pr-row.done .pr-check{background:var(--good); border-color:var(--good); color:#fff;}
+.pr-rank{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3); width:16px; flex:0 0 auto; padding-top:2px;}
+.pr-text{
+  flex:1 1 auto; border:none; background:transparent; font-family:var(--font-body); font-size:13.6px;
+  color:var(--ink); padding:2px 0; resize:none; line-height:1.4;
+}
+.pr-row.done .pr-text{text-decoration:line-through; color:var(--ink-3);}
+.pr-text:focus{outline:none;}
+.pr-actions{display:flex; gap:2px; flex:0 0 auto;}
+.pr-move{width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--ink-3); cursor:pointer; border-radius:5px; font-size:12px;}
+.pr-move:hover{background:var(--surface-alt); color:var(--ink);}
+.pr-del{width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--ink-3); cursor:pointer; border-radius:5px;}
+.pr-del:hover{background:var(--critical-soft); color:var(--critical);}
+.pr-savebar{display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--ink-3); margin-top:10px;}
+.pr-savebar .dot{width:6px; height:6px; border-radius:50%; background:var(--good);}
+.pr-savebar.saving .dot{background:var(--warn);}
+
+/* ---- top ideas (read-only ranked list) ---- */
+.ti-list{display:flex; flex-direction:column; gap:8px;}
+.ti-row{display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:10px 12px;}
+.ti-rank{font-family:var(--font-mono); font-size:14px; font-weight:600; color:var(--ink-3); width:20px; flex:0 0 auto; text-align:center;}
+.ti-title{flex:1 1 auto; font-size:13.6px; font-weight:600; color:var(--ink);}
+.ti-meta{font-size:11px; color:var(--ink-3); flex:0 0 auto;}
+
+/* ---- Warehouse Inventory & Order Fulfillment — outgoing / incoming cards ---- */
+.og-card{display:flex; flex-direction:column; gap:8px;}
+.og-title{font-size:12.5px; color:var(--ink-2); font-weight:600;}
+.og-value{font-family:var(--font-mono); font-size:23px; font-weight:600; letter-spacing:-.01em;}
+.og-breakdown{display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;}
+.inc-card{display:flex; flex-direction:column; gap:8px;}
+.inc-title{font-size:12.5px; color:var(--ink-2); font-weight:600;}
+.inc-count{font-family:var(--font-mono); font-size:23px; font-weight:600; letter-spacing:-.01em;}
+.inc-item-row{display:flex; align-items:baseline; justify-content:space-between; gap:8px; font-size:12.5px; padding:4px 0; border-top:1px solid var(--border-soft);}
+.inc-item-row .nm{font-weight:600; color:var(--ink);}
+.inc-item-row .dt{color:var(--ink-3); flex:0 0 auto;}
+.inc-item-row a{color:var(--accent); text-decoration:none;}
+.mini-form{display:flex; flex-direction:column; gap:6px; margin-top:8px;}
+.mini-form input{font-family:inherit; font-size:12.5px; padding:7px 9px; border-radius:7px; border:1px solid var(--border); background:var(--surface); color:var(--ink);}
+.mini-form .btn{align-self:flex-start;}
+
+/* ---- two-col layout ---- */
+.cols-2{grid-template-columns:1.3fr 1fr;}
+.cols-3{grid-template-columns:repeat(3,1fr);}
+.cols-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width: 900px){
+  .cols-2, .cols-3, .cols-4{grid-template-columns:1fr;}
+  .kanban{grid-template-columns:repeat(5,220px);}
+}
+@media (max-width: 760px){
+  .sidebar{position:fixed; left:0; top:0; z-index:20; transform:translateX(-100%); transition:transform .2s; box-shadow:var(--shadow-2);}
+  .sidebar.open{transform:none;}
+  .topbar,.content{padding-left:18px; padding-right:18px;}
+  #menu-toggle{display:flex !important;}
+}
+</style>
+
+<div class="app">
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-text"><strong>Salt City</strong><span>Command Deck</span></div>
+    </div>
+    <div class="nav-group-label">Company</div>
+    <ul class="nav-list">
+      <li><button class="nav-item active" data-section="overview"><span class="nav-dot"></span>Overview</button></li>
+      <li><button class="nav-item" data-section="sales"><span class="nav-dot"></span>Sales &amp; Labor</button></li>
+      <li><button class="nav-item" data-section="crm"><span class="nav-dot"></span>Customer Journey &amp; Marketing</button></li>
+      <li><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
+    </ul>
+    <div class="nav-group-label">Planning</div>
+    <ul class="nav-list">
+      <li><button class="nav-item" data-section="calendar"><span class="nav-dot"></span>Calendar &amp; Events</button></li>
+      <li><button class="nav-item" data-section="goals"><span class="nav-dot"></span>Goals &amp; Projections</button></li>
+      <li><button class="nav-item" data-section="priorities"><span class="nav-dot"></span>COO Priorities</button></li>
+    </ul>
+    <div class="nav-group-label">Production</div>
+    <ul class="nav-list">
+      <li><button class="nav-item" data-section="warehouse"><span class="nav-dot"></span>Warehouse Inventory &amp; Order Fulfillment</button></li>
+      <li><button class="nav-item" data-section="foodprod"><span class="nav-dot"></span>Food Production</button></li>
+      <li><button class="nav-item" data-section="coldbrewprod"><span class="nav-dot"></span>Cold Brew Production</button></li>
+      <li><button class="nav-item" data-section="roastery"><span class="nav-dot"></span>Roastery</button></li>
+      <li><button class="nav-item" data-section="productdev"><span class="nav-dot"></span>Product Development</button></li>
+    </ul>
+    <div class="sidebar-foot">
+      <b>Sample data build</b> — layout &amp; structure for review. Live sources wire in next: Square via nightly sync, Supabase for CRM/Academy/priorities.
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <button class="btn ghost sm" id="menu-toggle" style="display:none;margin-top:2px;">☰</button>
+        <div>
+        <h1 id="topbar-title">Overview</h1>
+        <div class="sub" id="topbar-sub">Portfolio pulse — company-wide, trailing 30 days</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span class="sample-pill" id="section-pill">
+          <svg id="section-pill-icon-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 9v4M12 17h.01M10.3 3.86 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.86a2 2 0 0 0-3.4 0Z"/></svg>
+          <svg id="section-pill-icon-good" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          <svg id="section-pill-icon-neutral" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <span id="section-pill-text">Sample data</span>
+        </span>
+        <span class="asof" id="topbar-asof">As of —</span>
+      </div>
+    </div>
+    <div class="content" id="content">
+
+      <!-- ============ OVERVIEW ============ -->
+      <section class="panel active" id="sec-overview">
+        <div class="section-head">
+          <h2>Portfolio pulse — trailing 30 days</h2>
+          <span class="hint" id="ov-live-status">Sample data · Square not yet synced</span>
+        </div>
+        <div class="grid kpi-row">
+          <div class="card kpi">
+            <div class="label">Portfolio revenue</div>
+            <div class="value tabular" id="ov-kpi-revenue">$610.4K</div>
+            <div class="delta up" id="ov-kpi-revenue-delta">▲ 3.6% vs prior 30d</div>
+            <div class="target">Q3 projection $2.42M</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Blended labor %</div>
+            <div class="value tabular" id="ov-kpi-labor">29.1%</div>
+            <div class="delta up" id="ov-kpi-labor-delta">▼ 0.5pt vs prior 30d</div>
+            <div class="target">Target 28.0%</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Transactions</div>
+            <div class="value tabular" id="ov-kpi-txn">39.5K</div>
+            <div class="delta up" id="ov-kpi-txn-delta">▲ 2.1% vs prior 30d</div>
+            <div class="target" id="ov-kpi-ticket">Avg ticket $6.72</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Customer journey — at risk</div>
+            <div class="value tabular">312</div>
+            <div class="delta down">▲ 18 vs last mo.</div>
+            <div class="target">Loyalty enrollment 61%</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Academy engagement (30d)</div>
+            <div class="value tabular">71%</div>
+            <div class="delta up">▲ 4pt vs last mo.</div>
+            <div class="target">Craft 78% · Leadership 64%</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Open wholesale / roastery</div>
+            <div class="value tabular">5</div>
+            <div class="delta flat">2 due this week</div>
+            <div class="target">214 active subscriptions</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">COO top-10 priorities</div>
+            <div class="value tabular" id="ov-pr-progress">0 / 10</div>
+            <div class="delta flat">Q3 2026 cycle</div>
+            <div class="target">Editable — see Priorities</div>
+          </div>
+        </div>
+
+        <div class="section-head"><h2>Locations</h2><span class="hint">Click a card to open its Sales &amp; Labor detail</span></div>
+        <div class="grid loc-grid" id="location-cards"><!-- injected by JS from LOCATIONS --></div>
+      </section>
+
+      <!-- ============ SALES & LABOR ============ -->
+      <section class="panel" id="sec-sales">
+
+        <div id="sales-portfolio">
+          <div class="section-head"><h2>Portfolio — trailing 30 days</h2><span class="hint" id="sales-live-status">Sample data · Square not yet synced</span></div>
+          <div class="grid cols-2">
+            <div class="card">
+              <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:12px;">Revenue by location (MTD)</div>
+              <div class="barlist" id="sales-barlist"><!-- injected --></div>
+            </div>
+            <div class="card">
+              <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:12px;">Labor % vs. 28% target</div>
+              <div class="barlist" id="labor-barlist"><!-- injected --></div>
+            </div>
+          </div>
+          <div class="section-head"><h2>All locations</h2><span class="hint">Click a row to drill in</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Location</th><th>Location Manager</th><th class="right">MTD revenue</th><th class="right">Labor %</th><th class="right">Transactions</th><th class="right">Avg ticket</th><th>Status</th></tr></thead>
+              <tbody id="sales-table-body"><!-- injected --></tbody>
+              <tfoot><tr style="font-weight:700;"><td>Portfolio total</td><td></td><td class="right num" id="sales-total-rev">$610,450</td><td class="right num" id="sales-total-labor">29.1%</td><td class="right num" id="sales-total-txn">39,500</td><td class="right num" id="sales-total-ticket">$6.72</td><td></td></tr></tfoot>
+            </table>
+          </div>
+          <div class="empty-note" id="sales-source-note">This table reads from <code>square_location_kpis_public</code> in Supabase — populated by <code>sync_square_daily_rollups.py</code>, which you run locally against your own Square token (not a live Square query per page load; see Warehouse note on the same pattern already used for inventory). Run the script, then reload this page.</div>
+        </div>
+
+        <div id="sales-location" style="display:none;">
+          <button class="btn ghost sm" id="back-to-portfolio" style="margin-bottom:14px;">← Back to portfolio</button>
+          <div class="section-head" style="margin-top:0;"><h2 id="loc-detail-name">—</h2><span class="hint" id="loc-detail-lm">—</span></div>
+          <div class="grid kpi-row">
+            <div class="card kpi"><div class="label">MTD revenue</div><div class="value tabular" id="loc-d-rev">—</div><div class="delta" id="loc-d-rev-delta"></div></div>
+            <div class="card kpi"><div class="label">Labor %</div><div class="value tabular" id="loc-d-labor">—</div><div class="target">Target 28.0%</div></div>
+            <div class="card kpi"><div class="label">Transactions</div><div class="value tabular" id="loc-d-txn">—</div></div>
+            <div class="card kpi"><div class="label">Avg ticket</div><div class="value tabular" id="loc-d-ticket">—</div></div>
+          </div>
+          <div class="grid cols-2" style="margin-top:14px;">
+            <div class="card">
+              <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:10px;">12-week revenue trend</div>
+              <svg id="loc-trend-svg" viewBox="0 0 360 120" style="width:100%;height:120px;overflow:visible;"></svg>
+            </div>
+            <div class="card">
+              <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:10px;">Team snapshot</div>
+              <div id="loc-team-rows" class="barlist"><!-- injected --></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============ CRM / CUSTOMER JOURNEY & MARKETING ============ -->
+      <section class="panel" id="sec-crm">
+        <div class="section-head"><h2>Customer Journey — 9-stage ladder</h2><span class="hint">Portfolio-wide, trailing 90 days · CRM build in progress</span></div>
+        <div class="grid cols-2">
+          <div class="card">
+            <div class="funnel" id="journey-funnel"><!-- injected --></div>
+          </div>
+          <div class="grid" style="grid-template-columns:1fr 1fr; gap:14px; align-content:start;">
+            <div class="card kpi"><div class="label">At risk</div><div class="value tabular">312</div><div class="target">Regular/Loyal/Daily-Regular absence windows</div></div>
+            <div class="card kpi"><div class="label">Lapsed</div><div class="value tabular">540</div><div class="target">8 / 6 / 3-week windows by tier</div></div>
+            <div class="card kpi"><div class="label">Loyalty enrollment</div><div class="value tabular">61%</div><div class="target">38 unenrolled Loyal+ — conversion target</div></div>
+            <div class="card kpi"><div class="label">Revenue share, Loyal+</div><div class="value tabular">41%</div><div class="target">Regular 34% · Other 25%</div></div>
+          </div>
+        </div>
+
+        <div class="section-head"><h2>Marketing calendar — upcoming touches</h2><span class="hint">Linked to the master company calendar</span></div>
+        <div class="card">
+          <div class="event-list" id="marketing-calendar"><!-- injected --></div>
+        </div>
+
+        <div class="section-head"><h2>Current campaigns</h2><span class="hint">Social · text · email</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Campaign</th><th>Channels</th><th>Segment</th><th>Window</th><th>Owner</th><th>Status</th></tr></thead>
+            <tbody id="campaigns-table-body"><!-- injected --></tbody>
+          </table>
+        </div>
+
+        <div class="section-head"><h2>Marketing Planning</h2><span class="hint">Campaign intake &amp; planning board — shared with an outside marketing collaborator</span></div>
+        <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/marketing-planning.html" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Marketing Planning →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/marketing-planning.html — submit campaign requests, move them through the planning board. Not wired to a CRM yet — see note below.</div></div>
+          <div class="arrow">↗</div>
+        </a>
+      </section>
+
+      <!-- ============ ACADEMY ENGAGEMENT ============ -->
+      <section class="panel" id="sec-academy">
+        <div class="section-head"><h2>Completion by competency</h2><span class="hint">Company-wide average across active, eligible staff</span></div>
+        <div class="grid cols-2">
+          <div class="card">
+            <div class="donut-wrap">
+              <svg width="150" height="150" viewBox="0 0 150 150" id="academy-donut"></svg>
+              <div class="legend" id="academy-legend"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:12px;">Completion by role</div>
+            <div class="barlist" id="academy-role-bars"><!-- injected --></div>
+          </div>
+        </div>
+
+        <div class="section-head"><h2>Upcoming Academy milestones</h2><span class="hint">360s, pulse surveys, audit cycles</span></div>
+        <div class="card">
+          <div class="event-list" id="academy-milestones"><!-- injected --></div>
+        </div>
+
+        <div class="section-head"><h2>Salt City Academy</h2><span class="hint">The real leadership/pay-tier platform</span></div>
+        <a class="link-card" href="https://salt-city-academy.netlify.app/" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Salt City Academy →</div><div class="lc-sub">salt-city-academy.netlify.app — competency tracking, pay-tier progression, the real system behind the numbers above</div></div>
+          <div class="arrow">↗</div>
+        </a>
+      </section>
+
+      <!-- ============ CALENDAR & EVENTS ============ -->
+      <section class="panel" id="sec-calendar">
+        <div class="section-head"><h2>Q3 2026 — upcoming events</h2><span class="hint">Pulled from the master company calendar</span></div>
+        <div class="card">
+          <div class="event-list" id="calendar-events"><!-- injected --></div>
+        </div>
+      </section>
+
+      <!-- ============ GOALS & PROJECTIONS ============ -->
+      <section class="panel" id="sec-goals">
+        <div class="section-head">
+          <h2>Quarterly goals — Q3 2026</h2>
+          <span class="hint">Editable &amp; saved to this page</span>
+        </div>
+        <div class="card">
+          <div id="quarterly-goals" style="display:flex;flex-direction:column;gap:14px;"><!-- injected --></div>
+          <div style="margin-top:10px;"><button class="btn sm" id="qgoal-add">+ Add quarterly goal</button></div>
+        </div>
+
+        <div class="section-head"><h2>Annual goals — 2026</h2></div>
+        <div class="card">
+          <div id="annual-goals" style="display:flex;flex-direction:column;gap:14px;"><!-- injected --></div>
+          <div style="margin-top:10px;"><button class="btn sm" id="agoal-add">+ Add annual goal</button></div>
+        </div>
+        <div class="pr-savebar" id="goals-savebar"><span class="dot"></span><span id="goals-savebar-text">Saved</span></div>
+
+        <div class="section-head"><h2>Projections vs. reality</h2><span class="hint">Revenue by quarter, $k</span></div>
+        <div class="card">
+          <svg id="proj-chart" viewBox="0 0 640 220" style="width:100%;height:220px;overflow:visible;"></svg>
+        </div>
+      </section>
+
+      <!-- ============ WAREHOUSE & INVENTORY ============ -->
+      <section class="panel" id="sec-warehouse">
+        <div class="section-head" style="margin-top:0;"><h2>Outgoing orders</h2><span class="hint" id="outgoing-status">Loading…</span></div>
+        <div class="grid cols-3" id="outgoing-cards"><!-- injected: cafe / wholesale / subscription --></div>
+
+        <div class="section-head"><h2>Incoming orders</h2><span class="hint">Green coffee, dry goods, food &amp; beverage — logged manually on order or arrival</span></div>
+        <div class="grid cols-3" id="incoming-cards"><!-- injected: 3 category cards --></div>
+
+        <div class="section-head"><h2>Inventory</h2><span class="hint">Emergencies &amp; a real-time cost view</span></div>
+        <div class="grid cols-2">
+          <div class="card">
+            <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:2px;">Inventory emergencies</div>
+            <div id="inv-emergency-status" style="font-size:12px;color:var(--ink-3);margin-bottom:8px;">Loading…</div>
+            <div class="event-list" id="inv-emergency-list"><!-- injected --></div>
+          </div>
+          <div class="card">
+            <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:2px;">Real-time COGS tracker</div>
+            <div id="cogs-status" style="font-size:12px;color:var(--ink-3);margin-bottom:8px;">Loading…</div>
+            <div id="cogs-body"><!-- injected --></div>
+          </div>
+        </div>
+
+        <div class="section-head"><h2>Bagging summary</h2><span class="hint" id="bagging-summary-status">Loading…</span></div>
+        <div class="grid kpi-row" id="bagging-kpi-row">
+          <div class="card kpi"><div class="label">Not bagged</div><div class="value tabular" id="bg-kpi-notbagged">–</div></div>
+          <div class="card kpi"><div class="label">In process</div><div class="value tabular" id="bg-kpi-inprocess">–</div></div>
+          <div class="card kpi"><div class="label">Cannot bag</div><div class="value tabular" id="bg-kpi-cannotbag">–</div></div>
+          <div class="card kpi"><div class="label">Ready to ship</div><div class="value tabular" id="bg-kpi-ready">–</div></div>
+        </div>
+
+        <div class="section-head"><h2>Order fulfillment tools</h2><span class="hint">Cafe orders, wholesale &amp; subscription, bagging, legacy worklist</span></div>
+        <div class="grid cols-3">
+          <a class="link-card" href="https://salt-city-coffee-systems.netlify.app" target="_blank" rel="noopener">
+            <div><div class="lc-title">Cafe Orders →</div><div class="lc-sub">salt-city-coffee-systems.netlify.app — the warehouse inventory platform cafe orders already run through</div></div>
+            <div class="arrow">↗</div>
+          </a>
+          <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/wholesale-subscription.html" target="_blank" rel="noopener">
+            <div><div class="lc-title">Wholesale &amp; Subscription →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/wholesale-subscription.html — big tap-cards, one per order, with the 72hr ship-by countdown</div></div>
+            <div class="arrow">↗</div>
+          </a>
+          <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/bagging.html" target="_blank" rel="noopener">
+            <div><div class="lc-title">Bagging Station →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/bagging.html — tracks open wholesale/subscription line items through bagging (Warehouse's job, not Head Baker's)</div></div>
+            <div class="arrow">↗</div>
+          </a>
+        </div>
+        <div class="empty-note" style="margin-top:10px;">Roastery Production moved to its own Roastery tab — this tab now covers Warehouse's own jobs (cafe/wholesale/subscription fulfillment, bagging). The old merged Order Fulfillment worklist page is still <a href="https://salt-city-coffee-tools.netlify.app/order-fulfillment.html" target="_blank" rel="noopener">reachable here</a> but isn't the primary wholesale/subscription tool anymore — see the note at the bottom of this tab about a stage-labeling bug it now has.</div>
+
+        <div class="section-head"><h2>Sysco order guide &amp; invoices</h2><span class="hint">Grocery/paper vendor — separate from the Incoming Orders log above</span></div>
+        <div class="grid cols-2">
+          <div class="card">
+            <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:2px;">Sysco order guide</div>
+            <div id="sysco-orders-status" style="font-size:12px;color:var(--ink-3);margin-bottom:8px;">Sample data · no import yet</div>
+            <div class="event-list" id="sysco-deliveries"><!-- injected --></div>
+          </div>
+          <div class="card">
+            <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:2px;">Recent Sysco invoices</div>
+            <div id="sysco-invoices-status" style="font-size:12px;color:var(--ink-3);margin-bottom:8px;">Live — Supabase · loading…</div>
+            <div class="event-list" id="sysco-invoices-list"><!-- injected --></div>
+          </div>
+        </div>
+
+        <div class="section-head"><h2>Inventory Tracker</h2><span class="hint">The live picking / warehouse system</span></div>
+        <a class="link-card" href="https://salt-city-coffee-systems.netlify.app" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Inventory Tracker →</div><div class="lc-sub">salt-city-coffee-systems.netlify.app — par-level ordering, picking, delivery pipeline, invoice OCR</div></div>
+          <div class="arrow">↗</div>
+        </a>
+      </section>
+
+      <!-- ============ COO PRIORITIES ============ -->
+      <section class="panel" id="sec-priorities">
+        <div class="section-head">
+          <h2>Top 10 priorities — Q3 2026</h2>
+          <span class="hint">Editable &amp; checkable · saved to this page</span>
+        </div>
+        <div class="card">
+          <div class="progress" style="margin-bottom:14px;"><span id="pr-progress-bar" style="width:0%;"></span></div>
+          <div class="pr-list" id="priorities-list"><!-- injected --></div>
+          <div style="margin-top:10px;">
+            <button class="btn sm" id="pr-add">+ Add priority</button>
+          </div>
+          <div class="pr-savebar" id="pr-savebar"><span class="dot"></span><span id="pr-savebar-text">Saved</span></div>
+        </div>
+      </section>
+
+      <!-- ============ FOOD PRODUCTION ============ -->
+      <section class="panel" id="sec-foodprod">
+        <div class="grid kpi-row" id="foodprod-kpi-row">
+          <div class="card kpi"><div class="label">Production list — not started</div><div class="value tabular" id="fp-kpi-notstarted">–</div></div>
+          <div class="card kpi"><div class="label">Production list — in progress</div><div class="value tabular" id="fp-kpi-started">–</div></div>
+          <div class="card kpi"><div class="label">Production list — ready to ship</div><div class="value tabular" id="fp-kpi-ready">–</div></div>
+        </div>
+        <div id="foodprod-status" style="font-size:12px;color:var(--ink-3);margin:-8px 0 20px;">Loading…</div>
+
+        <div class="section-head" style="margin-top:0;"><h2>Daily Production List</h2><span class="hint">Bakers Page · Head Baker sets days &amp; priority, bakers track 5 stages</span></div>
+        <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/daily-bake-list.html" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Daily Production List →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/daily-bake-list.html — date-scoped list the Head Baker sets and bakers move through five stages — plus wholesale/subscription order items that show up automatically to be scheduled.</div></div>
+          <div class="arrow">↗</div>
+        </a>
+
+        <div class="empty-note" style="margin-top:2px;">Bagging Station moved to the Warehouse Inventory &amp; Order Fulfillment tab — it's the Assistant Production Manager's job (tracking wholesale/subscription order items through bagging), not the Head Baker's. See "Order fulfillment tools" over there.</div>
+      </section>
+
+      <!-- ============ COLD BREW PRODUCTION ============ -->
+      <section class="panel" id="sec-coldbrewprod">
+        <div class="grid kpi-row" id="coldbrewprod-kpi-row">
+          <div class="card kpi"><div class="label">Cold brew batches today</div><div class="value tabular" id="cbp-kpi-cb-total">–</div></div>
+          <div class="card kpi"><div class="label">Cold brew complete</div><div class="value tabular" id="cbp-kpi-cb-complete">–</div></div>
+          <div class="card kpi"><div class="label">Keg batches today</div><div class="value tabular" id="cbp-kpi-keg-total">–</div></div>
+          <div class="card kpi"><div class="label">Keg batches complete</div><div class="value tabular" id="cbp-kpi-keg-complete">–</div></div>
+        </div>
+        <div id="coldbrewprod-status" style="font-size:12px;color:var(--ink-3);margin:-8px 0 20px;">Loading…</div>
+
+        <div class="section-head" style="margin-top:0;"><h2>Cold Brew Production log</h2><span class="hint">32-gal cold brew batches + draft latte &amp; cold brew keg batches</span></div>
+        <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/cold-brew-production.html" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Cold Brew Production →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/cold-brew-production.html — log today's cold brew and keg batches, each tracked complete/incomplete.</div></div>
+          <div class="arrow">↗</div>
+        </a>
+      </section>
+
+      <!-- ============ ROASTERY ============ -->
+      <section class="panel" id="sec-roastery">
+        <div class="grid kpi-row" id="roastery-kpi-row">
+          <div class="card kpi"><div class="label">Queued to roast</div><div class="value tabular" id="rst-kpi-queued">–</div></div>
+          <div class="card kpi"><div class="label">Roasting now</div><div class="value tabular" id="rst-kpi-roasting">–</div></div>
+          <div class="card kpi"><div class="label">Roasted today</div><div class="value tabular" id="rst-kpi-roasted-today">–</div></div>
+          <div class="card kpi"><div class="label">Cannot start</div><div class="value tabular" id="rst-kpi-cannotstart">–</div></div>
+        </div>
+        <div id="roastery-status" style="font-size:12px;color:var(--ink-3);margin:-8px 0 20px;">Loading…</div>
+
+        <div class="section-head" style="margin-top:0;"><h2>Roastery Production</h2><span class="hint">Roast queue &amp; tap-card status, per roast</span></div>
+        <div class="grid cols-2">
+          <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/roastery-production.html" target="_blank" rel="noopener">
+            <div><div class="lc-title">Roastery Production →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/roastery-production.html — add roasts, filter, the full management view</div></div>
+            <div class="arrow">↗</div>
+          </a>
+          <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/roastery-execution.html" target="_blank" rel="noopener">
+            <div><div class="lc-title">Roastery Execution View →</div><div class="lc-sub">Stripped-down tap-to-change-status view for whoever's roasting — no add, no summary</div></div>
+            <div class="arrow">↗</div>
+          </a>
+        </div>
+        <div class="empty-note" style="margin-top:14px;">Wholesale &amp; subscription order tracking, and cold brew concentrate, moved off this tab — cold brew lives on the Cold Brew Production tab, and order fulfillment lives on Warehouse Inventory &amp; Order Fulfillment. This tab is now purely the Roastery's own big-picture roasting status.</div>
+      </section>
+
+      <!-- ============ PRODUCT DEVELOPMENT ============ -->
+      <section class="panel" id="sec-productdev">
+        <div class="section-head"><h2>Idea Decision Matrix</h2><span class="hint">CBO idea intake · blind multi-rater scoring · manual priority ranking</span></div>
+        <a class="link-card" href="https://salt-city-new-product-decision-matrix.netlify.app/" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Idea Decision Matrix →</div><div class="lc-sub">salt-city-new-product-decision-matrix.netlify.app — Brand Alignment, Implementation Lift, Longevity &amp; Profit Margin — blind on each idea until you submit your own rating</div></div>
+          <div class="arrow">↗</div>
+        </a>
+
+        <div class="section-head"><h2>Top 5 ideas</h2><span class="hint" id="top-ideas-status">Sample data · loading…</span></div>
+        <div class="ti-list" id="top-ideas-list"><!-- injected --></div>
+
+        <div class="section-head"><h2>Seasonal recipe pipeline</h2><span class="hint">Concept → Testing → Costing → Launch Ready → Live</span></div>
+        <div class="kanban" id="recipe-kanban"><!-- injected --></div>
+
+        <div class="section-head"><h2>Recipe readiness</h2><span class="hint" id="bakery-platform-status">Sample data · loading…</span></div>
+        <div class="grid kpi-row">
+          <div class="card kpi"><div class="label">Recipes tracked</div><div class="value tabular" id="bakery-kpi-recipes">32</div><div class="target" id="bakery-kpi-recipes-sub">+11 flagged missing entirely</div></div>
+          <div class="card kpi"><div class="label">Overall readiness</div><div class="value tabular" id="bakery-kpi-readiness">10%</div><div class="target" id="bakery-kpi-readiness-sub">62 of 646 checklist items confirmed</div></div>
+          <div class="card kpi"><div class="label">No recipe, still selling</div><div class="value tabular" id="bakery-kpi-norecipe">11</div><div class="target" id="bakery-kpi-norecipe-sub">$19,063 YTD with zero recipe on file</div></div>
+          <div class="card kpi"><div class="label">Production ready</div><div class="value tabular" id="bakery-kpi-ready">0</div><div class="target">Cleared for scale</div></div>
+        </div>
+        <div class="table-wrap" style="margin-top:14px;">
+          <table>
+            <thead><tr><th>Recipe</th><th>Status</th><th>Next step</th><th class="right">Sales YTD</th><th class="right">Checklist</th></tr></thead>
+            <tbody id="bakery-recipe-table-body"><!-- injected --></tbody>
+          </table>
+        </div>
+        <div class="empty-note" id="bakery-empty-note">This checklist tool saves each person's checked items only in their own browser — it has no shared backend today, so there's no live data for this dashboard to read yet. The table above is a one-time snapshot, not a feed.</div>
+        <a class="link-card" href="https://salt-city-bakery-production-platform.netlify.app/" target="_blank" rel="noopener" style="margin-top:12px;">
+          <div><div class="lc-title">Open Recipe Readiness Checklist →</div><div class="lc-sub">salt-city-bakery-production-platform.netlify.app</div></div>
+          <div class="arrow">↗</div>
+        </a>
+
+        <div class="section-head"><h2>Bakery development — The Bake Case</h2><span class="hint">In-house baked-goods production planning (staffing, waste, feasibility)</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Workstream</th><th>Owner</th><th>Status</th></tr></thead>
+            <tbody id="bakery-table-body"><!-- injected --></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script id="priorities-state" type="application/json">[
+  {"text":"Fill LeMoyne, Clay & Fayetteville Location Manager vacancies","done":false},
+  {"text":"Finalize two-pool incentive plan — pool sizing & distribution cadence","done":false},
+  {"text":"Launch Salt City Scheduling Engine pilot on the Square Labor API","done":false},
+  {"text":"Land the in-house bakery decision — The Bake Case","done":false},
+  {"text":"Roll out Academy Leadership L2/L3 company-wide","done":false},
+  {"text":"Close the GM succession gap left by Amanda Underwood's departure","done":false},
+  {"text":"Confirm Square Customer Directory ID rate for the Customer Journey model","done":false},
+  {"text":"Bring blended labor % down to the 28% target","done":false},
+  {"text":"Finalize the Clay grand-opening marketing push","done":false},
+  {"text":"Wire this Command Deck to live data — Square sync + Supabase, section by section","done":false}
+]</script>
+
+<script id="quarterly-goals-state" type="application/json">[
+  {"title":"Fill LeMoyne, Clay & Fayetteville LM vacancies","owner":"Emma Stratigos","pct":60,"status":"warn","statusLabel":"In progress — 2 of 3 in final interviews"},
+  {"title":"Launch Academy L2/L3 company-wide","owner":"Jon Whiteway","pct":70,"status":"good","statusLabel":"On track"},
+  {"title":"Finalize two-pool incentive plan sizing","owner":"Jon Whiteway & Aaron","pct":35,"status":"critical","statusLabel":"At risk — open decisions"},
+  {"title":"Bring blended labor % to 28% portfolio-wide","owner":"Emma Stratigos","pct":55,"status":"warn","statusLabel":"In progress — 29.1% current"},
+  {"title":"Land in-house bakery decision (The Bake Case)","owner":"Jon Whiteway","pct":75,"status":"good","statusLabel":"On track"}
+]</script>
+
+<script id="annual-goals-state" type="application/json">[
+  {"title":"Bring Clay + LeMoyne to full run-rate (~$2M combined)","owner":"Emma Stratigos","pct":40,"status":"warn","statusLabel":"In progress"},
+  {"title":"Full Academy rollout across all 5 role tiers","owner":"Jon Whiteway","pct":55,"status":"good","statusLabel":"In progress"},
+  {"title":"Launch company-wide profit-sharing plan","owner":"Jon Whiteway & Aaron","pct":45,"status":"warn","statusLabel":"In progress"},
+  {"title":"Stand up the Salt City Scheduling Engine","owner":"Jon Whiteway","pct":30,"status":"warn","statusLabel":"In progress"},
+  {"title":"Scale toward 10 locations","owner":"Aaron & Emma Stratigos","pct":15,"status":"neutral","statusLabel":"Planning"}
+]</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================================================================
+   SAMPLE DATA — clearly-labeled placeholders for structural review.
+   Phase 2 replaces each block below with a live read (Square nightly-sync
+   Supabase tables for Sales/Labor; Supabase tables for CRM, Academy,
+   Goals, Warehouse rollups, Product Dev, Roastery — same project as the
+   live Inventory Tracker / Salt City Academy builds).
+   ====================================================================== */
+
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+
+const LOCATIONS = [
+  { id:"university",   sbId:"708366e3-de19-4769-8299-b8a87a757fbc", name:"University",    lm:"Mellina DeSilvio — Location Manager", rev:142300, laborPct:27.8, txns:9120, ticket:6.85, trend:4.2,  status:"good",   trendSeries:[118,121,126,124,131,128,134,130,137,133,139,142] },
+  { id:"509",          sbId:"2a5d4c6a-3d02-4448-ab1c-d7337f8bb0f9", name:"509",            lm:"Nick Shafer — Location Manager",      rev:98600,  laborPct:29.4, txns:6410, ticket:6.42, trend:1.1,  status:"warn",   trendSeries:[92,94,90,95,97,93,96,99,95,98,97,99] },
+  { id:"market",       sbId:"ee2344e9-8171-47f4-9a11-4ffc5f95f39a", name:"Market",         lm:"Jacob Fleischer — Bar &amp; Location Manager", rev:121750, laborPct:26.9, txns:7980, ticket:7.10, trend:6.8, status:"good", trendSeries:[100,103,101,108,110,107,113,111,116,114,119,122] },
+  { id:"lemoyne",      sbId:"35a199d6-c152-45ad-9398-c9b1c0918c7e", name:"LeMoyne",        lm:"Location Manager — open",             rev:76200,  laborPct:32.1, txns:5340, ticket:6.55, trend:-2.3, status:"serious", trendSeries:[82,80,81,78,79,76,77,75,76,74,75,76] },
+  { id:"clay",         sbId:"55ef8519-c9f8-4601-acbb-c1f7812345d4", name:"Clay",           lm:"Location Manager — open",             rev:68900,  laborPct:33.6, txns:4890, ticket:6.20, trend:9.4,  status:"warn",   trendSeries:[46,49,52,54,58,57,61,63,62,66,65,69] },
+  { id:"fayetteville", sbId:"96c421ad-cb6c-4efc-bf43-861ec810b2c2", name:"Fayetteville",   lm:"Location Manager — open",             rev:84300,  laborPct:30.2, txns:5760, ticket:6.60, trend:-0.8, status:"warn",   trendSeries:[87,86,88,85,86,84,85,83,85,84,83,84] },
+  { id:"mobilebar",    sbId:"3c29e883-0bb8-4bb1-9b4d-a4a78985f712", name:"Mobile Bar",     lm:"Jacob Ellison — Mobile Bar Manager",  rev:18400,  laborPct:null, txns:820,  ticket:22.44, trend:null, status:"good", trendSeries:null, note:"6 events booked this quarter — event-staffed, not a daily labor %." }
+];
+// Marks each location's numbers as sample until a live Supabase fetch overwrites them.
+LOCATIONS.forEach(l => l.live = false);
+
+const TEAM_BY_LOCATION = {
+  university:["7 Baristas","1 Shift Lead","1 Assistant Manager (Luella K., pre-promotion)"],
+  "509":["6 Baristas","1 Shift Lead"],
+  market:["7 Baristas — dual Bar &amp; Cafe scope"],
+  lemoyne:["5 Baristas","LM vacancy — covered by Regional Manager"],
+  clay:["5 Baristas — ramping since spring open","LM vacancy"],
+  fayetteville:["6 Baristas","LM vacancy since departure"],
+  mobilebar:["Staffed per booked event only"]
+};
+
+const JOURNEY = [
+  { label:"First-Time Guest",  n:1240, pct:100 },
+  { label:"Second-Time Guest", n:680,  pct:78 },
+  { label:"Third-Time Guest",  n:410,  pct:60 },
+  { label:"Repeat (4+ visits)",n:2150, pct:88 },
+  { label:"Regular",           n:890,  pct:52 },
+  { label:"Loyal",             n:410,  pct:34 },
+  { label:"Daily Regular",     n:96,   pct:18 },
+  { label:"Salt City Evangelist", n:58, pct:12 }
+];
+
+const CAMPAIGNS = [
+  { name:"Fall Seasonal Launch", channels:"Social + Email", segment:"All guests", window:"Sep 2 – Sep 30", owner:"Maria Metthe", status:"good", statusLabel:"Live" },
+  { name:"Clay Grand-Opening Push", channels:"Social + Email + Text", segment:"Clay, 5-mile radius", window:"Sep 8 – Sep 22", owner:"Maria Metthe", status:"warn", statusLabel:"Scheduled" },
+  { name:"Back-to-School Student Discount", channels:"Social", segment:"University area", window:"Aug 20 – Sep 10", owner:"Maria Metthe", status:"good", statusLabel:"Live" },
+  { name:"Loyal+ Appreciation Blast", channels:"Text", segment:"Loyal / Daily Regular", window:"Sep 15", owner:"Marketing — TBD", status:"warn", statusLabel:"Scheduled" },
+  { name:"Evangelist Referral Pilot", channels:"Email", segment:"Evangelist tier", window:"TBD", owner:"Marketing — TBD", status:"neutral", statusLabel:"Draft" }
+];
+
+const MARKETING_CAL = [
+  { d:"2", m:"Sep", title:"Fall Seasonal Launch goes live", meta:"Social + Email · all locations" },
+  { d:"8", m:"Sep", title:"Clay Grand-Opening campaign starts", meta:"Social + Email + Text" },
+  { d:"10", m:"Sep", title:"Back-to-School promo ends", meta:"Social · University" },
+  { d:"15", m:"Sep", title:"Loyal+ Appreciation text blast", meta:"Text · Loyal / Daily Regular" },
+  { d:"22", m:"Sep", title:"Clay Grand-Opening campaign ends", meta:"Wrap &amp; results review" },
+  { d:"30", m:"Sep", title:"Fall Seasonal Launch ends", meta:"Q4 marketing planning kickoff" }
+];
+
+const ACADEMY_COMPETENCY = [
+  { label:"Leadership", pct:64, color:"var(--series-1)" },
+  { label:"Craft", pct:78, color:"var(--series-2)" },
+  { label:"Customer Care", pct:71, color:"var(--series-3)" }
+];
+
+const ACADEMY_ROLE = [
+  { label:"Barista", pct:82 },
+  { label:"Shift Lead", pct:90 },
+  { label:"Assistant Manager", pct:75 },
+  { label:"Location Manager", pct:68 },
+  { label:"GM / Regional Manager", pct:55 }
+];
+
+const ACADEMY_MILESTONES = [
+  { d:"12", m:"Sep", title:"LM quarterly walk-through audits begin", meta:"3 per store this quarter, GM-scheduled" },
+  { d:"25", m:"Sep", title:"LM quarterly 1-1 audit-trend reviews", meta:"Emma Stratigos with each Location Manager" },
+  { d:"1", m:"Oct", title:"GM 360 assessment window opens", meta:"Team, peer LMs, Production Manager, COO" },
+  { d:"1", m:"Oct", title:"Team pulse survey due (6-month cadence)", meta:"Lencioni-based, all locations" }
+];
+
+const CALENDAR_EVENTS = [
+  { d:"2", m:"Sep", title:"Fall Seasonal Menu launches", meta:"All locations" },
+  { d:"5", m:"Sep", title:"Quarterly cleaning night", meta:"All locations · paid, ~$20/hr" },
+  { d:"8", m:"Sep", title:"Clay Grand Opening campaign begins", meta:"Clay" },
+  { d:"12", m:"Sep", title:"Weekly Core Team Sync", meta:"Recurring — Aaron, Jon, Emma, Avante, Maria" },
+  { d:"18", m:"Sep", title:"Culture happy hour", meta:"University" },
+  { d:"20", m:"Sep", title:"Union Day corporate event", meta:"Market · scaled event, gratuity pool" },
+  { d:"25", m:"Sep", title:"LM quarterly 1-1 reviews begin", meta:"Portfolio-wide" },
+  { d:"30", m:"Sep", title:"Q3 close &amp; Q4 planning kickoff", meta:"Core Team" }
+];
+
+// Quarterly/annual goals are now editable, persisted state — loaded from
+// #quarterly-goals-state / #annual-goals-state (see COO PRIORITIES-style
+// pattern below) rather than hardcoded here.
+
+const PROJECTIONS = {
+  quarters:["Q1","Q2","Q3","Q4"],
+  projected:[2150,2300,2420,2600],
+  actual:[2080,2265,2390,null]
+};
+
+const SYSCO_DELIVERIES = [
+  { d:"3", m:"Sep", title:"Weekly Sysco order — Roastery consolidated", meta:"Distributed to LeMoyne, University, Fayetteville, Market, 509" },
+  { d:"3", m:"Sep", title:"Clay direct-ship portion", meta:"Ships direct per standing routing" },
+  { d:"10", m:"Sep", title:"Next weekly Sysco order", meta:"Cadence: one order per week" }
+];
+
+const RECIPE_KANBAN = {
+  "Concept":["Spiced Cascara Latte","Maple Cold Brew Concentrate"],
+  "Testing":["Brown Butter Pumpkin Latte"],
+  "Costing":["Salted Caramel Cortado (seasonal)"],
+  "Launch Ready":["Fall Spice Cold Foam"],
+  "Live":["Fall Seasonal Menu — 5 drinks"]
+};
+
+// One-time snapshot read from the live Bakery Recipe Readiness Checklist
+// (salt-city-bakery-production-platform.netlify.app) on 2026-08-31 — real
+// recipe names, statuses, Sales YTD and checklist counts, not sample data.
+// Shown until initLiveBakeryData() confirms the Supabase views have rows,
+// at which point it's replaced by a live read of the same numbers.
+const BAKERY_RECIPES_SNAPSHOT = [
+  { name:"Croissant Dough", stage:"development", next_step:"Complete lamination/proof/bake SOP", sales_ytd:24045, items_confirmed:1, items_total:45 },
+  { name:"Muffins", stage:"testing", next_step:"COGS, waste, shelf life", sales_ytd:14509, items_confirmed:2, items_total:19 },
+  { name:"Gingerbread Loaf", stage:"testing", next_step:"COGS, waste, shelf life", sales_ytd:7969, items_confirmed:2, items_total:19 },
+  { name:"Lemon Loaf", stage:"testing", next_step:"COGS, waste, shelf life", sales_ytd:7969, items_confirmed:2, items_total:19 },
+  { name:"Lemon Zucchini Bread", stage:"development", next_step:"Complete recipe", sales_ytd:7969, items_confirmed:2, items_total:17 },
+  { name:"Almond Cakes", stage:"testing", next_step:"Yield, labor, COGS, shelf life", sales_ytd:7808, items_confirmed:6, items_total:22 },
+  { name:"Pop Tart", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:7191, items_confirmed:0, items_total:0 },
+  { name:"Fruit Oat Bar", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:5680, items_confirmed:0, items_total:0 },
+  { name:"Scones", stage:"development", next_step:"Complete wet formulation + yield", sales_ytd:5214, items_confirmed:4, items_total:19 },
+  { name:"Oatmeal Cream Pies", stage:"testing", next_step:"Assembly labor, COGS, waste, shelf life", sales_ytd:5190, items_confirmed:2, items_total:19 },
+  { name:"Donut", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:4330, items_confirmed:0, items_total:0 },
+  { name:"Brown Butter Brownies", stage:"development", next_step:"Yield, portion, COGS", sales_ytd:4224, items_confirmed:0, items_total:19 },
+  { name:"Chocolate Cake", stage:"development", next_step:"Yield, portion, COGS", sales_ytd:4222, items_confirmed:0, items_total:19 },
+  { name:"Yellow Cake", stage:"development", next_step:"Yield, portion, COGS", sales_ytd:4222, items_confirmed:0, items_total:19 },
+  { name:"Pecan Filling", stage:"development", next_step:"Complete recipe", sales_ytd:3039, items_confirmed:0, items_total:19 },
+  { name:"Cinnamon Buns / Brioche", stage:"testing", next_step:"Labor, COGS, waste, shelf life", sales_ytd:2936, items_confirmed:2, items_total:19 },
+  { name:"Quiche", stage:"testing", next_step:"COGS, waste, shelf life", sales_ytd:1372, items_confirmed:2, items_total:19 },
+  { name:"Chocolate Chip Cookies", stage:"testing", next_step:"Labor, COGS, waste, shelf life", sales_ytd:896, items_confirmed:2, items_total:19 },
+  { name:"Macaron", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:791, items_confirmed:0, items_total:0 },
+  { name:"Pie Dough", stage:"testing", next_step:"COGS, yield, storage", sales_ytd:561, items_confirmed:2, items_total:19 },
+  { name:"Cannoli", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:476, items_confirmed:0, items_total:0 },
+  { name:"Trifle Cup", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:301, items_confirmed:0, items_total:0 },
+  { name:"Flourless Chocolate Cake", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:197, items_confirmed:0, items_total:0 },
+  { name:"Cheesecake", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:49, items_confirmed:0, items_total:0 },
+  { name:"Dot Cake", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:33, items_confirmed:0, items_total:0 },
+  { name:"Biscotti", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:11, items_confirmed:0, items_total:0 },
+  { name:"Raspberry Shortbread", stage:"no_recipe", next_step:"No recipe exists in the book — full development needed", sales_ytd:4, items_confirmed:0, items_total:0 },
+  { name:"Peanut Butter Cookies", stage:"testing", next_step:"Resolve portion/yield conflict", sales_ytd:3, items_confirmed:4, items_total:17 },
+  { name:"Bagel Bombs", stage:"testing", next_step:"Labor, COGS, waste, storage", sales_ytd:0, items_confirmed:7, items_total:24 },
+  { name:"Black & White Cookies", stage:"development", next_step:"Complete recipe", sales_ytd:0, items_confirmed:0, items_total:27 },
+  { name:"Snickerdoodles", stage:"development", next_step:"Yield, portion, COGS", sales_ytd:0, items_confirmed:0, items_total:19 },
+  { name:"Sugar Cookies", stage:"development", next_step:"Yield, portion, labor", sales_ytd:0, items_confirmed:0, items_total:19 },
+  { name:"Cosmic Brownie Cookies", stage:"testing", next_step:"Labor, COGS, waste", sales_ytd:0, items_confirmed:2, items_total:19 },
+  { name:"Almond Paste", stage:"testing", next_step:"COGS, yield, shelf life", sales_ytd:null, items_confirmed:2, items_total:19 },
+  { name:"Béchamel Sauce", stage:"testing", next_step:"COGS, yield, storage", sales_ytd:null, items_confirmed:2, items_total:19 },
+  { name:"Brown Butter Anglaise", stage:"testing", next_step:"COGS, storage, labor", sales_ytd:null, items_confirmed:2, items_total:19 },
+  { name:"Dark Chocolate Ganache", stage:"testing", next_step:"COGS, shelf life", sales_ytd:null, items_confirmed:2, items_total:19 },
+  { name:"Lemon Curd", stage:"testing", next_step:"COGS, storage, labor", sales_ytd:null, items_confirmed:2, items_total:19 },
+  { name:"Maple Mustard", stage:"testing", next_step:"COGS, shelf life", sales_ytd:null, items_confirmed:2, items_total:19 },
+  { name:"Fruity Pebbles Krispy Treats", stage:"testing", next_step:"COGS, waste, shelf life", sales_ytd:0, items_confirmed:2, items_total:19 },
+  { name:"Marshmallow", stage:"testing", next_step:"Yield, COGS, shelf life", sales_ytd:null, items_confirmed:2, items_total:19 },
+  { name:"Pretzels", stage:"testing", next_step:"COGS, waste, shelf life", sales_ytd:0, items_confirmed:2, items_total:19 },
+  { name:"Waffle Batter", stage:"testing", next_step:"COGS, yield, shelf life", sales_ytd:0, items_confirmed:2, items_total:19 }
+];
+
+const BAKERY_TRACKER = [
+  { workstream:"In-house croissant line", owner:"Kirstin Dunlap", status:"warn", statusLabel:"Costing" },
+  { workstream:"Head Baker + Assistant Baker staffing model", owner:"Jon Whiteway", status:"warn", statusLabel:"Under review" },
+  { workstream:"Too Good To Go recovery pilot", owner:"Jon Whiteway", status:"neutral", statusLabel:"Planning" },
+  { workstream:"Vendor transition plan (Mixing Bowl, Honey Comb, Sweet Praxis, Fat Cat)", owner:"Jon Whiteway", status:"neutral", statusLabel:"Concept" }
+];
+
+/* ======================================================================
+   helpers
+   ====================================================================== */
+const $ = (sel, root) => (root||document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root||document).querySelectorAll(sel));
+const money = n => n==null ? "—" : "$" + Math.round(n).toLocaleString("en-US");
+const moneyK = n => n==null ? "—" : "$" + (n/1000).toFixed(1) + "K";
+const pct1 = n => n==null ? "—" : n.toFixed(1) + "%";
+const esc = s => (s==null?"":String(s));
+function statusLabel(s){ return {good:"On target", warn:"Watch", serious:"Attention", critical:"Attention", neutral:"—"}[s] || s; }
+function el(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+
+/* ======================================================================
+   OVERVIEW — location cards
+   ====================================================================== */
+function renderLocationCards(){
+  const wrap = $("#location-cards");
+  wrap.innerHTML = LOCATIONS.map(loc => `
+    <button class="card loc-card" data-loc="${loc.id}">
+      <div class="lc-head">
+        <div><h3>${esc(loc.name)}</h3><div class="lm">${loc.lm}</div></div>
+        <span class="chip ${loc.status}">${statusLabel(loc.status)}</span>
+      </div>
+      <div class="lc-stats">
+        <div class="lc-stat"><div class="n tabular">${moneyK(loc.rev)}</div><div class="l">MTD rev</div></div>
+        <div class="lc-stat"><div class="n tabular">${loc.laborPct==null?"—":pct1(loc.laborPct)}</div><div class="l">Labor %</div></div>
+        <div class="lc-stat"><div class="n tabular">${loc.trend==null?"—":(loc.trend>=0?"▲":"▼")+Math.abs(loc.trend).toFixed(1)+"%"}</div><div class="l">Trend</div></div>
+      </div>
+      <div class="lc-foot">View Sales &amp; Labor →</div>
+    </button>
+  `).join("");
+  $$(".loc-card", wrap).forEach(card => card.addEventListener("click", () => goToLocation(card.dataset.loc)));
+}
+
+/* ======================================================================
+   SALES & LABOR
+   ====================================================================== */
+function renderSalesPortfolio(){
+  const maxRev = Math.max(...LOCATIONS.map(l=>l.rev));
+  $("#sales-barlist").innerHTML = LOCATIONS.map(l => `
+    <div class="row">
+      <div class="name">${esc(l.name)}</div>
+      <div class="track"><span style="width:${(l.rev/maxRev*100).toFixed(1)}%"></span></div>
+      <div class="val tabular">${moneyK(l.rev)}</div>
+    </div>`).join("");
+
+  const overTarget = `<svg class="mark over" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.86 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.86a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>`;
+  const underTarget = `<svg class="mark under" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 5-5"/></svg>`;
+  $("#labor-barlist").innerHTML = LOCATIONS.filter(l=>l.laborPct!=null).map(l => {
+    const over = l.laborPct > 28;
+    return `
+    <div class="row">
+      <div class="name">${esc(l.name)}</div>
+      <div class="track">
+        <div class="target-tick" style="left:70%;" title="Target: 28%"></div>
+        <span style="width:${Math.min(100,l.laborPct/40*100).toFixed(1)}%; background:${over?"var(--critical)":"var(--good)"};"></span>
+      </div>
+      <div class="val tabular">${pct1(l.laborPct)} ${over?overTarget:underTarget}</div>
+    </div>`;
+  }).join("");
+
+  $("#sales-table-body").innerHTML = LOCATIONS.map(l => `
+    <tr class="row-click" data-loc="${l.id}" style="cursor:pointer;">
+      <td>${esc(l.name)}</td>
+      <td>${l.lm}</td>
+      <td class="right num">${money(l.rev)}</td>
+      <td class="right num">${l.laborPct==null?"—":pct1(l.laborPct)}</td>
+      <td class="right num">${l.txns.toLocaleString()}</td>
+      <td class="right num">$${l.ticket.toFixed(2)}</td>
+      <td><span class="chip ${l.status}">${statusLabel(l.status)}</span></td>
+    </tr>`).join("");
+  $$("#sales-table-body tr").forEach(tr => tr.addEventListener("click", () => goToLocation(tr.dataset.loc)));
+}
+
+function renderLocationDetail(id){
+  const loc = LOCATIONS.find(l=>l.id===id);
+  if(!loc) return;
+  $("#loc-detail-name").textContent = loc.name;
+  $("#loc-detail-lm").textContent = loc.lm.replace(/&amp;/g,"&");
+  $("#loc-d-rev").textContent = money(loc.rev);
+  $("#loc-d-rev-delta").innerHTML = loc.trend==null ? "" : `<span style="color:${loc.trend>=0?'var(--good)':'var(--critical)'}">${loc.trend>=0?"▲":"▼"} ${Math.abs(loc.trend).toFixed(1)}% vs last mo.</span>`;
+  $("#loc-d-labor").textContent = loc.laborPct==null ? "n/a" : pct1(loc.laborPct);
+  $("#loc-d-txn").textContent = loc.txns.toLocaleString();
+  $("#loc-d-ticket").textContent = "$"+loc.ticket.toFixed(2);
+
+  const teamRows = TEAM_BY_LOCATION[id] || [];
+  $("#loc-team-rows").innerHTML = teamRows.map(t=>`<div class="row" style="grid-template-columns:1fr;"><div class="name" style="color:var(--ink);">• ${t.replace(/&amp;/g,"&")}</div></div>`).join("")
+    + (loc.note ? `<div class="empty-note" style="margin-top:6px;">${loc.note}</div>` : "");
+
+  const svg = $("#loc-trend-svg");
+  if(loc.trendSeries){
+    const series = loc.trendSeries, w=360, h=120, pad=6;
+    const max=Math.max(...series), min=Math.min(...series);
+    const pts = series.map((v,i)=>{
+      const x = pad + i*((w-pad*2)/(series.length-1));
+      const y = h-pad - ( (v-min)/(max-min||1) )*(h-pad*2);
+      return [x,y];
+    });
+    const path = pts.map((p,i)=> (i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    const areaPath = path + ` L${pts[pts.length-1][0].toFixed(1)},${h} L${pts[0][0].toFixed(1)},${h} Z`;
+    svg.innerHTML = `
+      <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--series-2)" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="var(--series-2)" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${areaPath}" fill="url(#areaGrad)" stroke="none"/>
+      <path d="${path}" fill="none" stroke="var(--series-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="var(--series-2)"/>
+    `;
+  } else {
+    svg.innerHTML = `<text x="10" y="60" fill="var(--ink-3)" font-size="12">Event-based — no weekly trend to chart.</text>`;
+  }
+}
+
+function goToLocation(id){
+  setActiveSection("sales");
+  $("#sales-portfolio").style.display = "none";
+  $("#sales-location").style.display = "block";
+  renderLocationDetail(id);
+}
+
+/* ======================================================================
+   LIVE SQUARE DATA — reads square_location_kpis_public (Supabase view,
+   granted to anon), populated by scripts/sync_square_daily_rollups.py.
+   Falls back to the sample numbers above if nothing has synced yet, or
+   the fetch fails for any reason (offline, RLS misconfigured, etc.) —
+   this must never break the page.
+   ====================================================================== */
+function isoWeekKey(dateStr){
+  const d = new Date(dateStr + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return d.getUTCFullYear() + "-W" + String(week).padStart(2,"0");
+}
+
+async function loadLiveSquareData(){
+  try{
+    const url = `${SUPABASE_URL}/rest/v1/square_location_kpis_public?select=*&order=business_date.asc`;
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const resp = await fetch(url, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok) throw new Error("Supabase responded " + resp.status);
+    const rows = await resp.json();
+    if(!Array.isArray(rows) || rows.length === 0) return { ok:false, reason:"empty" };
+
+    const byLoc = new Map();
+    let latestSync = null;
+    rows.forEach(r => {
+      if(!byLoc.has(r.location_id)) byLoc.set(r.location_id, []);
+      byLoc.get(r.location_id).push(r);
+      if(!latestSync || r.synced_at > latestSync) latestSync = r.synced_at;
+    });
+
+    const today = new Date();
+    const cutoff30 = new Date(today); cutoff30.setDate(cutoff30.getDate() - 30);
+    const cutoff60 = new Date(today); cutoff60.setDate(cutoff60.getDate() - 60);
+
+    LOCATIONS.forEach(loc => {
+      const rowsForLoc = byLoc.get(loc.sbId);
+      if(!rowsForLoc || !rowsForLoc.length) return; // no synced rows for this location yet — keep sample
+
+      const last30 = rowsForLoc.filter(r => new Date(r.business_date) >= cutoff30);
+      const prior30 = rowsForLoc.filter(r => new Date(r.business_date) >= cutoff60 && new Date(r.business_date) < cutoff30);
+      const sum = (arr,k) => arr.reduce((a,r)=> a + (Number(r[k])||0), 0);
+
+      const rev = sum(last30,"revenue");
+      const txns = sum(last30,"transaction_count");
+      const laborCost = last30.some(r=>r.labor_cost!=null) ? sum(last30,"labor_cost") : null;
+      const prevRev = sum(prior30,"revenue");
+      const prevLaborCost = prior30.some(r=>r.labor_cost!=null) ? sum(prior30,"labor_cost") : null;
+
+      loc.live = true;
+      loc.rev = rev;
+      loc.txns = txns;
+      loc.ticket = txns > 0 ? rev/txns : loc.ticket;
+      loc.laborPct = laborCost!=null && rev>0 ? (laborCost/rev*100) : null;
+      loc.laborPctPrev = prevLaborCost!=null && prevRev>0 ? (prevLaborCost/prevRev*100) : null;
+      loc.trend = prevRev > 0 ? ((rev-prevRev)/prevRev*100) : null;
+      loc.status = loc.laborPct==null ? "good" : (loc.laborPct<=28 ? "good" : loc.laborPct<=31 ? "warn" : "serious");
+
+      // last 12 ISO weeks, summed revenue per week, for the location-detail sparkline
+      const weekTotals = new Map();
+      rowsForLoc.forEach(r => {
+        const wk = isoWeekKey(r.business_date);
+        weekTotals.set(wk, (weekTotals.get(wk)||0) + Number(r.revenue||0));
+      });
+      const weeks = Array.from(weekTotals.keys()).sort();
+      loc.trendSeries = weeks.slice(-12).map(w => weekTotals.get(w));
+    });
+
+    return { ok:true, syncedAt:latestSync };
+  }catch(err){
+    return { ok:false, reason: err.message || "fetch failed" };
+  }
+}
+
+function renderOverviewFinance(){
+  const live = LOCATIONS.some(l=>l.live);
+  const totalRev = LOCATIONS.reduce((a,l)=>a+l.rev,0);
+  const totalTxn = LOCATIONS.reduce((a,l)=>a+l.txns,0);
+  const laborLocs = LOCATIONS.filter(l=>l.laborPct!=null);
+  const blendedLabor = laborLocs.length ? laborLocs.reduce((a,l)=>a+l.laborPct,0)/laborLocs.length : null;
+  const prevLaborLocs = LOCATIONS.filter(l=>l.laborPctPrev!=null);
+  const blendedLaborPrev = prevLaborLocs.length ? prevLaborLocs.reduce((a,l)=>a+l.laborPctPrev,0)/prevLaborLocs.length : null;
+  const avgTicket = totalTxn>0 ? totalRev/totalTxn : 0;
+  const trendedLocs = LOCATIONS.filter(l=>l.trend!=null);
+  const avgTrend = trendedLocs.length ? trendedLocs.reduce((a,l)=>a+l.trend,0)/trendedLocs.length : null;
+
+  $("#ov-kpi-revenue").textContent = moneyK(totalRev);
+  $("#ov-kpi-labor").textContent = blendedLabor==null ? "—" : pct1(blendedLabor);
+  if(live){
+    $("#ov-kpi-revenue-delta").innerHTML = avgTrend==null ? "No prior-period data yet" : `${avgTrend>=0?"▲":"▼"} ${Math.abs(avgTrend).toFixed(1)}% vs prior 30d`;
+    $("#ov-kpi-revenue-delta").className = "delta " + (avgTrend==null?"flat":avgTrend>=0?"up":"down");
+    if(blendedLabor!=null && blendedLaborPrev!=null){
+      const laborDelta = blendedLabor - blendedLaborPrev;
+      $("#ov-kpi-labor-delta").innerHTML = `${laborDelta<=0?"▼":"▲"} ${Math.abs(laborDelta).toFixed(1)}pt vs prior 30d`;
+      $("#ov-kpi-labor-delta").className = "delta " + (laborDelta<=0?"up":"down");
+    } else {
+      $("#ov-kpi-labor-delta").textContent = "No prior-period data yet";
+      $("#ov-kpi-labor-delta").className = "delta flat";
+    }
+  }
+  // sample mode: leave the hand-set narrative deltas in the static markup as-is
+  $("#ov-kpi-txn").textContent = totalTxn>=1000 ? (totalTxn/1000).toFixed(1)+"K" : String(totalTxn);
+  $("#ov-kpi-ticket").textContent = "Avg ticket $"+avgTicket.toFixed(2);
+
+  $("#sales-total-rev").textContent = money(totalRev);
+  $("#sales-total-labor").textContent = blendedLabor==null ? "—" : pct1(blendedLabor);
+  $("#sales-total-txn").textContent = totalTxn.toLocaleString();
+  $("#sales-total-ticket").textContent = "$"+avgTicket.toFixed(2);
+}
+
+async function initLiveSquareData(){
+  const result = await loadLiveSquareData();
+  const anyLive = LOCATIONS.some(l=>l.live);
+  squareLive = anyLive;
+  const ovStatus = $("#ov-live-status"), salesStatus = $("#sales-live-status");
+
+  if(anyLive){
+    const syncedTxt = result.syncedAt ? new Date(result.syncedAt).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "recently";
+    ovStatus.textContent = `Live — Square, synced ${syncedTxt}`;
+    salesStatus.textContent = `Live — Square via square_location_kpis_public, synced ${syncedTxt}`;
+    $("#sales-source-note").textContent = "Revenue, transactions and labor % above are real, pulled from Square by sync_square_daily_rollups.py and read live from Supabase. Location Manager, team snapshot, and every other section on this page are still sample data.";
+    $("#topbar-asof").textContent = result.syncedAt
+      ? `Square synced ${syncedTxt}`
+      : "Square data live — sync time unknown";
+  } else {
+    const why = result.reason === "empty" ? "table is empty — run scripts/sync_square_daily_rollups.py" : `couldn't load (${result.reason}) — showing sample data`;
+    ovStatus.textContent = `Sample data · ${why}`;
+    salesStatus.textContent = `Sample data · ${why}`;
+    $("#topbar-asof").textContent = `Page loaded ${new Date().toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})} — Square not yet synced`;
+  }
+
+  renderLocationCards();
+  renderSalesPortfolio();
+  renderOverviewFinance();
+  updateSectionPill(currentSection);
+}
+
+/* ======================================================================
+   CRM — journey, campaigns, marketing calendar
+   ====================================================================== */
+function renderJourney(){
+  $("#journey-funnel").innerHTML = JOURNEY.map(s => `
+    <div class="step">
+      <div class="label">${s.label}</div>
+      <div class="bar-bg"><div class="bar-fill" style="--w:${s.pct}%;"></div></div>
+      <div class="count tabular">${s.n.toLocaleString()}</div>
+    </div>`).join("");
+}
+function renderEventList(targetId, items){
+  $(targetId).innerHTML = items.map(e => `
+    <div class="event-row">
+      <div class="event-date"><div class="d">${e.d}</div><div class="m">${e.m}</div></div>
+      <div><div class="event-title">${e.title}</div><div class="event-meta">${e.meta}</div></div>
+      <div></div>
+    </div>`).join("");
+}
+function renderCampaigns(){
+  $("#campaigns-table-body").innerHTML = CAMPAIGNS.map(c => `
+    <tr>
+      <td style="font-weight:600;">${c.name}</td>
+      <td>${c.channels}</td>
+      <td>${c.segment}</td>
+      <td class="num">${c.window}</td>
+      <td>${c.owner}</td>
+      <td><span class="chip ${c.status}">${c.statusLabel}</span></td>
+    </tr>`).join("");
+}
+
+/* ======================================================================
+   ACADEMY
+   ====================================================================== */
+function renderAcademyDonut(){
+  const svg = $("#academy-donut");
+  const cx=75, cy=75, r=58, sw=20;
+  const circ = 2*Math.PI*r;
+  let offset = 0;
+  // Each competency gets an equal third of the ring; each third fills in proportion to its own completion %.
+  const third = circ/ACADEMY_COMPETENCY.length;
+  let html = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface-alt)" stroke-width="${sw}"/>`;
+  ACADEMY_COMPETENCY.forEach((seg,i) => {
+    const filled = third * (seg.pct/100);
+    const gap = third - filled;
+    html += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="${sw}"
+      stroke-dasharray="${filled.toFixed(2)} ${(circ-filled).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}"
+      stroke-linecap="butt" transform="rotate(-90 ${cx} ${cy})"/>`;
+    offset += third;
+  });
+  html += `<text x="${cx}" y="${cy-3}" text-anchor="middle" font-family="var(--font-mono)" font-size="19" font-weight="600" fill="var(--ink)">71%</text>
+           <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="9.5" fill="var(--ink-3)">avg engaged</text>`;
+  svg.innerHTML = html;
+
+  $("#academy-legend").innerHTML = ACADEMY_COMPETENCY.map(seg => `
+    <div class="li"><span class="sw" style="background:${seg.color}"></span>${seg.label}<span class="amt tabular">${seg.pct}%</span></div>`).join("");
+}
+function renderAcademyRoles(){
+  const max = 100;
+  $("#academy-role-bars").innerHTML = ACADEMY_ROLE.map(r => `
+    <div class="row">
+      <div class="name">${r.label}</div>
+      <div class="track"><span style="width:${r.pct}%;"></span></div>
+      <div class="val tabular">${r.pct}%</div>
+    </div>`).join("");
+}
+
+/* ======================================================================
+   GOALS & PROJECTIONS
+   ====================================================================== */
+function renderGoalsEditable(containerSel, arr, schedulePersistFn){
+  const wrap = $(containerSel);
+  wrap.innerHTML = arr.map((g, i) => `
+    <div class="goal-row" data-idx="${i}" style="border-bottom:1px dashed var(--border);padding-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:5px;">
+        <div class="goal-title" contenteditable="true" spellcheck="false" style="font-weight:600;font-size:13.5px;outline:none;flex:1 1 auto;min-width:0;"></div>
+        <div style="display:flex;align-items:center;gap:6px;flex:0 0 auto;">
+          <select class="goal-status" style="font-size:11px;font-weight:700;border-radius:99px;border:1px solid var(--border);padding:2px 8px;background:var(--surface);color:var(--ink-2);">
+            <option value="good">On track</option>
+            <option value="warn">In progress</option>
+            <option value="critical">At risk</option>
+            <option value="neutral">Planning</option>
+          </select>
+          <button class="goal-del" type="button" title="Remove goal" style="border:none;background:none;cursor:pointer;color:var(--ink-3);padding:2px;">${trashGlyph()}</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="progress" style="flex:1 1 auto;"><span style="width:${g.pct||0}%;"></span></div>
+        <input class="goal-pct" type="number" min="0" max="100" value="${g.pct||0}" style="font-size:12px;color:var(--ink);width:48px;text-align:right;border:1px solid var(--border);border-radius:6px;padding:2px 4px;background:var(--surface);" />
+      </div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:6px;display:flex;align-items:center;gap:6px;">
+        <span style="flex:0 0 auto;">Owner:</span>
+        <input class="goal-owner" type="text" value="${escapeHtml(g.owner)}" style="flex:1 1 auto;font-size:11.5px;border:1px solid var(--border);border-radius:6px;padding:2px 6px;background:var(--surface);color:var(--ink);" />
+      </div>
+      <div style="margin-top:6px;">
+        <input class="goal-statuslabel" type="text" value="${escapeHtml(g.statusLabel)}" placeholder="Status note" style="width:100%;font-size:11.5px;border:1px solid var(--border);border-radius:6px;padding:3px 6px;background:var(--surface);color:var(--ink);" />
+      </div>
+    </div>`).join("");
+
+  $$(".goal-row", wrap).forEach(row => {
+    const i = parseInt(row.dataset.idx, 10);
+    const g = arr[i];
+    const titleEl = row.querySelector(".goal-title");
+    titleEl.textContent = g.title;
+    const statusSel = row.querySelector(".goal-status");
+    statusSel.value = g.status;
+
+    titleEl.addEventListener("blur", () => { g.title = titleEl.textContent.trim() || "Untitled goal"; schedulePersistFn(); });
+    titleEl.addEventListener("keydown", (e) => { if(e.key==="Enter"){ e.preventDefault(); titleEl.blur(); } });
+    statusSel.addEventListener("change", () => { g.status = statusSel.value; schedulePersistFn(); });
+    row.querySelector(".goal-pct").addEventListener("change", (e) => {
+      let v = Math.round(Number(e.target.value));
+      if(isNaN(v)) v = 0;
+      v = Math.max(0, Math.min(100, v));
+      g.pct = v; e.target.value = v;
+      row.querySelector(".progress span").style.width = v + "%";
+      schedulePersistFn();
+    });
+    row.querySelector(".goal-owner").addEventListener("change", (e) => { g.owner = e.target.value.trim(); schedulePersistFn(); });
+    row.querySelector(".goal-statuslabel").addEventListener("change", (e) => { g.statusLabel = e.target.value.trim(); schedulePersistFn(); });
+    row.querySelector(".goal-del").addEventListener("click", () => {
+      arr.splice(i, 1);
+      renderGoalsEditable(containerSel, arr, schedulePersistFn);
+      schedulePersistFn();
+    });
+  });
+}
+function renderProjections(){
+  const svg = $("#proj-chart");
+  const W=640,H=220,padL=52,padB=28,padT=14,padR=10;
+  const all = PROJECTIONS.projected.concat(PROJECTIONS.actual.filter(v=>v!=null));
+  const max = Math.ceil(Math.max(...all)/200)*200;
+  const n = PROJECTIONS.quarters.length;
+  const groupW = (W-padL-padR)/n;
+  const barW = 30;
+  const y = v => H-padB - (v/max)*(H-padB-padT);
+  let bars = "";
+  // gridlines
+  let grid = "";
+  for(let g=0; g<=4; g++){
+    const gv = max/4*g, gy = y(gv);
+    grid += `<line x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}" stroke="var(--border-soft)" stroke-width="1"/>
+             <text x="${padL-8}" y="${gy+4}" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="var(--font-mono)">${gv/1000}M</text>`;
+  }
+  PROJECTIONS.quarters.forEach((q,i) => {
+    const gx = padL + i*groupW + groupW/2;
+    const pv = PROJECTIONS.projected[i], av = PROJECTIONS.actual[i];
+    const px = gx - barW - 3, ax = gx + 3;
+    bars += `<rect x="${px}" y="${y(pv)}" width="${barW}" height="${H-padB-y(pv)}" rx="3" fill="var(--surface-alt)" stroke="var(--border)" stroke-dasharray="3 2"/>`;
+    if(av!=null){
+      bars += `<rect x="${ax}" y="${y(av)}" width="${barW}" height="${H-padB-y(av)}" rx="3" fill="var(--series-2)"/>`;
+    } else {
+      bars += `<text x="${gx}" y="${H-padB+18}" text-anchor="middle" font-size="9.5" fill="var(--ink-3)">projected only</text>`;
+    }
+    bars += `<text x="${gx}" y="${H-padB+18}" text-anchor="middle" font-size="11" fill="var(--ink-2)" font-weight="600">${q}</text>`;
+  });
+  svg.innerHTML = `${grid}${bars}
+    <g transform="translate(${W-190},${padT})">
+      <rect x="0" y="0" width="11" height="11" rx="2" fill="var(--surface-alt)" stroke="var(--border)" stroke-dasharray="3 2"/>
+      <text x="16" y="9.5" font-size="11" fill="var(--ink-2)">Projected</text>
+      <rect x="90" y="0" width="11" height="11" rx="2" fill="var(--series-2)"/>
+      <text x="106" y="9.5" font-size="11" fill="var(--ink-2)">Actual</text>
+    </g>`;
+}
+
+/* ======================================================================
+   WAREHOUSE
+   ====================================================================== */
+function renderWarehouse(){
+  renderEventList("#sysco-deliveries", SYSCO_DELIVERIES);
+}
+
+/* ======================================================================
+   WAREHOUSE & ORDER FULFILLMENT — Top line: Outgoing / Incoming / Inventory
+   ====================================================================== */
+
+// 3 business days (weekends don't count) from order placement — same rule
+// as the Wholesale & Subscription page's ship-by countdown.
+function businessDeadline(startIso){
+  if(!startIso) return null;
+  let d = new Date(startIso);
+  let daysCounted = 0;
+  while(daysCounted < 3){
+    d = new Date(d.getTime() + 24*60*60*1000);
+    const dow = d.getUTCDay();
+    if(dow !== 0 && dow !== 6) daysCounted++;
+  }
+  d.setUTCHours(23,59,59,999);
+  return d;
+}
+function deadlineSeverity(placedAt){
+  const deadline = businessDeadline(placedAt);
+  if(!deadline) return "neutral";
+  const msLeft = deadline.getTime() - Date.now();
+  if(msLeft < 0) return "critical";
+  if(msLeft <= 24*60*60*1000) return "warn";
+  return "good";
+}
+
+function outgoingCard(title, sub, value, breakdownHtml, href){
+  return `<a class="card og-card" href="${href}" target="_blank" rel="noopener" style="text-decoration:none; color:inherit; display:block;">
+    <div class="og-title">${title}</div>
+    <div class="og-value">${value}</div>
+    <div class="og-breakdown">${breakdownHtml}</div>
+    <div style="font-size:11.5px; color:var(--ink-3); margin-top:2px;">${sub}</div>
+  </a>`;
+}
+
+async function initOutgoingCards(){
+  const status = $("#outgoing-status");
+  const [cafeResult, worklistResult] = await Promise.all([
+    fetchSupabase("cafe_orders_summary_public?select=*"),
+    fetchSupabase("fulfillment_worklist_public?select=source,order_type,stage,placed_at,is_emergency&source=in.(shopify,bluecart)")
+  ]);
+
+  // Cafe Orders — 5 existing stages, highlighting emergency orders
+  let cafeHtml;
+  if(cafeResult.ok){
+    const totalOpen = cafeResult.rows.reduce((s,r) => s + (r.order_count||0), 0);
+    const emergencyCount = cafeResult.rows.reduce((s,r) => s + (r.emergency_count||0), 0);
+    const breakdown = cafeResult.rows.map(r => `<span class="chip neutral">${r.status}: ${r.order_count}</span>`).join("");
+    cafeHtml = outgoingCard(
+      "Cafe Orders", emergencyCount ? `${emergencyCount} emergency order${emergencyCount===1?"":"s"} — highlighted below` : "No emergency orders open",
+      totalOpen, (emergencyCount ? `<span class="chip critical">🚨 ${emergencyCount} emergency</span>` : "") + breakdown,
+      "https://salt-city-coffee-systems.netlify.app"
+    );
+  } else if(cafeResult.reason === "empty"){
+    cafeHtml = outgoingCard("Cafe Orders", "No open cafe orders right now", 0, "", "https://salt-city-coffee-systems.netlify.app");
+  } else {
+    cafeHtml = outgoingCard("Cafe Orders", `Sample data · couldn't load cafe_orders_summary_public (${cafeResult.reason})`, "—", "", "https://salt-city-coffee-systems.netlify.app");
+  }
+
+  // Wholesale & Subscription — open counts + how many are close to/past the 72hr deadline
+  function buildTypeCard(orderType, title, href){
+    if(!worklistResult.ok && worklistResult.reason !== "empty") return outgoingCard(title, `Sample data · run 2026-09-04c_warehouse_fulfillment_v2.sql (${worklistResult.reason})`, "—", "", href);
+    const rows = (worklistResult.ok ? worklistResult.rows : []).filter(r => r.order_type === orderType);
+    const atRisk = rows.filter(r => { const s = deadlineSeverity(r.placed_at); return s === "warn" || s === "critical"; }).length;
+    const overdue = rows.filter(r => deadlineSeverity(r.placed_at) === "critical").length;
+    let breakdown = `<span class="chip neutral">${rows.length} open</span>`;
+    if(overdue) breakdown += `<span class="chip critical">⏱ ${overdue} overdue</span>`;
+    else if(atRisk) breakdown += `<span class="chip warn">⏱ ${atRisk} due within 24h</span>`;
+    return outgoingCard(title, rows.length ? "Tap to open the tracker" : "Nothing open right now", rows.length, breakdown, href);
+  }
+  const wholesaleHtml = buildTypeCard("wholesale", "Wholesale", "https://salt-city-coffee-tools.netlify.app/wholesale-subscription.html");
+  const subHtml = buildTypeCard("subscription", "Subscription", "https://salt-city-coffee-tools.netlify.app/wholesale-subscription.html");
+
+  $("#outgoing-cards").innerHTML = cafeHtml + wholesaleHtml + subHtml;
+  const cafeLive = cafeResult.ok || cafeResult.reason === "empty";
+  const worklistLive = worklistResult.ok || worklistResult.reason === "empty";
+  status.textContent = (cafeLive && worklistLive) ? "Live — Cafe Orders from the warehouse platform's own status; Wholesale/Subscription counts and deadlines from Order Fulfillment" : "Some cards showing sample data — see each card";
+}
+
+/* ---- Incoming Orders: Green Coffee / Dry Goods / Food & Beverage ---- */
+const INCOMING_CATEGORIES = [
+  { key:"green-coffee", label:"Green Coffee" },
+  { key:"dry-goods", label:"Dry Goods" },
+  { key:"food-beverage", label:"Food & Beverage" }
+];
+let incomingShipments = [];
+
+function incomingCategoryHtml(cat){
+  const rows = incomingShipments.filter(r => r.category === cat.key && !r.received);
+  const rowsHtml = rows.length
+    ? rows.slice(0,5).map(r => `<div class="inc-item-row">
+        <div><div class="nm">${escapeHtml(r.item_name)}${r.qty ? " — " + escapeHtml(r.qty) : ""}</div>${r.confirmation_link ? `<a href="${escapeHtml(r.confirmation_link)}" target="_blank" rel="noopener">confirmation ↗</a>` : ""}</div>
+        <div class="dt">${r.expected_date ? new Date(r.expected_date+"T00:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"}) : ""}</div>
+      </div>`).join("")
+    : `<div class="empty-note" style="padding:6px 0;">Nothing logged as incoming right now.</div>`;
+  return `<div class="card inc-card">
+    <div class="inc-title">${cat.label}</div>
+    <div class="inc-count">${rows.length}</div>
+    <div>${rowsHtml}</div>
+    <details>
+      <summary class="btn sm" style="display:inline-flex;">+ Log a shipment</summary>
+      <form class="mini-form" data-category="${cat.key}">
+        <input type="text" placeholder="Item" data-field="item_name" required>
+        <input type="text" placeholder="Qty (optional)" data-field="qty">
+        <input type="date" data-field="expected_date">
+        <input type="text" placeholder="Confirmation link (Drive, email, etc.)" data-field="confirmation_link">
+        <button type="submit" class="btn sm primary">Add</button>
+      </form>
+    </details>
+  </div>`;
+}
+
+function renderIncomingCards(){
+  $("#incoming-cards").innerHTML = INCOMING_CATEGORIES.map(incomingCategoryHtml).join("");
+  $$('.mini-form').forEach(form => {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = { category: form.dataset.category };
+      $$('input[data-field]', form).forEach(inp => { payload[inp.dataset.field] = inp.value.trim() || null; });
+      if(!payload.item_name) return;
+      const result = await fetchSupabasePost("incoming_shipments", payload);
+      if(result.ok){ await initIncomingCards(); } else alert("Couldn't add: " + result.reason);
+    });
+  });
+}
+
+async function initIncomingCards(){
+  const result = await fetchSupabase("incoming_shipments?select=*&order=expected_date.asc.nullslast,created_at.desc");
+  incomingShipments = result.ok ? result.rows : [];
+  renderIncomingCards();
+}
+
+async function fetchSupabasePost(path, payload){
+  try{
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      method:"POST",
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization:"Bearer " + SUPABASE_ANON_KEY, "Content-Type":"application/json", Prefer:"return=minimal" },
+      body: JSON.stringify(payload)
+    });
+    if(!resp.ok){ const text = await resp.text().catch(()=>""); return { ok:false, reason:`${resp.status}${text?" — "+text.slice(0,140):""}` }; }
+    return { ok:true };
+  }catch(err){ return { ok:false, reason: err.message || "request failed" }; }
+}
+
+/* ---- Inventory Emergencies + Real-time COGS tracker ---- */
+async function initInventoryEmergencies(){
+  const status = $("#inv-emergency-status");
+  const result = await fetchSupabase("inventory_emergencies_public?select=*&limit=8");
+  if(result.ok){
+    status.textContent = `Live — items at or below their reorder threshold`;
+    $("#inv-emergency-list").innerHTML = result.rows.map(r => `
+      <div style="padding:9px 2px; border-bottom:1px solid var(--border-soft);">
+        <div class="event-title">${escapeHtml(r.item_name)} <span class="chip ${r.is_stockout ? "critical" : "warn"}">${r.is_stockout ? "Out of stock" : "Low"}</span></div>
+        <div class="event-meta">${escapeHtml(r.location_name)} · ${r.quantity_on_hand} ${escapeHtml(r.unit||"")} on hand (reorder at ${r.reorder_threshold})</div>
+      </div>`).join("");
+  } else {
+    status.textContent = result.reason === "empty" ? "Live — nothing at or below its reorder threshold right now" : `Couldn't load (${result.reason}) — run 2026-09-04c_warehouse_fulfillment_v2.sql if you haven't yet`;
+    $("#inv-emergency-list").innerHTML = result.reason === "empty" ? "" : `<div class="empty-note">Needs reorder_threshold set on items and the migration run — see the note below.</div>`;
+  }
+}
+
+async function initCogsTracker(){
+  const status = $("#cogs-status");
+  const result = await fetchSupabase("inventory_value_public?select=*");
+  if(!result.ok && result.reason !== "empty"){
+    status.textContent = `Couldn't load (${result.reason}) — run 2026-09-04c_warehouse_fulfillment_v2.sql if you haven't yet`;
+    $("#cogs-body").innerHTML = "";
+    return;
+  }
+  const rows = result.ok ? result.rows : [];
+  const totalItems = rows.reduce((s,r) => s + (r.items_total||0), 0);
+  const withCost = rows.reduce((s,r) => s + (r.items_with_cost||0), 0);
+  const value = rows.reduce((s,r) => s + (Number(r.value_at_cost)||0), 0);
+  if(withCost === 0){
+    status.textContent = "No per-item cost data yet";
+    $("#cogs-body").innerHTML = `<div class="empty-note">There's no unit cost on any item yet (${totalItems} items tracked, 0 with a cost set), so neither a running COGS-from-sales figure nor a warehouse value-at-cost can be shown honestly. The schema's ready — <span class="mono">items.unit_cost</span> — this fills in as soon as a cost list is imported.</div>`;
+  } else {
+    status.textContent = `Live — value at cost across ${withCost} of ${totalItems} items with a cost set`;
+    $("#cogs-body").innerHTML = `<div class="og-value" style="font-size:23px;">${money(value)}</div><div style="font-size:11.5px;color:var(--ink-3);margin-top:2px;">Value of inventory currently in the warehouse, at cost${withCost < totalItems ? ` — ${totalItems - withCost} items still missing a cost, so this is a floor, not the full total` : ""}. Running COGS-from-sales isn't shown yet — that needs a cost figure wired into the sales feed, a further step once the cost import is in.</div>`;
+  }
+}
+
+/* ======================================================================
+   WAREHOUSE — Sysco order guide (manual CSV import) + Sysco invoices
+   (existing invoice-OCR pipeline), both read live from Supabase
+   ====================================================================== */
+function monthAbbrev(iso){
+  if(!iso) return "";
+  return new Date(iso + "T00:00:00Z").toLocaleString("en-US",{month:"short",timeZone:"UTC"});
+}
+function dayNum(iso){
+  if(!iso) return "";
+  return String(new Date(iso + "T00:00:00Z").getUTCDate());
+}
+
+async function fetchSupabase(path){
+  try{
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok) throw new Error("Supabase responded " + resp.status);
+    const rows = await resp.json();
+    if(!Array.isArray(rows) || !rows.length) return { ok:false, reason:"empty" };
+    return { ok:true, rows };
+  }catch(err){
+    return { ok:false, reason: err.message || "fetch failed" };
+  }
+}
+
+async function initLiveSyscoOrders(){
+  const status = $("#sysco-orders-status");
+  const result = await fetchSupabase("sysco_orders_public?select=*&order=order_date.desc&limit=6");
+  if(result.ok){
+    const lastImport = result.rows.reduce((a,r) => (!a || r.imported_at > a) ? r.imported_at : a, null);
+    const importedTxt = lastImport ? new Date(lastImport).toLocaleDateString("en-US",{month:"short",day:"numeric"}) : "recently";
+    status.textContent = `Live — imported from a Sysco Shop export, last import ${importedTxt}`;
+    renderEventList("#sysco-deliveries", result.rows.filter(r=>r.order_date).map(r => ({
+      d: dayNum(r.order_date), m: monthAbbrev(r.order_date),
+      title: `${money(r.total_spend)} — ${r.line_items} line item${r.line_items===1?"":"s"}`,
+      meta: "Imported from Sysco Shop export"
+    })));
+  } else {
+    const why = result.reason === "empty" ? "no import yet — run scripts/import_sysco_order_export.py" : `couldn't load (${result.reason}) — showing sample data`;
+    status.textContent = `Sample data · ${why}`;
+    renderEventList("#sysco-deliveries", SYSCO_DELIVERIES);
+  }
+}
+
+async function initLiveSyscoInvoices(){
+  const status = $("#sysco-invoices-status");
+  const result = await fetchSupabase("sysco_invoices_public?select=*&order=invoice_date.desc&limit=6");
+  if(result.ok){
+    status.textContent = "Live — from the Inventory Tracker's invoice OCR";
+    renderEventList("#sysco-invoices-list", result.rows.map(r => ({
+      d: dayNum(r.invoice_date), m: monthAbbrev(r.invoice_date),
+      title: `${money(r.total_amount)} — ${r.line_item_count} item${r.line_item_count===1?"":"s"}`,
+      meta: `${r.location_name || "Unassigned location"} · ${r.status}`
+    })));
+  } else {
+    status.textContent = "Live — from the Inventory Tracker's invoice OCR · no Sysco invoices processed yet";
+    $("#sysco-invoices-list").innerHTML = `<div class="empty-note">No Sysco invoices have gone through invoice OCR yet — this fills in automatically the first time one's uploaded and reviewed in the Inventory Tracker. No new work needed there; it's the same pipeline already live for other vendors.</div>`;
+  }
+}
+
+/* ======================================================================
+   PRODUCT DEVELOPMENT
+   ====================================================================== */
+function renderProductDev(){
+  $("#recipe-kanban").innerHTML = Object.entries(RECIPE_KANBAN).map(([stage,items]) => `
+    <div class="kanban-col">
+      <h4>${stage}</h4>
+      ${items.map(name => `<div class="kcard">${name}</div>`).join("") || `<div class="empty-note">Nothing here</div>`}
+    </div>`).join("");
+
+  $("#bakery-table-body").innerHTML = BAKERY_TRACKER.map(b => `
+    <tr><td style="font-weight:600;">${b.workstream}</td><td>${b.owner}</td><td><span class="chip ${b.status}">${b.statusLabel}</span></td></tr>`).join("");
+
+  renderBakeryReadiness();
+}
+
+/* ---- Top 5 ideas (live read from the Idea Decision Matrix's `ideas` table) ---- */
+const IDEA_STATUS_LABEL = {new:"New", under_review:"Under Review", approved:"Approved", operationalized:"Operationalized", parked:"Parked"};
+const IDEA_STATUS_CHIP = {new:"neutral", under_review:"warn", approved:"serious", operationalized:"good", parked:"critical"};
+const SAMPLE_TOP_IDEAS = [
+  { title:"Drive-thru pilot at 509", status:"under_review" },
+  { title:"Oat milk cold foam line", status:"new" },
+  { title:"Loyalty punch-card app", status:"approved" },
+  { title:"Nitro cold brew taps", status:"new" },
+  { title:"Bagged whole-bean retail rack", status:"parked" }
+];
+function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function renderTopIdeas(list){
+  $("#top-ideas-list").innerHTML = list.map((idea,i) => `
+    <div class="ti-row">
+      <div class="ti-rank">${i+1}</div>
+      <div class="ti-title">${escapeHtml(idea.title)}</div>
+      <span class="chip ${IDEA_STATUS_CHIP[idea.status]||'neutral'}">${IDEA_STATUS_LABEL[idea.status]||idea.status}</span>
+    </div>`).join("") || `<div class="empty-note">No ideas submitted yet.</div>`;
+}
+async function initLiveTopIdeas(){
+  const status = $("#top-ideas-status");
+  const result = await fetchSupabase("ideas?select=title,status,priority_rank&order=priority_rank.asc.nullslast,created_at.desc&limit=5");
+  if(result.ok){
+    status.textContent = "Live — from the Idea Decision Matrix, ranked by manual priority order";
+    renderTopIdeas(result.rows);
+  } else {
+    const why = result.reason === "empty" ? "no ideas submitted yet" : `couldn't load (${result.reason}) — showing sample data`;
+    status.textContent = `Sample data · ${why}`;
+    renderTopIdeas(SAMPLE_TOP_IDEAS);
+  }
+}
+
+/* ======================================================================
+   PRODUCT DEVELOPMENT — Bakery Recipe Readiness (live Supabase read)
+   ====================================================================== */
+let bakeryLive = false;
+let BAKERY_READINESS = null; // one row from bakery_readiness_public once live
+let BAKERY_RECIPES = [];     // rows from bakery_recipes_public once live
+
+function bakeryStageChip(stage){
+  return {
+    production_ready:{status:"good",  label:"Production ready"},
+    testing:          {status:"warn",   label:"Testing"},
+    development:      {status:"serious",label:"Development"},
+    no_recipe:        {status:"critical",label:"No recipe"}
+  }[stage] || {status:"neutral",label:stage};
+}
+
+function renderBakeryReadiness(){
+  const rows = bakeryLive && BAKERY_RECIPES.length ? BAKERY_RECIPES : BAKERY_RECIPES_SNAPSHOT;
+
+  if(bakeryLive && BAKERY_READINESS){
+    const r = BAKERY_READINESS;
+    const pct = r.items_total > 0 ? Math.round(r.items_confirmed / r.items_total * 100) : 0;
+    $("#bakery-kpi-recipes").textContent = r.recipes_in_book;
+    $("#bakery-kpi-recipes-sub").textContent = `+${r.count_no_recipe} flagged missing entirely`;
+    $("#bakery-kpi-readiness").textContent = pct + "%";
+    $("#bakery-kpi-readiness-sub").textContent = `${r.items_confirmed} of ${r.items_total} checklist items confirmed`;
+    $("#bakery-kpi-norecipe").textContent = r.count_no_recipe;
+    $("#bakery-kpi-ready").textContent = r.count_ready;
+  } else {
+    $("#bakery-kpi-recipes").textContent = "32";
+    $("#bakery-kpi-recipes-sub").textContent = "+11 flagged missing entirely";
+    $("#bakery-kpi-readiness").textContent = "10%";
+    $("#bakery-kpi-readiness-sub").textContent = "62 of 646 checklist items confirmed";
+    $("#bakery-kpi-norecipe").textContent = "11";
+    $("#bakery-kpi-ready").textContent = "0";
+  }
+  const noRecipeSales = rows.filter(x => x.stage === "no_recipe").reduce((a,x) => a + (Number(x.sales_ytd)||0), 0);
+  $("#bakery-kpi-norecipe-sub").textContent = `${money(noRecipeSales)} YTD with zero recipe on file`;
+
+  $("#bakery-recipe-table-body").innerHTML = rows.map(rec => {
+    const chip = bakeryStageChip(rec.stage);
+    const sales = rec.sales_ytd == null ? "—" : money(Number(rec.sales_ytd));
+    const confirmed = rec.items_confirmed ?? 0, total = rec.items_total ?? 0;
+    return `<tr><td style="font-weight:600;">${esc(rec.name)}</td><td><span class="chip ${chip.status}">${chip.label}</span></td><td>${esc(rec.next_step||"")}</td><td class="right num">${sales}</td><td class="right num">${total>0?`${confirmed}/${total}`:"—"}</td></tr>`;
+  }).join("");
+}
+
+async function loadLiveBakeryData(){
+  try{
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const [readinessResp, recipesResp] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/bakery_readiness_public?select=*`, { headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY }, signal: ctrl.signal }),
+      fetch(`${SUPABASE_URL}/rest/v1/bakery_recipes_public?select=*&order=sales_ytd.desc.nullslast`, { headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY }, signal: ctrl.signal })
+    ]);
+    clearTimeout(timeout);
+    if(!readinessResp.ok || !recipesResp.ok) throw new Error("Supabase responded " + readinessResp.status + "/" + recipesResp.status);
+    const readinessRows = await readinessResp.json();
+    const recipes = await recipesResp.json();
+    if(!Array.isArray(readinessRows) || !readinessRows.length || !Array.isArray(recipes) || !recipes.length) return { ok:false, reason:"empty" };
+    BAKERY_READINESS = readinessRows[0];
+    BAKERY_RECIPES = recipes;
+    return { ok:true, syncedAt: BAKERY_READINESS.updated_at };
+  }catch(err){
+    return { ok:false, reason: err.message || "fetch failed" };
+  }
+}
+
+async function initLiveBakeryData(){
+  const result = await loadLiveBakeryData();
+  bakeryLive = result.ok;
+  const status = $("#bakery-platform-status");
+
+  if(bakeryLive){
+    const syncedTxt = result.syncedAt ? new Date(result.syncedAt).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "recently";
+    status.textContent = `Live — Supabase, synced ${syncedTxt}`;
+    $("#bakery-empty-note").textContent = "Recipe names, status, Sales YTD and checklist counts above are real, read live from the bakery_readiness_public / bakery_recipes_public Supabase views. The 646 individual checklist item labels aren't stored yet — checking an item still only saves in that person's own browser until the checklist tool itself writes to Supabase instead of localStorage.";
+  } else {
+    const why = result.reason === "empty" ? "views are empty — run the bakery seed migration" : `couldn't load (${result.reason}) — showing the Aug 31 snapshot`;
+    status.textContent = `Sample data · ${why}`;
+  }
+  renderBakeryReadiness();
+  updateSectionPill(currentSection);
+}
+
+/* ======================================================================
+   ROASTERY — big-picture roasting status, read live from Supabase
+   (roastery_items). Wholesale/subscription orders and cold brew
+   concentrate moved off this tab — see Warehouse & Cold Brew Production.
+   ====================================================================== */
+async function initRoasteryBigPicture(){
+  const status = $("#roastery-status");
+  const result = await fetchSupabase("roastery_items?select=phase,roasted_at");
+  if(!result.ok){
+    status.textContent = `Sample data · couldn't load (${result.reason})`;
+    return;
+  }
+  const rows = result.rows;
+  const todayStr = new Date().toISOString().slice(0,10);
+  const count = p => rows.filter(r => r.phase === p).length;
+  const roastedToday = rows.filter(r => r.phase === "roasted" && r.roasted_at && r.roasted_at.slice(0,10) === todayStr).length;
+  $("#rst-kpi-queued").textContent = count("not-started");
+  $("#rst-kpi-roasting").textContent = count("roasting");
+  $("#rst-kpi-roasted-today").textContent = roastedToday;
+  $("#rst-kpi-cannotstart").textContent = count("cannot-start");
+  status.textContent = "Live — from roastery_items";
+}
+
+/* ======================================================================
+   WAREHOUSE — Bagging summary, read live from Supabase (bagging_items)
+   ====================================================================== */
+async function initBaggingSummary(){
+  const status = $("#bagging-summary-status");
+  const result = await fetchSupabase("bagging_items?select=phase");
+  if(!result.ok){
+    status.textContent = `Sample data · couldn't load (${result.reason})`;
+    return;
+  }
+  const rows = result.rows;
+  const count = p => rows.filter(r => r.phase === p).length;
+  $("#bg-kpi-notbagged").textContent = count("not-bagged");
+  $("#bg-kpi-inprocess").textContent = count("in-process");
+  $("#bg-kpi-cannotbag").textContent = count("cannot-bag");
+  $("#bg-kpi-ready").textContent = count("ready-to-ship") + count("complete");
+  status.textContent = "Live — from bagging_items";
+}
+
+/* ======================================================================
+   FOOD PRODUCTION — Daily Production List (Bakers Page) status counts,
+   read live from Supabase. (Bagging Station lives under the Warehouse tab
+   now, not here — it's Warehouse's job, not Head Baker's.)
+   ====================================================================== */
+let foodProdLive = false;
+
+async function initLiveFoodProduction(){
+  const status = $("#foodprod-status");
+  const today = new Date().toISOString().slice(0,10);
+  const bakeResult = await fetchSupabase(`bake_list_items?select=phase&bake_date=eq.${today}`);
+  foodProdLive = bakeResult.ok;
+  const bakeRows = bakeResult.ok ? bakeResult.rows : [];
+  const count = (rows,p) => rows.filter(r => r.phase === p).length;
+  $("#fp-kpi-notstarted").textContent = count(bakeRows,"not-started");
+  $("#fp-kpi-started").textContent = count(bakeRows,"started");
+  $("#fp-kpi-ready").textContent = count(bakeRows,"ready-to-ship");
+  status.textContent = foodProdLive
+    ? "Live — today's counts from bake_list_items (Daily Production List)"
+    : "Sample data · run the 2026-09-04b_production_tracking.sql migration in Supabase if you haven't yet";
+  updateSectionPill(currentSection);
+}
+
+/* ======================================================================
+   COLD BREW PRODUCTION — cold brew batches + keg batches, read live
+   ====================================================================== */
+let coldBrewProdLive = false;
+
+async function initLiveColdBrewProduction(){
+  const status = $("#coldbrewprod-status");
+  const today = new Date().toISOString().slice(0,10);
+  const [cbResult, kegResult] = await Promise.all([
+    fetchSupabase(`cold_brew_batches?select=status&batch_date=eq.${today}`),
+    fetchSupabase(`keg_batches?select=status&batch_date=eq.${today}`)
+  ]);
+  coldBrewProdLive = cbResult.ok || kegResult.ok;
+  const cbRows = cbResult.ok ? cbResult.rows : [];
+  const kegRows = kegResult.ok ? kegResult.rows : [];
+  $("#cbp-kpi-cb-total").textContent = cbRows.length;
+  $("#cbp-kpi-cb-complete").textContent = cbRows.filter(r => r.status === "complete").length;
+  $("#cbp-kpi-keg-total").textContent = kegRows.length;
+  $("#cbp-kpi-keg-complete").textContent = kegRows.filter(r => r.status === "complete").length;
+  status.textContent = coldBrewProdLive
+    ? "Live — today's counts from cold_brew_batches and keg_batches"
+    : "Sample data · run the 2026-09-04b_production_tracking.sql migration in Supabase if you haven't yet";
+  updateSectionPill(currentSection);
+}
+
+/* ======================================================================
+   COO PRIORITIES — editable, checkable, and genuinely persisted via the
+   `artifact` runtime capability. State lives in #priorities-state (JSON);
+   every mutation re-renders from that state, then republishes the whole
+   document so every open view (including this one) reloads to the saved
+   version. Never reads live widget values as the source of truth.
+   ====================================================================== */
+let priorities = [];
+try{ priorities = JSON.parse($("#priorities-state").textContent); }catch(e){ priorities = []; }
+
+function renderPriorities(){
+  const list = $("#priorities-list");
+  list.innerHTML = "";
+  priorities.forEach((item, i) => {
+    const row = document.createElement("div");
+    row.className = "pr-row" + (item.done ? " done" : "");
+    row.innerHTML = `
+      <div class="pr-rank tabular">${i+1}</div>
+      <div class="pr-check" role="checkbox" aria-checked="${item.done}" tabindex="0">${item.done ? checkGlyph() : ""}</div>
+      <div class="pr-text" contenteditable="true" spellcheck="false"></div>
+      <div class="pr-actions">
+        <button class="pr-move" data-dir="-1" title="Move up" ${i===0?"disabled":""}>▲</button>
+        <button class="pr-move" data-dir="1" title="Move down" ${i===priorities.length-1?"disabled":""}>▼</button>
+        <button class="pr-del" title="Remove">${trashGlyph()}</button>
+      </div>`;
+    row.querySelector(".pr-text").textContent = item.text;
+
+    const toggleDone = () => { item.done = !item.done; renderPriorities(); schedulePersist(); };
+    row.querySelector(".pr-check").addEventListener("click", toggleDone);
+    row.querySelector(".pr-check").addEventListener("keydown", (e) => { if(e.key===" "||e.key==="Enter"){ e.preventDefault(); toggleDone(); } });
+    const textEl = row.querySelector(".pr-text");
+    textEl.addEventListener("blur", () => { item.text = textEl.textContent.trim() || "Untitled priority"; schedulePersist(); });
+    textEl.addEventListener("keydown", (e) => { if(e.key==="Enter"){ e.preventDefault(); textEl.blur(); } });
+    row.querySelectorAll(".pr-move").forEach(btn => btn.addEventListener("click", () => {
+      const dir = parseInt(btn.dataset.dir,10);
+      const j = i+dir;
+      if(j<0 || j>=priorities.length) return;
+      [priorities[i],priorities[j]] = [priorities[j],priorities[i]];
+      renderPriorities(); schedulePersist();
+    }));
+    row.querySelector(".pr-del").addEventListener("click", () => {
+      priorities.splice(i,1); renderPriorities(); schedulePersist();
+    });
+    list.appendChild(row);
+  });
+
+  const done = priorities.filter(p=>p.done).length;
+  const total = priorities.length;
+  $("#pr-progress-bar").style.width = total ? (done/total*100)+"%" : "0%";
+  $("#ov-pr-progress").textContent = `${done} / ${total}`;
+  $("#pr-add").disabled = priorities.length >= 15;
+}
+function checkGlyph(){ return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`; }
+function trashGlyph(){ return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>`; }
+
+$("#pr-add").addEventListener("click", () => {
+  if(priorities.length >= 15) return;
+  priorities.push({ text:"New priority", done:false });
+  renderPriorities();
+  const rows = $$(".pr-row");
+  const last = rows[rows.length-1];
+  const t = last.querySelector(".pr-text");
+  t.focus();
+  document.execCommand && window.getSelection().selectAllChildren(t);
+  schedulePersist();
+});
+
+/* Generic publish helper — every editable-state block (priorities, goals)
+   syncs its own JSON state-tag from its in-memory array, then calls this
+   to republish the WHOLE document via the `artifact` runtime capability
+   so every open view (including this one) reloads to the saved version. */
+async function publishDocument(barSel, textSel, syncFn){
+  const bar = $(barSel), txt = $(textSel);
+  bar.classList.add("saving"); txt.textContent = "Saving…";
+  syncFn();
+  try{
+    if(window.claude && typeof window.claude.use === "function"){
+      const artifact = await window.claude.use("artifact");
+      if(artifact && typeof artifact.publish === "function"){
+        await artifact.publish("<!doctype html>\n" + document.documentElement.outerHTML);
+        bar.classList.remove("saving");
+        txt.textContent = "Saved — visible next time this page is opened";
+        return;
+      }
+    }
+    bar.classList.remove("saving");
+    txt.textContent = "Not saved — open the published page to persist edits";
+  }catch(err){
+    bar.classList.remove("saving");
+    txt.textContent = "Couldn't save — edits will reset on reload";
+  }
+}
+
+let persistTimer = null;
+function schedulePersist(){
+  const bar = $("#pr-savebar"), txt = $("#pr-savebar-text");
+  bar.classList.add("saving"); txt.textContent = "Saving…";
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => publishDocument("#pr-savebar", "#pr-savebar-text", () => {
+    $("#priorities-state").textContent = JSON.stringify(priorities);
+  }), 700);
+}
+
+/* ======================================================================
+   GOALS & PROJECTIONS — editable, persisted the same way as COO Priorities
+   above. State lives in #quarterly-goals-state / #annual-goals-state.
+   ====================================================================== */
+let quarterlyGoals = [];
+try{ quarterlyGoals = JSON.parse($("#quarterly-goals-state").textContent); }catch(e){ quarterlyGoals = []; }
+let annualGoals = [];
+try{ annualGoals = JSON.parse($("#annual-goals-state").textContent); }catch(e){ annualGoals = []; }
+
+let goalsPersistTimer = null;
+function scheduleGoalsPersist(){
+  const bar = $("#goals-savebar"), txt = $("#goals-savebar-text");
+  bar.classList.add("saving"); txt.textContent = "Saving…";
+  clearTimeout(goalsPersistTimer);
+  goalsPersistTimer = setTimeout(() => publishDocument("#goals-savebar", "#goals-savebar-text", () => {
+    $("#quarterly-goals-state").textContent = JSON.stringify(quarterlyGoals);
+    $("#annual-goals-state").textContent = JSON.stringify(annualGoals);
+  }), 700);
+}
+
+$("#qgoal-add").addEventListener("click", () => {
+  quarterlyGoals.push({ title:"New quarterly goal", owner:"", pct:0, status:"neutral", statusLabel:"Planning" });
+  renderGoalsEditable("#quarterly-goals", quarterlyGoals, scheduleGoalsPersist);
+  scheduleGoalsPersist();
+});
+$("#agoal-add").addEventListener("click", () => {
+  annualGoals.push({ title:"New annual goal", owner:"", pct:0, status:"neutral", statusLabel:"Planning" });
+  renderGoalsEditable("#annual-goals", annualGoals, scheduleGoalsPersist);
+  scheduleGoalsPersist();
+});
+
+/* ======================================================================
+   ROUTER
+   ====================================================================== */
+const SECTION_META = {
+  overview:   { title:"Overview", sub:"Portfolio pulse — company-wide, trailing 30 days" },
+  sales:      { title:"Sales & Labor", sub:"Square: sales, labor cost, team — portfolio and per-location" },
+  crm:        { title:"Customer Journey & Marketing", sub:"CRM in progress — journey stages, marketing calendar, campaigns" },
+  academy:    { title:"Academy Engagement", sub:"Leadership · Craft · Customer Care completion and cadence" },
+  calendar:   { title:"Calendar & Events", sub:"Quarterly events linked to the master company calendar" },
+  goals:      { title:"Goals & Projections", sub:"Quarterly and annual goals against current reality" },
+  warehouse:  { title:"Warehouse Inventory & Order Fulfillment", sub:"Outgoing orders (cafe, wholesale, subscription), incoming shipments, inventory emergencies & cost, bagging, plus Sysco and the live Inventory Tracker — Assistant Production Manager's station" },
+  priorities: { title:"COO Priorities", sub:"Top 10 for Q3 2026 — editable and checkable" },
+  foodprod:   { title:"Food Production", sub:"Daily Production List (Bakers Page)" },
+  coldbrewprod: { title:"Cold Brew Production", sub:"32-gal cold brew batches and draft latte / cold brew keg batches" },
+  productdev: { title:"Product Development", sub:"Seasonal recipes and the in-house bakery build-out" },
+  roastery:   { title:"Roastery", sub:"Roast queue and tap-card status — big-picture roasting only" }
+};
+
+let squareLive = false; // flips true once loadLiveSquareData() confirms at least one location synced
+let currentSection = "overview";
+
+function updateSectionPill(id){
+  const pill = $("#section-pill"), text = $("#section-pill-text");
+  const iconWarn = $("#section-pill-icon-warn"), iconGood = $("#section-pill-icon-good"), iconNeutral = $("#section-pill-icon-neutral");
+  iconWarn.style.display = "none"; iconGood.style.display = "none"; iconNeutral.style.display = "none";
+  pill.classList.remove("is-live","is-editable");
+
+  if((id === "overview" || id === "sales") && squareLive){
+    pill.classList.add("is-live"); iconGood.style.display = "block";
+    text.textContent = "Live — Square";
+  } else if(id === "productdev" && bakeryLive){
+    pill.classList.add("is-live"); iconGood.style.display = "block";
+    text.textContent = "Live — Supabase";
+  } else if(id === "foodprod" && foodProdLive){
+    pill.classList.add("is-live"); iconGood.style.display = "block";
+    text.textContent = "Live — Supabase";
+  } else if(id === "coldbrewprod" && coldBrewProdLive){
+    pill.classList.add("is-live"); iconGood.style.display = "block";
+    text.textContent = "Live — Supabase";
+  } else if(id === "priorities"){
+    pill.classList.add("is-editable"); iconNeutral.style.display = "block";
+    text.textContent = "Editable — saved to this page";
+  } else {
+    iconWarn.style.display = "block";
+    text.textContent = "Sample data";
+  }
+}
+
+function setActiveSection(id){
+  currentSection = id;
+  $$(".panel").forEach(p => p.classList.toggle("active", p.id === "sec-"+id));
+  $$(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.section === id));
+  const meta = SECTION_META[id];
+  if(meta){ $("#topbar-title").textContent = meta.title; $("#topbar-sub").textContent = meta.sub; }
+  if(id === "sales"){ $("#sales-portfolio").style.display = "block"; $("#sales-location").style.display = "none"; }
+  updateSectionPill(id);
+  $("#sidebar").classList.remove("open");
+  $("#content").scrollTo && window.scrollTo({top:0, behavior:"instant"});
+}
+
+$$(".nav-item").forEach(btn => btn.addEventListener("click", () => setActiveSection(btn.dataset.section)));
+$("#back-to-portfolio").addEventListener("click", () => setActiveSection("sales"));
+$("#menu-toggle").addEventListener("click", () => $("#sidebar").classList.toggle("open"));
+
+/* ======================================================================
+   INIT
+   ====================================================================== */
+function init(){
+  renderLocationCards();
+  renderSalesPortfolio();
+  renderOverviewFinance();
+  renderJourney();
+  renderCampaigns();
+  renderEventList("#marketing-calendar", MARKETING_CAL);
+  renderAcademyDonut();
+  renderAcademyRoles();
+  renderEventList("#academy-milestones", ACADEMY_MILESTONES);
+  renderEventList("#calendar-events", CALENDAR_EVENTS);
+  renderGoalsEditable("#quarterly-goals", quarterlyGoals, scheduleGoalsPersist);
+  renderGoalsEditable("#annual-goals", annualGoals, scheduleGoalsPersist);
+  renderProjections();
+  renderWarehouse();
+  renderPriorities();
+  renderProductDev();
+}
+init();
+initLiveSquareData();
+initLiveBakeryData();
+initLiveSyscoOrders();
+initLiveSyscoInvoices();
+initLiveTopIdeas();
+initRoasteryBigPicture();
+initBaggingSummary();
+initOutgoingCards();
+initIncomingCards();
+initInventoryEmergencies();
+initCogsTracker();
+initLiveFoodProduction();
+initLiveColdBrewProduction();
+
+})();
+</script>
+
+
+

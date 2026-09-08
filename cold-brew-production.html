@@ -1,0 +1,383 @@
+<title>Cold Brew Production — Salt City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --serious:#C15A34; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:10px; --radius-sm:6px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 6px 20px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:17px; line-height:1.5; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:600; margin:0; text-wrap:balance; color:var(--ink);}
+a{color:inherit;} button{font-family:inherit; touch-action:manipulation;}
+.mono{font-family:var(--font-mono);}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+.wrap{max-width:980px; margin:0 auto; padding:20px 20px 90px;}
+.back-link{font-size:15px; color:var(--ink-2); text-decoration:none; display:inline-block; padding:8px 4px;}
+.masthead{margin:6px 0 22px;}
+.eyebrow{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--caramel); font-weight:700;}
+.masthead h1{font-size:30px; margin-top:4px;}
+.masthead .sub{color:var(--ink-2); font-size:15.5px; margin-top:6px; max-width:70ch;}
+
+.date-bar{display:flex; align-items:center; gap:10px; margin:20px 0 16px; flex-wrap:wrap;}
+.date-bar input[type=date]{font-family:inherit; font-size:17px; padding:12px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); min-height:48px;}
+.date-nav{display:flex; gap:6px; flex-wrap:wrap;}
+
+.sample-pill{
+  display:inline-flex; align-items:center; gap:6px; background:var(--warn-soft); color:var(--warn);
+  border:1px solid color-mix(in srgb, var(--warn) 35%, transparent); font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:5px 10px; border-radius:99px; white-space:nowrap;
+}
+.sample-pill.is-live{ background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb, var(--good) 35%, transparent); }
+.status-line{font-size:12px; color:var(--ink-3); margin-top:8px;}
+
+.grid{display:grid; gap:14px;}
+.kpi-row{grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin:16px 0 22px;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:16px;}
+.kpi{padding:14px 16px;}
+.kpi .label{font-size:12px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+.kpi .value{font-family:var(--font-mono); font-size:27px; font-weight:600; margin-top:6px;}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); font-size:16px; font-weight:700; padding:13px 20px; min-height:50px; cursor:pointer;}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.btn.primary:hover{filter:brightness(1.05);}
+.btn.sm{padding:10px 16px; font-size:14.5px; min-height:44px;}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+.btn.toggle-complete{min-width:190px;}
+.btn.toggle-complete.is-complete{background:var(--good-soft); border-color:var(--good); color:var(--good);}
+
+.chip{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; letter-spacing:.01em;}
+.chip::before{content:""; width:8px; height:8px; flex:0 0 auto; background:currentColor;}
+.chip.good{background:var(--good-soft); color:var(--good);} .chip.good::before{border-radius:50%;}
+.chip.warn{background:var(--warn-soft); color:var(--warn);} .chip.warn::before{border-radius:1.5px; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);}
+.chip.neutral{background:var(--surface-alt); color:var(--ink-2);} .chip.neutral::before{border-radius:1.5px; transform:rotate(45deg);}
+
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:32px 0 12px;}
+.section-head h2{font-size:19px;}
+.section-head .hint{font-size:13.5px; color:var(--ink-3);}
+
+.batch-list{display:flex; flex-direction:column; gap:12px;}
+.batch-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:14px 16px;}
+.batch-row.complete{opacity:.7;}
+.batch-row input[type=text]{border:1.5px solid var(--border); background:var(--surface-alt); font-family:inherit; font-size:15.5px; color:var(--ink); padding:9px 10px; border-radius:9px; width:100%;}
+.batch-row input[type=text]:focus{border-color:var(--accent); background:var(--surface); outline:none;}
+.batch-info{flex:1 1 190px;}
+.batch-main{font-weight:700; font-size:18px;}
+.batch-qty{font-size:14px; color:var(--ink-3); margin-top:2px;}
+.batch-notes{flex:1 1 200px; min-width:150px;}
+.batch-del{
+  flex:0 0 auto; min-width:44px; min-height:44px; border:1.5px solid var(--border); background:var(--surface);
+  color:var(--ink-3); cursor:pointer; border-radius:10px; font-size:16px; font-weight:700; padding:0 14px;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.batch-del:hover{background:var(--critical-soft); color:var(--critical); border-color:var(--critical);}
+.batch-madeby{font-size:12px; color:var(--ink-3); margin-top:2px;}
+
+.add-row{display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; align-items:stretch;}
+.add-row input, .add-row select{font-family:inherit; font-size:16px; padding:13px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); min-height:50px;}
+.add-row input{flex:1 1 160px;}
+.add-row select{flex:1 1 150px;}
+.empty-note{font-size:14.5px; color:var(--ink-3); font-style:italic; padding:14px 4px;}
+
+.foot-note{font-size:13.5px; color:var(--ink-3); margin-top:30px; line-height:1.6; border-top:1px solid var(--border-soft); padding-top:16px;}
+@media (max-width:600px){
+  .batch-main{font-size:17px;}
+  .btn.toggle-complete{flex:1 1 100%;}
+}
+</style>
+
+<div class="wrap">
+  <a class="back-link" href="#" onclick="history.back();return false;">← Back</a>
+  <div class="masthead">
+    <div class="eyebrow">Salt City Coffee — Cold Brew Production</div>
+    <h1>Cold Brew Production</h1>
+    <div class="sub">32-gallon cold brew batches, plus keg batches for draft latte and cold brew — each tracked complete/incomplete by day.</div>
+    <a class="btn sm" style="margin-top:10px;text-decoration:none;" href="cold-brew-execution.html">📋 Open Execution View — stripped-down, just tap the status →</a>
+  </div>
+
+  <div class="date-bar">
+    <div class="date-nav">
+      <button class="btn sm" id="prev-day">← Prev</button>
+      <button class="btn" id="today-btn">Today</button>
+      <button class="btn sm" id="next-day">Next →</button>
+    </div>
+    <input type="date" id="batch-date">
+    <span class="sample-pill" id="status-pill" style="margin-left:auto;">Loading…</span>
+  </div>
+  <div class="status-line" id="status-line"></div>
+
+  <div class="grid kpi-row">
+    <div class="card kpi"><div class="label">Cold brew batches</div><div class="value mono" id="kpi-cb-total">–</div></div>
+    <div class="card kpi"><div class="label">Cold brew complete</div><div class="value mono" id="kpi-cb-complete">–</div></div>
+    <div class="card kpi"><div class="label">Keg batches</div><div class="value mono" id="kpi-keg-total">–</div></div>
+    <div class="card kpi"><div class="label">Keg batches complete</div><div class="value mono" id="kpi-keg-complete">–</div></div>
+  </div>
+
+  <div class="section-head" style="margin-top:0;">
+    <h2>Cold brew batches (32 gal)</h2>
+    <span class="hint">One row per batch</span>
+  </div>
+  <div class="batch-list" id="cb-list"></div>
+  <div class="add-row">
+    <input type="text" id="cb-add-gallons" placeholder="Gallons" value="32">
+    <input type="text" id="cb-add-notes" placeholder="Notes (optional)">
+    <button class="btn primary" id="cb-add-btn">+ Add batch</button>
+  </div>
+
+  <div class="section-head">
+    <h2>Keg batches</h2>
+    <span class="hint">Draft latte &amp; cold brew, by type</span>
+  </div>
+  <div class="batch-list" id="keg-list"></div>
+  <div class="add-row keg-row">
+    <select id="keg-add-category">
+      <option value="draft-latte">Draft latte</option>
+      <option value="cold-brew">Cold brew</option>
+    </select>
+    <input type="text" id="keg-add-type" placeholder="Type — e.g. Vanilla, Original">
+    <input type="text" id="keg-add-qty" placeholder="Qty">
+    <input type="text" id="keg-add-notes" placeholder="Notes (optional)">
+    <button class="btn primary" id="keg-add-btn">+ Add batch</button>
+  </div>
+
+  <div class="foot-note">
+    Plain production log — no automatic demand signal here yet, so batches and quantities are entered by whoever's running production. Marking a batch complete records who and when.
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function addDaysISO(iso, delta){
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + delta);
+  return d.toISOString().slice(0,10);
+}
+const KEG_CATEGORY_LABEL = { "draft-latte":"Draft latte", "cold-brew":"Cold brew" };
+
+async function fetchSupabase(path, opts={}){
+  try{
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const { headers: extraHeaders, ...restOpts } = opts;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      ...restOpts,
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, ...(extraHeaders||{}) },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok){
+      const text = await resp.text().catch(()=> "");
+      throw new Error(`Supabase responded ${resp.status}${text ? " — " + text.slice(0,160) : ""}`);
+    }
+    if(resp.status === 204) return { ok:true, rows:[] };
+    const text = await resp.text();
+    const rows = text ? JSON.parse(text) : [];
+    return { ok:true, rows: Array.isArray(rows) ? rows : [rows] };
+  }catch(err){
+    return { ok:false, reason: err.message || "request failed" };
+  }
+}
+
+let currentDate = todayISO();
+let cbBatches = [];
+let kegBatches = [];
+
+function setDate(iso){
+  currentDate = iso;
+  $("#batch-date").value = iso;
+  loadAll();
+}
+
+function renderKpis(){
+  $("#kpi-cb-total").textContent = cbBatches.length;
+  $("#kpi-cb-complete").textContent = cbBatches.filter(b => b.status === "complete").length;
+  $("#kpi-keg-total").textContent = kegBatches.length;
+  $("#kpi-keg-complete").textContent = kegBatches.filter(b => b.status === "complete").length;
+}
+
+function renderCbList(){
+  const wrap = $("#cb-list");
+  if(!cbBatches.length){
+    wrap.innerHTML = `<div class="empty-note">No cold brew batches logged for ${currentDate} yet.</div>`;
+    return;
+  }
+  wrap.innerHTML = cbBatches.map(b => `
+    <div class="batch-row ${b.status === "complete" ? "complete" : ""}" data-id="${b.id}" data-table="cold_brew_batches">
+      <div class="batch-info">
+        <div class="batch-main">${escapeHtml(b.gallons)} gal batch</div>
+        ${b.made_by ? `<div class="batch-madeby">by ${escapeHtml(b.made_by)}</div>` : ""}
+      </div>
+      <input type="text" class="batch-notes" data-field="notes" value="${escapeHtml(b.notes || "")}" placeholder="notes">
+      <button class="btn toggle-complete ${b.status === "complete" ? "is-complete" : ""}" data-action="toggle">${b.status === "complete" ? "✅ Complete" : "Mark complete"}</button>
+      <button class="batch-del" data-action="delete">✕ Remove</button>
+    </div>`).join("");
+  wireBatchRows(wrap);
+}
+
+function renderKegList(){
+  const wrap = $("#keg-list");
+  if(!kegBatches.length){
+    wrap.innerHTML = `<div class="empty-note">No keg batches logged for ${currentDate} yet.</div>`;
+    return;
+  }
+  wrap.innerHTML = kegBatches.map(b => `
+    <div class="batch-row ${b.status === "complete" ? "complete" : ""}" data-id="${b.id}" data-table="keg_batches">
+      <div class="batch-info">
+        <div class="batch-main"><span class="chip neutral">${KEG_CATEGORY_LABEL[b.keg_category] || b.keg_category}</span> ${escapeHtml(b.keg_type)}</div>
+        ${b.qty != null ? `<div class="batch-qty">Qty ${escapeHtml(b.qty)}</div>` : ""}
+        ${b.made_by ? `<div class="batch-madeby">by ${escapeHtml(b.made_by)}</div>` : ""}
+      </div>
+      <input type="text" class="batch-notes" data-field="notes" value="${escapeHtml(b.notes || "")}" placeholder="notes">
+      <button class="btn toggle-complete ${b.status === "complete" ? "is-complete" : ""}" data-action="toggle">${b.status === "complete" ? "✅ Complete" : "Mark complete"}</button>
+      <button class="batch-del" data-action="delete">✕ Remove</button>
+    </div>`).join("");
+  wireBatchRows(wrap);
+}
+
+function wireBatchRows(wrap){
+  $$(".toggle-complete", wrap).forEach(btn => btn.addEventListener("click", () => {
+    const row = btn.closest(".batch-row");
+    toggleComplete(row.dataset.table, row.dataset.id);
+  }));
+  $$(".batch-del", wrap).forEach(btn => btn.addEventListener("click", () => {
+    const row = btn.closest(".batch-row");
+    deleteBatch(row.dataset.table, row.dataset.id);
+  }));
+  $$("input[data-field]", wrap).forEach(inp => inp.addEventListener("change", () => {
+    const row = inp.closest(".batch-row");
+    updateBatchField(row.dataset.table, row.dataset.id, inp.dataset.field, inp.value);
+  }));
+}
+
+async function toggleComplete(table, id){
+  const list = table === "cold_brew_batches" ? cbBatches : kegBatches;
+  const batch = list.find(b => b.id === id);
+  if(!batch) return;
+  const completingNow = batch.status !== "complete";
+  const who = completingNow ? (prompt("Your name (for the record):") || "").trim() : null;
+  const patch = completingNow
+    ? { status:"complete", made_by: who || null, completed_at: new Date().toISOString() }
+    : { status:"incomplete", made_by:null, completed_at:null };
+  const result = await fetchSupabase(`${table}?id=eq.${id}`, {
+    method:"PATCH", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify(patch)
+  });
+  if(result.ok) await loadAll();
+  else alert("Couldn't update: " + result.reason);
+}
+
+async function updateBatchField(table, id, field, value){
+  const result = await fetchSupabase(`${table}?id=eq.${id}`, {
+    method:"PATCH", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify({ [field]: value })
+  });
+  if(!result.ok) alert("Couldn't save: " + result.reason);
+}
+
+async function deleteBatch(table, id){
+  if(!confirm("Remove this batch?")) return;
+  const result = await fetchSupabase(`${table}?id=eq.${id}`, { method:"DELETE" });
+  if(result.ok) await loadAll();
+  else alert("Couldn't remove: " + result.reason);
+}
+
+async function addCbBatch(){
+  const gallons = $("#cb-add-gallons").value.trim() || "32";
+  const payload = { batch_date: currentDate, gallons: Number(gallons) || 32, notes: $("#cb-add-notes").value.trim() || null };
+  const result = await fetchSupabase("cold_brew_batches", {
+    method:"POST", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify(payload)
+  });
+  if(result.ok){ $("#cb-add-gallons").value = "32"; $("#cb-add-notes").value = ""; await loadAll(); }
+  else alert("Couldn't add: " + result.reason);
+}
+
+async function addKegBatch(){
+  const type = $("#keg-add-type").value.trim();
+  if(!type){ alert("Enter a keg type."); return; }
+  const payload = {
+    batch_date: currentDate,
+    keg_category: $("#keg-add-category").value,
+    keg_type: type,
+    qty: $("#keg-add-qty").value.trim() ? Number($("#keg-add-qty").value.trim()) : null,
+    notes: $("#keg-add-notes").value.trim() || null
+  };
+  const result = await fetchSupabase("keg_batches", {
+    method:"POST", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify(payload)
+  });
+  if(result.ok){ $("#keg-add-type").value = ""; $("#keg-add-qty").value = ""; $("#keg-add-notes").value = ""; await loadAll(); }
+  else alert("Couldn't add: " + result.reason);
+}
+
+async function loadAll(){
+  const pill = $("#status-pill");
+  const line = $("#status-line");
+  const [cbResult, kegResult] = await Promise.all([
+    fetchSupabase(`cold_brew_batches?select=*&batch_date=eq.${currentDate}&order=created_at.asc`),
+    fetchSupabase(`keg_batches?select=*&batch_date=eq.${currentDate}&order=created_at.asc`)
+  ]);
+  if(cbResult.ok && kegResult.ok){
+    cbBatches = cbResult.rows;
+    kegBatches = kegResult.rows;
+    pill.textContent = "Live";
+    pill.classList.add("is-live");
+    line.textContent = "Reading/writing cold_brew_batches and keg_batches directly — no login on this tool, so treat it as an honor-system shared log.";
+  } else {
+    cbBatches = []; kegBatches = [];
+    pill.textContent = "Not connected yet";
+    pill.classList.remove("is-live");
+    line.textContent = `Couldn't load (${(cbResult.ok ? kegResult.reason : cbResult.reason)}) — run the 2026-09-04b_production_tracking.sql migration in Supabase if you haven't yet.`;
+  }
+  renderKpis();
+  renderCbList();
+  renderKegList();
+}
+
+$("#batch-date").addEventListener("change", (e) => setDate(e.target.value));
+$("#prev-day").addEventListener("click", () => setDate(addDaysISO(currentDate, -1)));
+$("#next-day").addEventListener("click", () => setDate(addDaysISO(currentDate, 1)));
+$("#today-btn").addEventListener("click", () => setDate(todayISO()));
+$("#cb-add-btn").addEventListener("click", addCbBatch);
+$("#keg-add-btn").addEventListener("click", addKegBatch);
+
+setDate(currentDate);
+</script>

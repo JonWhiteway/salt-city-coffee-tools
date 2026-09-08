@@ -1,0 +1,204 @@
+<title>Roastery — Execution</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E;
+  --good:#0CA30C; --warn:#B8860B; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --critical-soft:#F8DADA;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E;
+    --good:#3FCB3F; --warn:#E0B23B; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --critical-soft:#3A1919;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E;
+  --good:#3FCB3F; --warn:#E0B23B; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --critical-soft:#3A1919;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:17px; line-height:1.45; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;}
+h1{font-family:var(--font-display); font-weight:700; margin:0; color:var(--ink);}
+button{font-family:inherit; touch-action:manipulation;}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+.wrap{max-width:640px; margin:0 auto; padding:20px 18px 100px;}
+.eyebrow{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--caramel); font-weight:700;}
+h1{font-size:26px; margin-top:4px;}
+.date-line{font-size:16px; color:var(--ink-2); margin-top:8px;}
+.status-line{font-size:12.5px; color:var(--ink-3); margin-top:10px;}
+.full-link{display:inline-block; font-size:13px; color:var(--ink-3); text-decoration:none; margin-top:10px;}
+.full-link:hover{color:var(--accent);}
+
+.exec-list{display:flex; flex-direction:column; gap:12px; margin-top:22px;}
+.exec-row{
+  width:100%; text-align:left; border-radius:16px; border:2px solid var(--border);
+  background:var(--surface); padding:16px 18px; cursor:pointer; display:block;
+}
+.exec-row.phase-roasting{border-color:var(--warn);}
+.exec-row.phase-cannot-start{border-color:var(--critical);}
+.exec-top{display:flex; align-items:center; justify-content:space-between; gap:14px;}
+.exec-name{font-family:var(--font-display); font-weight:700; font-size:20px;}
+.exec-qty{font-size:14.5px; color:var(--ink-3); margin-top:3px;}
+.exec-status{
+  display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700;
+  padding:6px 12px; border-radius:99px; white-space:nowrap; flex:0 0 auto;
+}
+.exec-status.neutral{background:var(--surface-alt); color:var(--ink-2);}
+.exec-status.warn{background:var(--warn-soft); color:var(--warn);}
+.exec-status.critical{background:var(--critical-soft); color:var(--critical);}
+.exec-status.good{background:var(--good-soft); color:var(--good);}
+.exec-chevron{margin-left:8px; color:var(--ink-3); font-size:13px;}
+
+.picker{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:14px; border-top:1px dashed var(--border);}
+.picker-btn{
+  flex:1 1 45%; min-height:60px; border-radius:12px; border:2px solid var(--border); background:var(--surface-alt);
+  color:var(--ink-2); font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 12px;
+}
+.picker-btn .ic{font-size:19px; line-height:1;}
+.picker-btn.current{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+.picker-btn[data-stage="cannot-start"].current{background:var(--critical-soft); border-color:var(--critical); color:var(--critical);}
+.picker-btn[data-stage="roasted"].current{background:var(--good-soft); border-color:var(--good); color:var(--good);}
+
+.empty-note{font-size:15px; color:var(--ink-3); font-style:italic; padding:20px 4px;}
+@media (max-width:420px){ .picker-btn{flex:1 1 100%;} }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Roastery — execution</div>
+  <h1>What needs roasting</h1>
+  <div class="date-line" id="date-line">–</div>
+  <div class="status-line" id="status-line"></div>
+  <a class="full-link" href="roastery-production.html">Full Roastery Production page (add items, filters) →</a>
+
+  <div class="exec-list" id="exec-list"></div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+const PHASES = ["not-started","cannot-start","roasting","roasted"];
+const PHASE_LABEL = { "not-started":"Not started", "cannot-start":"Cannot start", roasting:"Roasting", roasted:"Roasted" };
+const PHASE_ICON = { "not-started":"⚪", "cannot-start":"🚫", roasting:"🔥", roasted:"✅" };
+const PHASE_CHIP = { "not-started":"neutral", "cannot-start":"critical", roasting:"warn", roasted:"good" };
+
+let allItems = [];
+let expandedId = null;
+
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+async function fetchSupabase(path, opts={}){
+  try{
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const { headers: extraHeaders, ...restOpts } = opts;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      ...restOpts,
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, ...(extraHeaders||{}) },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok){
+      const text = await resp.text().catch(()=> "");
+      throw new Error(`Supabase responded ${resp.status}${text ? " — " + text.slice(0,160) : ""}`);
+    }
+    if(resp.status === 204) return { ok:true, rows:[] };
+    const text = await resp.text();
+    const rows = text ? JSON.parse(text) : [];
+    return { ok:true, rows: Array.isArray(rows) ? rows : [rows] };
+  }catch(err){
+    return { ok:false, reason: err.message || "request failed" };
+  }
+}
+
+function renderList(){
+  const list = $("#exec-list");
+  const rows = [...allItems].sort((a,b) => (a.created_at||"").localeCompare(b.created_at||""));
+  if(!rows.length){
+    list.innerHTML = `<div class="empty-note">Nothing to roast right now.</div>`;
+    return;
+  }
+  list.innerHTML = rows.map(item => {
+    const isExpanded = expandedId === item.id;
+    return `
+    <button type="button" class="exec-row phase-${item.phase}" data-id="${item.id}">
+      <div class="exec-top">
+        <div>
+          <div class="exec-name">${escapeHtml(item.item_name)}</div>
+          ${item.qty_needed ? `<div class="exec-qty">Qty ${escapeHtml(item.qty_needed)}</div>` : ""}
+        </div>
+        <span class="exec-status ${PHASE_CHIP[item.phase]}">${PHASE_ICON[item.phase]} ${PHASE_LABEL[item.phase]}<span class="exec-chevron">${isExpanded?"▲":"▼"}</span></span>
+      </div>
+      ${isExpanded ? `
+        <div class="picker" role="group" aria-label="Status">
+          ${PHASES.map(p => `<span class="picker-btn ${p===item.phase?"current":""}" data-stage="${p}"><span class="ic">${PHASE_ICON[p]}</span>${PHASE_LABEL[p]}</span>`).join("")}
+        </div>
+      ` : ""}
+    </button>
+  `; }).join("");
+
+  $$(".exec-row", list).forEach(row => {
+    row.addEventListener("click", (e) => {
+      if(e.target.closest(".picker-btn")) return;
+      expandedId = expandedId === row.dataset.id ? null : row.dataset.id;
+      renderList();
+    });
+  });
+  $$(".picker-btn", list).forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      updatePhase(btn.closest(".exec-row").dataset.id, btn.dataset.stage);
+    });
+  });
+}
+
+async function updatePhase(id, phase){
+  const patch = { phase };
+  if(phase === "roasted") patch.roasted_at = new Date().toISOString();
+  const result = await fetchSupabase(`roastery_items?id=eq.${id}`, {
+    method:"PATCH", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify(patch)
+  });
+  if(!result.ok){ alert("Couldn't save: " + result.reason); return; }
+  expandedId = null;
+  await loadQueue();
+}
+
+async function loadQueue(){
+  const line = $("#status-line");
+  const result = await fetchSupabase("roastery_items?select=*&phase=neq.roasted");
+  if(result.ok){
+    allItems = result.rows;
+    line.textContent = "Live — roasted items drop off this list automatically.";
+  } else {
+    allItems = [];
+    line.textContent = `Couldn't load (${result.reason}).`;
+  }
+  renderList();
+}
+
+$("#date-line").textContent = new Date().toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
+loadQueue();
+</script>

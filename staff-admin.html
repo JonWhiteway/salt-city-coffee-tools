@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff &amp; Location Assignments — Salt City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --good:#0CA30C; --good-soft:#DCF3DC; --critical:#D03B3B; --critical-soft:#F8DADA;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:10px; --shadow-1:0 1px 2px rgba(36,31,24,.06); --shadow-2:0 8px 24px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --good:#3FCB3F; --good-soft:#193119; --critical:#E66767; --critical-soft:#3A1919;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --good:#3FCB3F; --good-soft:#193119; --critical:#E66767; --critical-soft:#3A1919;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:14.5px; line-height:1.5;}
+h1,h2{font-family:var(--font-display); font-weight:600; margin:0;}
+button{font-family:inherit;}
+[hidden]{display:none !important;}
+
+.login-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+.login-card{width:100%; max-width:420px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-2); padding:30px;}
+.login-brand{display:flex; align-items:center; gap:10px; margin-bottom:20px;}
+.brand-mark{width:34px; height:34px; border-radius:9px; background:linear-gradient(155deg,#F0824C,#B9852E); display:flex; align-items:center; justify-content:center; color:#191410; font-family:var(--font-display); font-weight:700; font-size:16px;}
+.login-brand strong{font-family:var(--font-display); font-size:17px;}
+.login-brand span{display:block; font-size:11px; color:var(--ink-3);}
+.staff-tiles{display:flex; flex-direction:column; gap:8px;}
+.staff-tile{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface-alt); cursor:pointer; text-align:left;}
+.staff-tile:hover{border-color:var(--accent);}
+.staff-tile .nm{font-family:var(--font-display); font-weight:600; font-size:14.5px;}
+.staff-tile .rl{font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color:var(--ink-3);}
+.pin-back{background:none; border:none; color:var(--ink-2); cursor:pointer; font-size:13px; padding:0 0 16px;}
+.pin-person{text-align:center; margin-bottom:18px;}
+.pin-person .nm{font-family:var(--font-display); font-size:18px; font-weight:600;}
+.pin-dots{display:flex; gap:12px; justify-content:center; margin-bottom:20px;}
+.pin-dots span{width:15px; height:15px; border-radius:50%; border:1.6px solid var(--border); background:var(--surface-alt);}
+.pin-dots span.filled{background:var(--accent); border-color:var(--accent);}
+.pin-dots.err span{border-color:var(--critical); background:var(--critical-soft);}
+.pin-pad{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:260px; margin:0 auto;}
+.pin-key{aspect-ratio:1; border-radius:12px; border:1px solid var(--border); background:var(--surface-alt); font-family:var(--font-mono); font-size:20px; font-weight:600; cursor:pointer;}
+.pin-key.wide{font-size:12px; font-family:var(--font-body); font-weight:600; color:var(--ink-2);}
+.pin-error{text-align:center; color:var(--critical); font-size:12px; margin-top:12px; min-height:1.4em;}
+
+.topbar{padding:16px 28px; border-bottom:1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;}
+.topbar h1{font-size:19px;}
+.topbar .sub{font-size:12px; color:var(--ink-3); margin-top:2px;}
+.btn{border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:13px; font-weight:600; padding:8px 13px; cursor:pointer;}
+.btn:hover{border-color:var(--accent);}
+.content{padding:24px 28px 64px; max-width:900px; margin:0 auto;}
+.hint{font-size:12px; color:var(--ink-3); margin-bottom:16px;}
+.assign-table{width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; box-shadow:var(--shadow-1);}
+.assign-table th, .assign-table td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--border-soft); font-size:13px;}
+.assign-table th{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); font-weight:700;}
+.assign-table tr:last-child td{border-bottom:none;}
+.role-tag{font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color:var(--ink-3);}
+.loc-checks{display:flex; flex-wrap:wrap; gap:6px;}
+.loc-check{display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:99px; border:1px solid var(--border); background:var(--surface-alt); font-size:12px; cursor:pointer; user-select:none;}
+.loc-check.on{background:var(--accent-soft); border-color:var(--accent); font-weight:600;}
+.loc-check input{display:none;}
+.save-note{font-size:11px; color:var(--ink-3);}
+.save-note.saving{color:var(--accent);}
+.save-note.err{color:var(--critical);}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">S</div>
+      <div><strong>Salt City</strong><span>Staff &amp; Location Assignments</span></div>
+    </div>
+    <div id="login-step-pick">
+      <div style="font-family:var(--font-display); font-size:19px; margin-bottom:4px;">Who's signing in?</div>
+      <div class="hint">COO / Production Manager only — tap your name, then enter your PIN.</div>
+      <div class="staff-tiles" id="staff-tiles"><div class="hint">Loading…</div></div>
+    </div>
+    <div id="login-step-pin" hidden>
+      <button class="pin-back" id="pin-back">← Not you?</button>
+      <div class="pin-person"><div class="nm" id="pin-person-name">—</div></div>
+      <div class="pin-dots" id="pin-dots"><span></span><span></span><span></span><span></span></div>
+      <div class="pin-pad" id="pin-pad">
+        <button class="pin-key" data-k="1">1</button><button class="pin-key" data-k="2">2</button><button class="pin-key" data-k="3">3</button>
+        <button class="pin-key" data-k="4">4</button><button class="pin-key" data-k="5">5</button><button class="pin-key" data-k="6">6</button>
+        <button class="pin-key" data-k="7">7</button><button class="pin-key" data-k="8">8</button><button class="pin-key" data-k="9">9</button>
+        <button class="pin-key wide" data-k="clear">Clear</button><button class="pin-key" data-k="0">0</button><button class="pin-key wide" data-k="back">⌫</button>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app-wrap" hidden>
+  <div class="topbar">
+    <div><h1>Staff &amp; Location Assignments</h1><div class="sub" id="app-sub">—</div></div>
+    <button class="btn" id="sign-out-btn">Sign out</button>
+  </div>
+  <div class="content">
+    <div class="hint">Toggling a location saves immediately — no separate save button. GM &amp; LM Command Deck pages only show whatever's checked here.</div>
+    <div id="table-wrap"><div class="hint">Loading staff…</div></div>
+    <div class="save-note" id="save-note"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const PIN_PREFIX = "sc-pin-";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = (sel, root) => (root||document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root||document).querySelectorAll(sel));
+const esc = s => (s==null?"":String(s));
+const ROLE_LABEL = { gm:"GM", location_manager:"LM", production_manager:"Production Manager", coo:"COO" };
+
+let directory = [];
+let pinTarget = null;
+let pinDigits = "";
+let allStaff = [];
+let allLocations = [];
+let assignments = new Map(); // staff_id -> Set(location_id)
+
+async function loadDirectory(){
+  const { data, error } = await sb.rpc("staff_login_directory");
+  if(error){
+    $("#staff-tiles").innerHTML = `<div class="hint">Couldn't load the staff list (${esc(error.message)}).</div>`;
+    return;
+  }
+  directory = (data||[]).filter(s => s.role === "coo" || s.role === "production_manager");
+  renderTiles();
+}
+function renderTiles(){
+  const wrap = $("#staff-tiles");
+  if(!directory.length){ wrap.innerHTML = `<div class="hint">No COO/Production Manager accounts set up yet.</div>`; return; }
+  wrap.innerHTML = directory.map(s => `
+    <button class="staff-tile" data-id="${s.id}"><span class="nm">${esc(s.name)}</span><span class="rl">${ROLE_LABEL[s.role]||s.role}</span></button>
+  `).join("");
+  $$(".staff-tile", wrap).forEach(t => t.addEventListener("click", () => openPinPad(t.dataset.id)));
+}
+function openPinPad(staffId){
+  pinTarget = directory.find(s => s.id === staffId);
+  if(!pinTarget) return;
+  pinDigits = "";
+  $("#login-step-pick").hidden = true;
+  $("#login-step-pin").hidden = false;
+  $("#pin-person-name").textContent = pinTarget.name;
+  $("#pin-error").textContent = "";
+  updatePinDots();
+}
+function updatePinDots(err){
+  const dotsWrap = $("#pin-dots");
+  dotsWrap.classList.toggle("err", !!err);
+  $$("span", dotsWrap).forEach((d,i) => d.classList.toggle("filled", i < pinDigits.length));
+}
+async function submitPin(){
+  const { error } = await sb.auth.signInWithPassword({ email: pinTarget.email, password: PIN_PREFIX + pinDigits });
+  if(error){
+    $("#pin-error").textContent = "Wrong PIN — try again.";
+    updatePinDots(true);
+    pinDigits = "";
+    setTimeout(() => updatePinDots(false), 350);
+    return;
+  }
+  $("#login-wrap").hidden = true;
+  await initApp();
+}
+$("#pin-back").addEventListener("click", () => { $("#login-step-pin").hidden = true; $("#login-step-pick").hidden = false; pinDigits=""; });
+$("#pin-pad").addEventListener("click", (e) => {
+  const btn = e.target.closest(".pin-key"); if(!btn) return;
+  const k = btn.dataset.k;
+  if(k === "clear"){ pinDigits = ""; }
+  else if(k === "back"){ pinDigits = pinDigits.slice(0,-1); }
+  else if(pinDigits.length < 4){ pinDigits += k; }
+  $("#pin-error").textContent = "";
+  updatePinDots(false);
+  if(pinDigits.length === 4) submitPin();
+});
+$("#sign-out-btn").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
+
+async function initApp(){
+  $("#app-wrap").hidden = false;
+  const { data: { user } } = await sb.auth.getUser();
+  const { data: myStaff, error: myErr } = await sb.from("staff").select("id,name,role").eq("auth_user_id", user.id).maybeSingle();
+  if(myErr || !myStaff || !(myStaff.role === "coo" || myStaff.role === "production_manager")){
+    $("#table-wrap").innerHTML = `<div class="hint">Signed in, but this account isn't COO/Production Manager — nothing to manage here.</div>`;
+    return;
+  }
+  $("#app-sub").textContent = `Signed in as ${myStaff.name} — ${ROLE_LABEL[myStaff.role]}`;
+
+  const { data: staffRows } = await sb.from("staff").select("id,name,role").in("role", ["gm","location_manager"]).order("role").order("name");
+  allStaff = staffRows || [];
+
+  const { data: locRows } = await sb.from("locations").select("id,name,type").in("type", ["cafe","mobile"]).order("name");
+  allLocations = locRows || [];
+
+  const { data: assignRows } = await sb.from("staff_locations").select("staff_id,location_id");
+  assignments = new Map();
+  (assignRows||[]).forEach(a => {
+    if(!assignments.has(a.staff_id)) assignments.set(a.staff_id, new Set());
+    assignments.get(a.staff_id).add(a.location_id);
+  });
+
+  renderTable();
+}
+
+function renderTable(){
+  if(!allStaff.length){
+    $("#table-wrap").innerHTML = `<div class="hint">No GM or Location Manager accounts exist yet — create one with scripts/set_staff_pin.py first.</div>`;
+    return;
+  }
+  $("#table-wrap").innerHTML = `
+    <table class="assign-table">
+      <thead><tr><th>Name</th><th>Role</th><th>Locations</th></tr></thead>
+      <tbody>
+        ${allStaff.map(s => {
+          const mine = assignments.get(s.id) || new Set();
+          return `<tr>
+            <td>${esc(s.name)}</td>
+            <td><span class="role-tag">${ROLE_LABEL[s.role]||s.role}</span></td>
+            <td><div class="loc-checks" data-staff="${s.id}">
+              ${allLocations.map(l => `
+                <label class="loc-check ${mine.has(l.id)?"on":""}" data-loc="${l.id}">
+                  <input type="checkbox" ${mine.has(l.id)?"checked":""}>${esc(l.name)}
+                </label>`).join("")}
+            </div></td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+
+  $$(".loc-check", $("#table-wrap")).forEach(chip => {
+    chip.addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleAssignment(chip.closest(".loc-checks").dataset.staff, chip.dataset.loc, chip);
+    });
+  });
+}
+
+async function toggleAssignment(staffId, locId, chipEl){
+  const note = $("#save-note");
+  const mine = assignments.get(staffId) || new Set();
+  const isOn = mine.has(locId);
+  note.textContent = "Saving…"; note.className = "save-note saving";
+
+  if(isOn){
+    const { error } = await sb.from("staff_locations").delete().eq("staff_id", staffId).eq("location_id", locId);
+    if(error){ note.textContent = "Couldn't save: " + error.message; note.className = "save-note err"; return; }
+    mine.delete(locId);
+  } else {
+    const { error } = await sb.from("staff_locations").insert({ staff_id: staffId, location_id: locId });
+    if(error){ note.textContent = "Couldn't save: " + error.message; note.className = "save-note err"; return; }
+    mine.add(locId);
+  }
+  assignments.set(staffId, mine);
+  chipEl.classList.toggle("on", !isOn);
+  const input = chipEl.querySelector("input");
+  if(input) input.checked = !isOn;
+  note.textContent = "Saved."; note.className = "save-note";
+}
+
+(async function boot(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){ $("#login-wrap").hidden = true; await initApp(); }
+  else { loadDirectory(); }
+})();
+</script>
+</body>
+</html>

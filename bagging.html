@@ -1,0 +1,431 @@
+<title>Bagging Station — Salt City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --serious:#C15A34; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:10px; --radius-sm:6px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 6px 20px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:17px; line-height:1.5; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:600; margin:0; text-wrap:balance; color:var(--ink);}
+a{color:inherit;} button{font-family:inherit; touch-action:manipulation;}
+.mono{font-family:var(--font-mono);}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+.wrap{max-width:1080px; margin:0 auto; padding:20px 20px 90px;}
+.masthead{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px; flex-wrap:wrap;}
+.eyebrow{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--caramel); font-weight:700;}
+.masthead h1{font-size:30px; margin-top:4px;}
+.masthead .sub{color:var(--ink-2); font-size:15.5px; margin-top:6px; max-width:64ch;}
+.back-link{font-size:15px; color:var(--ink-2); text-decoration:none; display:inline-flex; align-items:center; gap:5px; padding:8px 4px;}
+
+.sample-pill{
+  display:inline-flex; align-items:center; gap:6px; background:var(--warn-soft); color:var(--warn);
+  border:1px solid color-mix(in srgb, var(--warn) 35%, transparent); font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:5px 10px; border-radius:99px; white-space:nowrap;
+}
+.sample-pill.is-live{ background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb, var(--good) 35%, transparent); }
+.status-line{font-size:12px; color:var(--ink-3); margin-top:10px;}
+
+.grid{display:grid; gap:14px;}
+.kpi-row{grid-template-columns:repeat(auto-fit,minmax(135px,1fr)); margin-bottom:22px;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:16px;}
+.kpi{padding:14px 16px;}
+.kpi .label{font-size:12px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+.kpi .value{font-family:var(--font-mono); font-size:27px; font-weight:600; margin-top:6px; letter-spacing:-.01em;}
+
+.chip{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; letter-spacing:.01em;}
+.chip::before{content:""; width:8px; height:8px; flex:0 0 auto; background:currentColor;}
+.chip.good{background:var(--good-soft); color:var(--good);} .chip.good::before{border-radius:50%;}
+.chip.warn{background:var(--warn-soft); color:var(--warn);} .chip.warn::before{border-radius:1.5px; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);}
+.chip.critical{background:var(--critical-soft); color:var(--critical);} .chip.critical::before{border-radius:1.5px; clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);}
+.chip.neutral{background:var(--surface-alt); color:var(--ink-2);} .chip.neutral::before{border-radius:1.5px; transform:rotate(45deg);}
+.chip.src{background:var(--surface-alt); color:var(--ink-2); text-transform:uppercase; font-size:10px;}
+.chip.src::before{display:none;}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); font-size:16px; font-weight:700; padding:13px 20px; min-height:50px; cursor:pointer;}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.btn.primary:hover{filter:brightness(1.05);}
+.btn.sm{padding:10px 16px; font-size:14.5px; min-height:44px;}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:30px 0 12px;}
+.section-head h2{font-size:19px;}
+.section-head .hint{font-size:13.5px; color:var(--ink-3);}
+
+.filter-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+.filter-row select{font-family:inherit; font-size:16px; padding:11px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); min-height:46px;}
+
+.bg-list{display:flex; flex-direction:column; gap:12px;}
+.bg-row{background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:12px; cursor:pointer;}
+.bg-row.phase-complete,.bg-row.phase-ready-to-ship{opacity:.75;}
+.bg-row:hover{border-color:var(--accent);}
+.bg-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.bg-info{flex:1 1 260px;}
+.bg-info .bg-item{font-weight:700; font-size:19px;}
+.bg-info .bg-order{font-size:13.5px; color:var(--ink-3); margin-top:2px;}
+.bg-info .bg-qty{font-size:15px; color:var(--ink-2); margin-top:4px;}
+.bg-del{
+  flex:0 0 auto; min-width:44px; min-height:44px; border:1.5px solid var(--border); background:var(--surface);
+  color:var(--ink-3); cursor:pointer; border-radius:10px; font-size:16px; font-weight:700; padding:0 14px;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.bg-del:hover{background:var(--critical-soft); color:var(--critical); border-color:var(--critical);}
+.bg-tap-hint{font-size:13px; color:var(--ink-3); text-align:center; padding-top:2px;}
+
+.phase-picker{display:flex; flex-wrap:wrap; gap:8px; padding-top:10px; border-top:1px dashed var(--border-soft);}
+.phase-btn{
+  flex:1 1 150px; min-height:56px; border-radius:12px; border:2px solid var(--border); background:var(--surface-alt);
+  color:var(--ink-2); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:7px; padding:10px 12px; text-align:center;
+}
+.phase-btn .ic{font-size:17px; line-height:1;}
+.phase-btn[data-chip="neutral"].active{background:var(--surface-alt); border-color:var(--ink-3); color:var(--ink);}
+.phase-btn[data-chip="critical"].active{background:var(--critical-soft); border-color:var(--critical); color:var(--critical);}
+.phase-btn[data-chip="warn"].active{background:var(--warn-soft); border-color:var(--warn); color:var(--warn);}
+.phase-btn[data-chip="good"].active{background:var(--good-soft); border-color:var(--good); color:var(--good);}
+.reason-picker{display:flex; flex-wrap:wrap; gap:8px; padding:12px; border-radius:12px; background:var(--critical-soft);}
+.reason-picker .rp-label{flex:1 1 100%; font-size:13px; font-weight:700; color:var(--critical); text-transform:uppercase; letter-spacing:.04em;}
+.reason-btn{
+  min-height:48px; border-radius:10px; border:2px solid color-mix(in srgb, var(--critical) 40%, transparent);
+  background:var(--surface); color:var(--critical); font-family:inherit; font-size:14.5px; font-weight:600;
+  cursor:pointer; padding:9px 14px;
+}
+.reason-btn.active{background:var(--critical); border-color:var(--critical); color:#fff;}
+.empty-note{font-size:14.5px; color:var(--ink-3); font-style:italic; padding:14px 4px;}
+
+.toggle-card{cursor:pointer;}
+.toggle-card summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;}
+.toggle-card summary::-webkit-details-marker{display:none;}
+.toggle-card summary .lc-title{font-family:var(--font-display); font-size:18px; font-weight:600;}
+.toggle-card summary .lc-sub{font-size:14px; color:var(--ink-2); margin-top:3px; font-family:var(--font-body); font-weight:400;}
+.toggle-card[open] summary{margin-bottom:16px;}
+.add-form{display:flex; flex-direction:column; gap:10px;}
+.add-form .row{display:grid; grid-template-columns:1.6fr .8fr 1.2fr auto; gap:12px;}
+.add-form input{font-family:inherit; font-size:16px; padding:13px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); min-height:50px;}
+
+.foot-note{font-size:13.5px; color:var(--ink-3); margin-top:26px; line-height:1.6; border-top:1px solid var(--border-soft); padding-top:16px;}
+@media (max-width:600px){
+  .bg-info .bg-item{font-size:18px;}
+  .phase-btn{flex-basis:100%;}
+  .add-form .row{grid-template-columns:1fr;}
+}
+</style>
+
+<div class="wrap">
+  <a class="back-link" href="#" onclick="history.back();return false;">← Back</a>
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Salt City Coffee — Bagging Station</div>
+      <h1>Bagging Station</h1>
+      <div class="sub">One item per line from open wholesale &amp; subscription orders — track each through bagging, independent of the warehouse's own Order Fulfillment stage.</div>
+      <a class="btn sm" style="margin-top:10px;text-decoration:none;" href="bagging-execution.html">📋 Open Execution View — stripped-down, just tap the status →</a>
+    </div>
+    <div>
+      <span class="sample-pill" id="status-pill">Loading…</span>
+      <div class="status-line" id="status-line"></div>
+    </div>
+  </div>
+
+  <div class="grid kpi-row">
+    <div class="card kpi"><div class="label">Items</div><div class="value mono" id="kpi-total">–</div></div>
+    <div class="card kpi"><div class="label">Not bagged</div><div class="value mono" id="kpi-notbagged">–</div></div>
+    <div class="card kpi"><div class="label">In process</div><div class="value mono" id="kpi-inprocess">–</div></div>
+    <div class="card kpi"><div class="label">Cannot bag</div><div class="value mono" id="kpi-cannotbag">–</div></div>
+    <div class="card kpi"><div class="label">Ready to ship</div><div class="value mono" id="kpi-ready">–</div></div>
+  </div>
+
+  <div class="section-head" style="margin-top:0;">
+    <h2>Bagging queue</h2>
+    <span class="hint">Auto-synced from open Shopify wholesale &amp; subscription orders</span>
+  </div>
+  <div class="filter-row">
+    <select id="filter-phase">
+      <option value="">All statuses</option>
+      <option value="not-bagged">Not bagged</option>
+      <option value="cannot-bag">Cannot bag</option>
+      <option value="in-process">In process</option>
+      <option value="complete">Complete</option>
+      <option value="ready-to-ship">Ready to ship</option>
+    </select>
+  </div>
+  <div class="bg-list" id="bagging-list"></div>
+
+  <div class="section-head" style="margin-top:26px;">
+    <h2>Add manually</h2>
+    <span class="hint">For re-bags or anything not pulled in automatically</span>
+  </div>
+  <details class="card toggle-card" id="add-details">
+    <summary>
+      <div>
+        <div class="lc-title">+ Add an item</div>
+        <div class="lc-sub">Order/customer, item, qty, notes</div>
+      </div>
+      <span class="btn sm" id="add-toggle-btn">Open</span>
+    </summary>
+    <form class="add-form" id="add-form">
+      <div class="row">
+        <input type="text" id="add-order" placeholder="Order / customer (optional)">
+        <input type="text" id="add-item" placeholder="Item" required>
+        <input type="text" id="add-qty" placeholder="Qty">
+        <button type="submit" class="btn primary">Add</button>
+      </div>
+    </form>
+  </details>
+
+  <div class="foot-note">
+    This queue mirrors the line items on open Shopify wholesale/subscription orders (auto-synced on load, deduped per order line) — it doesn't write back to Order Fulfillment's own stage, so advancing an item here won't move the order's warehouse-side status. Marking a whole order's items bagged and shipped is still a manual step done by eye against the Order Fulfillment worklist.
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+const PHASES = ["not-bagged","cannot-bag","in-process","complete","ready-to-ship"];
+const PHASE_LABEL = { "not-bagged":"Not bagged", "cannot-bag":"Cannot bag", "in-process":"In process", complete:"Complete", "ready-to-ship":"Ready to ship" };
+const PHASE_CHIP = { "not-bagged":"neutral", "cannot-bag":"critical", "in-process":"warn", complete:"good", "ready-to-ship":"good" };
+const PHASE_ICON = { "not-bagged":"⚪", "cannot-bag":"🚫", "in-process":"▶️", complete:"✅", "ready-to-ship":"📦" };
+const CANNOT_BAG_REASONS = [
+  "Missing bags / packaging",
+  "Item not ready from kitchen",
+  "Equipment down",
+  "Staffing",
+  "Other — see notes"
+];
+
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function phaseButtons(current){
+  return `<div class="phase-picker" role="group" aria-label="Status">` + PHASES.map(p =>
+    `<button type="button" class="phase-btn ${p===current?"active":""}" data-chip="${PHASE_CHIP[p]}" data-phase="${p}"><span class="ic">${PHASE_ICON[p]}</span>${PHASE_LABEL[p]}</button>`
+  ).join("") + `</div>`;
+}
+function reasonButtons(current){
+  return `<div class="reason-picker" role="group" aria-label="Reason it can't be bagged"><span class="rp-label">Why not?</span>` + CANNOT_BAG_REASONS.map(r =>
+    `<button type="button" class="reason-btn ${r===current?"active":""}" data-reason="${escapeHtml(r)}">${escapeHtml(r)}</button>`
+  ).join("") + `</div>`;
+}
+
+async function fetchSupabase(path, opts={}){
+  try{
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const { headers: extraHeaders, ...restOpts } = opts;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      ...restOpts,
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, ...(extraHeaders||{}) },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok){
+      const text = await resp.text().catch(()=> "");
+      throw new Error(`Supabase responded ${resp.status}${text ? " — " + text.slice(0,160) : ""}`);
+    }
+    if(resp.status === 204) return { ok:true, rows:[] };
+    const text = await resp.text();
+    const rows = text ? JSON.parse(text) : [];
+    return { ok:true, rows: Array.isArray(rows) ? rows : [rows] };
+  }catch(err){
+    return { ok:false, reason: err.message || "request failed" };
+  }
+}
+
+let allItems = [];
+let expandedId = null;
+
+function applyFilter(rows){
+  const phase = $("#filter-phase").value;
+  return rows.filter(r => !phase || r.phase === phase);
+}
+
+function renderKpis(){
+  const count = p => allItems.filter(i => i.phase === p).length;
+  $("#kpi-total").textContent = allItems.length;
+  $("#kpi-notbagged").textContent = count("not-bagged");
+  $("#kpi-inprocess").textContent = count("in-process");
+  $("#kpi-cannotbag").textContent = count("cannot-bag");
+  $("#kpi-ready").textContent = count("ready-to-ship");
+}
+
+function renderList(){
+  const wrap = $("#bagging-list");
+  const rows = applyFilter(allItems).sort((a,b) => (a.created_at||"").localeCompare(b.created_at||""));
+  if(!rows.length){
+    wrap.innerHTML = `<div class="empty-note">Nothing here — no open wholesale/subscription order items match this filter.</div>`;
+    return;
+  }
+  wrap.innerHTML = rows.map(item => {
+    const isExpanded = expandedId === item.id;
+    return `
+    <div class="bg-row phase-${item.phase}" data-id="${item.id}">
+      <div class="bg-top">
+        <div class="bg-info">
+          <div class="bg-item">${escapeHtml(item.item_name)}</div>
+          ${item.order_label ? `<div class="bg-order">${escapeHtml(item.order_label)}</div>` : ""}
+          <div class="bg-qty">${item.qty_needed ? `Qty ${escapeHtml(item.qty_needed)} · ` : ""}${item.source === "manual" ? `<span class="chip src">Manual</span>` : `<span class="chip src">From order</span>`} <span class="chip ${PHASE_CHIP[item.phase]}">${PHASE_ICON[item.phase]} ${PHASE_LABEL[item.phase]}</span></div>
+        </div>
+        <button class="bg-del" data-action="delete">✕ Remove</button>
+      </div>
+      ${isExpanded ? `
+        ${phaseButtons(item.phase)}
+        ${item.phase === "cannot-bag" ? reasonButtons(item.cannot_reason) : ""}
+      ` : `<div class="bg-tap-hint">Tap to change status</div>`}
+    </div>
+  `; }).join("");
+
+  $$(".bg-row", wrap).forEach(row => {
+    row.addEventListener("click", (e) => {
+      if(e.target.closest(".bg-del") || e.target.closest(".phase-btn") || e.target.closest(".reason-btn")) return;
+      expandedId = expandedId === row.dataset.id ? null : row.dataset.id;
+      renderList();
+    });
+  });
+  $$(".bg-del", wrap).forEach(btn => btn.addEventListener("click", (e) => { e.stopPropagation(); deleteItem(btn.closest(".bg-row").dataset.id); }));
+  $$(".phase-btn", wrap).forEach(btn => {
+    btn.addEventListener("click", (e) => { e.stopPropagation(); updateField(btn.closest(".bg-row").dataset.id, "phase", btn.dataset.phase); });
+  });
+  $$(".reason-btn", wrap).forEach(btn => {
+    btn.addEventListener("click", (e) => { e.stopPropagation(); updateField(btn.closest(".bg-row").dataset.id, "cannot_reason", btn.dataset.reason, false); });
+  });
+}
+
+async function updateField(id, field, value, collapse=true){
+  const patch = { [field]: value };
+  if(field === "phase"){
+    if(value !== "cannot-bag") patch.cannot_reason = null;
+    if(value === "complete" || value === "ready-to-ship"){ patch.bagged_at = new Date().toISOString(); }
+  }
+  const result = await fetchSupabase(`bagging_items?id=eq.${id}`, {
+    method:"PATCH", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify(patch)
+  });
+  if(!result.ok){ alert("Couldn't save: " + result.reason); return; }
+  if(collapse) expandedId = null;
+  await loadQueue();
+}
+
+async function deleteItem(id){
+  if(!confirm("Remove this item?")) return;
+  const result = await fetchSupabase(`bagging_items?id=eq.${id}`, { method:"DELETE" });
+  if(result.ok) await loadQueue();
+  else alert("Couldn't remove: " + result.reason);
+}
+
+async function loadQueue(){
+  const pill = $("#status-pill");
+  const line = $("#status-line");
+  const result = await fetchSupabase("bagging_items?select=*&phase=neq.ready-to-ship");
+  if(result.ok){
+    allItems = result.rows;
+    pill.textContent = allItems.length ? "Live" : "Live — nothing to bag right now";
+    pill.classList.add("is-live");
+    line.textContent = "Reading/writing bagging_items directly — no login on this tool, so treat it as an honor-system shared queue. Items marked Ready to ship drop off this list.";
+  } else {
+    allItems = [];
+    pill.textContent = "Not connected yet";
+    pill.classList.remove("is-live");
+    line.textContent = `Couldn't load (${result.reason}) — run the 2026-09-04b_production_tracking.sql migration in Supabase if you haven't yet.`;
+  }
+  renderKpis();
+  renderList();
+  if(result.ok) syncFromOrders();
+}
+
+async function syncFromOrders(){
+  const ordersResult = await fetchSupabase("shopify_order_import?select=id,order_name,line_items&local_stage=neq.shipped");
+  if(!ordersResult.ok || !ordersResult.rows.length) return;
+  const existingKeysResult = await fetchSupabase("bagging_items?select=source_key&source=eq.shopify-order");
+  const existingKeys = new Set((existingKeysResult.ok ? existingKeysResult.rows : []).map(r => r.source_key).filter(Boolean));
+
+  const newRows = [];
+  ordersResult.rows.forEach(order => {
+    (order.line_items || []).forEach(li => {
+      const title = (li.title || "").trim();
+      if(!title) return;
+      const key = `${order.id}::${title}`;
+      if(existingKeys.has(key)) return;
+      existingKeys.add(key);
+      newRows.push({
+        shopify_order_id: order.id,
+        order_label: order.order_name || null,
+        item_name: title,
+        qty_needed: li.quantity != null ? String(li.quantity) : null,
+        phase: "not-bagged",
+        source: "shopify-order",
+        source_key: key,
+        added_by: "auto-sync"
+      });
+    });
+  });
+  if(!newRows.length) return;
+  const post = await fetchSupabase("bagging_items", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", Prefer:"return=minimal,resolution=ignore-duplicates" },
+    body: JSON.stringify(newRows)
+  });
+  if(post.ok) await loadQueue();
+}
+
+async function submitManual(e){
+  e.preventDefault();
+  const item = $("#add-item").value.trim();
+  if(!item) return;
+  const payload = {
+    order_label: $("#add-order").value.trim() || null,
+    item_name: item,
+    qty_needed: $("#add-qty").value.trim() || null,
+    phase: "not-bagged",
+    source: "manual"
+  };
+  const result = await fetchSupabase("bagging_items", {
+    method:"POST", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify(payload)
+  });
+  if(result.ok){
+    $("#add-form").reset();
+    await loadQueue();
+  } else alert("Couldn't add: " + result.reason);
+}
+
+$("#filter-phase").addEventListener("change", renderList);
+$("#add-form").addEventListener("submit", submitManual);
+$("#add-details").addEventListener("toggle", () => { $("#add-toggle-btn").textContent = $("#add-details").open ? "Close" : "Open"; });
+
+loadQueue();
+</script>

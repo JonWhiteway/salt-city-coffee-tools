@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GM, LM &amp; Production Manager Command Deck — Salt City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --serious:#C15A34; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --series-2:#eb6834;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:10px; --radius-sm:6px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 8px 24px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+    --series-2:#d95926;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+  --series-2:#d95926;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:14.5px; line-height:1.5; -webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:var(--font-display); font-weight:600; margin:0; color:var(--ink);}
+button{font-family:inherit;}
+[hidden]{display:none !important;}
+
+/* ---------- login ---------- */
+.login-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+.login-card{width:100%; max-width:460px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-2); padding:32px 30px;}
+.login-brand{display:flex; align-items:center; gap:10px; margin-bottom:22px;}
+.brand-mark{width:36px; height:36px; border-radius:9px; background:linear-gradient(155deg,#F0824C,#B9852E); display:flex; align-items:center; justify-content:center; color:#191410; font-family:var(--font-display); font-weight:700; font-size:17px; flex:0 0 auto;}
+.login-brand strong{font-family:var(--font-display); font-size:18px; font-weight:600;}
+.login-brand span{display:block; font-size:11.5px; color:var(--ink-3); letter-spacing:.02em;}
+.login-title{font-size:20px; margin-bottom:4px;}
+.login-sub{font-size:13px; color:var(--ink-2); margin-bottom:22px;}
+.staff-tiles{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.staff-tile{display:flex; flex-direction:column; align-items:flex-start; gap:5px; padding:14px 15px; border-radius:11px; border:1px solid var(--border); background:var(--surface-alt); cursor:pointer; text-align:left;}
+.staff-tile:hover{border-color:var(--accent);}
+.staff-tile .nm{font-family:var(--font-display); font-size:15.5px; font-weight:600;}
+.staff-tile .rl{font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3);}
+.pin-back{display:flex; align-items:center; gap:8px; color:var(--ink-2); font-size:13px; background:none; border:none; cursor:pointer; padding:0 0 18px; }
+.pin-person{display:flex; flex-direction:column; align-items:center; gap:4px; margin-bottom:20px;}
+.pin-person .nm{font-family:var(--font-display); font-size:19px; font-weight:600;}
+.pin-person .rl{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3);}
+.pin-dots{display:flex; gap:14px; justify-content:center; margin-bottom:22px;}
+.pin-dots span{width:16px; height:16px; border-radius:50%; border:1.6px solid var(--border); background:var(--surface-alt);}
+.pin-dots span.filled{background:var(--accent); border-color:var(--accent);}
+.pin-dots.err span{border-color:var(--critical); background:var(--critical-soft);}
+.pin-pad{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:280px; margin:0 auto;}
+.pin-key{aspect-ratio:1; border-radius:14px; border:1px solid var(--border); background:var(--surface-alt); color:var(--ink); font-family:var(--font-mono); font-size:22px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+.pin-key:active{background:var(--accent-soft); border-color:var(--accent);}
+.pin-key.wide{font-size:13px; font-family:var(--font-body); font-weight:600; color:var(--ink-2);}
+.pin-error{text-align:center; color:var(--critical); font-size:12.5px; margin-top:14px; min-height:1.4em;}
+
+/* ---------- app shell ---------- */
+.topbar{position:sticky; top:0; z-index:5; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--border-soft); padding:16px 28px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+.topbar h1{font-size:19px;}
+.topbar .sub{font-size:12px; color:var(--ink-3); margin-top:2px;}
+.btn{display:inline-flex; align-items:center; gap:7px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:13px; font-weight:600; padding:8px 13px; cursor:pointer;}
+.btn:hover{border-color:var(--accent);}
+.btn.ghost{background:transparent;}
+.content{padding:24px 28px 64px; max-width:1100px; margin:0 auto;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:24px 0 14px;}
+.section-head:first-child{margin-top:0;}
+.section-head h2{font-size:16px;}
+.section-head .hint{font-size:12px; color:var(--ink-3);}
+.grid{display:grid; gap:14px;}
+.kpi-row{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));}
+.loc-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:16px;}
+.kpi{padding:14px 16px;}
+.kpi .label{font-size:11.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+.kpi .value{font-family:var(--font-mono); font-size:23px; font-weight:600; margin-top:6px;}
+.kpi .delta{font-size:12px; margin-top:4px;}
+.delta.up{color:var(--good);} .delta.down{color:var(--critical);} .delta.flat{color:var(--ink-3);}
+.tabular{font-variant-numeric:tabular-nums;}
+.chip{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px;}
+.chip::before{content:""; width:8px; height:8px; flex:0 0 auto; background:currentColor;}
+.chip.good{background:var(--good-soft); color:var(--good);} .chip.good::before{border-radius:50%;}
+.chip.warn{background:var(--warn-soft); color:var(--warn);} .chip.warn::before{border-radius:1.5px; clip-path:polygon(50% 0%,0% 100%,100% 100%);}
+.chip.serious{background:var(--serious-soft); color:var(--serious);} .chip.serious::before{border-radius:1.5px; clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
+.loc-card{text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:10px; background:var(--surface);}
+.loc-card:hover{box-shadow:var(--shadow-2); border-color:var(--accent);}
+.loc-card .lc-head{display:flex; align-items:flex-start; justify-content:space-between; gap:8px;}
+.loc-card h3{font-size:15px;}
+.loc-card .lc-stats{display:flex; gap:16px;}
+.loc-card .lc-stat .n{font-family:var(--font-mono); font-size:16.5px; font-weight:600;}
+.loc-card .lc-stat .l{font-size:10.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em;}
+.loc-card .lc-foot{font-size:11.5px; color:var(--accent); font-weight:600;}
+.empty-note{font-size:12.5px; color:var(--ink-3); font-style:italic; padding:10px 2px;}
+.trend-svg{width:100%; height:120px; overflow:visible;}
+
+/* ---------- Production Manager rollup ---------- */
+.station-grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));}
+.station-card{display:flex; flex-direction:column; gap:8px; text-decoration:none; color:inherit;}
+.station-card .st-title{font-family:var(--font-display); font-size:15px; font-weight:600; color:var(--ink);}
+.station-card .st-owner{font-size:11.5px; color:var(--ink-3);}
+.station-card .st-stat{font-family:var(--font-mono); font-size:20px; font-weight:600; margin-top:2px; color:var(--ink);}
+.station-card .st-stat-label{font-size:11px; color:var(--ink-3);}
+.station-card .st-link{font-size:12px; color:var(--accent); font-weight:600; text-decoration:none; margin-top:auto; padding-top:6px; border-top:1px solid var(--border-soft);}
+.craft-list{display:flex; flex-direction:column; gap:0;}
+.craft-row{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:14px 4px; border-bottom:1px solid var(--border-soft);}
+.craft-row:last-child{border-bottom:none;}
+.craft-row .cr-label{font-size:13.5px; font-weight:600; color:var(--ink); display:flex; align-items:center; gap:8px;}
+.craft-row .cr-pts{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-3); background:var(--surface-alt); padding:2px 7px; border-radius:99px; flex:0 0 auto;}
+.craft-row .cr-detail{font-size:12px; color:var(--ink-2); margin-top:4px; max-width:60ch;}
+.craft-row .cr-right{text-align:right; flex:0 0 auto;}
+.craft-row .cr-value{font-family:var(--font-mono); font-size:16px; font-weight:600;}
+.craft-row .cr-value-label{font-size:10.5px; color:var(--ink-3); margin-top:2px;}
+.craft-row.untracked{opacity:.72;}
+.craft-row.untracked .cr-value{font-size:11px; font-weight:600; color:var(--ink-3); font-family:var(--font-body);}
+.scorecard-bar{display:flex; height:8px; border-radius:99px; overflow:hidden; background:var(--surface-alt); margin:10px 0 8px;}
+.scorecard-bar span{display:block; height:100%;}
+.scorecard-key{display:flex; gap:16px; font-size:11px; color:var(--ink-3); font-family:var(--font-mono); flex-wrap:wrap;}
+.scorecard-key .k{display:inline-flex; align-items:center; gap:5px;}
+.scorecard-key .dot{width:8px; height:8px; border-radius:2px; flex:0 0 auto;}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">S</div>
+      <div><strong>Salt City</strong><span>GM, LM &amp; Production Manager Command Deck</span></div>
+    </div>
+
+    <div id="login-step-pick">
+      <div class="login-title">Who's signing in?</div>
+      <div class="login-sub">Tap your name, then enter your 4-digit PIN.</div>
+      <div class="staff-tiles" id="staff-tiles"><div class="empty-note">Loading…</div></div>
+    </div>
+
+    <div id="login-step-pin" hidden>
+      <button class="pin-back" id="pin-back">← Not you?</button>
+      <div class="pin-person">
+        <div class="nm" id="pin-person-name">—</div>
+        <div class="rl" id="pin-person-role">—</div>
+      </div>
+      <div class="pin-dots" id="pin-dots">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="pin-pad" id="pin-pad">
+        <button class="pin-key" data-k="1">1</button>
+        <button class="pin-key" data-k="2">2</button>
+        <button class="pin-key" data-k="3">3</button>
+        <button class="pin-key" data-k="4">4</button>
+        <button class="pin-key" data-k="5">5</button>
+        <button class="pin-key" data-k="6">6</button>
+        <button class="pin-key" data-k="7">7</button>
+        <button class="pin-key" data-k="8">8</button>
+        <button class="pin-key" data-k="9">9</button>
+        <button class="pin-key wide" data-k="clear">Clear</button>
+        <button class="pin-key" data-k="0">0</button>
+        <button class="pin-key wide" data-k="back">⌫</button>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app-wrap" hidden>
+  <div class="topbar">
+    <div>
+      <h1 id="app-title">—</h1>
+      <div class="sub" id="app-sub">—</div>
+    </div>
+    <button class="btn ghost" id="sign-out-btn">Sign out</button>
+  </div>
+  <div class="content">
+
+    <div id="view-portfolio" hidden>
+      <div class="section-head"><h2>Your locations</h2><span class="hint">Tap a location for its full detail</span></div>
+      <div class="grid loc-grid" id="portfolio-cards"></div>
+    </div>
+
+    <div id="view-detail" hidden>
+      <button class="btn ghost" id="back-to-portfolio" hidden style="margin-bottom:14px;">← Back to your locations</button>
+      <div class="section-head" style="margin-top:0;"><h2 id="detail-name">—</h2><span class="hint" id="detail-status">—</span></div>
+      <div class="grid kpi-row">
+        <div class="card kpi"><div class="label">MTD revenue</div><div class="value tabular" id="d-rev">—</div><div class="delta" id="d-rev-delta"></div></div>
+        <div class="card kpi"><div class="label">Labor %</div><div class="value tabular" id="d-labor">—</div><div class="delta" id="d-labor-delta"></div></div>
+        <div class="card kpi"><div class="label">Transactions</div><div class="value tabular" id="d-txn">—</div></div>
+        <div class="card kpi"><div class="label">Avg ticket</div><div class="value tabular" id="d-ticket">—</div></div>
+      </div>
+      <div class="section-head"><h2>12-week revenue trend</h2></div>
+      <div class="card"><svg id="trend-svg" class="trend-svg" viewBox="0 0 640 120"></svg></div>
+      <div class="empty-note">Revenue, transactions and labor % are real — pulled from Square and scoped to only the location(s) assigned to you. Walk-Through Audit trend, Safety Incident Log, Service Recovery Log and other role-specific scorecard items aren't wired up yet.</div>
+    </div>
+
+    <div id="view-empty" hidden>
+      <div class="card" style="text-align:center; padding:40px 20px;">
+        <div style="font-family:var(--font-display); font-size:17px; margin-bottom:6px;">No locations assigned yet</div>
+        <div style="font-size:13px; color:var(--ink-2);">Ask your COO to assign you a location — nothing to show here until then.</div>
+      </div>
+    </div>
+
+    <div id="view-pm" hidden>
+      <div class="section-head" style="margin-top:0;"><h2>Your stations</h2><span class="hint">Warehouse Inventory &amp; Order Fulfillment, Roastery, Food Production, Cold Brew Production — tap through to each one's own tracking tool</span></div>
+      <div class="grid station-grid" id="pm-stations"></div>
+
+      <div class="section-head"><h2>Craft — 65 of 100 pts</h2><span class="hint" id="pm-craft-status">Loading…</span></div>
+      <div class="card">
+        <div class="scorecard-bar"><span style="width:20%;background:var(--caramel);"></span><span style="width:65%;background:var(--accent);"></span><span style="width:15%;background:var(--good);"></span></div>
+        <div class="scorecard-key">
+          <span class="k"><span class="dot" style="background:var(--caramel);"></span>Leadership 20</span>
+          <span class="k"><span class="dot" style="background:var(--accent);"></span>Craft 65</span>
+          <span class="k"><span class="dot" style="background:var(--good);"></span>Cust. Care 15</span>
+        </div>
+        <div class="craft-list" id="pm-craft-list" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="section-head"><h2>Leadership (20 pts) &amp; Customer Care (15 pts)</h2></div>
+      <div class="empty-note">Team meeting cadence (1-1s + monthly team meetings) and the quarterly, named LM/GM satisfaction survey (Q1–Q6 scored 1–5, plus 2 open questions) are both designed in the measurables system, but neither has a tool tracking real data yet — nothing to show here honestly until one exists.</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const PIN_PREFIX = "sc-pin-";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const $ = (sel, root) => (root||document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root||document).querySelectorAll(sel));
+const esc = s => (s==null?"":String(s));
+const money = n => n==null ? "—" : "$" + Math.round(n).toLocaleString("en-US");
+const moneyK = n => n==null ? "—" : "$" + (n/1000).toFixed(1) + "K";
+const pct1 = n => n==null ? "—" : n.toFixed(1) + "%";
+const ROLE_LABEL = { gm:"General Manager", location_manager:"Location Manager", production_manager:"Production Manager" };
+const PM_LINKS = {
+  cafe: "https://salt-city-coffee-systems.netlify.app",
+  wholesale: "https://salt-city-coffee-tools.netlify.app/wholesale-subscription.html",
+  roastery: "https://salt-city-coffee-tools.netlify.app/roastery-production.html",
+  bagging: "https://salt-city-coffee-tools.netlify.app/bagging.html",
+  coldbrew: "https://salt-city-coffee-tools.netlify.app/cold-brew-production.html",
+  bakers: "https://salt-city-coffee-tools.netlify.app/daily-bake-list.html"
+};
+
+let directory = [];
+let pinTarget = null;
+let pinDigits = "";
+let myStaff = null;
+let myLocations = [];
+let locData = {}; // location_id -> aggregated numbers
+
+/* ---------------------------------------------------------------------
+   LOGIN
+   --------------------------------------------------------------------- */
+async function loadDirectory(){
+  const { data, error } = await sb.rpc("staff_login_directory");
+  if(error){
+    $("#staff-tiles").innerHTML = `<div class="empty-note">Couldn't load the staff list (${esc(error.message)}). Refresh to try again, or check that the Phase 6b migration has been run.</div>`;
+    return;
+  }
+  directory = (data||[]).filter(s => s.role === "gm" || s.role === "location_manager" || s.role === "production_manager");
+  renderTiles();
+}
+
+function renderTiles(){
+  const wrap = $("#staff-tiles");
+  if(!directory.length){
+    wrap.innerHTML = `<div class="empty-note">No GM, LM, or Production Manager accounts set up yet. Use scripts/set_staff_pin.py to create one.</div>`;
+    return;
+  }
+  wrap.innerHTML = directory.map(s => `
+    <button class="staff-tile" data-id="${s.id}">
+      <span class="nm">${esc(s.name)}</span>
+      <span class="rl">${ROLE_LABEL[s.role]||s.role}</span>
+    </button>
+  `).join("");
+  $$(".staff-tile", wrap).forEach(t => t.addEventListener("click", () => openPinPad(t.dataset.id)));
+}
+
+function openPinPad(staffId){
+  pinTarget = directory.find(s => s.id === staffId);
+  if(!pinTarget) return;
+  pinDigits = "";
+  $("#login-step-pick").hidden = true;
+  $("#login-step-pin").hidden = false;
+  $("#pin-person-name").textContent = pinTarget.name;
+  $("#pin-person-role").textContent = ROLE_LABEL[pinTarget.role] || pinTarget.role;
+  $("#pin-error").textContent = "";
+  updatePinDots();
+}
+
+function updatePinDots(err){
+  const dotsWrap = $("#pin-dots");
+  dotsWrap.classList.toggle("err", !!err);
+  $$("span", dotsWrap).forEach((d,i) => d.classList.toggle("filled", i < pinDigits.length));
+}
+
+async function submitPin(){
+  const { error } = await sb.auth.signInWithPassword({
+    email: pinTarget.email,
+    password: PIN_PREFIX + pinDigits
+  });
+  if(error){
+    $("#pin-error").textContent = "Wrong PIN — try again.";
+    updatePinDots(true);
+    pinDigits = "";
+    setTimeout(() => updatePinDots(false), 350);
+    return;
+  }
+  $("#login-wrap").hidden = true;
+  await initApp();
+}
+
+$("#pin-back").addEventListener("click", () => {
+  $("#login-step-pin").hidden = true;
+  $("#login-step-pick").hidden = false;
+  pinDigits = "";
+});
+
+$("#pin-pad").addEventListener("click", (e) => {
+  const btn = e.target.closest(".pin-key");
+  if(!btn) return;
+  const k = btn.dataset.k;
+  if(k === "clear"){ pinDigits = ""; }
+  else if(k === "back"){ pinDigits = pinDigits.slice(0,-1); }
+  else if(pinDigits.length < 4){ pinDigits += k; }
+  $("#pin-error").textContent = "";
+  updatePinDots(false);
+  if(pinDigits.length === 4) submitPin();
+});
+
+$("#sign-out-btn").addEventListener("click", async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+/* ---------------------------------------------------------------------
+   APP — real, RLS-scoped data for whoever is signed in
+   --------------------------------------------------------------------- */
+function isoWeekKey(dateStr){
+  const d = new Date(dateStr + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return d.getUTCFullYear() + "-W" + String(week).padStart(2,"0");
+}
+
+async function initApp(){
+  $("#app-wrap").hidden = false;
+
+  const { data: { user } } = await sb.auth.getUser();
+  const { data: staffRow, error: staffErr } = await sb.from("staff").select("id,name,role").eq("auth_user_id", user.id).maybeSingle();
+  if(staffErr || !staffRow){
+    $("#app-title").textContent = "Account not fully set up";
+    $("#app-sub").textContent = "Signed in, but no matching staff record — ask your COO to check scripts/set_staff_pin.py.";
+    return;
+  }
+  myStaff = staffRow;
+
+  $("#app-title").textContent = `${myStaff.name} — ${ROLE_LABEL[myStaff.role]||myStaff.role}`;
+
+  if(myStaff.role === "production_manager"){
+    await initProductionManager();
+    return;
+  }
+
+  $("#app-sub").textContent = "Real, live data — scoped to only your assigned location(s).";
+
+  const { data: assign } = await sb.from("staff_locations").select("location_id, locations(id,name,type)").eq("staff_id", myStaff.id);
+  myLocations = (assign||[]).map(a => a.locations).filter(Boolean);
+
+  if(!myLocations.length){
+    $("#view-empty").hidden = false;
+    return;
+  }
+
+  const locIds = myLocations.map(l => l.id);
+  const { data: rollups } = await sb.from("square_daily_rollups")
+    .select("location_id,business_date,revenue,transaction_count,labor_cost,labor_hours")
+    .in("location_id", locIds)
+    .order("business_date", { ascending: true });
+
+  aggregate(rollups || []);
+
+  if(myLocations.length > 1){
+    $("#view-portfolio").hidden = false;
+    renderPortfolio();
+  } else {
+    $("#view-detail").hidden = false;
+    $("#back-to-portfolio").hidden = true;
+    renderDetail(myLocations[0].id);
+  }
+}
+
+function aggregate(rows){
+  const byLoc = new Map();
+  rows.forEach(r => {
+    if(!byLoc.has(r.location_id)) byLoc.set(r.location_id, []);
+    byLoc.get(r.location_id).push(r);
+  });
+
+  const today = new Date();
+  const cutoff30 = new Date(today); cutoff30.setDate(cutoff30.getDate()-30);
+  const cutoff60 = new Date(today); cutoff60.setDate(cutoff60.getDate()-60);
+  const sum = (arr,k) => arr.reduce((a,r)=>a+(Number(r[k])||0),0);
+
+  myLocations.forEach(loc => {
+    const rowsForLoc = byLoc.get(loc.id) || [];
+    const last30 = rowsForLoc.filter(r => new Date(r.business_date) >= cutoff30);
+    const prior30 = rowsForLoc.filter(r => new Date(r.business_date) >= cutoff60 && new Date(r.business_date) < cutoff30);
+    const rev = sum(last30,"revenue");
+    const txns = sum(last30,"transaction_count");
+    const laborCost = last30.some(r=>r.labor_cost!=null) ? sum(last30,"labor_cost") : null;
+    const prevRev = sum(prior30,"revenue");
+    const prevLaborCost = prior30.some(r=>r.labor_cost!=null) ? sum(prior30,"labor_cost") : null;
+
+    const laborPct = laborCost!=null && rev>0 ? (laborCost/rev*100) : null;
+    const laborPctPrev = prevLaborCost!=null && prevRev>0 ? (prevLaborCost/prevRev*100) : null;
+
+    const weekTotals = new Map();
+    rowsForLoc.forEach(r => {
+      const wk = isoWeekKey(r.business_date);
+      weekTotals.set(wk, (weekTotals.get(wk)||0) + Number(r.revenue||0));
+    });
+    const weeks = Array.from(weekTotals.keys()).sort();
+
+    locData[loc.id] = {
+      hasData: rowsForLoc.length > 0,
+      rev, txns, ticket: txns>0 ? rev/txns : null,
+      laborPct, laborPctPrev,
+      trend: prevRev>0 ? ((rev-prevRev)/prevRev*100) : null,
+      trendSeries: weeks.slice(-12).map(w=>weekTotals.get(w)),
+      status: laborPct==null ? "good" : (laborPct<=28 ? "good" : laborPct<=31 ? "warn" : "serious")
+    };
+  });
+}
+
+function renderPortfolio(){
+  $("#portfolio-cards").innerHTML = myLocations.map(loc => {
+    const d = locData[loc.id] || {};
+    return `
+    <button class="card loc-card" data-loc="${loc.id}">
+      <div class="lc-head">
+        <h3>${esc(loc.name)}</h3>
+        <span class="chip ${d.status||"good"}">${d.hasData ? (d.status==="good"?"On target":d.status==="warn"?"Watch":"Attention") : "No data yet"}</span>
+      </div>
+      <div class="lc-stats">
+        <div class="lc-stat"><div class="n tabular">${moneyK(d.rev)}</div><div class="l">MTD rev</div></div>
+        <div class="lc-stat"><div class="n tabular">${d.laborPct==null?"—":pct1(d.laborPct)}</div><div class="l">Labor %</div></div>
+        <div class="lc-stat"><div class="n tabular">${d.trend==null?"—":(d.trend>=0?"▲":"▼")+Math.abs(d.trend).toFixed(1)+"%"}</div><div class="l">Trend</div></div>
+      </div>
+      <div class="lc-foot">View detail →</div>
+    </button>`;
+  }).join("");
+  $$(".loc-card", $("#portfolio-cards")).forEach(c => c.addEventListener("click", () => {
+    $("#view-portfolio").hidden = true;
+    $("#view-detail").hidden = false;
+    $("#back-to-portfolio").hidden = false;
+    renderDetail(c.dataset.loc);
+  }));
+  $("#back-to-portfolio").addEventListener("click", () => {
+    $("#view-detail").hidden = true;
+    $("#view-portfolio").hidden = false;
+  }, { once:true });
+}
+
+function renderDetail(locId){
+  const loc = myLocations.find(l=>l.id===locId);
+  const d = locData[locId] || {};
+  $("#detail-name").textContent = loc.name;
+  $("#detail-status").textContent = d.hasData ? "Live — Square, trailing 30 days" : "No Square data synced for this location yet";
+  $("#d-rev").textContent = money(d.rev);
+  $("#d-rev-delta").innerHTML = d.trend==null ? "" : `<span style="color:${d.trend>=0?'var(--good)':'var(--critical)'}">${d.trend>=0?"▲":"▼"} ${Math.abs(d.trend).toFixed(1)}% vs prior 30d</span>`;
+  $("#d-labor").textContent = d.laborPct==null ? "n/a" : pct1(d.laborPct);
+  if(d.laborPct!=null && d.laborPctPrev!=null){
+    const delta = d.laborPct - d.laborPctPrev;
+    $("#d-labor-delta").innerHTML = `<span style="color:${delta<=0?'var(--good)':'var(--critical)'}">${delta<=0?"▼":"▲"} ${Math.abs(delta).toFixed(1)}pt vs prior 30d</span>`;
+  } else {
+    $("#d-labor-delta").textContent = "";
+  }
+  $("#d-txn").textContent = (d.txns||0).toLocaleString();
+  $("#d-ticket").textContent = d.ticket==null ? "—" : "$"+d.ticket.toFixed(2);
+
+  const svg = $("#trend-svg");
+  const series = d.trendSeries || [];
+  if(series.length > 1){
+    const w=640, h=120, pad=8;
+    const max=Math.max(...series), min=Math.min(...series);
+    const pts = series.map((v,i)=>{
+      const x = pad + i*((w-pad*2)/(series.length-1));
+      const y = h-pad - ( (v-min)/(max-min||1) )*(h-pad*2);
+      return [x,y];
+    });
+    const path = pts.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    const areaPath = path + ` L${pts[pts.length-1][0].toFixed(1)},${h} L${pts[0][0].toFixed(1)},${h} Z`;
+    svg.innerHTML = `
+      <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--series-2)" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="var(--series-2)" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${areaPath}" fill="url(#ag)" stroke="none"/>
+      <path d="${path}" fill="none" stroke="var(--series-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="var(--series-2)"/>`;
+  } else {
+    svg.innerHTML = `<text x="10" y="60" fill="var(--ink-3)" font-size="12">Not enough synced weeks yet to chart a trend.</text>`;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   PRODUCTION MANAGER — a real portfolio rollup across the four stations
+   (Warehouse Inventory & Order Fulfillment, Roastery, Food Production,
+   Cold Brew Production), grounded in
+   the real Craft scorecard (65 of 100 pts, see salt-city-measurables).
+   Leadership/Customer Care stay an honest empty state — no tool tracks
+   real data for either yet.
+   --------------------------------------------------------------------- */
+function pmStationCard(title, owner, statHtml, statLabel, href, linkLabel){
+  return `<a class="card station-card" href="${href}" target="_blank" rel="noopener">
+    <div class="st-title">${title}</div>
+    <div class="st-owner">${owner}</div>
+    <div class="st-stat">${statHtml}</div>
+    <div class="st-stat-label">${statLabel}</div>
+    <div class="st-link">${linkLabel} →</div>
+  </a>`;
+}
+
+function pmCraftRow(label, pts, valueHtml, valueLabel, detail, untracked){
+  return `<div class="craft-row${untracked?" untracked":""}">
+    <div>
+      <div class="cr-label">${label}<span class="cr-pts">${pts} pts</span></div>
+      <div class="cr-detail">${detail}</div>
+    </div>
+    <div class="cr-right">
+      <div class="cr-value">${valueHtml}</div>
+      <div class="cr-value-label">${valueLabel}</div>
+    </div>
+  </div>`;
+}
+
+async function initProductionManager(){
+  $("#app-sub").textContent = "Real, live data pulled from each station's own tracking tool — not a location-scoped view like GM/LM.";
+  $("#view-pm").hidden = false;
+
+  const today = new Date().toISOString().slice(0,10);
+
+  const [cafeRes, worklistRes, invEmergRes, invValRes, roasteryRes, bagRes, bakeRes, cbRes, kegRes, shopSummaryRes] = await Promise.all([
+    sb.from("cafe_orders_summary_public").select("*"),
+    sb.from("fulfillment_worklist_public").select("source,order_type,stage,placed_at,is_emergency").in("source",["shopify","bluecart"]),
+    sb.from("inventory_emergencies_public").select("*"),
+    sb.from("inventory_value_public").select("*"),
+    sb.from("roastery_items").select("phase"),
+    sb.from("bagging_items").select("phase"),
+    sb.from("bake_list_items").select("phase").eq("bake_date", today),
+    sb.from("cold_brew_batches").select("status").eq("batch_date", today),
+    sb.from("keg_batches").select("status").eq("batch_date", today),
+    sb.from("shopify_orders_summary_public").select("*")
+  ]);
+
+  const cafeRows = cafeRes.data || [];
+  const worklistRows = worklistRes.data || [];
+  const invEmergRows = invEmergRes.data || [];
+  const invValRows = invValRes.data || [];
+  const roasteryRows = roasteryRes.data || [];
+  const bagRows = bagRes.data || [];
+  const bakeRows = bakeRes.data || [];
+  const cbRows = cbRes.data || [];
+  const kegRows = kegRes.data || [];
+  const shopRows = shopSummaryRes.data || [];
+
+  const anyLive = !cafeRes.error || !worklistRes.error || !roasteryRes.error || !bagRes.error || !bakeRes.error;
+  $("#pm-craft-status").textContent = anyLive ? "Live — pulled from each station's own Supabase tables" : "Couldn't load — check that the production-tracking migrations have been run";
+
+  const count = (rows,field,val) => rows.filter(r => r[field]===val).length;
+  const businessDeadline = (startIso) => {
+    if(!startIso) return null;
+    let d = new Date(startIso), n = 0;
+    while(n < 3){ d = new Date(d.getTime()+86400000); const dow = d.getUTCDay(); if(dow!==0 && dow!==6) n++; }
+    d.setUTCHours(23,59,59,999);
+    return d;
+  };
+  const atRiskOrOverdue = (rows) => rows.filter(r => {
+    const dl = businessDeadline(r.placed_at);
+    if(!dl) return false;
+    const ms = dl.getTime() - Date.now();
+    return ms <= 24*60*60*1000;
+  }).length;
+
+  /* ---- station cards ---- */
+  const cafeOpen = cafeRows.reduce((s,r)=>s+(r.order_count||0),0);
+  const cafeEmergency = cafeRows.reduce((s,r)=>s+(r.emergency_count||0),0);
+  const wholesaleRows = worklistRows.filter(r=>r.order_type==="wholesale");
+  const subRows = worklistRows.filter(r=>r.order_type==="subscription");
+  const bagOpen = bagRows.filter(r=>r.phase!=="ready-to-ship").length;
+  const invValue = invValRows.reduce((s,r)=>s+(Number(r.value_at_cost)||0),0);
+  const invWithCost = invValRows.reduce((s,r)=>s+(r.items_with_cost||0),0);
+
+  $("#pm-stations").innerHTML = [
+    pmStationCard("Warehouse Inventory &amp; Order Fulfillment", "Assistant Production Manager",
+      cafeRes.error ? "—" : `${cafeOpen} open`,
+      cafeEmergency ? `🚨 ${cafeEmergency} emergency cafe order${cafeEmergency===1?"":"s"} · ${wholesaleRows.length+subRows.length} wholesale/subscription open · ${bagOpen} bagging in progress`
+        : `Cafe Orders open · ${wholesaleRows.length+subRows.length} wholesale/subscription open · ${bagOpen} bagging in progress`,
+      PM_LINKS.wholesale, "Open Wholesale & Subscription"),
+    pmStationCard("Roastery", "Lead Roaster — not staffed yet",
+      roasteryRes.error ? "—" : `${count(roasteryRows,"phase","roasting")+count(roasteryRows,"phase","not-started")} in queue`,
+      `${count(roasteryRows,"phase","roasted")} roasted today`,
+      PM_LINKS.roastery, "Open Roastery Production"),
+    pmStationCard("Food Production", "Head Baker · 2 bakers report in",
+      bakeRes.error ? "—" : `${count(bakeRows,"phase","not-started")+count(bakeRows,"phase","started")} in progress`,
+      `${count(bakeRows,"phase","ready-to-ship")} ready to ship today`,
+      PM_LINKS.bakers, "Open Daily Production List"),
+    pmStationCard("Cold Brew Production", "Lead Brewer — not staffed yet",
+      (cbRes.error && kegRes.error) ? "—" : `${cbRows.length+kegRows.length} batches today`,
+      `${cbRows.filter(r=>r.status==="complete").length+kegRows.filter(r=>r.status==="complete").length} complete`,
+      PM_LINKS.coldbrew, "Open Cold Brew Production")
+  ].join("");
+
+  /* ---- Craft scorecard, grounded in the real 6-item breakdown ---- */
+  const rows = [];
+
+  rows.push(pmCraftRow("Accuracy in fulfillment", 12,
+    cafeRes.error ? "—" : String(cafeOpen), cafeRes.error ? "couldn't load" : "cafe orders open right now",
+    `Cafe Orders — 5-stage worklist in the Salt City Coffee Systems picking app.${cafeEmergency?` <b>${cafeEmergency} flagged emergency.</b>`:""}`));
+
+  rows.push(pmCraftRow("Inventory management", 12,
+    invEmergRes.error ? "—" : String(invEmergRows.length),
+    invEmergRes.error ? "couldn't load" : "items at/below reorder threshold",
+    invWithCost ? `Warehouse value at cost: ${money(invValue)} across ${invWithCost} priced items.` : "No per-item cost data yet, so warehouse value-at-cost isn't shown — the schema's ready, waiting on a cost import."));
+
+  rows.push(pmCraftRow("Safety &amp; compliance", 10, "—", "not tracked yet",
+    "No incident/compliance log exists for this role yet — same honest gap flagged in the measurables system.", true));
+
+  rows.push(pmCraftRow("Process improvement", 8, "—", "not tracked yet",
+    "No process-improvement tracker exists yet.", true));
+
+  const roastedToday = count(roasteryRows,"phase","roasted");
+  const cbComplete = cbRows.filter(r=>r.status==="complete").length + kegRows.filter(r=>r.status==="complete").length;
+  rows.push(pmCraftRow("Roasting &amp; Cold Brew production", 12,
+    (roasteryRes.error && cbRes.error) ? "—" : `${roastedToday} / ${cbComplete}`,
+    "roasted today / batches complete today",
+    "Roastery Production (auto-synced from open Shopify wholesale/subscription orders) + Cold Brew Production (manual batch log)."));
+
+  const wholesaleAtRisk = atRiskOrOverdue(wholesaleRows) + atRiskOrOverdue(subRows);
+  rows.push(pmCraftRow("Wholesale order fulfillment", 11,
+    worklistRes.error ? "—" : String(wholesaleRows.length+subRows.length),
+    worklistRes.error ? "couldn't load" : `open · ${wholesaleAtRisk} due within 24h or overdue`,
+    `Wholesale &amp; Subscription's 3-business-day ship-by tracker, plus Bagging (${bagOpen} in progress) — bagging is Warehouse's job, tracked here since it's part of getting a wholesale/subscription order out the door.`));
+
+  $("#pm-craft-list").innerHTML = rows.join("");
+}
+
+/* ---------------------------------------------------------------------
+   BOOTSTRAP — resume an existing session, or show the login screen
+   --------------------------------------------------------------------- */
+(async function boot(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){
+    $("#login-wrap").hidden = true;
+    await initApp();
+  } else {
+    loadDirectory();
+  }
+})();
+</script>
+</body>
+</html>

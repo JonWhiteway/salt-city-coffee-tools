@@ -1,0 +1,486 @@
+<title>Wholesale &amp; Subscription — Salt City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --critical-soft:#F8DADA;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:14px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 10px 26px rgba(36,31,24,.14);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --critical-soft:#3A1919;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 14px 32px rgba(0,0,0,.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --critical-soft:#3A1919;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 14px 32px rgba(0,0,0,.5);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:17px; line-height:1.5; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:600; margin:0; text-wrap:balance; color:var(--ink);}
+a{color:inherit;} button{font-family:inherit; touch-action:manipulation;}
+.mono{font-family:var(--font-mono);}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+.wrap{max-width:1180px; margin:0 auto; padding:20px 20px 90px;}
+.back-link{font-size:15px; color:var(--ink-2); text-decoration:none; display:inline-block; padding:8px 4px;}
+.masthead{margin:6px 0 20px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+.eyebrow{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--caramel); font-weight:700;}
+.masthead h1{font-size:30px; margin-top:4px;}
+.masthead .sub{color:var(--ink-2); font-size:15.5px; margin-top:6px; max-width:70ch;}
+
+.sample-pill{
+  display:inline-flex; align-items:center; gap:6px; background:var(--warn-soft); color:var(--warn);
+  border:1px solid color-mix(in srgb, var(--warn) 35%, transparent); font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:5px 10px; border-radius:99px; white-space:nowrap;
+}
+.sample-pill.is-live{ background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb, var(--good) 35%, transparent); }
+.status-line{font-size:12.5px; color:var(--ink-3); margin-top:6px;}
+
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:28px 0 14px;}
+.section-head h2{font-size:20px;}
+.section-head .hint{font-size:13.5px; color:var(--ink-3);}
+.empty-note{font-size:14.5px; color:var(--ink-3); font-style:italic; padding:14px 4px;}
+
+.chip{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:99px; white-space:nowrap; letter-spacing:.01em;}
+.chip::before{content:""; width:8px; height:8px; flex:0 0 auto; background:currentColor;}
+.chip.good{background:var(--good-soft); color:var(--good);} .chip.good::before{border-radius:50%;}
+.chip.warn{background:var(--warn-soft); color:var(--warn);} .chip.warn::before{border-radius:1.5px; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);}
+.chip.critical{background:var(--critical-soft); color:var(--critical);} .chip.critical::before{border-radius:1.5px; clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);}
+.chip.neutral{background:var(--surface-alt); color:var(--ink-2);} .chip.neutral::before{border-radius:1.5px; transform:rotate(45deg);}
+
+/* ---- big-card grid ---- */
+.card-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;}
+.order-card{
+  background:var(--surface); border:2px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1);
+  padding:18px; cursor:pointer; display:flex; flex-direction:column; gap:10px; transition:box-shadow .12s, border-color .12s;
+}
+.order-card:hover{box-shadow:var(--shadow-2);}
+.order-card:active{box-shadow:var(--shadow-1);}
+.order-card.expanded{border-color:var(--accent); box-shadow:var(--shadow-2);}
+.order-card.overdue{border-color:var(--critical);}
+.oc-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+.oc-customer{font-family:var(--font-display); font-size:19px; font-weight:600;}
+.oc-orderno{font-size:13px; color:var(--ink-3); margin-top:1px;}
+.oc-items{font-size:14.5px; color:var(--ink-2); line-height:1.4;}
+.oc-countdown{font-family:var(--font-mono); font-size:13.5px; font-weight:700; display:flex; align-items:center; gap:6px;}
+.oc-upstream{display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;}
+.oc-tap-hint{font-size:12px; color:var(--ink-3); text-align:center; margin-top:2px;}
+
+.status-picker{display:flex; flex-wrap:wrap; gap:8px; padding-top:10px; border-top:1px dashed var(--border-soft);}
+.status-btn{
+  flex:1 1 46%; min-height:54px; border-radius:12px; border:2px solid var(--border); background:var(--surface-alt);
+  color:var(--ink-2); font-family:inherit; font-size:14.5px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px; text-align:center;
+}
+.status-btn .ic{font-size:16px; line-height:1;}
+.status-btn.current{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+
+.filter-row{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+.filter-row select{font-family:inherit; font-size:16px; padding:11px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); min-height:46px;}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); font-size:16px; font-weight:700; padding:13px 20px; min-height:50px; cursor:pointer;}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.btn.sm{padding:10px 16px; font-size:14.5px; min-height:44px;}
+
+.toggle-card{cursor:pointer;}
+.toggle-card summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;}
+.toggle-card summary::-webkit-details-marker{display:none;}
+.toggle-card summary .lc-title{font-family:var(--font-display); font-size:18px; font-weight:600;}
+.toggle-card summary .lc-sub{font-size:14px; color:var(--ink-2); margin-top:3px; font-family:var(--font-body); font-weight:400;}
+.toggle-card[open] summary{margin-bottom:16px;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:16px;}
+.bc-form{display:flex; flex-direction:column; gap:10px;}
+.bc-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;}
+.field{display:flex; flex-direction:column; gap:4px;}
+.field label{font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-3); font-weight:600;}
+.field input, .field select{font-family:inherit; font-size:16px; padding:11px 12px; border-radius:9px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); min-height:46px;}
+.li-rows{display:flex; flex-direction:column; gap:6px;}
+.li-row{display:grid; grid-template-columns:1fr 90px 40px; gap:8px; align-items:center;}
+.li-row input{font-family:inherit; font-size:15px; padding:9px 10px; border-radius:8px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink);}
+.li-del{width:40px; height:40px; border:none; background:transparent; color:var(--ink-3); cursor:pointer; border-radius:8px; font-size:15px;}
+.li-del:hover{background:var(--critical-soft); color:var(--critical);}
+.bc-msg{font-size:13px;}
+.bc-msg.ok{color:var(--good);} .bc-msg.err{color:var(--critical);}
+
+.foot-note{font-size:13.5px; color:var(--ink-3); margin-top:30px; line-height:1.6; border-top:1px solid var(--border-soft); padding-top:16px;}
+</style>
+
+<div class="wrap">
+  <a class="back-link" href="#" onclick="history.back();return false;">← Back</a>
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Salt City Coffee — Warehouse &amp; Order Fulfillment</div>
+      <h1>Wholesale &amp; Subscription</h1>
+      <div class="sub">Tap a card to change its status — tap a status to save and close. Countdown is our 72-hour (3 business day) ship-by commitment.</div>
+    </div>
+    <div>
+      <span class="sample-pill" id="status-pill">Loading…</span>
+      <div class="status-line" id="status-line"></div>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <select id="filter-stage">
+      <option value="">All statuses</option>
+      <option value="open">Open</option>
+      <option value="new">New</option>
+      <option value="picked">Picked</option>
+      <option value="packaged">Packaged</option>
+    </select>
+    <select id="filter-urgency">
+      <option value="">All orders</option>
+      <option value="overdue">Overdue only</option>
+      <option value="soon">Due within 24h</option>
+    </select>
+  </div>
+
+  <div class="section-head" style="margin-top:0;">
+    <h2>Wholesale</h2>
+    <span class="hint" id="wholesale-count"></span>
+  </div>
+  <div class="card-grid" id="wholesale-grid"></div>
+
+  <div class="section-head">
+    <h2>Subscription</h2>
+    <span class="hint" id="subscription-count"></span>
+  </div>
+  <div class="card-grid" id="subscription-grid"></div>
+
+  <div class="section-head" style="margin-top:34px;">
+    <h2>Add a BlueCart order</h2>
+    <span class="hint">Temporary — while wholesale/subscription hasn't fully moved to Shopify</span>
+  </div>
+  <details class="card toggle-card" id="bc-details">
+    <summary>
+      <div>
+        <div class="lc-title">+ Add manually</div>
+        <div class="lc-sub">Order #, customer, items, total</div>
+      </div>
+      <span class="btn sm" id="bc-toggle-btn">Open</span>
+    </summary>
+    <form class="bc-form" id="bc-form">
+      <div class="bc-row">
+        <div class="field"><label>Order reference</label><input type="text" id="bc-ref" required placeholder="e.g. BC-10432"></div>
+        <div class="field"><label>Order type</label>
+          <select id="bc-type" required>
+            <option value="wholesale">Wholesale</option>
+            <option value="subscription">Subscription</option>
+          </select>
+        </div>
+        <div class="field"><label>Customer</label><input type="text" id="bc-customer" placeholder="e.g. Corner Market Co-op"></div>
+      </div>
+      <div class="field">
+        <label>Line items</label>
+        <div class="li-rows" id="li-rows"></div>
+        <button type="button" class="btn sm" id="li-add" style="align-self:flex-start;">+ Add line item</button>
+      </div>
+      <div class="bc-row">
+        <div class="field"><label>Total price</label><input type="number" step="0.01" id="bc-total" placeholder="0.00"></div>
+        <div class="field"><label>Your name</label><input type="text" id="bc-added-by" placeholder="Who's entering this"></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button type="submit" class="btn primary">Add order</button>
+        <span class="bc-msg" id="bc-msg"></span>
+      </div>
+    </form>
+  </details>
+
+  <div class="foot-note">
+    Statuses here are Order Fulfillment's own: open (just synced in) → new → picked → packaged → shipped (shipped drops it off this page). The small badges under an order's items (🔥 Roasting, 🧺 Bagging, 🥐 Baking) are read-only — they update automatically from the Roastery Production, Bagging Station, and Daily Production List pages and aren't something you set here. The legacy merged Order Fulfillment worklist (cafe + everything) still exists if you need it, but this page is the primary one for wholesale/subscription now.
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+const STAGES = ["open","new","picked","packaged","shipped"];
+const STAGE_LABEL = { open:"Open", new:"New", picked:"Picked", packaged:"Packaged", shipped:"Shipped" };
+const STAGE_ICON = { open:"⚪", new:"🆕", picked:"🧺", packaged:"📦", shipped:"🚚" };
+
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function money(n){
+  if(n === null || n === undefined || n === "") return "";
+  const v = Number(n);
+  if(Number.isNaN(v)) return "";
+  return "$" + v.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function businessDeadline(startIso){
+  const d = new Date(startIso);
+  let count = 0;
+  while(count < 3){
+    d.setDate(d.getDate() + 1);
+    const day = d.getDay();
+    if(day !== 0 && day !== 6) count++;
+  }
+  d.setHours(23,59,59,999);
+  return d;
+}
+function countdownInfo(placedAt){
+  if(!placedAt) return null;
+  const deadline = businessDeadline(placedAt);
+  const ms = deadline.getTime() - Date.now();
+  const overdue = ms < 0;
+  const abs = Math.abs(ms);
+  const h = Math.floor(abs/3600000);
+  const m = Math.floor((abs%3600000)/60000);
+  const hoursLeft = ms/3600000;
+  let chip = "good";
+  if(overdue) chip = "critical";
+  else if(hoursLeft <= 24) chip = "warn";
+  const text = overdue ? `${h}h ${m}m overdue` : `${h}h ${m}m left`;
+  return { overdue, hoursLeft, chip, text };
+}
+
+async function fetchSupabase(path, opts={}){
+  try{
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const { headers: extraHeaders, ...restOpts } = opts;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      ...restOpts,
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, ...(extraHeaders||{}) },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok){
+      const text = await resp.text().catch(()=> "");
+      throw new Error(`Supabase responded ${resp.status}${text ? " — " + text.slice(0,160) : ""}`);
+    }
+    if(resp.status === 204) return { ok:true, rows:[] };
+    const text = await resp.text();
+    const rows = text ? JSON.parse(text) : [];
+    return { ok:true, rows: Array.isArray(rows) ? rows : [rows] };
+  }catch(err){
+    return { ok:false, reason: err.message || "request failed" };
+  }
+}
+
+let allOrders = [];
+let upstream = { roastery:[], bagging:[], baking:[] };
+let expandedId = null;
+let tickHandle = null;
+
+function lineItemSummary(order){
+  if(order.source === "shopify"){
+    return (order.line_items || []).map(li => `${li.title || "item"} x${li.quantity ?? "?"}`).join(", ");
+  }
+  return (order.line_items || []).map(li => `${li.title || "item"} x${li.quantity ?? "?"}`).join(", ");
+}
+
+function upstreamBadges(order){
+  if(order.source !== "shopify") return "";
+  const badges = [];
+  const mk = (list, icon, label) => {
+    const rows = list.filter(r => r.shopify_order_id === order.id);
+    if(!rows.length) return;
+    const done = rows.filter(r => r.phase === "roasted" || r.phase === "ready-to-ship" || r.phase === "completed").length;
+    badges.push(`<span class="chip ${done === rows.length ? "good" : "neutral"}">${icon} ${label} ${done}/${rows.length}</span>`);
+  };
+  mk(upstream.roastery, "🔥", "Roasting");
+  mk(upstream.bagging, "🧺", "Bagging");
+  mk(upstream.baking, "🥐", "Baking");
+  return badges.length ? `<div class="oc-upstream">${badges.join("")}</div>` : "";
+}
+
+function passesFilters(order){
+  const stage = $("#filter-stage").value;
+  const urgency = $("#filter-urgency").value;
+  if(stage && order.local_stage !== stage) return false;
+  if(urgency){
+    const info = countdownInfo(order.placed_at);
+    if(!info) return false;
+    if(urgency === "overdue" && !info.overdue) return false;
+    if(urgency === "soon" && !(info.hoursLeft <= 24 && !info.overdue)) return false;
+  }
+  return true;
+}
+
+function renderGrid(gridId, countId, orderType){
+  const grid = $(gridId);
+  const rows = allOrders.filter(o => o.order_type === orderType).filter(passesFilters);
+  $(countId).textContent = `${rows.length} open`;
+  if(!rows.length){
+    grid.innerHTML = `<div class="empty-note">No open ${orderType} orders match this filter.</div>`;
+    return;
+  }
+  grid.innerHTML = rows.map(order => {
+    const info = countdownInfo(order.placed_at);
+    const isExpanded = expandedId === order.id;
+    const customer = order.customer_name || order.order_label;
+    return `
+    <div class="order-card ${isExpanded ? "expanded" : ""} ${info && info.overdue ? "overdue" : ""}" data-id="${order.id}">
+      <div class="oc-top">
+        <div>
+          <div class="oc-customer">${escapeHtml(customer)}</div>
+          <div class="oc-orderno">${escapeHtml(order.order_label)}${order.total_price ? " · " + money(order.total_price) : ""}</div>
+        </div>
+        <span class="chip ${STAGE_LABEL[order.local_stage] ? (order.local_stage === "open" ? "neutral" : "good") : "neutral"}">${STAGE_ICON[order.local_stage] || ""} ${STAGE_LABEL[order.local_stage] || order.local_stage}</span>
+      </div>
+      <div class="oc-items">${escapeHtml(lineItemSummary(order)) || "—"}</div>
+      ${upstreamBadges(order)}
+      ${info ? `<div class="oc-countdown"><span class="chip ${info.chip}">${info.text}</span></div>` : ""}
+      ${isExpanded ? `
+        <div class="status-picker">
+          ${STAGES.map(s => `<button type="button" class="status-btn ${s === order.local_stage ? "current" : ""}" data-stage="${s}"><span class="ic">${STAGE_ICON[s]}</span>${STAGE_LABEL[s]}</button>`).join("")}
+        </div>
+      ` : `<div class="oc-tap-hint">Tap to change status</div>`}
+    </div>`;
+  }).join("");
+
+  $$(".order-card", grid).forEach(card => {
+    card.addEventListener("click", (e) => {
+      if(e.target.closest(".status-btn")) return;
+      expandedId = expandedId === card.dataset.id ? null : card.dataset.id;
+      renderAll();
+    });
+  });
+  $$(".status-btn", grid).forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const card = btn.closest(".order-card");
+      setStage(card.dataset.id, btn.dataset.stage);
+    });
+  });
+}
+
+function renderAll(){
+  renderGrid("#wholesale-grid", "#wholesale-count", "wholesale");
+  renderGrid("#subscription-grid", "#subscription-count", "subscription");
+}
+
+async function setStage(id, stage){
+  const order = allOrders.find(o => o.id === id);
+  if(!order) return;
+  const table = order.source === "shopify" ? "shopify_order_import" : "manual_order_import";
+  const result = await fetchSupabase(`${table}?id=eq.${id}`, {
+    method:"PATCH", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" },
+    body: JSON.stringify({ local_stage: stage })
+  });
+  expandedId = null;
+  if(!result.ok){ alert("Couldn't save: " + result.reason); }
+  await loadAll();
+}
+
+async function loadAll(){
+  const pill = $("#status-pill");
+  const line = $("#status-line");
+  const [shopifyResult, manualResult] = await Promise.all([
+    fetchSupabase("shopify_order_import?select=id,order_name,order_type,total_price,local_stage,line_items,created_at_shopify,customer_name&local_stage=neq.shipped&order=created_at_shopify.asc"),
+    fetchSupabase("manual_order_import?select=id,order_reference,order_type,customer_name,total_price,local_stage,line_items,created_at&local_stage=neq.shipped&order=created_at.asc")
+  ]);
+  const shopifyRows = shopifyResult.ok ? shopifyResult.rows.map(r => ({
+    id:r.id, source:"shopify", order_type:r.order_type, order_label:r.order_name, customer_name:r.customer_name,
+    total_price:r.total_price, local_stage:r.local_stage, line_items:r.line_items, placed_at:r.created_at_shopify
+  })) : [];
+  const manualRows = manualResult.ok ? manualResult.rows.map(r => ({
+    id:r.id, source:"bluecart", order_type:r.order_type, order_label:r.order_reference, customer_name:r.customer_name,
+    total_price:r.total_price, local_stage:r.local_stage, line_items:r.line_items, placed_at:r.created_at
+  })) : [];
+  allOrders = [...shopifyRows, ...manualRows];
+
+  if(shopifyResult.ok || manualResult.ok){
+    pill.textContent = allOrders.length ? "Live" : "Live — nothing open right now";
+    pill.classList.add("is-live");
+    line.textContent = "Reading/writing shopify_order_import and manual_order_import directly — no login on this tool, so treat it as an honor-system shared board.";
+  } else {
+    pill.textContent = "Not connected yet";
+    pill.classList.remove("is-live");
+    line.textContent = `Couldn't load (${shopifyResult.reason || manualResult.reason}) — run 2026-09-04c_warehouse_fulfillment_v2.sql in Supabase if you haven't yet.`;
+  }
+
+  const shopifyIds = shopifyRows.map(o => o.id);
+  if(shopifyIds.length){
+    const inList = shopifyIds.map(id => `"${id}"`).join(",");
+    const [roasteryResult, baggingResult, bakingResult] = await Promise.all([
+      fetchSupabase(`roastery_items?select=shopify_order_id,phase&shopify_order_id=in.(${inList})`),
+      fetchSupabase(`bagging_items?select=shopify_order_id,phase&shopify_order_id=in.(${inList})`),
+      fetchSupabase(`bake_list_items?select=source_order_id,phase&source_order_id=in.(${inList})`)
+    ]);
+    upstream.roastery = roasteryResult.ok ? roasteryResult.rows : [];
+    upstream.bagging = baggingResult.ok ? baggingResult.rows : [];
+    upstream.baking = (bakingResult.ok ? bakingResult.rows : []).map(r => ({ shopify_order_id: r.source_order_id, phase: r.phase }));
+  } else {
+    upstream = { roastery:[], bagging:[], baking:[] };
+  }
+
+  renderAll();
+}
+
+/* ---- BlueCart form ---- */
+function addLineItemRow(title="", qty=""){
+  const row = document.createElement("div");
+  row.className = "li-row";
+  row.innerHTML = `
+    <input type="text" placeholder="Item" class="li-title" value="${escapeHtml(title)}">
+    <input type="text" placeholder="Qty" class="li-qty" value="${escapeHtml(qty)}">
+    <button type="button" class="li-del">✕</button>`;
+  row.querySelector(".li-del").addEventListener("click", () => row.remove());
+  $("#li-rows").appendChild(row);
+}
+async function submitBlueCartOrder(e){
+  e.preventDefault();
+  const msg = $("#bc-msg");
+  msg.textContent = ""; msg.className = "bc-msg";
+  const ref = $("#bc-ref").value.trim();
+  if(!ref){ msg.textContent = "Order reference is required."; msg.className = "bc-msg err"; return; }
+  const lineItems = $$(".li-row").map(row => ({
+    title: row.querySelector(".li-title").value.trim(),
+    quantity: row.querySelector(".li-qty").value.trim()
+  })).filter(li => li.title || li.quantity);
+  const payload = {
+    order_reference: ref, order_type: $("#bc-type").value,
+    customer_name: $("#bc-customer").value.trim() || null, line_items: lineItems,
+    total_price: $("#bc-total").value ? Number($("#bc-total").value) : null,
+    added_by: $("#bc-added-by").value.trim() || null
+  };
+  const submitBtn = $("#bc-form button[type=submit]");
+  submitBtn.disabled = true;
+  const result = await fetchSupabase("manual_order_import", {
+    method:"POST", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify(payload)
+  });
+  submitBtn.disabled = false;
+  if(result.ok){
+    msg.textContent = "Added."; msg.className = "bc-msg ok";
+    $("#bc-form").reset(); $("#li-rows").innerHTML = ""; addLineItemRow();
+    await loadAll();
+  } else { msg.textContent = "Couldn't save: " + result.reason; msg.className = "bc-msg err"; }
+}
+
+$("#filter-stage").addEventListener("change", renderAll);
+$("#filter-urgency").addEventListener("change", renderAll);
+$("#li-add").addEventListener("click", () => addLineItemRow());
+$("#bc-form").addEventListener("submit", submitBlueCartOrder);
+$("#bc-details").addEventListener("toggle", () => { $("#bc-toggle-btn").textContent = $("#bc-details").open ? "Close" : "Open"; });
+
+addLineItemRow();
+loadAll();
+tickHandle = setInterval(renderAll, 60000);
+</script>

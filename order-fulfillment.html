@@ -1,0 +1,445 @@
+<title>Order Fulfillment — Salt City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============================= TOKENS (matches Command Deck) ============================= */
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --serious:#C15A34; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:10px; --radius-sm:6px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 6px 20px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+    --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:14.5px; line-height:1.5; -webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:600; margin:0; text-wrap:balance; color:var(--ink);}
+a{color:inherit;} button{font-family:inherit;}
+.mono{font-family:var(--font-mono);}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+.wrap{max-width:1180px; margin:0 auto; padding:28px 28px 72px;}
+.masthead{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px; flex-wrap:wrap;}
+.eyebrow{font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--caramel); font-weight:700;}
+.masthead h1{font-size:26px; margin-top:4px;}
+.masthead .sub{color:var(--ink-2); font-size:13.3px; margin-top:5px; max-width:60ch;}
+.back-link{font-size:12.5px; color:var(--ink-2); text-decoration:none; display:inline-flex; align-items:center; gap:5px;}
+
+.sample-pill{
+  display:inline-flex; align-items:center; gap:6px; background:var(--warn-soft); color:var(--warn);
+  border:1px solid color-mix(in srgb, var(--warn) 35%, transparent); font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:5px 10px; border-radius:99px; white-space:nowrap;
+}
+.sample-pill.is-live{ background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb, var(--good) 35%, transparent); }
+.status-line{font-size:12px; color:var(--ink-3); margin-top:10px;}
+
+.grid{display:grid; gap:14px;}
+.kpi-row{grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); margin-bottom:22px;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:16px;}
+.kpi{padding:14px 16px;}
+.kpi .label{font-size:11.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+.kpi .value{font-family:var(--font-mono); font-size:23px; font-weight:600; margin-top:6px; letter-spacing:-.01em;}
+
+.chip{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; letter-spacing:.01em;}
+.chip::before{content:""; width:8px; height:8px; flex:0 0 auto; background:currentColor;}
+.chip.good{background:var(--good-soft); color:var(--good);} .chip.good::before{border-radius:50%;}
+.chip.warn{background:var(--warn-soft); color:var(--warn);} .chip.warn::before{border-radius:1.5px; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);}
+.chip.serious{background:var(--serious-soft); color:var(--serious);} .chip.serious::before{border-radius:1.5px; clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);}
+.chip.neutral{background:var(--surface-alt); color:var(--ink-2);} .chip.neutral::before{border-radius:1.5px; transform:rotate(45deg);}
+.chip.src{background:var(--surface-alt); color:var(--ink-2); text-transform:uppercase; font-size:10px;}
+.chip.src::before{display:none;}
+
+.btn{display:inline-flex; align-items:center; gap:7px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:13px; font-weight:600; padding:8px 13px; cursor:pointer;}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.btn.primary:hover{filter:brightness(1.05);}
+.btn.sm{padding:5px 10px; font-size:12px;}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:30px 0 12px;}
+.section-head h2{font-size:16.5px;}
+.section-head .hint{font-size:12px; color:var(--ink-3);}
+
+table{width:100%; border-collapse:collapse; font-size:13px;}
+th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); font-weight:700; padding:0 10px 8px; border-bottom:1px solid var(--border);}
+td{padding:10px 10px; border-bottom:1px solid var(--border-soft); vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+.table-wrap{overflow-x:auto; border-radius:var(--radius); border:1px solid var(--border); background:var(--surface);}
+.table-wrap table{min-width:920px;}
+.num{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+.order-name{font-weight:600;}
+.line-summary{color:var(--ink-3); font-size:12px; margin-top:2px; max-width:340px;}
+.empty-note{font-size:12.5px; color:var(--ink-3); font-style:italic; padding:14px 4px;}
+
+.filter-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+.filter-row select{font-family:inherit; font-size:12.5px; padding:6px 10px; border-radius:7px; border:1px solid var(--border); background:var(--surface); color:var(--ink);}
+
+/* ---- BlueCart form ---- */
+.bc-form{display:flex; flex-direction:column; gap:12px;}
+.bc-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;}
+.field{display:flex; flex-direction:column; gap:4px;}
+.field label{font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-3); font-weight:600;}
+.field input, .field select, .field textarea{
+  font-family:inherit; font-size:13.3px; padding:8px 10px; border-radius:7px; border:1px solid var(--border);
+  background:var(--surface); color:var(--ink);
+}
+.field textarea{resize:vertical; min-height:44px;}
+.li-rows{display:flex; flex-direction:column; gap:6px;}
+.li-row{display:grid; grid-template-columns:1fr 90px 110px 30px; gap:8px; align-items:center;}
+.li-row input{font-family:inherit; font-size:13px; padding:7px 9px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--ink);}
+.li-del{width:26px; height:26px; border:none; background:transparent; color:var(--ink-3); cursor:pointer; border-radius:5px; font-size:14px;}
+.li-del:hover{background:var(--critical-soft); color:var(--critical);}
+.bc-actions{display:flex; align-items:center; gap:10px;}
+.bc-msg{font-size:12.5px;}
+.bc-msg.ok{color:var(--good);} .bc-msg.err{color:var(--critical);}
+.toggle-card{cursor:pointer;}
+.toggle-card summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;}
+.toggle-card summary::-webkit-details-marker{display:none;}
+.toggle-card summary .lc-title{font-family:var(--font-display); font-size:16px; font-weight:600;}
+.toggle-card summary .lc-sub{font-size:12.5px; color:var(--ink-2); margin-top:3px; font-family:var(--font-body); font-weight:400;}
+.toggle-card[open] summary{margin-bottom:16px;}
+
+.foot-note{font-size:11.5px; color:var(--ink-3); margin-top:26px; line-height:1.6; border-top:1px solid var(--border-soft); padding-top:16px;}
+</style>
+
+<div class="wrap">
+  <a class="back-link" href="#" onclick="history.back();return false;">← Back</a>
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Salt City Coffee — Warehouse · Order Fulfillment</div>
+      <h1>Order Fulfillment</h1>
+      <div class="sub">One merged, stage-tracked worklist — cafe/internal orders, Shopify wholesale &amp; subscription, and BlueCart manual entries — instead of separate trackers per source.</div>
+    </div>
+    <div>
+      <span class="sample-pill" id="status-pill">Loading…</span>
+      <div class="status-line" id="status-line"></div>
+    </div>
+  </div>
+
+  <div class="grid kpi-row">
+    <div class="card kpi"><div class="label">Open orders</div><div class="value num" id="kpi-total">–</div></div>
+    <div class="card kpi"><div class="label">Open / New</div><div class="value num" id="kpi-new">–</div></div>
+    <div class="card kpi"><div class="label">Picking / Picked</div><div class="value num" id="kpi-picking">–</div></div>
+    <div class="card kpi"><div class="label">Packed / Packaged</div><div class="value num" id="kpi-packed">–</div></div>
+    <div class="card kpi"><div class="label">Shipped</div><div class="value num" id="kpi-shipped">–</div></div>
+  </div>
+
+  <div class="section-head">
+    <h2>Worklist</h2>
+    <span class="hint">Sorted oldest-first — advance a stage as it moves through the warehouse</span>
+  </div>
+  <div class="filter-row">
+    <select id="filter-source">
+      <option value="">All sources</option>
+      <option value="cafe">Cafe / internal</option>
+      <option value="shopify">Shopify</option>
+      <option value="bluecart">BlueCart</option>
+    </select>
+    <select id="filter-stage">
+      <option value="">All stages</option>
+      <option value="open">Open</option>
+      <option value="new">New</option>
+      <option value="picking">Picking (cafe)</option>
+      <option value="picked">Picked</option>
+      <option value="packed">Packed (cafe)</option>
+      <option value="packaged">Packaged</option>
+      <option value="shipped">Shipped</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Source</th><th>Order</th><th>Type</th><th>Destination / customer</th><th>Items</th><th>Stage</th><th>Placed</th><th></th></tr>
+      </thead>
+      <tbody id="worklist-body"></tbody>
+    </table>
+  </div>
+
+  <div class="section-head" style="margin-top:34px;">
+    <h2>BlueCart manual entry</h2>
+    <span class="hint">Temporary — while wholesale/subscription hasn't fully moved to Shopify</span>
+  </div>
+  <details class="card toggle-card" id="bc-details">
+    <summary>
+      <div>
+        <div class="lc-title">+ Add a BlueCart order</div>
+        <div class="lc-sub">Type in what's on the invoice — no automatic invoice upload in this tool yet</div>
+      </div>
+      <span class="btn sm" id="bc-toggle-btn">Open</span>
+    </summary>
+    <form class="bc-form" id="bc-form">
+      <div class="bc-row">
+        <div class="field"><label>Order reference (BlueCart PO/order #)</label><input type="text" id="bc-ref" required placeholder="e.g. BC-10432"></div>
+        <div class="field"><label>Order type</label>
+          <select id="bc-type" required>
+            <option value="wholesale">Wholesale</option>
+            <option value="subscription">Subscription</option>
+          </select>
+        </div>
+        <div class="field"><label>Customer / account</label><input type="text" id="bc-customer" placeholder="e.g. Corner Market Co-op"></div>
+      </div>
+      <div class="field">
+        <label>Line items</label>
+        <div class="li-rows" id="li-rows"></div>
+        <button type="button" class="btn sm" id="li-add" style="align-self:flex-start;">+ Add line item</button>
+      </div>
+      <div class="bc-row">
+        <div class="field"><label>Total price</label><input type="number" step="0.01" id="bc-total" placeholder="0.00"></div>
+        <div class="field"><label>Currency</label><input type="text" id="bc-currency" value="USD"></div>
+        <div class="field"><label>Your name</label><input type="text" id="bc-added-by" placeholder="Who's entering this"></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="bc-notes" placeholder="Anything worth flagging for the warehouse"></textarea></div>
+      <div class="bc-actions">
+        <button type="submit" class="btn primary">Add order to worklist</button>
+        <span class="bc-msg" id="bc-msg"></span>
+      </div>
+    </form>
+  </details>
+
+  <div class="foot-note">
+    Cafe/internal orders are read-only here — their stage is set in the existing warehouse picking &amp; delivery app. Shopify and BlueCart rows can be advanced directly from this page; marking an order <b>Delivered</b> clears it from the worklist. This merges what used to be separate wholesale and internal-order trackers into one queue, per the Order Fulfillment role's scope in <span class="mono">The Command Chain</span>.
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+// Shopify/BlueCart orders (the only editable_here rows) now use this vocabulary — used for
+// the "advance to next stage" button. Cafe rows use their own separate new/picking/packed/
+// shipped/delivered system (read-only here) — both are covered in the label/chip maps below.
+const STAGES = ["open","new","picked","packaged","shipped"];
+const STAGE_LABEL = { open:"Open", new:"New", picking:"Picking", picked:"Picked", packed:"Packed", packaged:"Packaged", shipped:"Shipped", delivered:"Delivered" };
+const STAGE_CHIP = { open:"neutral", new:"neutral", picking:"warn", picked:"warn", packed:"good", packaged:"good", shipped:"good", delivered:"good" };
+const SOURCE_LABEL = { cafe:"Cafe", shopify:"Shopify", bluecart:"BlueCart" };
+
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function money(n, currency){
+  if(n === null || n === undefined || n === "") return "–";
+  const v = Number(n);
+  if(Number.isNaN(v)) return "–";
+  return (currency && currency !== "USD" ? currency + " " : "$") + v.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function timeAgo(iso){
+  if(!iso) return "–";
+  const d = new Date(iso);
+  const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+  if(days <= 0) return "today";
+  if(days === 1) return "1 day ago";
+  return `${days} days ago`;
+}
+
+async function fetchSupabase(path, opts={}){
+  try{
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const { headers: extraHeaders, ...restOpts } = opts;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      ...restOpts,
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, ...(extraHeaders||{}) },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok){
+      const text = await resp.text().catch(()=> "");
+      throw new Error(`Supabase responded ${resp.status}${text ? " — " + text.slice(0,160) : ""}`);
+    }
+    if(resp.status === 204) return { ok:true, rows:[] };
+    const text = await resp.text();
+    const rows = text ? JSON.parse(text) : [];
+    return { ok:true, rows: Array.isArray(rows) ? rows : [rows] };
+  }catch(err){
+    return { ok:false, reason: err.message || "request failed" };
+  }
+}
+
+let allRows = [];
+
+function applyFilters(rows){
+  const src = $("#filter-source").value;
+  const stage = $("#filter-stage").value;
+  return rows.filter(r => (!src || r.source === src) && (!stage || r.stage === stage));
+}
+
+function renderWorklist(){
+  const body = $("#worklist-body");
+  const rows = applyFilters(allRows);
+  if(!rows.length){
+    body.innerHTML = `<tr><td colspan="8"><div class="empty-note">No open orders match this filter.</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = rows.map(r => {
+    const stageChip = STAGE_CHIP[r.stage] || "neutral";
+    const stageLabel = STAGE_LABEL[r.stage] || r.stage;
+    const nextIdx = STAGES.indexOf(r.stage) + 1;
+    const nextStage = r.editable_here && nextIdx < STAGES.length ? STAGES[nextIdx] : null;
+    const actionBtn = r.editable_here
+      ? (nextStage
+          ? `<button class="btn sm" data-source="${r.source}" data-id="${escapeHtml(r.detail_id)}" data-next="${nextStage}">→ ${STAGE_LABEL[nextStage]}</button>`
+          : "")
+      : `<span class="hint" style="font-size:11px;">via warehouse app</span>`;
+    return `<tr>
+      <td><span class="chip src">${SOURCE_LABEL[r.source] || r.source}</span></td>
+      <td><div class="order-name">${escapeHtml(r.order_label)}</div>${r.line_item_summary ? `<div class="line-summary">${escapeHtml(r.line_item_summary)}</div>` : ""}</td>
+      <td style="text-transform:capitalize;">${escapeHtml(r.order_type)}</td>
+      <td>${escapeHtml(r.destination) || "–"}</td>
+      <td class="num">${r.item_count ?? "–"}${r.total_value !== null && r.total_value !== undefined ? `<div class="line-summary">${money(r.total_value)}</div>` : ""}</td>
+      <td><span class="chip ${stageChip}">${stageLabel}</span></td>
+      <td class="num">${timeAgo(r.placed_at)}</td>
+      <td>${actionBtn}</td>
+    </tr>`;
+  }).join("");
+
+  $$("#worklist-body button[data-source]").forEach(btn => {
+    btn.addEventListener("click", () => advanceStage(btn.dataset.source, btn.dataset.id, btn.dataset.next, btn));
+  });
+}
+
+function renderKpis(){
+  // Cafe orders and Shopify/BlueCart orders use two different stage vocabularies merged
+  // into one queue — each KPI tile counts the matching stage from either one.
+  const counts = { open:0, new:0, picking:0, picked:0, packed:0, packaged:0, shipped:0 };
+  allRows.forEach(r => { if(counts[r.stage] !== undefined) counts[r.stage]++; });
+  $("#kpi-total").textContent = allRows.length;
+  $("#kpi-new").textContent = counts.open + counts.new;
+  $("#kpi-picking").textContent = counts.picking + counts.picked;
+  $("#kpi-packed").textContent = counts.packed + counts.packaged;
+  $("#kpi-shipped").textContent = counts.shipped;
+}
+
+async function advanceStage(source, id, nextStage, btn){
+  if(btn) btn.disabled = true;
+  const table = source === "shopify" ? "shopify_order_import" : "manual_order_import";
+  const result = await fetchSupabase(`${table}?id=eq.${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
+    body: JSON.stringify({ local_stage: nextStage })
+  });
+  if(!result.ok){
+    alert("Couldn't update that order: " + result.reason);
+    if(btn) btn.disabled = false;
+    return;
+  }
+  await loadWorklist();
+}
+
+async function loadWorklist(){
+  const result = await fetchSupabase("fulfillment_worklist_public?select=*");
+  const pill = $("#status-pill");
+  const line = $("#status-line");
+  if(result.ok){
+    allRows = result.rows;
+    pill.textContent = allRows.length ? "Live" : "Live — no open orders";
+    pill.classList.add("is-live");
+    line.textContent = "Reading fulfillment_worklist_public — merges orders, shopify_order_import, and manual_order_import.";
+  } else {
+    allRows = [];
+    pill.textContent = "Not connected yet";
+    pill.classList.remove("is-live");
+    line.textContent = `Couldn't load (${result.reason}) — run the 2026-09-04_fulfillment_and_bake_list.sql migration in Supabase if you haven't yet.`;
+  }
+  renderKpis();
+  renderWorklist();
+}
+
+/* ---- BlueCart form ---- */
+function addLineItemRow(title="", qty="", sku=""){
+  const row = document.createElement("div");
+  row.className = "li-row";
+  row.innerHTML = `
+    <input type="text" placeholder="Item / description" class="li-title" value="${escapeHtml(title)}">
+    <input type="text" placeholder="Qty" class="li-qty" value="${escapeHtml(qty)}">
+    <input type="text" placeholder="SKU (optional)" class="li-sku" value="${escapeHtml(sku)}">
+    <button type="button" class="li-del" title="Remove">✕</button>`;
+  row.querySelector(".li-del").addEventListener("click", () => row.remove());
+  $("#li-rows").appendChild(row);
+}
+
+async function submitBlueCartOrder(e){
+  e.preventDefault();
+  const msg = $("#bc-msg");
+  msg.textContent = ""; msg.className = "bc-msg";
+  const ref = $("#bc-ref").value.trim();
+  if(!ref){ msg.textContent = "Order reference is required."; msg.className = "bc-msg err"; return; }
+  const lineItems = $$(".li-row").map(row => ({
+    title: row.querySelector(".li-title").value.trim(),
+    quantity: row.querySelector(".li-qty").value.trim(),
+    sku: row.querySelector(".li-sku").value.trim() || null
+  })).filter(li => li.title || li.quantity);
+
+  const payload = {
+    order_reference: ref,
+    order_type: $("#bc-type").value,
+    customer_name: $("#bc-customer").value.trim() || null,
+    line_items: lineItems,
+    total_price: $("#bc-total").value ? Number($("#bc-total").value) : null,
+    currency: $("#bc-currency").value.trim() || "USD",
+    notes: $("#bc-notes").value.trim() || null,
+    added_by: $("#bc-added-by").value.trim() || null
+  };
+
+  const submitBtn = $("#bc-form button[type=submit]");
+  submitBtn.disabled = true;
+  const result = await fetchSupabase("manual_order_import", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
+    body: JSON.stringify(payload)
+  });
+  submitBtn.disabled = false;
+  if(result.ok){
+    msg.textContent = "Added — showing up in the worklist above.";
+    msg.className = "bc-msg ok";
+    $("#bc-form").reset();
+    $("#li-rows").innerHTML = "";
+    addLineItemRow();
+    await loadWorklist();
+  } else {
+    msg.textContent = "Couldn't save: " + result.reason;
+    msg.className = "bc-msg err";
+  }
+}
+
+$("#filter-source").addEventListener("change", renderWorklist);
+$("#filter-stage").addEventListener("change", renderWorklist);
+$("#li-add").addEventListener("click", () => addLineItemRow());
+$("#bc-form").addEventListener("submit", submitBlueCartOrder);
+$("#bc-details").addEventListener("toggle", () => { $("#bc-toggle-btn").textContent = $("#bc-details").open ? "Close" : "Open"; });
+
+addLineItemRow();
+loadWorklist();
+</script>

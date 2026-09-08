@@ -1,0 +1,485 @@
+<title>Marketing Planning — Salt City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --serious:#C15A34; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:10px; --radius-sm:6px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 6px 20px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:600; margin:0; text-wrap:balance; color:var(--ink);}
+a{color:inherit;} button{font-family:inherit; touch-action:manipulation;}
+.mono{font-family:var(--font-mono);}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+.wrap{max-width:1080px; margin:0 auto; padding:20px 20px 90px;}
+.masthead{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px; flex-wrap:wrap;}
+.eyebrow{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--caramel); font-weight:700;}
+.masthead h1{font-size:28px; margin-top:4px;}
+.masthead .sub{color:var(--ink-2); font-size:15px; margin-top:6px; max-width:64ch;}
+.status-line{font-size:12px; color:var(--ink-3); margin-top:10px;}
+.sample-pill{
+  display:inline-flex; align-items:center; gap:6px; background:var(--warn-soft); color:var(--warn);
+  border:1px solid color-mix(in srgb, var(--warn) 35%, transparent); font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:5px 10px; border-radius:99px; white-space:nowrap;
+}
+.sample-pill.is-live{ background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb, var(--good) 35%, transparent); }
+
+.grid{display:grid; gap:14px;}
+.kpi-row{grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); margin-bottom:22px;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:16px;}
+.kpi{padding:14px 16px;}
+.kpi .label{font-size:11.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+.kpi .value{font-family:var(--font-mono); font-size:24px; font-weight:600; margin-top:6px; letter-spacing:-.01em;}
+
+.chip{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; letter-spacing:.01em;}
+.chip::before{content:""; width:8px; height:8px; flex:0 0 auto; background:currentColor;}
+.chip.good{background:var(--good-soft); color:var(--good);} .chip.good::before{border-radius:50%;}
+.chip.warn{background:var(--warn-soft); color:var(--warn);} .chip.warn::before{border-radius:1.5px; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);}
+.chip.serious{background:var(--serious-soft); color:var(--serious);} .chip.serious::before{border-radius:1.5px; clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);}
+.chip.critical{background:var(--critical-soft); color:var(--critical);} .chip.critical::before{border-radius:1.5px; clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);}
+.chip.neutral{background:var(--surface-alt); color:var(--ink-2);} .chip.neutral::before{border-radius:1.5px; transform:rotate(45deg);}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:11px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); font-size:15px; font-weight:700; padding:12px 18px; min-height:46px; cursor:pointer;}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.btn.primary:hover{filter:brightness(1.05);}
+.btn.sm{padding:9px 14px; font-size:13.5px; min-height:38px;}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:30px 0 12px;}
+.section-head h2{font-size:18px;}
+.section-head .hint{font-size:13px; color:var(--ink-3);}
+
+.filter-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+.filter-row select{font-family:inherit; font-size:15px; padding:9px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); min-height:42px;}
+
+form.intake{display:flex; flex-direction:column; gap:12px;}
+form.intake .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+form.intake .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+form.intake label{display:flex; flex-direction:column; gap:5px; font-size:13px; color:var(--ink-2); font-weight:600;}
+form.intake input, form.intake textarea{
+  font-family:inherit; font-size:15px; padding:11px 12px; border-radius:10px; border:1.5px solid var(--border);
+  background:var(--surface); color:var(--ink); min-height:44px;
+}
+form.intake textarea{min-height:70px; resize:vertical;}
+@media (max-width:680px){ form.intake .row2, form.intake .row3{grid-template-columns:1fr;} }
+
+.check-row{display:flex; align-items:center; gap:9px; font-size:14px; color:var(--ink); font-weight:600; cursor:pointer; user-select:none;}
+.check-row input[type="checkbox"]{width:19px; height:19px; accent-color:var(--accent); cursor:pointer;}
+.platform-picker{display:none; flex-wrap:wrap; gap:8px; margin-top:-2px;}
+.platform-picker.open{display:flex;}
+.platform-chip{
+  font-family:inherit; font-size:13.5px; font-weight:600; padding:8px 14px; border-radius:99px;
+  border:1.5px solid var(--border); background:var(--surface); color:var(--ink-2); cursor:pointer;
+}
+.platform-chip.selected{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+.platform-chip:hover{border-color:var(--accent);}
+
+.board{display:flex; flex-direction:column; gap:12px;}
+.camp-card{background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:16px 18px;}
+.camp-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; cursor:pointer;}
+.camp-title{font-family:var(--font-display); font-weight:600; font-size:18px; outline:none;}
+.camp-brief{font-size:13.5px; color:var(--ink-2); margin-top:4px; max-width:60ch;}
+.camp-meta{font-size:12px; color:var(--ink-3); margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;}
+.camp-chevron{color:var(--ink-3); font-size:13px; flex:0 0 auto; padding-top:3px;}
+.camp-edit{display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--border-soft); flex-direction:column; gap:10px;}
+.camp-edit.open{display:flex;}
+.camp-edit .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.camp-edit label{display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--ink-3); font-weight:600;}
+.camp-edit input, .camp-edit select, .camp-edit textarea{
+  font-family:inherit; font-size:14px; padding:9px 10px; border-radius:8px; border:1.5px solid var(--border);
+  background:var(--surface); color:var(--ink); min-height:38px;
+}
+.camp-edit textarea{min-height:56px; resize:vertical;}
+.camp-edit .check-row{font-size:13px;}
+.camp-edit .platform-chip{font-size:12.5px; padding:6px 11px;}
+.camp-actions{display:flex; justify-content:space-between; align-items:center; margin-top:4px;}
+.camp-del{border:none; background:none; color:var(--ink-3); cursor:pointer; font-size:13px; padding:6px;}
+.camp-del:hover{color:var(--critical);}
+@media (max-width:600px){ .camp-edit .row2{grid-template-columns:1fr;} }
+
+.empty-note{font-size:14px; color:var(--ink-3); font-style:italic; padding:14px 4px;}
+.foot-note{font-size:13px; color:var(--ink-3); margin-top:26px; line-height:1.6; border-top:1px solid var(--border-soft); padding-top:16px;}
+</style>
+
+<div class="wrap">
+  <a class="btn sm" style="text-decoration:none;margin-bottom:14px;display:inline-flex;" href="#" onclick="history.back();return false;">← Back</a>
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Salt City Coffee — Marketing</div>
+      <h1>Marketing Planning</h1>
+      <div class="sub">One shared place for campaign requests and planning — for Jon and anyone collaborating on marketing, including an outside marketing partner. Submit a request below, or open any campaign on the board to move it forward.</div>
+    </div>
+    <div>
+      <span class="sample-pill" id="status-pill">Loading…</span>
+      <div class="status-line" id="status-line"></div>
+    </div>
+  </div>
+
+  <div class="grid kpi-row">
+    <div class="card kpi"><div class="label">Submitted</div><div class="value mono" id="kpi-submitted">–</div></div>
+    <div class="card kpi"><div class="label">Planned</div><div class="value mono" id="kpi-planned">–</div></div>
+    <div class="card kpi"><div class="label">Scheduled</div><div class="value mono" id="kpi-scheduled">–</div></div>
+    <div class="card kpi"><div class="label">Live</div><div class="value mono" id="kpi-live">–</div></div>
+    <div class="card kpi"><div class="label">Completed</div><div class="value mono" id="kpi-completed">–</div></div>
+  </div>
+
+  <div class="section-head" style="margin-top:0;">
+    <h2>Create a marketing campaign</h2>
+    <span class="hint">Anyone can add one — Jon, or an outside marketing collaborator</span>
+  </div>
+  <div class="card">
+    <form class="intake" id="intake-form">
+      <label>Campaign title
+        <input type="text" id="in-title" placeholder="e.g. Fall Seasonal Launch" required>
+      </label>
+      <div class="row2">
+        <label>Owner
+          <input type="text" id="in-owner" placeholder="Who's running this?">
+        </label>
+        <label>Status
+          <select id="in-status">
+            <option value="submitted">Submitted</option>
+            <option value="planned">Planned</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="live">Live</option>
+            <option value="completed">Completed</option>
+            <option value="archived">Archived</option>
+          </select>
+        </label>
+      </div>
+      <label>Brief / goal
+        <textarea id="in-brief" placeholder="What's this campaign for? Target outcome?"></textarea>
+      </label>
+      <div class="row3">
+        <label>Channels
+          <input type="text" id="in-channels" placeholder="Social + Email">
+        </label>
+        <label>Target segment
+          <input type="text" id="in-segment" placeholder="All guests, Loyal+, Clay 5-mile radius…">
+        </label>
+        <label>Window
+          <input type="text" id="in-window" placeholder="Sep 8 – Sep 22">
+        </label>
+      </div>
+      <label class="check-row"><input type="checkbox" id="in-is-social"> Is this a social media campaign?</label>
+      <div class="platform-picker" id="in-platform-picker">
+        <button type="button" class="platform-chip" data-platform="Instagram">Instagram</button>
+        <button type="button" class="platform-chip" data-platform="Facebook">Facebook</button>
+        <button type="button" class="platform-chip" data-platform="TikTok">TikTok</button>
+        <button type="button" class="platform-chip" data-platform="X">X</button>
+        <button type="button" class="platform-chip" data-platform="LinkedIn">LinkedIn</button>
+        <button type="button" class="platform-chip" data-platform="YouTube">YouTube</button>
+        <button type="button" class="platform-chip" data-platform="Pinterest">Pinterest</button>
+      </div>
+      <div class="row2">
+        <label>Cost (optional)
+          <input type="number" id="in-budget" placeholder="0" min="0" step="1">
+        </label>
+        <label>Assets needed
+          <input type="text" id="in-assets" placeholder="Photos, copy, graphics…">
+        </label>
+      </div>
+      <label>Your name
+        <input type="text" id="in-requester" placeholder="Who's creating this?" required>
+      </label>
+      <div><button type="submit" class="btn primary">Create campaign</button></div>
+    </form>
+  </div>
+
+  <div class="section-head">
+    <h2>Planning board</h2>
+    <span class="hint" id="board-hint">Tap a campaign to edit owner, status, and details</span>
+  </div>
+  <div class="filter-row">
+    <select id="filter-status">
+      <option value="">All statuses</option>
+      <option value="submitted">Submitted</option>
+      <option value="planned">Planned</option>
+      <option value="scheduled">Scheduled</option>
+      <option value="live">Live</option>
+      <option value="completed">Completed</option>
+      <option value="archived">Archived</option>
+    </select>
+  </div>
+  <div class="board" id="board"></div>
+
+  <div class="foot-note">
+    Shared with anyone who has this page's link — same honor-system trust level as the COO Priorities list
+    and the Idea Decision Matrix elsewhere in this project (no login layer exists here). This is its own
+    tool for now, not wired into a CRM — Customer Journey &amp; Marketing on the Command Deck is still
+    sample data pending a real CRM schema; once that exists, connecting the two is a follow-up.
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+const STATUS_LABEL = { submitted:"Submitted", planned:"Planned", scheduled:"Scheduled", live:"Live", completed:"Completed", archived:"Archived" };
+const STATUS_CHIP = { submitted:"neutral", planned:"warn", scheduled:"warn", live:"good", completed:"good", archived:"neutral" };
+
+let allCampaigns = [];
+let expandedId = null;
+let inSelectedPlatforms = new Set();
+
+function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+async function fetchSupabase(path, opts={}){
+  try{
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const { headers: extraHeaders, ...restOpts } = opts;
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      ...restOpts,
+      headers:{ apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, ...(extraHeaders||{}) },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok){
+      const text = await resp.text().catch(()=> "");
+      throw new Error(`Supabase responded ${resp.status}${text ? " — " + text.slice(0,160) : ""}`);
+    }
+    if(resp.status === 204) return { ok:true, rows:[] };
+    const rows = await resp.json();
+    return { ok:true, rows: Array.isArray(rows) ? rows : [rows] };
+  }catch(err){
+    return { ok:false, reason: err.message || "request failed" };
+  }
+}
+
+function renderKpis(){
+  const count = s => allCampaigns.filter(c => c.status === s).length;
+  $("#kpi-submitted").textContent = count("submitted");
+  $("#kpi-planned").textContent = count("planned");
+  $("#kpi-scheduled").textContent = count("scheduled");
+  $("#kpi-live").textContent = count("live");
+  $("#kpi-completed").textContent = count("completed");
+}
+
+function renderBoard(){
+  const filter = $("#filter-status").value;
+  const rows = allCampaigns
+    .filter(c => !filter || c.status === filter)
+    .filter(c => c.status !== "archived" || filter === "archived")
+    .sort((a,b) => (b.created_at||"").localeCompare(a.created_at||""));
+  const board = $("#board");
+  if(!rows.length){
+    board.innerHTML = `<div class="empty-note">No campaigns yet — submit one above, or adjust the filter.</div>`;
+    return;
+  }
+  board.innerHTML = rows.map(c => {
+    const isOpen = expandedId === c.id;
+    return `
+    <div class="camp-card" data-id="${c.id}">
+      <div class="camp-top">
+        <div>
+          <div class="camp-title">${escapeHtml(c.title)}</div>
+          ${c.brief ? `<div class="camp-brief">${escapeHtml(c.brief)}</div>` : ""}
+          <div class="camp-meta">
+            <span class="chip ${STATUS_CHIP[c.status]||'neutral'}">${STATUS_LABEL[c.status]||c.status}</span>
+            ${c.owner ? `<span>Owner: ${escapeHtml(c.owner)}</span>` : `<span>Unassigned</span>`}
+            ${c.window_text ? `<span>${escapeHtml(c.window_text)}</span>` : ""}
+            ${c.is_social && c.platforms ? `<span>📱 ${escapeHtml(c.platforms)}</span>` : ""}
+            ${c.budget!=null ? `<span>$${Number(c.budget).toLocaleString()}</span>` : ""}
+            ${c.requested_by ? `<span>Requested by ${escapeHtml(c.requested_by)}</span>` : ""}
+          </div>
+        </div>
+        <span class="camp-chevron">${isOpen?"▲":"▼"}</span>
+      </div>
+      <div class="camp-edit ${isOpen?"open":""}">
+        <div class="row2">
+          <label>Status
+            <select class="f-status">
+              ${Object.keys(STATUS_LABEL).map(s => `<option value="${s}" ${s===c.status?"selected":""}>${STATUS_LABEL[s]}</option>`).join("")}
+            </select>
+          </label>
+          <label>Owner
+            <input type="text" class="f-owner" value="${escapeHtml(c.owner||"")}" placeholder="Who's running this?">
+          </label>
+        </div>
+        <div class="row2">
+          <label>Channels
+            <input type="text" class="f-channels" value="${escapeHtml(c.channels||"")}">
+          </label>
+          <label>Target segment
+            <input type="text" class="f-segment" value="${escapeHtml(c.segment||"")}">
+          </label>
+        </div>
+        <label class="check-row"><input type="checkbox" class="f-is-social" ${c.is_social?"checked":""}> Social media campaign</label>
+        <div class="platform-picker ${c.is_social?"open":""}">
+          ${["Instagram","Facebook","TikTok","X","LinkedIn","YouTube","Pinterest"].map(p => `<button type="button" class="platform-chip ${((c.platforms||"").split(",").map(s=>s.trim()).includes(p))?"selected":""}" data-platform="${p}">${p}</button>`).join("")}
+        </div>
+        <div class="row2">
+          <label>Window
+            <input type="text" class="f-window" value="${escapeHtml(c.window_text||"")}">
+          </label>
+          <label>Cost
+            <input type="number" class="f-budget" value="${c.budget!=null?c.budget:""}" min="0" step="1">
+          </label>
+        </div>
+        <label>Assets needed
+          <input type="text" class="f-assets" value="${escapeHtml(c.assets_needed||"")}">
+        </label>
+        <label>Notes
+          <textarea class="f-notes">${escapeHtml(c.notes||"")}</textarea>
+        </label>
+        <div class="camp-actions">
+          <span style="font-size:11.5px;color:var(--ink-3);">Requested by ${escapeHtml(c.requested_by||"—")}</span>
+          <button type="button" class="camp-del">✕ Remove campaign</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  $$(".camp-card", board).forEach(card => {
+    const id = card.dataset.id;
+    card.querySelector(".camp-top").addEventListener("click", () => {
+      expandedId = expandedId === id ? null : id;
+      renderBoard();
+    });
+    const edit = card.querySelector(".camp-edit");
+    if(!edit.classList.contains("open")) return;
+
+    const save = async (field, value) => {
+      const result = await fetchSupabase(`marketing_campaigns?id=eq.${id}`, {
+        method:"PATCH", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" },
+        body: JSON.stringify({ [field]: value })
+      });
+      if(!result.ok){ alert("Couldn't save: " + result.reason); return; }
+      const c = allCampaigns.find(x => x.id === id);
+      if(c) c[field] = value;
+      if(field === "status") { renderKpis(); renderBoard(); }
+    };
+
+    edit.querySelector(".f-status").addEventListener("change", e => save("status", e.target.value));
+    edit.querySelector(".f-owner").addEventListener("change", e => save("owner", e.target.value.trim() || null));
+    edit.querySelector(".f-channels").addEventListener("change", e => save("channels", e.target.value.trim() || null));
+    edit.querySelector(".f-segment").addEventListener("change", e => save("segment", e.target.value.trim() || null));
+    edit.querySelector(".f-window").addEventListener("change", e => save("window_text", e.target.value.trim() || null));
+    edit.querySelector(".f-budget").addEventListener("change", e => save("budget", e.target.value === "" ? null : Number(e.target.value)));
+    edit.querySelector(".f-assets").addEventListener("change", e => save("assets_needed", e.target.value.trim() || null));
+    edit.querySelector(".f-notes").addEventListener("change", e => save("notes", e.target.value.trim() || null));
+
+    const socialCheckbox = edit.querySelector(".f-is-social");
+    const platformPicker = edit.querySelector(".platform-picker");
+    socialCheckbox.addEventListener("change", e => {
+      platformPicker.classList.toggle("open", e.target.checked);
+      save("is_social", e.target.checked);
+    });
+    $$(".platform-chip", platformPicker).forEach(chip => {
+      chip.addEventListener("click", () => {
+        chip.classList.toggle("selected");
+        const selected = $$(".platform-chip.selected", platformPicker).map(c2 => c2.dataset.platform);
+        save("platforms", selected.length ? selected.join(", ") : null);
+      });
+    });
+    edit.querySelector(".camp-del").addEventListener("click", async () => {
+      if(!confirm(`Remove "${allCampaigns.find(x=>x.id===id)?.title}"? This can't be undone.`)) return;
+      const result = await fetchSupabase(`marketing_campaigns?id=eq.${id}`, { method:"DELETE" });
+      if(!result.ok){ alert("Couldn't remove: " + result.reason); return; }
+      allCampaigns = allCampaigns.filter(c => c.id !== id);
+      expandedId = null;
+      renderKpis(); renderBoard();
+    });
+  });
+}
+
+$("#filter-status").addEventListener("change", renderBoard);
+
+$("#in-is-social").addEventListener("change", (e) => {
+  $("#in-platform-picker").classList.toggle("open", e.target.checked);
+  if(!e.target.checked){ inSelectedPlatforms.clear(); $$(".platform-chip", $("#in-platform-picker")).forEach(c => c.classList.remove("selected")); }
+});
+$$(".platform-chip", $("#in-platform-picker")).forEach(chip => {
+  chip.addEventListener("click", () => {
+    const p = chip.dataset.platform;
+    if(inSelectedPlatforms.has(p)){ inSelectedPlatforms.delete(p); chip.classList.remove("selected"); }
+    else { inSelectedPlatforms.add(p); chip.classList.add("selected"); }
+  });
+});
+
+$("#intake-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const isSocial = $("#in-is-social").checked;
+  const payload = {
+    title: $("#in-title").value.trim(),
+    owner: $("#in-owner").value.trim() || null,
+    status: $("#in-status").value,
+    brief: $("#in-brief").value.trim() || null,
+    channels: $("#in-channels").value.trim() || null,
+    segment: $("#in-segment").value.trim() || null,
+    window_text: $("#in-window").value.trim() || null,
+    is_social: isSocial,
+    platforms: isSocial && inSelectedPlatforms.size ? Array.from(inSelectedPlatforms).join(", ") : null,
+    budget: $("#in-budget").value === "" ? null : Number($("#in-budget").value),
+    assets_needed: $("#in-assets").value.trim() || null,
+    requested_by: $("#in-requester").value.trim(),
+    added_by: $("#in-requester").value.trim()
+  };
+  if(!payload.title || !payload.requested_by) return;
+  const result = await fetchSupabase("marketing_campaigns", {
+    method:"POST", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify(payload)
+  });
+  if(!result.ok){ alert("Couldn't submit: " + result.reason); return; }
+  $("#intake-form").reset();
+  inSelectedPlatforms.clear();
+  $$(".platform-chip", $("#in-platform-picker")).forEach(c => c.classList.remove("selected"));
+  $("#in-platform-picker").classList.remove("open");
+  await loadCampaigns();
+});
+
+async function loadCampaigns(){
+  const pill = $("#status-pill"), line = $("#status-line");
+  const result = await fetchSupabase("marketing_campaigns?select=*&order=created_at.desc");
+  if(result.ok){
+    allCampaigns = result.rows;
+    pill.classList.add("is-live"); pill.textContent = "Live — Supabase";
+    line.textContent = allCampaigns.length ? "" : "No campaigns yet — submit the first one above.";
+  } else {
+    allCampaigns = [];
+    pill.classList.remove("is-live"); pill.textContent = "Not connected";
+    line.textContent = `Couldn't load (${result.reason}) — run migrations/2026-09-08b_marketing_campaigns.sql in Supabase if you haven't yet.`;
+  }
+  renderKpis();
+  renderBoard();
+}
+
+loadCampaigns();
+</script>
