@@ -57,6 +57,7 @@ h1{font-size:26px; margin-top:4px;}
 .exec-top{display:flex; align-items:center; justify-content:space-between; gap:14px;}
 .exec-name{font-family:var(--font-display); font-weight:700; font-size:20px;}
 .exec-qty{font-size:14.5px; color:var(--ink-3); margin-top:3px;}
+.exec-batch{font-size:14px; color:var(--caramel); font-weight:700; margin-top:4px;}
 .exec-status{
   display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700;
   padding:6px 12px; border-radius:99px; white-space:nowrap; flex:0 0 auto;
@@ -102,6 +103,17 @@ const PHASES = ["not-started","cannot-start","roasting","roasted"];
 const PHASE_LABEL = { "not-started":"Not started", "cannot-start":"Cannot start", roasting:"Roasting", roasted:"Roasted" };
 const PHASE_ICON = { "not-started":"⚪", "cannot-start":"🚫", roasting:"🔥", roasted:"✅" };
 const PHASE_CHIP = { "not-started":"neutral", "cannot-start":"critical", roasting:"warn", roasted:"good" };
+
+// Same fixed-batch math as Roastery Production — read-only here, lbs/unit is
+// only ever set/corrected on the management page, not this stripped-down view.
+const ROAST_BATCH_LBS = 30;
+function computeBatches(item){
+  const qty = parseFloat(item.qty_needed);
+  const lbsPerUnit = item.lbs_per_unit != null && item.lbs_per_unit !== "" ? Number(item.lbs_per_unit) : null;
+  if(lbsPerUnit == null || isNaN(lbsPerUnit) || isNaN(qty)) return null;
+  const totalLbs = qty * lbsPerUnit;
+  return { totalLbs, batches: Math.ceil(totalLbs / ROAST_BATCH_LBS) };
+}
 
 let allItems = [];
 let expandedId = null;
@@ -149,6 +161,7 @@ function renderList(){
         <div>
           <div class="exec-name">${escapeHtml(item.item_name)}</div>
           ${item.qty_needed ? `<div class="exec-qty">Qty ${escapeHtml(item.qty_needed)}</div>` : ""}
+          ${(() => { const b = computeBatches(item); return b ? `<div class="exec-batch">🔄 ${b.totalLbs.toFixed(1)} lb → ${b.batches} batch${b.batches===1?"":"es"} (${b.batches*ROAST_BATCH_LBS} lb)</div>` : ""; })()}
         </div>
         <span class="exec-status ${PHASE_CHIP[item.phase]}">${PHASE_ICON[item.phase]} ${PHASE_LABEL[item.phase]}<span class="exec-chevron">${isExpanded?"▲":"▼"}</span></span>
       </div>

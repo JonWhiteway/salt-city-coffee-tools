@@ -98,6 +98,11 @@ a{color:inherit;} button{font-family:inherit; touch-action:manipulation;}
 .ic-name{font-family:var(--font-display); font-weight:600; font-size:20px;}
 .ic-order{font-size:13.5px; color:var(--ink-3); margin-top:2px;}
 .ic-qty{font-size:15px; color:var(--ink-2); margin-top:6px;}
+.ic-batch{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:8px;}
+.lbs-field{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-3);}
+.lbs-input{width:62px; font-family:inherit; font-size:14px; padding:6px 7px; border-radius:7px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink);}
+.chip.batch{background:var(--caramel-soft); color:var(--caramel);}
+.chip.batch::before{display:none;}
 .ic-tap-hint{font-size:13px; color:var(--ink-3); text-align:center; padding-top:6px;}
 .ic-del{
   flex:0 0 auto; min-width:44px; min-height:44px; border:1.5px solid var(--border); background:var(--surface);
@@ -165,6 +170,7 @@ a{color:inherit;} button{font-family:inherit; touch-action:manipulation;}
     <div class="card kpi"><div class="label">Roasting</div><div class="value mono" id="kpi-roasting">–</div></div>
     <div class="card kpi"><div class="label">Cannot start</div><div class="value mono" id="kpi-cannotstart">–</div></div>
     <div class="card kpi"><div class="label">Roasted</div><div class="value mono" id="kpi-roasted">–</div></div>
+    <div class="card kpi"><div class="label">30lb batches queued</div><div class="value mono" id="kpi-batches">–</div></div>
   </div>
 
   <div class="section-head" style="margin-top:0;">
@@ -199,6 +205,7 @@ a{color:inherit;} button{font-family:inherit; touch-action:manipulation;}
         <input type="text" id="add-order" placeholder="Order / customer (optional)">
         <input type="text" id="add-item" placeholder="Item" required>
         <input type="text" id="add-qty" placeholder="Qty">
+        <input type="number" step="0.01" min="0" id="add-lbs" placeholder="Lbs/unit (optional)">
         <button type="submit" class="btn primary">Add</button>
       </div>
     </form>
@@ -206,6 +213,8 @@ a{color:inherit;} button{font-family:inherit; touch-action:manipulation;}
 
   <div class="foot-note">
     This queue auto-syncs line items from open <strong>Shopify</strong> wholesale/subscription orders only (deduped per order line) — BlueCart/manual orders aren't synced in yet, add those by hand below for now. It doesn't write back to Order Fulfillment's own stage: the Wholesale &amp; Subscription page shows a read-only Roasting badge computed from this queue, but advancing an item here never changes an order's own status there — that's still a manual tap on that page.
+    <br><br>
+    <strong>Roast batches:</strong> the roaster runs in fixed 30lb batches, so every item shows its own "lbs/unit" field — auto-guessed from the item name when it's obviously a weight (e.g. "12oz", "5lb"), always editable if the guess is wrong or missing. Qty × lbs/unit, rounded up to the nearest 30lb, is what shows as "→ N batches." Nothing gets combined across different items into one batch — each row is its own blend, roasted on its own.
   </div>
 </div>
 
@@ -218,6 +227,33 @@ const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 const PHASES = ["not-started","cannot-start","roasting","roasted"];
 const PHASE_LABEL = { "not-started":"Not started", "cannot-start":"Cannot start", roasting:"Roasting", roasted:"Roasted" };
 const PHASE_ICON = { "not-started":"⚪", "cannot-start":"🚫", roasting:"🔥", roasted:"✅" };
+
+// Our roaster runs in fixed 30lb batches — every "how much do we need to roast"
+// figure gets rounded up to a whole number of these.
+const ROAST_BATCH_LBS = 30;
+
+// Best-guess weight-per-unit from a Shopify line item's title, e.g. "House
+// Blend — 12oz Whole Bean" -> 0.75, "5lb Wholesale Bag" -> 5. Never guaranteed
+// right — always shown as an editable field on the card, never silently trusted.
+function detectLbsPerUnit(name){
+  if(!name) return null;
+  const s = String(name).toLowerCase();
+  let m = s.match(/(\d+(?:\.\d+)?)\s*-?\s*(?:lbs?|pounds?)\b/);
+  if(m) return parseFloat(m[1]);
+  m = s.match(/(\d+(?:\.\d+)?)\s*-?\s*(?:oz|ounces?)\b/);
+  if(m) return Math.round((parseFloat(m[1]) / 16) * 100) / 100;
+  return null;
+}
+
+// { totalLbs, batches } from an item's qty_needed × lbs_per_unit, rounded up
+// to whole 30lb batches — or null if either half of that math is unknown.
+function computeBatches(item){
+  const qty = parseFloat(item.qty_needed);
+  const lbsPerUnit = item.lbs_per_unit != null && item.lbs_per_unit !== "" ? Number(item.lbs_per_unit) : null;
+  if(lbsPerUnit == null || isNaN(lbsPerUnit) || isNaN(qty)) return null;
+  const totalLbs = qty * lbsPerUnit;
+  return { totalLbs, batches: Math.ceil(totalLbs / ROAST_BATCH_LBS) };
+}
 const CANNOT_START_REASONS = [
   "Green coffee not in stock",
   "Roaster down / maintenance",
@@ -268,6 +304,10 @@ function renderKpis(){
   $("#kpi-roasting").textContent = count("roasting");
   $("#kpi-cannotstart").textContent = count("cannot-start");
   $("#kpi-roasted").textContent = count("roasted");
+  const knownBatchItems = allItems.map(computeBatches).filter(Boolean);
+  const totalBatches = knownBatchItems.reduce((s,b) => s + b.batches, 0);
+  const unknownCount = allItems.length - knownBatchItems.length;
+  $("#kpi-batches").textContent = totalBatches + (unknownCount ? ` (+${unknownCount} unset)` : "");
 }
 
 function renderGrid(){
@@ -286,6 +326,14 @@ function renderGrid(){
           <div class="ic-name">${escapeHtml(item.item_name)}</div>
           ${item.order_label ? `<div class="ic-order">${escapeHtml(item.order_label)}</div>` : ""}
           <div class="ic-qty">${item.qty_needed ? `Qty ${escapeHtml(item.qty_needed)} · ` : ""}<span class="chip src">${item.source === "manual" ? "Manual" : "From order"}</span> <span class="chip ${item.phase === "cannot-start" ? "critical" : item.phase === "roasted" ? "good" : item.phase === "roasting" ? "warn" : "neutral"}">${PHASE_ICON[item.phase]} ${PHASE_LABEL[item.phase]}</span></div>
+          <div class="ic-batch">
+            <label class="lbs-field">lbs/unit
+              <input type="number" step="0.01" min="0" class="lbs-input" data-id="${item.id}" value="${item.lbs_per_unit != null ? item.lbs_per_unit : ""}" placeholder="—">
+            </label>
+            ${(() => { const b = computeBatches(item); return b
+              ? `<span class="chip batch">🔄 ${b.totalLbs.toFixed(1)} lb → <b>${b.batches}</b> batch${b.batches===1?"":"es"} (${b.batches*ROAST_BATCH_LBS} lb)</span>`
+              : `<span class="chip warn">Set lbs/unit to compute batches</span>`; })()}
+          </div>
         </div>
         <button class="ic-del" data-action="delete">✕</button>
       </div>
@@ -316,6 +364,19 @@ function renderGrid(){
   $$(".reason-btn", grid).forEach(btn => {
     btn.addEventListener("click", (e) => { e.stopPropagation(); updateField(btn.closest(".item-card").dataset.id, "cannot_reason", btn.dataset.reason, false); });
   });
+  $$(".lbs-input", grid).forEach(inp => {
+    inp.addEventListener("click", (e) => e.stopPropagation());
+    inp.addEventListener("change", (e) => { e.stopPropagation(); updateLbsPerUnit(inp.dataset.id, inp.value); });
+  });
+}
+
+async function updateLbsPerUnit(id, value){
+  const num = value === "" ? null : parseFloat(value);
+  const result = await fetchSupabase(`roastery_items?id=eq.${id}`, {
+    method:"PATCH", headers:{ "Content-Type":"application/json", Prefer:"return=minimal" }, body: JSON.stringify({ lbs_per_unit: (num == null || isNaN(num)) ? null : num })
+  });
+  if(!result.ok){ alert("Couldn't save: " + result.reason); return; }
+  await loadQueue();
 }
 
 async function updateField(id, field, value, collapse=true){
@@ -381,6 +442,7 @@ async function syncFromOrders(){
         order_label: order.order_name || null,
         item_name: title,
         qty_needed: li.quantity != null ? String(li.quantity) : null,
+        lbs_per_unit: detectLbsPerUnit(title),
         phase: "not-started",
         source: "shopify-order",
         source_key: key,
@@ -401,10 +463,12 @@ async function submitManual(e){
   e.preventDefault();
   const item = $("#add-item").value.trim();
   if(!item) return;
+  const lbsRaw = $("#add-lbs").value.trim();
   const payload = {
     order_label: $("#add-order").value.trim() || null,
     item_name: item,
     qty_needed: $("#add-qty").value.trim() || null,
+    lbs_per_unit: lbsRaw ? parseFloat(lbsRaw) : null,
     phase: "not-started",
     source: "manual"
   };
