@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Core Team Sync — Salt City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --serious:#C15A34; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:10px; --radius-sm:6px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 8px 24px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:14.5px; line-height:1.5; -webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:var(--font-display); font-weight:600; margin:0; color:var(--ink);}
+button{font-family:inherit;}
+textarea,input{font-family:inherit; color:inherit;}
+[hidden]{display:none !important;}
+
+/* ---------- login (same pattern as the GM/LM/Production Manager Command Deck) ---------- */
+.login-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+.login-card{width:100%; max-width:460px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-2); padding:32px 30px;}
+.login-brand{display:flex; align-items:center; gap:10px; margin-bottom:22px;}
+.brand-mark{width:36px; height:36px; border-radius:9px; background:linear-gradient(155deg,#F0824C,#B9852E); display:flex; align-items:center; justify-content:center; color:#191410; font-family:var(--font-display); font-weight:700; font-size:17px; flex:0 0 auto;}
+.login-brand strong{font-family:var(--font-display); font-size:18px; font-weight:600;}
+.login-brand span{display:block; font-size:11.5px; color:var(--ink-3); letter-spacing:.02em;}
+.login-title{font-size:20px; margin-bottom:4px;}
+.login-sub{font-size:13px; color:var(--ink-2); margin-bottom:22px;}
+.staff-tiles{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.staff-tile{display:flex; flex-direction:column; align-items:flex-start; gap:5px; padding:14px 15px; border-radius:11px; border:1px solid var(--border); background:var(--surface-alt); cursor:pointer; text-align:left;}
+.staff-tile:hover{border-color:var(--accent);}
+.staff-tile .nm{font-family:var(--font-display); font-size:15.5px; font-weight:600;}
+.staff-tile .rl{font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3);}
+.pin-back{display:flex; align-items:center; gap:8px; color:var(--ink-2); font-size:13px; background:none; border:none; cursor:pointer; padding:0 0 18px; }
+.pin-person{display:flex; flex-direction:column; align-items:center; gap:4px; margin-bottom:20px;}
+.pin-person .nm{font-family:var(--font-display); font-size:19px; font-weight:600;}
+.pin-person .rl{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3);}
+.pin-dots{display:flex; gap:14px; justify-content:center; margin-bottom:22px;}
+.pin-dots span{width:16px; height:16px; border-radius:50%; border:1.6px solid var(--border); background:var(--surface-alt);}
+.pin-dots span.filled{background:var(--accent); border-color:var(--accent);}
+.pin-dots.err span{border-color:var(--critical); background:var(--critical-soft);}
+.pin-pad{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:280px; margin:0 auto;}
+.pin-key{aspect-ratio:1; border-radius:14px; border:1px solid var(--border); background:var(--surface-alt); color:var(--ink); font-family:var(--font-mono); font-size:22px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+.pin-key:active{background:var(--accent-soft); border-color:var(--accent);}
+.pin-key.wide{font-size:13px; font-family:var(--font-body); font-weight:600; color:var(--ink-2);}
+.pin-error{text-align:center; color:var(--critical); font-size:12.5px; margin-top:14px; min-height:1.4em;}
+
+/* ---------- app shell ---------- */
+.topbar{position:sticky; top:0; z-index:5; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--border-soft); padding:16px 28px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+.topbar h1{font-size:19px;}
+.topbar .sub{font-size:12px; color:var(--ink-3); margin-top:2px;}
+.btn{display:inline-flex; align-items:center; gap:7px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:13px; font-weight:600; padding:8px 13px; cursor:pointer;}
+.btn:hover{border-color:var(--accent);}
+.btn.ghost{background:transparent;}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.btn.primary:hover{opacity:.92;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.btn-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+.content{padding:24px 28px 64px; max-width:1140px; margin:0 auto;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:24px 0 14px;}
+.section-head:first-child{margin-top:0;}
+.section-head h2{font-size:16px;}
+.section-head .hint{font-size:12px; color:var(--ink-3);}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:16px;}
+.empty-note{font-size:12.5px; color:var(--ink-3); font-style:italic; padding:10px 2px;}
+.chip{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px;}
+.chip.good{background:var(--good-soft); color:var(--good);}
+.chip.mode-view{background:var(--surface-alt); color:var(--ink-3);}
+.chip.mode-edit{background:var(--accent-soft); color:var(--accent);}
+
+/* ---------- tabs ---------- */
+.tabbar{display:flex; gap:6px; margin-bottom:18px; border-bottom:1px solid var(--border-soft);}
+.tab-btn{background:none; border:none; cursor:pointer; padding:10px 4px; margin-right:18px; font-size:13.5px; font-weight:600; color:var(--ink-3); border-bottom:2px solid transparent;}
+.tab-btn.active{color:var(--ink); border-bottom-color:var(--accent);}
+
+/* ---------- meetings layout ---------- */
+.meetings-layout{display:grid; grid-template-columns:220px 1fr; gap:20px; align-items:start;}
+@media (max-width:760px){ .meetings-layout{grid-template-columns:1fr;} }
+.meeting-list{display:flex; flex-direction:column; gap:6px;}
+.meeting-item{text-align:left; border:1px solid var(--border); background:var(--surface); border-radius:9px; padding:10px 12px; cursor:pointer; font-size:13px;}
+.meeting-item:hover{border-color:var(--accent);}
+.meeting-item.active{border-color:var(--accent); background:var(--accent-soft);}
+.meeting-item .dt{font-weight:700; font-family:var(--font-mono); font-size:12.5px;}
+.meeting-item .st{display:block; font-size:10.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em; margin-top:2px;}
+
+.attendee-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;}
+.attendee-chip{display:flex; flex-direction:column; padding:7px 11px; border-radius:9px; background:var(--surface-alt); border:1px solid var(--border-soft); min-width:110px;}
+.attendee-chip .nm{font-size:12.5px; font-weight:700;}
+.attendee-chip .rl{font-size:10px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em;}
+
+.agenda-section{margin-bottom:16px;}
+.agenda-section .lbl{display:flex; align-items:baseline; gap:8px; margin-bottom:6px;}
+.agenda-section .lbl .role-tag{font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--accent); background:var(--accent-soft); padding:2px 8px; border-radius:99px;}
+.agenda-section .lbl .txt{font-size:13.5px; font-weight:700;}
+.agenda-section textarea{width:100%; min-height:64px; resize:vertical; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--ink); padding:10px 12px; font-size:13px; line-height:1.5;}
+.agenda-section textarea:disabled{background:var(--surface-alt); color:var(--ink-2); cursor:default;}
+.agenda-section textarea.small{min-height:48px;}
+.cafe-block{border:1px solid var(--border-soft); border-radius:9px; padding:10px 12px; margin-bottom:8px; background:var(--surface-alt);}
+.cafe-block .who{font-size:12px; font-weight:700; margin-bottom:6px;}
+.cafe-block label{display:block; font-size:10.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em; margin:6px 0 3px;}
+
+/* ---------- action items ---------- */
+.ai-owner-group{margin-bottom:18px;}
+.ai-owner-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;}
+.ai-owner-head .who{display:flex; align-items:center; gap:8px;}
+.ai-owner-head .nm{font-family:var(--font-display); font-size:15px; font-weight:600;}
+.ai-owner-head .rl{font-family:var(--font-mono); font-size:10px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em;}
+.ai-count{font-size:11px; color:var(--ink-3);}
+.ai-item{display:flex; align-items:flex-start; gap:10px; padding:9px 12px; border:1px solid var(--border-soft); border-radius:8px; background:var(--surface); margin-bottom:6px;}
+.ai-item.done{opacity:.55;}
+.ai-item .chk{width:19px; height:19px; border-radius:5px; border:1.6px solid var(--border); background:var(--surface-alt); flex:0 0 auto; cursor:pointer; margin-top:1px; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--good);}
+.ai-item .chk.checked{background:var(--good-soft); border-color:var(--good);}
+.ai-item .chk:disabled{cursor:not-allowed; opacity:.4;}
+.ai-item .body{flex:1; min-width:0;}
+.ai-item .tx{font-size:13px;}
+.ai-item.done .tx{text-decoration:line-through;}
+.ai-item .meta{font-size:10.5px; color:var(--ink-3); margin-top:2px;}
+.ai-item .del{background:none; border:none; color:var(--ink-3); cursor:pointer; font-size:12px; flex:0 0 auto;}
+.ai-item .del:hover{color:var(--critical);}
+.add-ai-row{display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;}
+.add-ai-row input[type=text]{flex:1; min-width:180px; border:1px solid var(--border); border-radius:8px; padding:8px 11px; font-size:13px; background:var(--surface); color:var(--ink);}
+.add-ai-row select{border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:12.5px; background:var(--surface); color:var(--ink);}
+
+.field-row{display:flex; gap:10px; align-items:center; margin-bottom:14px; flex-wrap:wrap;}
+.field-row input[type=date]{border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:13px; background:var(--surface); color:var(--ink);}
+select.status-sel{border:1px solid var(--border); border-radius:8px; padding:6px 9px; font-size:12px; background:var(--surface); color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">S</div>
+      <div><strong>Salt City</strong><span>Core Team Sync</span></div>
+    </div>
+
+    <div id="login-step-pick">
+      <div class="login-title">Who's signing in?</div>
+      <div class="login-sub">Tap your name, then enter your 4-digit PIN.</div>
+      <div class="staff-tiles" id="staff-tiles"><div class="empty-note">Loading…</div></div>
+    </div>
+
+    <div id="login-step-pin" hidden>
+      <button class="pin-back" id="pin-back">← Not you?</button>
+      <div class="pin-person">
+        <div class="nm" id="pin-person-name">—</div>
+        <div class="rl" id="pin-person-role">—</div>
+      </div>
+      <div class="pin-dots" id="pin-dots">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="pin-pad" id="pin-pad">
+        <button class="pin-key" data-k="1">1</button>
+        <button class="pin-key" data-k="2">2</button>
+        <button class="pin-key" data-k="3">3</button>
+        <button class="pin-key" data-k="4">4</button>
+        <button class="pin-key" data-k="5">5</button>
+        <button class="pin-key" data-k="6">6</button>
+        <button class="pin-key" data-k="7">7</button>
+        <button class="pin-key" data-k="8">8</button>
+        <button class="pin-key" data-k="9">9</button>
+        <button class="pin-key wide" data-k="clear">Clear</button>
+        <button class="pin-key" data-k="0">0</button>
+        <button class="pin-key wide" data-k="back">⌫</button>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app-wrap" hidden>
+  <div class="topbar">
+    <div>
+      <h1 id="app-title">—</h1>
+      <div class="sub" id="app-sub">—</div>
+    </div>
+    <div class="btn-row">
+      <span class="chip" id="mode-chip">—</span>
+      <button class="btn ghost" id="sign-out-btn">Sign out</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="tabbar">
+      <button class="tab-btn active" data-tab="meetings">Meetings</button>
+      <button class="tab-btn" data-tab="actions">Action Items</button>
+    </div>
+
+    <!-- ============ MEETINGS TAB ============ -->
+    <div id="tab-meetings">
+      <div class="meetings-layout">
+        <div>
+          <div class="btn-row" style="margin-bottom:10px;">
+            <button class="btn primary" id="new-meeting-btn" style="display:none;">+ New meeting</button>
+          </div>
+          <div class="meeting-list" id="meeting-list"><div class="empty-note">Loading…</div></div>
+        </div>
+
+        <div id="meeting-detail">
+          <div class="empty-note" id="meeting-empty">No meetings yet.</div>
+
+          <div id="meeting-body" hidden>
+            <div class="section-head" style="margin-top:0;">
+              <h2 id="meeting-date-label">—</h2>
+              <span class="hint" id="meeting-status-hint">—</span>
+            </div>
+
+            <div class="field-row" id="coo-meeting-controls" hidden>
+              <label style="font-size:12px;color:var(--ink-2);">Meeting date:</label>
+              <input type="date" id="meeting-date-input">
+              <select class="status-sel" id="meeting-status-select">
+                <option value="draft">Draft</option>
+                <option value="final">Final</option>
+              </select>
+              <button class="btn primary" id="save-meeting-btn">Save meeting</button>
+              <button class="btn ghost" id="delete-meeting-btn" style="color:var(--critical);">Delete</button>
+              <span class="empty-note" id="save-status-note" style="padding:0;"></span>
+            </div>
+
+            <div class="section-head"><h2 style="font-size:14.5px;">Attendees</h2></div>
+            <div class="attendee-row" id="attendee-row"></div>
+
+            <div class="section-head"><h2 style="font-size:14.5px;">Agenda — Action Item Follow-up</h2></div>
+            <div class="agenda-section">
+              <div class="lbl"><span class="txt">Updates on action items from the previous meeting</span></div>
+              <textarea id="f-action-followup" placeholder="What moved since last week…"></textarea>
+            </div>
+
+            <div class="section-head"><h2 style="font-size:14.5px;">Agenda — Around The Company Updates</h2></div>
+
+            <div class="agenda-section">
+              <div class="lbl"><span class="role-tag">COO</span><span class="txt">Admin &amp; HR</span></div>
+              <textarea id="f-admin-hr" placeholder="Personnel, policy, and software updates…"></textarea>
+            </div>
+            <div class="agenda-section">
+              <div class="lbl"><span class="role-tag">CBO</span><span class="txt">Brand Standing</span></div>
+              <textarea id="f-brand-standing" placeholder="Where the company stands with customers, wholesalers, campaigns…"></textarea>
+            </div>
+            <div class="agenda-section">
+              <div class="lbl"><span class="role-tag">GMs</span><span class="txt">Cafes</span></div>
+              <div id="cafe-blocks"></div>
+              <div class="empty-note" style="padding:2px 2px 0;">Each GM updates the status of their portfolio — wins, areas for improvement, and any friction-point trends.</div>
+            </div>
+            <div class="agenda-section">
+              <div class="lbl"><span class="role-tag">Production Mgr</span><span class="txt">Production</span></div>
+              <textarea id="f-production" placeholder="Any changes to the regular production schedule or inventory availability…"></textarea>
+            </div>
+            <div class="agenda-section">
+              <div class="lbl"><span class="role-tag">CEO</span><span class="txt">Vision &amp; Mission</span></div>
+              <textarea id="f-vision-mission"></textarea>
+            </div>
+
+            <div class="section-head"><h2 style="font-size:14.5px;">Notes</h2></div>
+            <div class="agenda-section">
+              <textarea id="f-general-notes"></textarea>
+            </div>
+
+            <div class="section-head">
+              <h2 style="font-size:14.5px;">Action Items — this meeting</h2>
+              <span class="hint">Everyone's items, in one place, are on the Action Items tab</span>
+            </div>
+            <div id="meeting-ai-list"></div>
+            <div class="add-ai-row" id="meeting-ai-add" hidden>
+              <select id="meeting-ai-owner"></select>
+              <input type="text" id="meeting-ai-text" placeholder="Action item…">
+              <button class="btn" id="meeting-ai-add-btn">+ Add</button>
+            </div>
+
+            <div class="section-head"><h2 style="font-size:14.5px;">Next Meeting Agenda Items</h2></div>
+            <div class="agenda-section">
+              <textarea class="small" id="f-next-meeting" placeholder="Only different if something unique is upcoming…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ACTION ITEMS TAB ============ -->
+    <div id="tab-actions" hidden>
+      <div class="section-head" style="margin-top:0;">
+        <h2>All Core Team action items</h2>
+        <span class="hint">Grouped by owner — everyone's items live in one place</span>
+      </div>
+      <div class="field-row">
+        <label style="font-size:12px;color:var(--ink-2);"><input type="checkbox" id="hide-done-chk"> Hide completed</label>
+      </div>
+      <div id="ai-owner-groups"><div class="empty-note">Loading…</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const PIN_PREFIX = "sc-pin-";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const $ = (sel, root) => (root||document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root||document).querySelectorAll(sel));
+const esc = s => (s==null?"":String(s)).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const ROLE_LABEL = {
+  ceo: "CEO", cbo: "Chief Brand Officer", coo: "COO",
+  gm: "General Manager", location_manager: "Location Manager",
+  production_manager: "Production Manager", product_development: "Product Development"
+};
+// Fixed display order matching the real meeting template (CEO, CBO, COO, GM 2, GM 1, Production Manager, Product Development).
+const ROLE_ORDER = ["ceo","cbo","coo","gm","location_manager","production_manager","product_development"];
+
+let directory = [];       // Core Team roster (from core_team_login_directory)
+let pinTarget = null;
+let pinDigits = "";
+let myStaff = null;       // { id, name, role }
+let isCoo = false;
+let meetings = [];
+let selectedMeetingId = null;
+let actionItems = [];     // all action items (loaded once, refetched after writes)
+
+/* ---------------------------------------------------------------------
+   LOGIN
+   --------------------------------------------------------------------- */
+async function loadDirectory(){
+  const { data, error } = await sb.rpc("core_team_login_directory");
+  if(error){
+    $("#staff-tiles").innerHTML = `<div class="empty-note">Couldn't load the Core Team roster (${esc(error.message)}). Refresh to try again, or check that migrations/2026-09-10_core_team_sync.sql has been run.</div>`;
+    return;
+  }
+  directory = (data||[]).sort((a,b) => ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role));
+  renderTiles();
+}
+
+function renderTiles(){
+  const wrap = $("#staff-tiles");
+  if(!directory.length){
+    wrap.innerHTML = `<div class="empty-note">No Core Team accounts set up yet. Use scripts/set_staff_pin.py with --core-team to create one.</div>`;
+    return;
+  }
+  wrap.innerHTML = directory.map(s => `
+    <button class="staff-tile" data-id="${s.id}">
+      <span class="nm">${esc(s.name)}</span>
+      <span class="rl">${esc(ROLE_LABEL[s.role]||s.role)}</span>
+    </button>
+  `).join("");
+  $$(".staff-tile", wrap).forEach(t => t.addEventListener("click", () => openPinPad(t.dataset.id)));
+}
+
+function openPinPad(staffId){
+  pinTarget = directory.find(s => s.id === staffId);
+  if(!pinTarget) return;
+  pinDigits = "";
+  $("#login-step-pick").hidden = true;
+  $("#login-step-pin").hidden = false;
+  $("#pin-person-name").textContent = pinTarget.name;
+  $("#pin-person-role").textContent = ROLE_LABEL[pinTarget.role] || pinTarget.role;
+  $("#pin-error").textContent = "";
+  updatePinDots();
+}
+
+function updatePinDots(err){
+  const dotsWrap = $("#pin-dots");
+  dotsWrap.classList.toggle("err", !!err);
+  $$("span", dotsWrap).forEach((d,i) => d.classList.toggle("filled", i < pinDigits.length));
+}
+
+async function submitPin(){
+  const { error } = await sb.auth.signInWithPassword({
+    email: pinTarget.email,
+    password: PIN_PREFIX + pinDigits
+  });
+  if(error){
+    $("#pin-error").textContent = "Wrong PIN — try again.";
+    updatePinDots(true);
+    pinDigits = "";
+    setTimeout(() => updatePinDots(false), 350);
+    return;
+  }
+  $("#login-wrap").hidden = true;
+  await initApp();
+}
+
+$("#pin-back").addEventListener("click", () => {
+  $("#login-step-pin").hidden = true;
+  $("#login-step-pick").hidden = false;
+  pinDigits = "";
+});
+
+$("#pin-pad").addEventListener("click", (e) => {
+  const btn = e.target.closest(".pin-key");
+  if(!btn) return;
+  const k = btn.dataset.k;
+  if(k === "clear"){ pinDigits = ""; }
+  else if(k === "back"){ pinDigits = pinDigits.slice(0,-1); }
+  else if(pinDigits.length < 4){ pinDigits += k; }
+  $("#pin-error").textContent = "";
+  updatePinDots(false);
+  if(pinDigits.length === 4) submitPin();
+});
+
+$("#sign-out-btn").addEventListener("click", async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+/* ---------------------------------------------------------------------
+   APP INIT
+   --------------------------------------------------------------------- */
+async function initApp(){
+  $("#app-wrap").hidden = false;
+
+  const { data: { user } } = await sb.auth.getUser();
+  const { data: staffRow, error: staffErr } = await sb.from("staff").select("id,name,role").eq("auth_user_id", user.id).maybeSingle();
+  if(staffErr || !staffRow){
+    $("#app-title").textContent = "Account not fully set up";
+    $("#app-sub").textContent = "Signed in, but no matching staff record — ask your COO to check scripts/set_staff_pin.py.";
+    return;
+  }
+  myStaff = staffRow;
+  isCoo = myStaff.role === "coo";
+
+  $("#app-title").textContent = `${myStaff.name} — ${ROLE_LABEL[myStaff.role]||myStaff.role}`;
+  $("#app-sub").textContent = "Weekly Core Team Sync — one shared meeting tracker and one shared action-item list.";
+  const modeChip = $("#mode-chip");
+  modeChip.textContent = isCoo ? "Edit mode" : "View only";
+  modeChip.className = "chip " + (isCoo ? "mode-edit" : "mode-view");
+
+  $("#new-meeting-btn").style.display = isCoo ? "" : "none";
+  $("#coo-meeting-controls").hidden = !isCoo;
+  $("#meeting-ai-add").hidden = !isCoo;
+
+  populateOwnerSelect($("#meeting-ai-owner"));
+
+  await Promise.all([loadMeetings(), loadActionItems()]);
+}
+
+function populateOwnerSelect(sel){
+  sel.innerHTML = directory.map(s => `<option value="${s.id}">${esc(s.name)} — ${esc(ROLE_LABEL[s.role]||s.role)}</option>`).join("");
+}
+
+/* ---------------------------------------------------------------------
+   TABS
+   --------------------------------------------------------------------- */
+$$(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
+  $$(".tab-btn").forEach(b => b.classList.toggle("active", b === btn));
+  const tab = btn.dataset.tab;
+  $("#tab-meetings").hidden = tab !== "meetings";
+  $("#tab-actions").hidden = tab !== "actions";
+  if(tab === "actions") renderActionItems();
+}));
+
+/* ---------------------------------------------------------------------
+   MEETINGS
+   --------------------------------------------------------------------- */
+function nextFriday(){
+  const d = new Date();
+  const day = d.getDay();
+  const add = (5 - day + 7) % 7 || 7;
+  d.setDate(d.getDate() + add);
+  return d.toISOString().slice(0,10);
+}
+
+async function loadMeetings(){
+  const { data, error } = await sb.from("core_team_meetings").select("*").order("meeting_date", { ascending: false });
+  if(error){
+    $("#meeting-list").innerHTML = `<div class="empty-note">Couldn't load meetings (${esc(error.message)}).</div>`;
+    return;
+  }
+  meetings = data || [];
+  if(!selectedMeetingId && meetings.length) selectedMeetingId = meetings[0].id;
+  renderMeetingList();
+  renderMeetingDetail();
+}
+
+function fmtDate(iso){
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric", year:"numeric" });
+}
+
+function renderMeetingList(){
+  const wrap = $("#meeting-list");
+  if(!meetings.length){
+    wrap.innerHTML = `<div class="empty-note">No meetings yet${isCoo ? " — start with “+ New meeting.”" : "."}</div>`;
+    return;
+  }
+  wrap.innerHTML = meetings.map(m => `
+    <button class="meeting-item ${m.id===selectedMeetingId?'active':''}" data-id="${m.id}">
+      <span class="dt">${esc(fmtDate(m.meeting_date))}</span>
+      <span class="st">${esc(m.status)}</span>
+    </button>
+  `).join("");
+  $$(".meeting-item", wrap).forEach(btn => btn.addEventListener("click", () => {
+    selectedMeetingId = btn.dataset.id;
+    renderMeetingList();
+    renderMeetingDetail();
+  }));
+}
+
+function currentMeeting(){
+  return meetings.find(m => m.id === selectedMeetingId) || null;
+}
+
+function renderMeetingDetail(){
+  const m = currentMeeting();
+  $("#meeting-empty").hidden = !!m;
+  $("#meeting-body").hidden = !m;
+  if(!m) return;
+
+  $("#meeting-date-label").textContent = fmtDate(m.meeting_date);
+  $("#meeting-status-hint").textContent = m.status === "final" ? "Final" : "Draft";
+  $("#meeting-date-input").value = m.meeting_date;
+  $("#meeting-status-select").value = m.status;
+  $("#save-status-note").textContent = "";
+
+  // Attendees — the fixed real Core Team roster, in template order.
+  $("#attendee-row").innerHTML = directory.map(s => `
+    <div class="attendee-chip"><span class="nm">${esc(s.name)}</span><span class="rl">${esc(ROLE_LABEL[s.role]||s.role)}</span></div>
+  `).join("");
+
+  const fields = {
+    "#f-action-followup": m.action_item_followup_notes,
+    "#f-admin-hr": m.admin_hr_notes,
+    "#f-brand-standing": m.brand_standing_notes,
+    "#f-production": m.production_notes,
+    "#f-vision-mission": m.vision_mission_notes,
+    "#f-general-notes": m.general_notes,
+    "#f-next-meeting": m.next_meeting_notes
+  };
+  Object.entries(fields).forEach(([sel, val]) => {
+    const el = $(sel);
+    el.value = val || "";
+    el.disabled = !isCoo;
+  });
+
+  // Cafes — one block per GM-type Core Team member (gm + location_manager roles).
+  const gms = directory.filter(s => s.role === "gm" || s.role === "location_manager");
+  const cafesUpdates = Array.isArray(m.cafes_updates) ? m.cafes_updates : [];
+  $("#cafe-blocks").innerHTML = gms.map(gm => {
+    const existing = cafesUpdates.find(c => c.staff_id === gm.id) || {};
+    return `
+      <div class="cafe-block" data-staff-id="${gm.id}">
+        <div class="who">${esc(gm.name)} — ${esc(ROLE_LABEL[gm.role]||gm.role)}</div>
+        <label>Wins / areas for improvement</label>
+        <textarea class="small cafe-highlights" ${isCoo?'':'disabled'}>${esc(existing.highlights||"")}</textarea>
+        <label>Friction-point trends</label>
+        <textarea class="small cafe-friction" ${isCoo?'':'disabled'}>${esc(existing.friction||"")}</textarea>
+      </div>
+    `;
+  }).join("") || `<div class="empty-note">No GM/Location Manager accounts on the Core Team roster yet.</div>`;
+
+  renderMeetingActionItems();
+}
+
+function renderMeetingActionItems(){
+  const m = currentMeeting();
+  const wrap = $("#meeting-ai-list");
+  if(!m){ wrap.innerHTML = ""; return; }
+  const items = actionItems.filter(a => a.meeting_id === m.id);
+  if(!items.length){
+    wrap.innerHTML = `<div class="empty-note">No action items tied to this meeting yet.</div>`;
+    return;
+  }
+  wrap.innerHTML = items.map(renderActionItemRow).join("");
+  wireActionItemRows(wrap);
+}
+
+$("#new-meeting-btn").addEventListener("click", async () => {
+  const date = prompt("Meeting date (YYYY-MM-DD):", nextFriday());
+  if(!date) return;
+  const { data, error } = await sb.from("core_team_meetings").insert({ meeting_date: date, created_by: myStaff.id }).select().single();
+  if(error){ alert("Couldn't create meeting: " + error.message); return; }
+  selectedMeetingId = data.id;
+  await loadMeetings();
+});
+
+$("#save-meeting-btn").addEventListener("click", async () => {
+  const m = currentMeeting();
+  if(!m) return;
+  const cafesUpdates = $$(".cafe-block").map(block => ({
+    staff_id: block.dataset.staffId,
+    highlights: $(".cafe-highlights", block).value,
+    friction: $(".cafe-friction", block).value
+  }));
+  const patch = {
+    meeting_date: $("#meeting-date-input").value,
+    status: $("#meeting-status-select").value,
+    action_item_followup_notes: $("#f-action-followup").value,
+    admin_hr_notes: $("#f-admin-hr").value,
+    brand_standing_notes: $("#f-brand-standing").value,
+    production_notes: $("#f-production").value,
+    vision_mission_notes: $("#f-vision-mission").value,
+    general_notes: $("#f-general-notes").value,
+    next_meeting_notes: $("#f-next-meeting").value,
+    cafes_updates: cafesUpdates,
+    updated_at: new Date().toISOString()
+  };
+  $("#save-status-note").textContent = "Saving…";
+  const { error } = await sb.from("core_team_meetings").update(patch).eq("id", m.id);
+  if(error){ $("#save-status-note").textContent = "Couldn't save: " + error.message; return; }
+  $("#save-status-note").textContent = "Saved.";
+  await loadMeetings();
+});
+
+$("#delete-meeting-btn").addEventListener("click", async () => {
+  const m = currentMeeting();
+  if(!m) return;
+  if(!confirm(`Delete the ${fmtDate(m.meeting_date)} meeting? This can't be undone. Its action items stay, unlinked from any meeting.`)) return;
+  const { error } = await sb.from("core_team_meetings").delete().eq("id", m.id);
+  if(error){ alert("Couldn't delete: " + error.message); return; }
+  selectedMeetingId = null;
+  await loadMeetings();
+});
+
+$("#meeting-ai-add-btn").addEventListener("click", async () => {
+  const m = currentMeeting();
+  if(!m) return;
+  const text = $("#meeting-ai-text").value.trim();
+  if(!text) return;
+  const owner = $("#meeting-ai-owner").value;
+  const { error } = await sb.from("core_team_action_items").insert({
+    meeting_id: m.id, owner_staff_id: owner, text, created_by: myStaff.id
+  });
+  if(error){ alert("Couldn't add action item: " + error.message); return; }
+  $("#meeting-ai-text").value = "";
+  await loadActionItems();
+  renderMeetingActionItems();
+});
+
+/* ---------------------------------------------------------------------
+   ACTION ITEMS (shared row renderer + the dedicated tab)
+   --------------------------------------------------------------------- */
+async function loadActionItems(){
+  const { data, error } = await sb.from("core_team_action_items").select("*").order("created_at", { ascending: false });
+  if(error){
+    $("#ai-owner-groups").innerHTML = `<div class="empty-note">Couldn't load action items (${esc(error.message)}).</div>`;
+    return;
+  }
+  actionItems = data || [];
+}
+
+function renderActionItemRow(item){
+  const canToggle = isCoo || item.owner_staff_id === myStaff.id;
+  const meeting = meetings.find(m => m.id === item.meeting_id);
+  const metaBits = [];
+  if(meeting) metaBits.push(fmtDate(meeting.meeting_date));
+  if(item.status === "done" && item.completed_at) metaBits.push("done " + new Date(item.completed_at).toLocaleDateString("en-US"));
+  return `
+    <div class="ai-item ${item.status==='done'?'done':''}" data-id="${item.id}">
+      <button class="chk ${item.status==='done'?'checked':''}" ${canToggle?'':'disabled'} title="${canToggle?'Toggle done':'Only the owner or COO can change this'}">${item.status==='done'?'✓':''}</button>
+      <div class="body">
+        <div class="tx">${esc(item.text)}</div>
+        ${metaBits.length?`<div class="meta">${esc(metaBits.join(" · "))}</div>`:""}
+      </div>
+      ${isCoo?`<button class="del" title="Delete">✕</button>`:""}
+    </div>
+  `;
+}
+
+function wireActionItemRows(container){
+  $$(".ai-item", container).forEach(row => {
+    const id = row.dataset.id;
+    const chk = $(".chk", row);
+    if(chk && !chk.disabled){
+      chk.addEventListener("click", async () => {
+        const item = actionItems.find(a => a.id === id);
+        if(!item) return;
+        const nextStatus = item.status === "done" ? "open" : "done";
+        const { error } = await sb.from("core_team_action_items")
+          .update({ status: nextStatus, completed_at: nextStatus === "done" ? new Date().toISOString() : null })
+          .eq("id", id);
+        if(error){ alert("Couldn't update: " + error.message); return; }
+        await loadActionItems();
+        renderActionItems();
+        renderMeetingActionItems();
+      });
+    }
+    const del = $(".del", row);
+    if(del){
+      del.addEventListener("click", async () => {
+        if(!confirm("Delete this action item?")) return;
+        const { error } = await sb.from("core_team_action_items").delete().eq("id", id);
+        if(error){ alert("Couldn't delete: " + error.message); return; }
+        await loadActionItems();
+        renderActionItems();
+        renderMeetingActionItems();
+      });
+    }
+  });
+}
+
+function renderActionItems(){
+  const wrap = $("#ai-owner-groups");
+  const hideDone = $("#hide-done-chk").checked;
+  if(!directory.length){ wrap.innerHTML = `<div class="empty-note">No Core Team roster yet.</div>`; return; }
+
+  wrap.innerHTML = directory.map(owner => {
+    let items = actionItems.filter(a => a.owner_staff_id === owner.id);
+    if(hideDone) items = items.filter(a => a.status !== "done");
+    items = items.slice().sort((a,b) => (a.status===b.status?0:(a.status==='open'?-1:1)));
+    const openCount = actionItems.filter(a => a.owner_staff_id === owner.id && a.status !== "done").length;
+    return `
+      <div class="ai-owner-group">
+        <div class="ai-owner-head">
+          <div class="who"><span class="nm">${esc(owner.name)}</span><span class="rl">${esc(ROLE_LABEL[owner.role]||owner.role)}</span></div>
+          <span class="ai-count">${openCount} open</span>
+        </div>
+        <div class="ai-rows" data-owner="${owner.id}">
+          ${items.length ? items.map(renderActionItemRow).join("") : `<div class="empty-note">Nothing here.</div>`}
+        </div>
+        ${isCoo ? `
+          <div class="add-ai-row">
+            <input type="text" class="ai-quick-text" placeholder="Add an action item for ${esc(owner.name.split(' ')[0])}…">
+            <button class="btn ai-quick-add" data-owner="${owner.id}">+ Add</button>
+          </div>
+        ` : ""}
+      </div>
+    `;
+  }).join("");
+
+  wireActionItemRows(wrap);
+
+  $$(".ai-quick-add", wrap).forEach(btn => btn.addEventListener("click", async () => {
+    const group = btn.closest(".ai-owner-group");
+    const input = $(".ai-quick-text", group);
+    const text = input.value.trim();
+    if(!text) return;
+    const { error } = await sb.from("core_team_action_items").insert({
+      owner_staff_id: btn.dataset.owner, text, created_by: myStaff.id
+    });
+    if(error){ alert("Couldn't add action item: " + error.message); return; }
+    input.value = "";
+    await loadActionItems();
+    renderActionItems();
+  }));
+}
+
+$("#hide-done-chk").addEventListener("change", renderActionItems);
+
+/* ---------------------------------------------------------------------
+   START
+   --------------------------------------------------------------------- */
+loadDirectory();
+
+// If already signed in (session persisted), skip straight to the app.
+sb.auth.getSession().then(({ data }) => {
+  if(data && data.session){
+    $("#login-wrap").hidden = true;
+    initApp();
+  }
+});
+</script>
+</body>
+</html>
