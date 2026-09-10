@@ -485,8 +485,12 @@ tr:last-child td{border-bottom:none;}
           </div>
         </div>
 
-        <div class="section-head"><h2>Marketing calendar — upcoming touches</h2><span class="hint">Linked to the master company calendar</span></div>
-        <div class="card">
+        <div class="section-head"><h2>Marketing calendar — upcoming touches</h2><span class="hint" id="marketing-events-hint">Loading…</span></div>
+        <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/company-calendar.html?cal=marketing" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Marketing Calendar →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/company-calendar.html — live view of the real Marketing Google Calendar</div></div>
+          <div class="arrow">↗</div>
+        </a>
+        <div class="card" style="margin-top:10px;">
           <div class="event-list" id="marketing-calendar"><!-- injected --></div>
         </div>
 
@@ -535,7 +539,13 @@ tr:last-child td{border-bottom:none;}
 
       <!-- ============ CALENDAR & EVENTS ============ -->
       <section class="panel" id="sec-calendar">
-        <div class="section-head"><h2>Q3 2026 — upcoming events</h2><span class="hint">Pulled from the master company calendar</span></div>
+        <div class="section-head"><h2>Company Calendar</h2><span class="hint">Live Google Calendar — Company &amp; Marketing</span></div>
+        <a class="link-card" href="https://salt-city-coffee-tools.netlify.app/company-calendar.html" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Company Calendar →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/company-calendar.html — live embedded view of the real Company &amp; Marketing Google Calendars, tap to switch between them</div></div>
+          <div class="arrow">↗</div>
+        </a>
+
+        <div class="section-head" style="margin-top:18px;"><h2>Upcoming events</h2><span class="hint" id="calendar-events-hint">Loading…</span></div>
         <div class="card">
           <div class="event-list" id="calendar-events"><!-- injected --></div>
         </div>
@@ -839,6 +849,8 @@ const CAMPAIGNS = [
   { name:"Evangelist Referral Pilot", channels:"Email", segment:"Evangelist tier", window:"TBD", owner:"Marketing — TBD", status:"neutral", statusLabel:"Draft" }
 ];
 
+// Superseded by the live calendar feed (loadLiveCalendarSection, cal=marketing) — kept only as a reference
+// of the shape the real events render in; not read by init() anymore.
 const MARKETING_CAL = [
   { d:"2", m:"Sep", title:"Fall Seasonal Launch goes live", meta:"Social + Email · all locations" },
   { d:"8", m:"Sep", title:"Clay Grand-Opening campaign starts", meta:"Social + Email + Text" },
@@ -869,6 +881,8 @@ const ACADEMY_MILESTONES = [
   { d:"1", m:"Oct", title:"Team pulse survey due (6-month cadence)", meta:"Lencioni-based, all locations" }
 ];
 
+// Superseded by the live calendar feed (loadLiveCalendarSection, cal=company) — kept only as a reference
+// of the shape the real events render in; not read by init() anymore.
 const CALENDAR_EVENTS = [
   { d:"2", m:"Sep", title:"Fall Seasonal Menu launches", meta:"All locations" },
   { d:"5", m:"Sep", title:"Quarterly cleaning night", meta:"All locations · paid, ~$20/hr" },
@@ -1241,9 +1255,35 @@ function renderEventList(targetId, items){
   $(targetId).innerHTML = items.map(e => `
     <div class="event-row">
       <div class="event-date"><div class="d">${e.d}</div><div class="m">${e.m}</div></div>
-      <div><div class="event-title">${e.title}</div><div class="event-meta">${e.meta}</div></div>
+      <div><div class="event-title">${escapeHtml(e.title)}</div><div class="event-meta">${escapeHtml(e.meta || "")}</div></div>
       <div></div>
     </div>`).join("");
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+}
+// Live events for a real Google Calendar, via the calendar-events Supabase Edge Function (it reads the
+// calendar's public ICS feed server-side — a browser fetch to Google's feed is blocked by CORS — and
+// expands recurring events). Same source of truth as company-calendar.html's live list.
+async function loadLiveCalendarSection(calKey, listSel, hintSel){
+  const listEl = $(listSel), hintEl = $(hintSel);
+  try{
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/calendar-events?cal=${encodeURIComponent(calKey)}&limit=8`, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY }
+    });
+    const data = await resp.json();
+    if(!resp.ok || data.error) throw new Error(data.message || `HTTP ${resp.status}`);
+    if(!data.events || !data.events.length){
+      hintEl.textContent = "Live — nothing upcoming";
+      listEl.innerHTML = `<div class="event-row"><div></div><div><div class="event-title">Nothing on the calendar in the next 6 months</div></div><div></div></div>`;
+      return;
+    }
+    hintEl.textContent = "Live from the real Google Calendar";
+    renderEventList(listSel, data.events);
+  }catch(err){
+    hintEl.textContent = "Couldn't load live feed";
+    listEl.innerHTML = `<div class="event-row"><div></div><div><div class="event-title">Couldn't load live events</div><div class="event-meta">${escapeHtml(String(err && err.message || err))} — use the "Open Calendar" link above.</div></div><div></div></div>`;
+  }
 }
 function renderCampaigns(){
   $("#campaigns-table-body").innerHTML = CAMPAIGNS.map(c => `
@@ -2077,11 +2117,11 @@ function init(){
   renderOverviewFinance();
   renderJourney();
   renderCampaigns();
-  renderEventList("#marketing-calendar", MARKETING_CAL);
+  loadLiveCalendarSection("marketing", "#marketing-calendar", "#marketing-events-hint");
   renderAcademyDonut();
   renderAcademyRoles();
   renderEventList("#academy-milestones", ACADEMY_MILESTONES);
-  renderEventList("#calendar-events", CALENDAR_EVENTS);
+  loadLiveCalendarSection("company", "#calendar-events", "#calendar-events-hint");
   renderGoalsEditable("#quarterly-goals", quarterlyGoals, scheduleGoalsPersist);
   renderGoalsEditable("#annual-goals", annualGoals, scheduleGoalsPersist);
   renderProjections();
