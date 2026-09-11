@@ -190,6 +190,21 @@ tr:last-child td{border-bottom:none;}
 
 .empty-note{font-size:12px; color:var(--ink-3); font-style:italic; padding:8px 2px;}
 
+/* ---- range / metric pickers (Overview + Location detail Square trends) ---- */
+.picker-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:-4px 0 16px;}
+.picker-group{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+.picker-label{font-size:11px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:600; margin-right:2px;}
+.range-picker, .metric-picker{display:inline-flex; gap:3px; background:var(--surface-alt); border-radius:9px; padding:3px;}
+.range-pill, .metric-pill{border:none; background:transparent; color:var(--ink-2); font-size:12px; font-weight:600; padding:6px 11px; border-radius:7px; cursor:pointer;}
+.range-pill:hover, .metric-pill:hover{color:var(--ink);}
+.range-pill.active, .metric-pill.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow-1);}
+.custom-range-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.custom-range-row input[type=date]{font-family:inherit; font-size:12.5px; padding:6px 9px; border-radius:7px; border:1px solid var(--border); background:var(--surface); color:var(--ink);}
+.custom-range-row span{font-size:12px; color:var(--ink-3);}
+.trend-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
+.trend-value{font-family:var(--font-mono); font-size:18px; font-weight:600;}
+.trend-value .unit{font-size:11px; color:var(--ink-3); font-weight:500; margin-left:4px;}
+
 /* ---- location cards (Overview) ---- */
 .loc-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
 .loc-card{
@@ -369,8 +384,25 @@ tr:last-child td{border-bottom:none;}
       <!-- ============ OVERVIEW ============ -->
       <section class="panel active" id="sec-overview">
         <div class="section-head">
-          <h2>Portfolio pulse — trailing 30 days</h2>
+          <h2 id="ov-pulse-title">Portfolio pulse — trailing 30 days</h2>
           <span class="hint" id="ov-live-status">Sample data · Square not yet synced</span>
+        </div>
+        <div class="picker-row square-range-ui" id="ov-range-row" hidden>
+          <div class="picker-group">
+            <span class="picker-label">Time frame</span>
+            <div class="range-picker">
+              <button class="range-pill" data-range="7">7D</button>
+              <button class="range-pill active" data-range="30">30D</button>
+              <button class="range-pill" data-range="90">90D</button>
+              <button class="range-pill" data-range="mtd">MTD</button>
+              <button class="range-pill" data-range="qtd">QTD</button>
+              <button class="range-pill" data-range="custom">Custom</button>
+            </div>
+          </div>
+          <div class="custom-range-row" data-custom-row hidden>
+            <input type="date" class="custom-start"><span>to</span><input type="date" class="custom-end">
+            <button class="btn sm custom-apply">Apply</button>
+          </div>
         </div>
         <div class="grid kpi-row">
           <div class="card kpi">
@@ -417,6 +449,23 @@ tr:last-child td{border-bottom:none;}
           </div>
         </div>
 
+        <div class="card square-range-ui" id="ov-trend-card" hidden style="margin-bottom:24px;">
+          <div class="trend-head">
+            <div>
+              <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;">Portfolio trend</div>
+              <div class="trend-value" id="ov-trend-value">—<span class="unit" id="ov-trend-unit"></span></div>
+            </div>
+            <div class="metric-picker">
+              <button class="metric-pill active" data-metric="revenue">Revenue</button>
+              <button class="metric-pill" data-metric="laborPct">Labor %</button>
+              <button class="metric-pill" data-metric="txns">Transactions</button>
+              <button class="metric-pill" data-metric="ticket">Avg ticket</button>
+            </div>
+          </div>
+          <svg id="ov-trend-svg" viewBox="0 0 640 140" style="width:100%;height:140px;overflow:visible;"></svg>
+          <div class="empty-note" id="ov-trend-note" style="margin-top:4px;">Daily for ranges up to ~45 days, weekly beyond that — bounded by what's actually been synced.</div>
+        </div>
+
         <div class="section-head"><h2>Locations</h2><span class="hint">Click a card to open its Sales &amp; Labor detail</span></div>
         <div class="grid loc-grid" id="location-cards"><!-- injected by JS from LOCATIONS --></div>
       </section>
@@ -450,15 +499,43 @@ tr:last-child td{border-bottom:none;}
         <div id="sales-location" style="display:none;">
           <button class="btn ghost sm" id="back-to-portfolio" style="margin-bottom:14px;">← Back to portfolio</button>
           <div class="section-head" style="margin-top:0;"><h2 id="loc-detail-name">—</h2><span class="hint" id="loc-detail-lm">—</span></div>
+          <div class="picker-row square-range-ui" id="loc-range-row" hidden>
+            <div class="picker-group">
+              <span class="picker-label">Time frame</span>
+              <div class="range-picker">
+                <button class="range-pill" data-range="7">7D</button>
+                <button class="range-pill active" data-range="30">30D</button>
+                <button class="range-pill" data-range="90">90D</button>
+                <button class="range-pill" data-range="mtd">MTD</button>
+                <button class="range-pill" data-range="qtd">QTD</button>
+                <button class="range-pill" data-range="custom">Custom</button>
+              </div>
+            </div>
+            <div class="custom-range-row" data-custom-row hidden>
+              <input type="date" class="custom-start"><span>to</span><input type="date" class="custom-end">
+              <button class="btn sm custom-apply">Apply</button>
+            </div>
+          </div>
           <div class="grid kpi-row">
-            <div class="card kpi"><div class="label">MTD revenue</div><div class="value tabular" id="loc-d-rev">—</div><div class="delta" id="loc-d-rev-delta"></div></div>
+            <div class="card kpi"><div class="label" id="loc-d-rev-label">Revenue</div><div class="value tabular" id="loc-d-rev">—</div><div class="delta" id="loc-d-rev-delta"></div></div>
             <div class="card kpi"><div class="label">Labor %</div><div class="value tabular" id="loc-d-labor">—</div><div class="target">Target 28.0%</div></div>
             <div class="card kpi"><div class="label">Transactions</div><div class="value tabular" id="loc-d-txn">—</div></div>
             <div class="card kpi"><div class="label">Avg ticket</div><div class="value tabular" id="loc-d-ticket">—</div></div>
           </div>
           <div class="grid cols-2" style="margin-top:14px;">
             <div class="card">
-              <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;margin-bottom:10px;">12-week revenue trend</div>
+              <div class="trend-head">
+                <div>
+                  <div style="font-size:12.5px;color:var(--ink-2);font-weight:600;">Trend</div>
+                  <div class="trend-value" id="loc-trend-value">—<span class="unit" id="loc-trend-unit"></span></div>
+                </div>
+                <div class="metric-picker">
+                  <button class="metric-pill active" data-metric="revenue">Revenue</button>
+                  <button class="metric-pill" data-metric="laborPct">Labor %</button>
+                  <button class="metric-pill" data-metric="txns">Transactions</button>
+                  <button class="metric-pill" data-metric="ticket">Avg ticket</button>
+                </div>
+              </div>
               <svg id="loc-trend-svg" viewBox="0 0 360 120" style="width:100%;height:120px;overflow:visible;"></svg>
             </div>
             <div class="card">
@@ -1062,10 +1139,14 @@ function renderSalesPortfolio(){
 function renderLocationDetail(id){
   const loc = LOCATIONS.find(l=>l.id===id);
   if(!loc) return;
+  currentDetailLocId = id;
+
   $("#loc-detail-name").textContent = loc.name;
   $("#loc-detail-lm").textContent = loc.lm.replace(/&amp;/g,"&");
   $("#loc-d-rev").textContent = money(loc.rev);
-  $("#loc-d-rev-delta").innerHTML = loc.trend==null ? "" : `<span style="color:${loc.trend>=0?'var(--good)':'var(--critical)'}">${loc.trend>=0?"▲":"▼"} ${Math.abs(loc.trend).toFixed(1)}% vs last mo.</span>`;
+  const priorTxt = loc.live ? priorLabel() : "vs last mo.";
+  $("#loc-d-rev-delta").innerHTML = loc.trend==null ? "" : `<span style="color:${loc.trend>=0?'var(--good)':'var(--critical)'}">${loc.trend>=0?"▲":"▼"} ${Math.abs(loc.trend).toFixed(1)}% ${priorTxt}</span>`;
+  $("#loc-d-rev-label").textContent = loc.live ? `Revenue — ${rangeLabel()}` : "MTD revenue";
   $("#loc-d-labor").textContent = loc.laborPct==null ? "n/a" : pct1(loc.laborPct);
   $("#loc-d-txn").textContent = loc.txns.toLocaleString();
   $("#loc-d-ticket").textContent = "$"+loc.ticket.toFixed(2);
@@ -1075,27 +1156,19 @@ function renderLocationDetail(id){
     + (loc.note ? `<div class="empty-note" style="margin-top:6px;">${loc.note}</div>` : "");
 
   const svg = $("#loc-trend-svg");
-  if(loc.trendSeries){
-    const series = loc.trendSeries, w=360, h=120, pad=6;
-    const max=Math.max(...series), min=Math.min(...series);
-    const pts = series.map((v,i)=>{
-      const x = pad + i*((w-pad*2)/(series.length-1));
-      const y = h-pad - ( (v-min)/(max-min||1) )*(h-pad*2);
-      return [x,y];
-    });
-    const path = pts.map((p,i)=> (i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
-    const areaPath = path + ` L${pts[pts.length-1][0].toFixed(1)},${h} L${pts[0][0].toFixed(1)},${h} Z`;
-    svg.innerHTML = `
-      <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--series-2)" stop-opacity="0.22"/>
-        <stop offset="100%" stop-color="var(--series-2)" stop-opacity="0"/>
-      </linearGradient></defs>
-      <path d="${areaPath}" fill="url(#areaGrad)" stroke="none"/>
-      <path d="${path}" fill="none" stroke="var(--series-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="var(--series-2)"/>
-    `;
+  const valueEl = $("#loc-trend-value");
+  if(loc.live){
+    const rowsForLoc = squareRowsByLoc.get(loc.sbId) || [];
+    const { start, end } = currentRange();
+    const series = buildBucketSeries(rowsForLoc, start, end, chartMetric);
+    drawTrendSvg(svg, series, 360, 120);
+    valueEl.innerHTML = formatMetricTotal(chartMetric, series) + `<span class="unit">${metricLabel(chartMetric)} · ${rangeLabel()}</span>`;
+  } else if(loc.trendSeries){
+    drawTrendSvg(svg, loc.trendSeries, 360, 120);
+    valueEl.innerHTML = `<span class="unit">Sample data — revenue, last 12 weeks</span>`;
   } else {
     svg.innerHTML = `<text x="10" y="60" fill="var(--ink-3)" font-size="12">Event-based — no weekly trend to chart.</text>`;
+    valueEl.innerHTML = "";
   }
 }
 
@@ -1112,6 +1185,13 @@ function goToLocation(id){
    Falls back to the sample numbers above if nothing has synced yet, or
    the fetch fails for any reason (offline, RLS misconfigured, etc.) —
    this must never break the page.
+
+   All rows this table has ever synced are fetched once and cached in
+   squareRowsByLoc — an adjustable time frame + comparison period is then
+   just re-aggregating that cache client-side (no new network call per
+   range change). The range is bounded by whatever's actually been synced
+   — sync_square_daily_rollups.py defaults to a trailing 90 days; a wider
+   window needs Jon to re-run it with --start/--end to backfill further back.
    ====================================================================== */
 function isoWeekKey(dateStr){
   const d = new Date(dateStr + "T00:00:00Z");
@@ -1119,6 +1199,189 @@ function isoWeekKey(dateStr){
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
   const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
   return d.getUTCFullYear() + "-W" + String(week).padStart(2,"0");
+}
+
+let squareRowsByLoc = new Map(); // location uuid -> rows for that location, all synced history
+let squareSyncedAt = null;
+let currentDetailLocId = null;   // which location's detail view is open, if any
+
+let rangeMode = "30";            // "7" | "30" | "90" | "mtd" | "qtd" | "custom"
+let customStart = null, customEnd = null; // "YYYY-MM-DD", only used when rangeMode === "custom"
+let chartMetric = "revenue";     // "revenue" | "laborPct" | "txns" | "ticket" — shared by both trend charts
+
+function d0(dateObj){ const x = new Date(dateObj); x.setHours(0,0,0,0); return x; }
+function isoDate(dateObj){ return dateObj.toISOString().slice(0,10); }
+
+function currentRange(){
+  const today = d0(new Date());
+  let start;
+  if(rangeMode === "custom" && customStart && customEnd){
+    start = d0(new Date(customStart + "T00:00:00"));
+    const end = d0(new Date(customEnd + "T00:00:00"));
+    const lengthMs = end - start;
+    const priorEnd = new Date(start.getTime() - 86400000);
+    const priorStart = new Date(priorEnd.getTime() - lengthMs);
+    return { start, end, priorStart, priorEnd };
+  }
+  if(rangeMode === "mtd"){
+    start = new Date(today.getFullYear(), today.getMonth(), 1);
+  } else if(rangeMode === "qtd"){
+    const q = Math.floor(today.getMonth() / 3);
+    start = new Date(today.getFullYear(), q*3, 1);
+  } else {
+    const days = parseInt(rangeMode, 10) || 30;
+    start = new Date(today); start.setDate(start.getDate() - (days - 1));
+  }
+  const end = today;
+  const lengthMs = end - start;
+  const priorEnd = new Date(start.getTime() - 86400000);
+  const priorStart = new Date(priorEnd.getTime() - lengthMs);
+  return { start, end, priorStart, priorEnd };
+}
+
+function rangeLabel(){
+  if(rangeMode === "7") return "last 7 days";
+  if(rangeMode === "30") return "last 30 days";
+  if(rangeMode === "90") return "last 90 days";
+  if(rangeMode === "mtd") return "month to date";
+  if(rangeMode === "qtd") return "quarter to date";
+  if(rangeMode === "custom" && customStart && customEnd) return `${customStart} to ${customEnd}`;
+  return "selected range";
+}
+
+function priorLabel(){
+  return (rangeMode==="mtd"||rangeMode==="qtd"||rangeMode==="custom") ? "vs prior period" : `vs prior ${rangeMode}d`;
+}
+
+function sumRange(rowsForLoc, start, end){
+  const inRange = rowsForLoc.filter(r => {
+    const d = new Date(r.business_date + "T00:00:00");
+    return d >= start && d <= end;
+  });
+  const revenue = inRange.reduce((a,r)=>a+(Number(r.revenue)||0),0);
+  const txns = inRange.reduce((a,r)=>a+(Number(r.transaction_count)||0),0);
+  const hasLabor = inRange.some(r=>r.labor_cost!=null);
+  const laborCost = hasLabor ? inRange.reduce((a,r)=>a+(Number(r.labor_cost)||0),0) : null;
+  return {
+    revenue, txns, laborCost,
+    laborPct: (laborCost!=null && revenue>0) ? (laborCost/revenue*100) : null,
+    ticket: txns>0 ? revenue/txns : null
+  };
+}
+
+function applyRangeToAllLocations(){
+  const { start, end, priorStart, priorEnd } = currentRange();
+  LOCATIONS.forEach(loc => {
+    const rowsForLoc = squareRowsByLoc.get(loc.sbId);
+    if(!rowsForLoc || !rowsForLoc.length) return; // no synced rows for this location — keep sample
+
+    const cur = sumRange(rowsForLoc, start, end);
+    const prior = sumRange(rowsForLoc, priorStart, priorEnd);
+
+    loc.live = true;
+    loc.rev = cur.revenue;
+    loc.txns = cur.txns;
+    loc.ticket = cur.ticket!=null ? cur.ticket : loc.ticket;
+    loc.laborPct = cur.laborPct;
+    loc.laborPctPrev = prior.laborPct;
+    loc.trend = prior.revenue > 0 ? ((cur.revenue - prior.revenue) / prior.revenue * 100) : null;
+    loc.status = loc.laborPct==null ? "good" : (loc.laborPct<=28 ? "good" : loc.laborPct<=31 ? "warn" : "serious");
+  });
+}
+
+// Buckets a location's rows into the selected range at daily granularity (<=45 days) or
+// weekly (beyond that), then extracts one metric per bucket — used by both trend charts.
+function bucketRows(rowsForLoc, start, end){
+  const days = Math.round((end - start) / 86400000) + 1;
+  const granularity = days <= 45 ? "day" : "week";
+  const buckets = new Map();
+  rowsForLoc.forEach(r => {
+    const d = new Date(r.business_date + "T00:00:00");
+    if(d < start || d > end) return;
+    const key = granularity === "day" ? r.business_date : isoWeekKey(r.business_date);
+    if(!buckets.has(key)) buckets.set(key, { revenue:0, txns:0, laborCost:0, hasLabor:false });
+    const b = buckets.get(key);
+    b.revenue += Number(r.revenue)||0;
+    b.txns += Number(r.transaction_count)||0;
+    if(r.labor_cost!=null){ b.laborCost += Number(r.labor_cost)||0; b.hasLabor = true; }
+  });
+  return { buckets, granularity };
+}
+
+function metricFromBucket(b, metric){
+  if(metric === "revenue") return b.revenue;
+  if(metric === "txns") return b.txns;
+  if(metric === "ticket") return b.txns>0 ? b.revenue/b.txns : null;
+  if(metric === "laborPct") return (b.hasLabor && b.revenue>0) ? (b.laborCost/b.revenue*100) : null;
+  return b.revenue;
+}
+
+function buildBucketSeries(rowsForLoc, start, end, metric){
+  const { buckets } = bucketRows(rowsForLoc, start, end);
+  return Array.from(buckets.keys()).sort().map(k => metricFromBucket(buckets.get(k), metric));
+}
+
+function buildPortfolioSeries(start, end, metric){
+  const { start:s, end:e } = { start, end };
+  const merged = new Map();
+  let granularity = "day";
+  LOCATIONS.forEach(loc => {
+    const rowsForLoc = squareRowsByLoc.get(loc.sbId);
+    if(!rowsForLoc) return;
+    const { buckets, granularity: g } = bucketRows(rowsForLoc, s, e);
+    granularity = g;
+    buckets.forEach((b, k) => {
+      if(!merged.has(k)) merged.set(k, { revenue:0, txns:0, laborCost:0, hasLabor:false });
+      const m = merged.get(k);
+      m.revenue += b.revenue; m.txns += b.txns;
+      if(b.hasLabor){ m.laborCost += b.laborCost; m.hasLabor = true; }
+    });
+  });
+  const keys = Array.from(merged.keys()).sort();
+  return { granularity, series: keys.map(k => metricFromBucket(merged.get(k), metric)) };
+}
+
+function metricLabel(metric){
+  return { revenue:"Revenue", laborPct:"Labor %", txns:"Transactions", ticket:"Avg ticket" }[metric] || metric;
+}
+function formatMetricTotal(metric, values){
+  const clean = values.filter(v=>v!=null);
+  if(metric==="revenue") return money(clean.reduce((a,v)=>a+v,0));
+  if(metric==="txns") return clean.reduce((a,v)=>a+v,0).toLocaleString();
+  if(metric==="ticket"){ const avg = clean.length? clean.reduce((a,v)=>a+v,0)/clean.length : null; return avg==null?"—":"$"+avg.toFixed(2); }
+  if(metric==="laborPct"){ const avg = clean.length? clean.reduce((a,v)=>a+v,0)/clean.length : null; return avg==null?"—":pct1(avg); }
+  return "—";
+}
+
+// Generalized version of the original inline sparkline-drawing code — one line chart, area
+// gradient, endpoint dot. Draws "not enough data" text instead of breaking on an empty/flat series.
+function drawTrendSvg(svgEl, series, w, h){
+  w = w || 360; h = h || 120;
+  const pad = 6;
+  const clean = series.filter(v => v!=null && !Number.isNaN(v));
+  if(clean.length < 2){
+    svgEl.innerHTML = `<text x="10" y="${h/2}" fill="var(--ink-3)" font-size="12">Not enough data in this range yet.</text>`;
+    return;
+  }
+  const max = Math.max(...clean), min = Math.min(...clean);
+  const usable = series.map((v,i) => v==null ? null : [i,v]).filter(Boolean);
+  const pts = usable.map(([i,v]) => {
+    const x = pad + i * ((w - pad*2) / Math.max(series.length-1, 1));
+    const y = h - pad - ((v-min)/((max-min)||1)) * (h - pad*2);
+    return [x,y];
+  });
+  const path = pts.map((p,i) => (i===0?"M":"L") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  const areaPath = path + ` L${pts[pts.length-1][0].toFixed(1)},${h} L${pts[0][0].toFixed(1)},${h} Z`;
+  const gradId = "grad-" + Math.random().toString(36).slice(2,9);
+  svgEl.innerHTML = `
+    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--series-2)" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="var(--series-2)" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${areaPath}" fill="url(#${gradId})" stroke="none"/>
+    <path d="${path}" fill="none" stroke="var(--series-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="var(--series-2)"/>
+  `;
 }
 
 async function loadLiveSquareData(){
@@ -1135,51 +1398,16 @@ async function loadLiveSquareData(){
     const rows = await resp.json();
     if(!Array.isArray(rows) || rows.length === 0) return { ok:false, reason:"empty" };
 
-    const byLoc = new Map();
+    squareRowsByLoc = new Map();
     let latestSync = null;
     rows.forEach(r => {
-      if(!byLoc.has(r.location_id)) byLoc.set(r.location_id, []);
-      byLoc.get(r.location_id).push(r);
+      if(!squareRowsByLoc.has(r.location_id)) squareRowsByLoc.set(r.location_id, []);
+      squareRowsByLoc.get(r.location_id).push(r);
       if(!latestSync || r.synced_at > latestSync) latestSync = r.synced_at;
     });
+    squareSyncedAt = latestSync;
 
-    const today = new Date();
-    const cutoff30 = new Date(today); cutoff30.setDate(cutoff30.getDate() - 30);
-    const cutoff60 = new Date(today); cutoff60.setDate(cutoff60.getDate() - 60);
-
-    LOCATIONS.forEach(loc => {
-      const rowsForLoc = byLoc.get(loc.sbId);
-      if(!rowsForLoc || !rowsForLoc.length) return; // no synced rows for this location yet — keep sample
-
-      const last30 = rowsForLoc.filter(r => new Date(r.business_date) >= cutoff30);
-      const prior30 = rowsForLoc.filter(r => new Date(r.business_date) >= cutoff60 && new Date(r.business_date) < cutoff30);
-      const sum = (arr,k) => arr.reduce((a,r)=> a + (Number(r[k])||0), 0);
-
-      const rev = sum(last30,"revenue");
-      const txns = sum(last30,"transaction_count");
-      const laborCost = last30.some(r=>r.labor_cost!=null) ? sum(last30,"labor_cost") : null;
-      const prevRev = sum(prior30,"revenue");
-      const prevLaborCost = prior30.some(r=>r.labor_cost!=null) ? sum(prior30,"labor_cost") : null;
-
-      loc.live = true;
-      loc.rev = rev;
-      loc.txns = txns;
-      loc.ticket = txns > 0 ? rev/txns : loc.ticket;
-      loc.laborPct = laborCost!=null && rev>0 ? (laborCost/rev*100) : null;
-      loc.laborPctPrev = prevLaborCost!=null && prevRev>0 ? (prevLaborCost/prevRev*100) : null;
-      loc.trend = prevRev > 0 ? ((rev-prevRev)/prevRev*100) : null;
-      loc.status = loc.laborPct==null ? "good" : (loc.laborPct<=28 ? "good" : loc.laborPct<=31 ? "warn" : "serious");
-
-      // last 12 ISO weeks, summed revenue per week, for the location-detail sparkline
-      const weekTotals = new Map();
-      rowsForLoc.forEach(r => {
-        const wk = isoWeekKey(r.business_date);
-        weekTotals.set(wk, (weekTotals.get(wk)||0) + Number(r.revenue||0));
-      });
-      const weeks = Array.from(weekTotals.keys()).sort();
-      loc.trendSeries = weeks.slice(-12).map(w => weekTotals.get(w));
-    });
-
+    applyRangeToAllLocations();
     return { ok:true, syncedAt:latestSync };
   }catch(err){
     return { ok:false, reason: err.message || "fetch failed" };
@@ -1201,11 +1429,12 @@ function renderOverviewFinance(){
   $("#ov-kpi-revenue").textContent = moneyK(totalRev);
   $("#ov-kpi-labor").textContent = blendedLabor==null ? "—" : pct1(blendedLabor);
   if(live){
-    $("#ov-kpi-revenue-delta").innerHTML = avgTrend==null ? "No prior-period data yet" : `${avgTrend>=0?"▲":"▼"} ${Math.abs(avgTrend).toFixed(1)}% vs prior 30d`;
+    $("#ov-pulse-title").textContent = `Portfolio pulse — ${rangeLabel()}`;
+    $("#ov-kpi-revenue-delta").innerHTML = avgTrend==null ? "No prior-period data yet" : `${avgTrend>=0?"▲":"▼"} ${Math.abs(avgTrend).toFixed(1)}% ${priorLabel()}`;
     $("#ov-kpi-revenue-delta").className = "delta " + (avgTrend==null?"flat":avgTrend>=0?"up":"down");
     if(blendedLabor!=null && blendedLaborPrev!=null){
       const laborDelta = blendedLabor - blendedLaborPrev;
-      $("#ov-kpi-labor-delta").innerHTML = `${laborDelta<=0?"▼":"▲"} ${Math.abs(laborDelta).toFixed(1)}pt vs prior 30d`;
+      $("#ov-kpi-labor-delta").innerHTML = `${laborDelta<=0?"▼":"▲"} ${Math.abs(laborDelta).toFixed(1)}pt ${priorLabel()}`;
       $("#ov-kpi-labor-delta").className = "delta " + (laborDelta<=0?"up":"down");
     } else {
       $("#ov-kpi-labor-delta").textContent = "No prior-period data yet";
@@ -1222,6 +1451,67 @@ function renderOverviewFinance(){
   $("#sales-total-ticket").textContent = "$"+avgTicket.toFixed(2);
 }
 
+function renderPortfolioTrend(){
+  if(!squareLive) return;
+  const { start, end } = currentRange();
+  const { series } = buildPortfolioSeries(start, end, chartMetric);
+  drawTrendSvg($("#ov-trend-svg"), series, 640, 140);
+  $("#ov-trend-value").innerHTML = formatMetricTotal(chartMetric, series) + `<span class="unit">${metricLabel(chartMetric)} · ${rangeLabel()}</span>`;
+}
+
+// Re-applies the current range/metric to every live view without a new network fetch, and
+// keeps every range-picker/metric-picker instance in the DOM (Overview + Location detail both
+// have their own copy) showing the same selection.
+function refreshLiveViews(){
+  if(!squareLive) return;
+  applyRangeToAllLocations();
+  renderLocationCards();
+  renderSalesPortfolio();
+  renderOverviewFinance();
+  renderPortfolioTrend();
+  if(currentDetailLocId) renderLocationDetail(currentDetailLocId);
+
+  $$(".range-pill").forEach(b => b.classList.toggle("active", b.dataset.range === rangeMode));
+  $$(".metric-pill").forEach(b => b.classList.toggle("active", b.dataset.metric === chartMetric));
+  $$("[data-custom-row]").forEach(row => row.hidden = rangeMode !== "custom");
+}
+
+function wireSquarePickers(){
+  document.addEventListener("click", (e) => {
+    const rangeBtn = e.target.closest(".range-pill");
+    if(rangeBtn){
+      rangeMode = rangeBtn.dataset.range;
+      if(rangeMode === "custom"){
+        // seed the custom inputs with the currently-active range so Apply has sane defaults
+        const { start, end } = currentRange();
+        $$(".custom-start").forEach(i => i.value = i.value || isoDate(start));
+        $$(".custom-end").forEach(i => i.value = i.value || isoDate(end));
+      }
+      refreshLiveViews();
+      return;
+    }
+    const metricBtn = e.target.closest(".metric-pill");
+    if(metricBtn){
+      chartMetric = metricBtn.dataset.metric;
+      refreshLiveViews();
+      return;
+    }
+    const applyBtn = e.target.closest(".custom-apply");
+    if(applyBtn){
+      const row = applyBtn.closest("[data-custom-row]");
+      const s = $(".custom-start", row).value, en = $(".custom-end", row).value;
+      if(s && en && s <= en){
+        customStart = s; customEnd = en; rangeMode = "custom";
+        $$(".custom-start").forEach(i => i.value = s);
+        $$(".custom-end").forEach(i => i.value = en);
+        refreshLiveViews();
+      }
+      return;
+    }
+  });
+}
+wireSquarePickers();
+
 async function initLiveSquareData(){
   const result = await loadLiveSquareData();
   const anyLive = LOCATIONS.some(l=>l.live);
@@ -1236,16 +1526,19 @@ async function initLiveSquareData(){
     $("#topbar-asof").textContent = result.syncedAt
       ? `Square synced ${syncedTxt}`
       : "Square data live — sync time unknown";
+    $$(".square-range-ui").forEach(el => el.hidden = false);
   } else {
     const why = result.reason === "empty" ? "table is empty — run scripts/sync_square_daily_rollups.py" : `couldn't load (${result.reason}) — showing sample data`;
     ovStatus.textContent = `Sample data · ${why}`;
     salesStatus.textContent = `Sample data · ${why}`;
     $("#topbar-asof").textContent = `Page loaded ${new Date().toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})} — Square not yet synced`;
+    $$(".square-range-ui").forEach(el => el.hidden = true);
   }
 
   renderLocationCards();
   renderSalesPortfolio();
   renderOverviewFinance();
+  renderPortfolioTrend();
   updateSectionPill(currentSection);
 }
 
