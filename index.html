@@ -1544,7 +1544,7 @@ async function initLiveTimecardTally(){
   }
 }
 
-async function loadLiveSquareData(){
+async function initLiveSquareData(){
   const result = await loadLiveSquareData();
   const anyLive = LOCATIONS.some(l=>l.live);
   squareLive = anyLive;
