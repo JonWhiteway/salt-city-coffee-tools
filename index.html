@@ -424,6 +424,12 @@ tr:last-child td{border-bottom:none;}
             <div class="target" id="ov-kpi-ticket">Avg ticket $6.72</div>
           </div>
           <div class="card kpi">
+            <div class="label">Pending timecard requests</div>
+            <div class="value tabular" id="ov-kpi-tc-pending">—</div>
+            <div class="delta flat" id="ov-kpi-tc-detail">Loading…</div>
+            <div class="target">Company-wide, all locations</div>
+          </div>
+          <div class="card kpi">
             <div class="label">Customer journey — at risk</div>
             <div class="value tabular">312</div>
             <div class="delta down">▲ 18 vs last mo.</div>
@@ -1512,7 +1518,33 @@ function wireSquarePickers(){
 }
 wireSquarePickers();
 
-async function initLiveSquareData(){
+async function initLiveTimecardTally(){
+  const valEl = $("#ov-kpi-tc-pending"), detailEl = $("#ov-kpi-tc-detail");
+  try{
+    const url = `${SUPABASE_URL}/rest/v1/timecard_correction_company_summary?select=*`;
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    const resp = await fetch(url, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY },
+      signal: ctrl.signal
+    });
+    clearTimeout(timeout);
+    if(!resp.ok) throw new Error("Supabase responded " + resp.status);
+    const rows = await resp.json();
+    const total = (rows||[]).reduce((a,r) => a + (Number(r.pending_count)||0), 0);
+    const withReqs = (rows||[]).filter(r => r.pending_count > 0).sort((a,b)=>b.pending_count-a.pending_count);
+    valEl.textContent = total;
+    detailEl.className = "delta " + (total>0 ? "down" : "flat");
+    detailEl.textContent = withReqs.length
+      ? withReqs.slice(0,2).map(r => `${r.location_name} ${r.pending_count}`).join(", ") + (withReqs.length>2 ? `, +${withReqs.length-2} more` : "")
+      : "None open";
+  }catch(err){
+    valEl.textContent = "—";
+    detailEl.textContent = "Couldn't load (migration not applied yet?)";
+  }
+}
+
+async function loadLiveSquareData(){
   const result = await loadLiveSquareData();
   const anyLive = LOCATIONS.some(l=>l.live);
   squareLive = anyLive;
@@ -2433,6 +2465,7 @@ function init(){
 }
 init();
 initLiveSquareData();
+initLiveTimecardTally();
 initLiveBakeryData();
 initLiveSyscoOrders();
 initLiveSyscoInvoices();

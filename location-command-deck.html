@@ -143,6 +143,41 @@ button{font-family:inherit;}
 .scorecard-key{display:flex; gap:16px; font-size:11px; color:var(--ink-3); font-family:var(--font-mono); flex-wrap:wrap;}
 .scorecard-key .k{display:inline-flex; align-items:center; gap:5px;}
 .scorecard-key .dot{width:8px; height:8px; border-radius:2px; flex:0 0 auto;}
+
+/* ---------- Timecard Corrections ---------- */
+.tc-toolbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;}
+.tc-form{display:none; gap:10px; grid-template-columns:1.4fr 1fr 1fr 1fr; margin-bottom:16px;}
+.tc-form.open{display:grid;}
+.tc-form .fld{display:flex; flex-direction:column; gap:4px; position:relative;}
+.tc-form .fld label{font-size:11px; font-weight:600; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em;}
+.tc-form .fld.wide{grid-column:1 / -1;}
+input[type="text"],input[type="date"],input[type="time"],textarea,select{
+  font-family:var(--font-body); font-size:13.5px; color:var(--ink); background:var(--surface);
+  border:1px solid var(--border); border-radius:8px; padding:8px 10px; width:100%;
+}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
+textarea{resize:vertical; min-height:52px;}
+.autocomplete-list{position:absolute; top:100%; left:0; right:0; z-index:6; background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:var(--shadow-2); margin-top:2px; max-height:180px; overflow-y:auto;}
+.autocomplete-list button{display:block; width:100%; text-align:left; padding:8px 10px; border:none; background:none; font-size:13px; color:var(--ink); cursor:pointer;}
+.autocomplete-list button:hover{background:var(--surface-alt);}
+.tc-form-actions{grid-column:1 / -1; display:flex; gap:8px; justify-content:flex-end;}
+.btn.primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+.btn.small{padding:6px 11px; font-size:12px;}
+.btn:disabled{opacity:.5; cursor:not-allowed;}
+.tc-list{display:flex; flex-direction:column; gap:10px;}
+.tc-row{padding:14px 16px;}
+.tc-row-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.tc-row .tc-who{font-family:var(--font-display); font-weight:600; font-size:14.5px;}
+.tc-row .tc-when{font-size:11.5px; color:var(--ink-3); margin-top:2px;}
+.tc-row .tc-diff{font-family:var(--font-mono); font-size:12.5px; margin-top:8px; color:var(--ink-2);}
+.tc-row .tc-diff .arrow{color:var(--accent); margin:0 4px;}
+.tc-row .tc-reason{font-size:12px; color:var(--ink-2); margin-top:6px; font-style:italic;}
+.tc-row .tc-rec-reason{font-size:11.5px; color:var(--ink-3); margin-top:6px;}
+.tc-row .tc-actions{display:flex; gap:8px; margin-top:10px;}
+.chip.critical{background:var(--critical-soft); color:var(--critical);} .chip.critical::before{border-radius:1px;}
+.chip.neutral{background:var(--surface-alt); color:var(--ink-3);} .chip.neutral::before{border-radius:50%;}
+.loc-card .lc-tally{position:absolute; top:12px; right:12px;}
+.loc-card{position:relative;}
 </style>
 </head>
 <body>
@@ -211,10 +246,38 @@ button{font-family:inherit;}
         <div class="card kpi"><div class="label">Labor %</div><div class="value tabular" id="d-labor">—</div><div class="delta" id="d-labor-delta"></div></div>
         <div class="card kpi"><div class="label">Transactions</div><div class="value tabular" id="d-txn">—</div></div>
         <div class="card kpi"><div class="label">Avg ticket</div><div class="value tabular" id="d-ticket">—</div></div>
+        <div class="card kpi"><div class="label">Pending timecard requests</div><div class="value tabular" id="d-tc-pending">—</div></div>
       </div>
       <div class="section-head"><h2>12-week revenue trend</h2></div>
       <div class="card"><svg id="trend-svg" class="trend-svg" viewBox="0 0 640 120"></svg></div>
       <div class="empty-note">Revenue, transactions and labor % are real — pulled from Square and scoped to only the location(s) assigned to you. Walk-Through Audit trend, Safety Incident Log, Service Recovery Log and other role-specific scorecard items aren't wired up yet.</div>
+
+      <div class="section-head">
+        <h2>Timecard corrections</h2>
+        <span class="hint">Log what an employee reported, reconcile it against their real Square timecard, then apply or deny — right here.</span>
+      </div>
+      <div class="tc-toolbar">
+        <span class="empty-note" style="padding:0;">Square-native only — no Deputy schedule data is used here.</span>
+        <button class="btn primary small" id="tc-new-btn">+ New correction request</button>
+      </div>
+      <form class="tc-form card" id="tc-form">
+        <div class="fld wide">
+          <label>Employee</label>
+          <input type="text" id="tc-employee" autocomplete="off" placeholder="Start typing a name…" required>
+          <div class="autocomplete-list" id="tc-employee-list" hidden></div>
+        </div>
+        <div class="fld"><label>Shift date</label><input type="date" id="tc-date" required></div>
+        <div class="fld"><label>Corrected clock in</label><input type="time" id="tc-in"></div>
+        <div class="fld"><label>Corrected clock out</label><input type="time" id="tc-out"></div>
+        <div class="fld wide"><label>Reason (optional)</label><textarea id="tc-reason" placeholder="What the employee told you…"></textarea></div>
+        <div class="tc-form-actions">
+          <span class="pin-error" id="tc-form-error" style="min-height:auto;"></span>
+          <button type="button" class="btn small" id="tc-cancel-btn">Cancel</button>
+          <button type="submit" class="btn primary small" id="tc-submit-btn">Submit &amp; reconcile</button>
+        </div>
+      </form>
+      <div class="tc-list" id="tc-list"></div>
+      <div class="empty-note" id="tc-empty" hidden>No open timecard correction requests for this location.</div>
     </div>
 
     <div id="view-empty" hidden>
@@ -274,6 +337,9 @@ let pinDigits = "";
 let myStaff = null;
 let myLocations = [];
 let locData = {}; // location_id -> aggregated numbers
+let tcPending = {}; // location_id -> pending timecard-correction count
+let currentTcLocation = null; // the location object currently shown in #view-detail
+let tcEmployeeChoice = null; // { team_member_id, name } picked from autocomplete
 
 /* ---------------------------------------------------------------------
    LOGIN
@@ -392,7 +458,7 @@ async function initApp(){
 
   $("#app-sub").textContent = "Real, live data — scoped to only your assigned location(s).";
 
-  const { data: assign } = await sb.from("staff_locations").select("location_id, locations(id,name,type)").eq("staff_id", myStaff.id);
+  const { data: assign } = await sb.from("staff_locations").select("location_id, locations(id,name,type,square_location_id)").eq("staff_id", myStaff.id);
   myLocations = (assign||[]).map(a => a.locations).filter(Boolean);
 
   if(!myLocations.length){
@@ -407,6 +473,7 @@ async function initApp(){
     .order("business_date", { ascending: true });
 
   aggregate(rollups || []);
+  await loadTcPendingCounts();
 
   if(myLocations.length > 1){
     $("#view-portfolio").hidden = false;
@@ -466,6 +533,7 @@ function renderPortfolio(){
     const d = locData[loc.id] || {};
     return `
     <button class="card loc-card" data-loc="${loc.id}">
+      ${tcPending[loc.id] ? `<span class="chip warn lc-tally">${tcPending[loc.id]} timecard req${tcPending[loc.id]===1?"":"s"}</span>` : ""}
       <div class="lc-head">
         <h3>${esc(loc.name)}</h3>
         <span class="chip ${d.status||"good"}">${d.hasData ? (d.status==="good"?"On target":d.status==="warn"?"Watch":"Attention") : "No data yet"}</span>
@@ -506,6 +574,9 @@ function renderDetail(locId){
   }
   $("#d-txn").textContent = (d.txns||0).toLocaleString();
   $("#d-ticket").textContent = d.ticket==null ? "—" : "$"+d.ticket.toFixed(2);
+  $("#d-tc-pending").textContent = tcPending[locId] || 0;
+  currentTcLocation = loc;
+  loadCorrections(locId);
 
   const svg = $("#trend-svg");
   const series = d.trendSeries || [];
@@ -531,6 +602,198 @@ function renderDetail(locId){
     svg.innerHTML = `<text x="10" y="60" fill="var(--ink-3)" font-size="12">Not enough synced weeks yet to chart a trend.</text>`;
   }
 }
+
+/* ---------------------------------------------------------------------
+   TIMECARD CORRECTIONS — LM-facing, Square-only (no Deputy). All actual
+   Square reads/writes happen server-side in the timecard-corrections
+   Edge Function; this page only ever talks to Supabase (for the request
+   rows themselves) and to that one Edge Function.
+   --------------------------------------------------------------------- */
+const TC_EDGE_FN_URL = `${SUPABASE_URL}/functions/v1/timecard-corrections`;
+const TC_REC_LABEL = { auto_apply:"Auto-eligible", needs_review:"Needs review", error:"Error" };
+const TC_REC_CHIP = { auto_apply:"good", needs_review:"warn", error:"critical" };
+const TC_STATUS_LABEL = { new:"New", reconciling:"Reconciling…", ready_auto:"Auto-eligible", needs_review:"Needs review", error:"Error", applied:"Applied", denied:"Denied" };
+
+async function loadTcPendingCounts(){
+  const { data, error } = await sb.from("timecard_correction_pending_counts").select("location_id,pending_count");
+  tcPending = {};
+  if(!error) (data||[]).forEach(r => { tcPending[r.location_id] = r.pending_count; });
+}
+
+async function tcCall(action, payload){
+  const { data: { session } } = await sb.auth.getSession();
+  const resp = await fetch(TC_EDGE_FN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${session?.access_token || ""}`,
+      "apikey": SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ action, ...payload }),
+  });
+  const body = await resp.json().catch(() => ({}));
+  if(!resp.ok) throw new Error(body.error || `Request failed (${resp.status})`);
+  return body;
+}
+
+async function loadCorrections(locId){
+  const { data, error } = await sb.from("timecard_correction_requests")
+    .select("*").eq("location_id", locId).order("created_at", { ascending:false }).limit(50);
+  if(error){
+    $("#tc-list").innerHTML = `<div class="empty-note">Couldn't load requests (${esc(error.message)}).</div>`;
+    return;
+  }
+  renderCorrectionsList(data || []);
+}
+
+function tcTimeLabel(iso){
+  if(!iso) return "—";
+  return new Date(iso).toLocaleString("en-US", { timeZone:"America/New_York", month:"numeric", day:"numeric", hour:"numeric", minute:"2-digit" });
+}
+
+function renderCorrectionsList(rows){
+  $("#tc-empty").hidden = rows.length > 0;
+  $("#tc-list").innerHTML = rows.map(r => {
+    const recChip = r.recommendation ? `<span class="chip ${TC_REC_CHIP[r.recommendation]}">${TC_REC_LABEL[r.recommendation]}</span>` : `<span class="chip neutral">${TC_STATUS_LABEL[r.status]||r.status}</span>`;
+    const statusChip = ["applied","denied"].includes(r.status) ? `<span class="chip ${r.status==="applied"?"good":"neutral"}">${TC_STATUS_LABEL[r.status]}</span>` : "";
+    const canAct = ["ready_auto","needs_review"].includes(r.status);
+    const diff = (r.reported_clock_in || r.reported_clock_out) ? `
+      <div class="tc-diff">
+        In: ${tcTimeLabel(r.square_current_clock_in)} <span class="arrow">→</span> ${r.reported_clock_in ? tcTimeLabel(r.reported_clock_in) : "(unchanged)"} &nbsp;·&nbsp;
+        Out: ${tcTimeLabel(r.square_current_clock_out)} <span class="arrow">→</span> ${r.reported_clock_out ? tcTimeLabel(r.reported_clock_out) : "(unchanged)"}
+      </div>` : "";
+    return `
+    <div class="card tc-row" data-id="${r.id}">
+      <div class="tc-row-head">
+        <div>
+          <div class="tc-who">${esc(r.employee_name)}</div>
+          <div class="tc-when">${esc(r.shift_date)} · reported ${new Date(r.created_at).toLocaleDateString()}</div>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">${recChip}${statusChip}</div>
+      </div>
+      ${diff}
+      ${r.reason ? `<div class="tc-reason">"${esc(r.reason)}"</div>` : ""}
+      ${r.recommendation_reason ? `<div class="tc-rec-reason">${esc(r.recommendation_reason)}</div>` : ""}
+      ${canAct ? `
+      <div class="tc-actions">
+        <button class="btn primary small tc-approve">Approve &amp; apply to Square</button>
+        <button class="btn small tc-deny">Deny</button>
+      </div>` : ""}
+    </div>`;
+  }).join("");
+
+  $$(".tc-approve", $("#tc-list")).forEach(btn => btn.addEventListener("click", async (e) => {
+    const id = e.target.closest(".tc-row").dataset.id;
+    btn.disabled = true; btn.textContent = "Applying…";
+    try {
+      await tcCall("apply", { request_id: id });
+      await loadTcPendingCounts();
+      if(currentTcLocation) { $("#d-tc-pending").textContent = tcPending[currentTcLocation.id] || 0; loadCorrections(currentTcLocation.id); }
+    } catch(err){
+      alert("Couldn't apply to Square: " + err.message);
+      btn.disabled = false; btn.textContent = "Approve & apply to Square";
+    }
+  }));
+  $$(".tc-deny", $("#tc-list")).forEach(btn => btn.addEventListener("click", async (e) => {
+    const id = e.target.closest(".tc-row").dataset.id;
+    const note = prompt("Optional note for why this is being denied:") || null;
+    btn.disabled = true;
+    try {
+      await tcCall("deny", { request_id: id, denial_note: note });
+      await loadTcPendingCounts();
+      if(currentTcLocation) { $("#d-tc-pending").textContent = tcPending[currentTcLocation.id] || 0; loadCorrections(currentTcLocation.id); }
+    } catch(err){
+      alert("Couldn't deny: " + err.message);
+      btn.disabled = false;
+    }
+  }));
+}
+
+function tcResetForm(){
+  $("#tc-form").reset();
+  $("#tc-employee-list").hidden = true;
+  $("#tc-form-error").textContent = "";
+  tcEmployeeChoice = null;
+}
+
+$("#tc-new-btn").addEventListener("click", () => {
+  tcResetForm();
+  $("#tc-form").classList.add("open");
+  $("#tc-employee").focus();
+});
+$("#tc-cancel-btn").addEventListener("click", () => {
+  $("#tc-form").classList.remove("open");
+  tcResetForm();
+});
+
+let tcAutocompleteTimer = null;
+$("#tc-employee").addEventListener("input", () => {
+  tcEmployeeChoice = null;
+  const q = $("#tc-employee").value;
+  clearTimeout(tcAutocompleteTimer);
+  if(q.trim().length < 2 || !currentTcLocation?.square_location_id){
+    $("#tc-employee-list").hidden = true;
+    return;
+  }
+  tcAutocompleteTimer = setTimeout(async () => {
+    try {
+      const res = await tcCall("lookup_employee", { square_location_id: currentTcLocation.square_location_id, query: q });
+      const list = $("#tc-employee-list");
+      if(!res.members.length){
+        list.innerHTML = `<div style="padding:8px 10px; font-size:12.5px; color:var(--ink-3);">No active Square team members match "${esc(q)}" at this location.</div>`;
+      } else {
+        list.innerHTML = res.members.map(m => `<button type="button" data-id="${m.team_member_id}" data-name="${esc(m.name)}">${esc(m.name)}</button>`).join("");
+        $$("button", list).forEach(b => b.addEventListener("click", () => {
+          tcEmployeeChoice = { team_member_id: b.dataset.id, name: b.dataset.name };
+          $("#tc-employee").value = b.dataset.name;
+          list.hidden = true;
+        }));
+      }
+      list.hidden = false;
+    } catch(err){
+      $("#tc-employee-list").hidden = true;
+    }
+  }, 300);
+});
+
+$("#tc-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errEl = $("#tc-form-error");
+  errEl.textContent = "";
+  if(!tcEmployeeChoice){
+    errEl.textContent = "Pick an employee from the list — it has to match Square's own roster.";
+    return;
+  }
+  const shiftDate = $("#tc-date").value;
+  const inTime = $("#tc-in").value;
+  const outTime = $("#tc-out").value;
+  if(!shiftDate){ errEl.textContent = "Shift date is required."; return; }
+  if(!inTime && !outTime){ errEl.textContent = "Enter at least a corrected clock-in or clock-out time."; return; }
+
+  const submitBtn = $("#tc-submit-btn");
+  submitBtn.disabled = true; submitBtn.textContent = "Reconciling against Square…";
+  try {
+    await tcCall("create_and_reconcile", {
+      location_id: currentTcLocation.id,
+      square_location_id: currentTcLocation.square_location_id,
+      square_team_member_id: tcEmployeeChoice.team_member_id,
+      employee_name: tcEmployeeChoice.name,
+      shift_date: shiftDate,
+      reported_clock_in_local: inTime ? `${shiftDate}T${inTime}` : null,
+      reported_clock_out_local: outTime ? `${shiftDate}T${outTime}` : null,
+      reason: $("#tc-reason").value || null,
+    });
+    $("#tc-form").classList.remove("open");
+    tcResetForm();
+    await loadTcPendingCounts();
+    $("#d-tc-pending").textContent = tcPending[currentTcLocation.id] || 0;
+    loadCorrections(currentTcLocation.id);
+  } catch(err){
+    errEl.textContent = err.message;
+  } finally {
+    submitBtn.disabled = false; submitBtn.textContent = "Submit & reconcile";
+  }
+});
 
 /* ---------------------------------------------------------------------
    PRODUCTION MANAGER — a real portfolio rollup across the four stations
