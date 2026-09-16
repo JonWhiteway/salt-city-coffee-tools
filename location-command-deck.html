@@ -176,8 +176,67 @@ textarea{resize:vertical; min-height:52px;}
 .tc-row .tc-actions{display:flex; gap:8px; margin-top:10px;}
 .chip.critical{background:var(--critical-soft); color:var(--critical);} .chip.critical::before{border-radius:1px;}
 .chip.neutral{background:var(--surface-alt); color:var(--ink-3);} .chip.neutral::before{border-radius:50%;}
-.loc-card .lc-tally{position:absolute; top:12px; right:12px;}
+.loc-card .lc-tally{position:absolute; top:12px; right:12px; display:flex; flex-direction:column; align-items:flex-end; gap:4px;}
 .loc-card{position:relative;}
+
+/* ---------- Availability requests (reuses most Timecard Corrections patterns above) ---------- */
+.avail-list{display:flex; flex-direction:column; gap:10px;}
+.avail-row{padding:14px 16px;}
+.avail-row-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.avail-row .av-who{font-family:var(--font-display); font-weight:600; font-size:14.5px;}
+.avail-row .av-when{font-size:11.5px; color:var(--ink-3); margin-top:2px;}
+.avail-row .av-detail{font-family:var(--font-mono); font-size:12.5px; margin-top:8px; color:var(--ink-2);}
+.avail-row .av-reason{font-size:12px; color:var(--ink-2); margin-top:6px; font-style:italic;}
+.avail-row .av-actions{display:flex; gap:8px; margin-top:10px;}
+.avail-form{display:none; gap:10px; grid-template-columns:1.4fr 1fr 1fr; margin-bottom:16px;}
+.avail-form.open{display:grid;}
+.avail-form .fld{display:flex; flex-direction:column; gap:4px; position:relative;}
+.avail-form .fld label{font-size:11px; font-weight:600; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em;}
+.avail-form .fld.wide{grid-column:1 / -1;}
+.type-toggle{display:flex; gap:8px;}
+.type-toggle button{flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); font-size:12.5px; font-weight:600; color:var(--ink-2); cursor:pointer;}
+.type-toggle button.active{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+
+/* ---------- Schedule builder ---------- */
+.sched-toolbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap;}
+.week-nav{display:flex; align-items:center; gap:10px;}
+.week-nav .wk-label{font-family:var(--font-mono); font-size:13px; font-weight:600; min-width:180px; text-align:center;}
+.sched-rules{font-size:11.5px; color:var(--ink-3); margin-bottom:12px;}
+.sched-day{margin-bottom:14px;}
+.sched-day-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:6px;}
+.sched-day-head .dh-name{font-family:var(--font-display); font-weight:600; font-size:13.5px;}
+.sched-day-head .dh-meta{font-size:11px; color:var(--ink-3); font-family:var(--font-mono);}
+.sched-day-head .dh-meta.over{color:var(--critical);}
+.shift-list{display:flex; flex-direction:column; gap:8px;}
+.shift-card{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; cursor:pointer;}
+.shift-card .sc-left{display:flex; flex-direction:column; gap:2px;}
+.shift-card .sc-who{font-weight:600; font-size:13px;}
+.shift-card .sc-meta{font-size:11.5px; color:var(--ink-3);}
+.shift-card .sc-right{display:flex; align-items:center; gap:8px; flex:0 0 auto;}
+.shift-card .sc-time{font-family:var(--font-mono); font-size:12.5px; color:var(--ink-2);}
+.shift-card.has-conflict{border-color:var(--warn); background:var(--warn-soft);}
+.sched-form-modal{position:fixed; inset:0; z-index:20; display:none; align-items:flex-start; justify-content:center; background:rgba(20,16,12,.45); padding:40px 16px; overflow-y:auto;}
+.sched-form-modal.open{display:flex;}
+.sched-form-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-2); padding:22px; width:100%; max-width:480px;}
+.sched-form-card h3{font-size:16px; margin-bottom:14px;}
+.sched-form-card .fld{display:flex; flex-direction:column; gap:4px; margin-bottom:12px; position:relative;}
+.sched-form-card .fld label{font-size:11px; font-weight:600; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em;}
+.sched-form-card .fld-row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.sched-form-actions{display:flex; gap:8px; justify-content:space-between; margin-top:16px;}
+.sched-form-actions .right{display:flex; gap:8px;}
+
+/* ---------- Bookkeeper (consolidated PTO/Sick view) ---------- */
+.bk-toolbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
+.bk-year-select{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-2);}
+.bk-year-select select{width:auto;}
+.bk-summary{display:flex; gap:14px; margin-bottom:14px; flex-wrap:wrap;}
+.bk-list{display:flex; flex-direction:column; gap:10px;}
+.bk-row{padding:14px 16px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.bk-row .bk-who{font-family:var(--font-display); font-weight:600; font-size:14.5px;}
+.bk-row .bk-meta{font-size:11.5px; color:var(--ink-3); margin-top:2px;}
+.bk-row .bk-notes{font-size:12px; color:var(--ink-2); margin-top:6px; font-style:italic;}
+.bk-row .bk-right{text-align:right; flex:0 0 auto;}
+.bk-row .bk-hours{font-family:var(--font-mono); font-size:15px; font-weight:600;}
 </style>
 </head>
 <body>
@@ -247,6 +306,7 @@ textarea{resize:vertical; min-height:52px;}
         <div class="card kpi"><div class="label">Transactions</div><div class="value tabular" id="d-txn">—</div></div>
         <div class="card kpi"><div class="label">Avg ticket</div><div class="value tabular" id="d-ticket">—</div></div>
         <div class="card kpi"><div class="label">Pending timecard requests</div><div class="value tabular" id="d-tc-pending">—</div></div>
+        <div class="card kpi"><div class="label">Pending availability requests</div><div class="value tabular" id="d-avail-pending">—</div></div>
       </div>
       <div class="section-head"><h2>12-week revenue trend</h2></div>
       <div class="card"><svg id="trend-svg" class="trend-svg" viewBox="0 0 640 120"></svg></div>
@@ -278,6 +338,149 @@ textarea{resize:vertical; min-height:52px;}
       </form>
       <div class="tc-list" id="tc-list"></div>
       <div class="empty-note" id="tc-empty" hidden>No open timecard correction requests for this location.</div>
+
+      <div class="section-head">
+        <h2>Review hours vs. schedule</h2>
+        <span class="hint">Compares this week's Square Timecards against Square's own published schedule and flags anything worth a second look — this only reads, it never writes anything on its own.</span>
+      </div>
+      <div class="sched-toolbar">
+        <div class="week-nav">
+          <button class="btn small" id="scan-prev">← Prior week</button>
+          <span class="wk-label" id="scan-wk-label">—</span>
+          <button class="btn small" id="scan-next">Next week →</button>
+        </div>
+        <button class="btn primary small" id="scan-run-btn">Scan this week</button>
+      </div>
+      <div class="scan-list" id="scan-list"></div>
+      <div class="empty-note" id="scan-empty">Tap "Scan this week" to check for anomalies.</div>
+
+      <div class="section-head">
+        <h2>PTO &amp; Sick requests</h2>
+        <span class="hint">The source-of-truth log — replaces telling the bookkeeper by email. GMs, COO, Production Manager, and your bookkeeper can all see this across every location; nothing here touches Square or Gusto.</span>
+      </div>
+      <div class="tc-toolbar">
+        <span class="empty-note" style="padding:0;">No approval step — this is a running log, not a request queue.</span>
+        <button class="btn primary small" id="pto-new-btn">+ Log PTO/Sick day</button>
+      </div>
+      <form class="avail-form card" id="pto-form">
+        <div class="fld wide">
+          <label>Employee</label>
+          <select id="pto-employee" required><option value="">Loading roster…</option></select>
+        </div>
+        <div class="fld"><label>Shift date</label><input type="date" id="pto-date" required></div>
+        <div class="fld"><label>Hours</label><input type="text" inputmode="decimal" id="pto-hours" placeholder="8" required></div>
+        <div class="fld">
+          <label>Type</label>
+          <select id="pto-type"><option value="pto">PTO</option><option value="sick">Sick</option></select>
+        </div>
+        <div class="fld wide"><label>Notes (optional)</label><textarea id="pto-notes"></textarea></div>
+        <div class="tc-form-actions">
+          <span class="pin-error" id="pto-form-error" style="min-height:auto;"></span>
+          <button type="button" class="btn small" id="pto-cancel-btn">Cancel</button>
+          <button type="submit" class="btn primary small" id="pto-submit-btn">Save</button>
+        </div>
+      </form>
+      <div class="avail-list" id="pto-list"></div>
+      <div class="empty-note" id="pto-empty" hidden>No PTO/Sick days logged for this location yet.</div>
+
+      <div class="section-head">
+        <h2>Availability requests</h2>
+        <span class="hint">Log a standing or one-off availability change an employee asked for — approving it updates their real availability record, used by the schedule builder below.</span>
+      </div>
+      <div class="tc-toolbar">
+        <span class="empty-note" style="padding:0;">Square has no availability feature of its own — this is Salt City's own record.</span>
+        <button class="btn primary small" id="avail-new-btn">+ New availability request</button>
+      </div>
+      <form class="avail-form card" id="avail-form">
+        <div class="fld wide">
+          <div class="type-toggle">
+            <button type="button" class="active" data-type="standing">Standing (weekly pattern)</button>
+            <button type="button" data-type="one_off">One-off date</button>
+          </div>
+        </div>
+        <div class="fld wide">
+          <label>Employee</label>
+          <input type="text" id="avail-employee" autocomplete="off" placeholder="Start typing a name…" required>
+          <div class="autocomplete-list" id="avail-employee-list" hidden></div>
+        </div>
+        <div class="fld" id="avail-day-fld">
+          <label>Day of week</label>
+          <select id="avail-day">
+            <option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option>
+            <option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </div>
+        <div class="fld" id="avail-available-fld">
+          <label>Available that day?</label>
+          <select id="avail-available">
+            <option value="yes">Yes — with a time window</option>
+            <option value="all">Yes — all (store) hours</option>
+            <option value="no">No — fully unavailable</option>
+          </select>
+        </div>
+        <div class="fld" id="avail-start-fld"><label>From</label><input type="time" id="avail-start"></div>
+        <div class="fld" id="avail-end-fld"><label>Until</label><input type="time" id="avail-end"></div>
+        <div class="fld" id="avail-date-fld" hidden><label>Date</label><input type="date" id="avail-date"></div>
+        <div class="fld wide"><label>Reason (optional)</label><textarea id="avail-reason" placeholder="What the employee told you…"></textarea></div>
+        <div class="tc-form-actions">
+          <span class="pin-error" id="avail-form-error" style="min-height:auto;"></span>
+          <button type="button" class="btn small" id="avail-cancel-btn">Cancel</button>
+          <button type="submit" class="btn primary small" id="avail-submit-btn">Submit request</button>
+        </div>
+      </form>
+      <div class="avail-list" id="avail-list"></div>
+      <div class="empty-note" id="avail-empty" hidden>No open availability requests for this location.</div>
+
+      <div class="section-head">
+        <h2>Schedule builder</h2>
+        <span class="hint">Build the week here, then publish — writes real shifts straight to Square. Conflicts with stated availability are flagged, not blocked.</span>
+      </div>
+      <div class="sched-toolbar">
+        <div class="week-nav">
+          <button class="btn small" id="wk-prev">← Prior week</button>
+          <span class="wk-label" id="wk-label">—</span>
+          <button class="btn small" id="wk-next">Next week →</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn small" id="sched-add-btn">+ Add shift</button>
+          <button class="btn primary small" id="sched-publish-btn">Publish week</button>
+        </div>
+      </div>
+      <div class="sched-rules" id="sched-rules">Loading scheduling rules…</div>
+      <div id="sched-days"></div>
+      <div class="empty-note" id="sched-empty" hidden>No shifts yet this week — tap "+ Add shift" to start building it.</div>
+    </div>
+
+    <div class="sched-form-modal" id="sched-form-modal">
+      <div class="sched-form-card">
+        <h3 id="sched-form-title">Add shift</h3>
+        <div class="fld">
+          <label>Employee (optional — leave blank for open shift)</label>
+          <input type="text" id="sched-employee" autocomplete="off" placeholder="Start typing a name…">
+          <div class="autocomplete-list" id="sched-employee-list" hidden></div>
+        </div>
+        <div class="fld">
+          <label>Job</label>
+          <select id="sched-job"><option value="">Loading…</option></select>
+        </div>
+        <div class="fld-row">
+          <div class="fld"><label>Date</label><input type="date" id="sched-date" required></div>
+          <div class="fld"><label>Notes (optional)</label><input type="text" id="sched-notes"></div>
+        </div>
+        <div class="fld-row">
+          <div class="fld"><label>Start</label><input type="time" id="sched-start" required></div>
+          <div class="fld"><label>End</label><input type="time" id="sched-end" required></div>
+        </div>
+        <span class="pin-error" id="sched-form-error" style="min-height:auto; display:block; margin-bottom:8px;"></span>
+        <div class="sched-form-actions">
+          <button type="button" class="btn small" id="sched-delete-btn" hidden>Delete shift</button>
+          <div class="right">
+            <button type="button" class="btn small" id="sched-cancel-btn">Cancel</button>
+            <button type="button" class="btn primary small" id="sched-save-btn">Save draft</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="view-empty" hidden>
@@ -285,6 +488,19 @@ textarea{resize:vertical; min-height:52px;}
         <div style="font-family:var(--font-display); font-size:17px; margin-bottom:6px;">No locations assigned yet</div>
         <div style="font-size:13px; color:var(--ink-2);">Ask your COO to assign you a location — nothing to show here until then.</div>
       </div>
+    </div>
+
+    <div id="view-bookkeeper" hidden>
+      <div class="section-head" style="margin-top:0;"><h2>PTO &amp; Sick requests — all locations</h2><span class="hint">Read-only — the source of truth for every location's PTO/Sick log. Logged by each location's LM/GM; nothing to approve here.</span></div>
+      <div class="bk-toolbar">
+        <div class="bk-year-select">
+          <label for="bk-year">Year</label>
+          <select id="bk-year"></select>
+        </div>
+      </div>
+      <div class="bk-summary" id="bk-summary"></div>
+      <div class="bk-list" id="bk-list"></div>
+      <div class="empty-note" id="bk-empty" hidden>No PTO/Sick days logged for this year yet.</div>
     </div>
 
     <div id="view-pm" hidden>
@@ -321,7 +537,7 @@ const esc = s => (s==null?"":String(s));
 const money = n => n==null ? "—" : "$" + Math.round(n).toLocaleString("en-US");
 const moneyK = n => n==null ? "—" : "$" + (n/1000).toFixed(1) + "K";
 const pct1 = n => n==null ? "—" : n.toFixed(1) + "%";
-const ROLE_LABEL = { gm:"General Manager", location_manager:"Location Manager", production_manager:"Production Manager" };
+const ROLE_LABEL = { gm:"General Manager", location_manager:"Location Manager", production_manager:"Production Manager", bookkeeper:"Bookkeeper" };
 const PM_LINKS = {
   cafe: "https://salt-city-coffee-systems.netlify.app",
   wholesale: "https://salt-city-coffee-tools.netlify.app/wholesale-subscription.html",
@@ -338,8 +554,23 @@ let myStaff = null;
 let myLocations = [];
 let locData = {}; // location_id -> aggregated numbers
 let tcPending = {}; // location_id -> pending timecard-correction count
-let currentTcLocation = null; // the location object currently shown in #view-detail
+let currentTcLocation = null; // the location object currently shown in #view-detail — shared by Timecard Corrections, Availability, and Schedule Builder, all of which operate on this same location
 let tcEmployeeChoice = null; // { team_member_id, name } picked from autocomplete
+let availPending = {}; // location_id -> pending availability-request count
+let availEmployeeChoice = null;
+let availRequestType = "standing";
+let scheduleWeekStart = null; // "YYYY-MM-DD", a Monday
+let scheduleShifts = [];
+let scheduleRules = null;
+let scheduleJobs = null; // cached once, [{id,title}]
+let scheduleRoster = {}; // location_id -> [{team_member_id,name}]
+let scheduleEmployeeChoice = null;
+let editingShiftId = null;
+let ptoEmployeeChoice = null;
+let editingPtoId = null;
+let scanWeekStart = null; // "YYYY-MM-DD", a Monday — independent of scheduleWeekStart, since scanning a week is a deliberate, on-demand Square call
+let scanAnomalies = [];
+let tcSourceOverride = null; // set to "system_flagged" only when the tc-form was opened from a scan_week anomaly
 
 /* ---------------------------------------------------------------------
    LOGIN
@@ -350,7 +581,7 @@ async function loadDirectory(){
     $("#staff-tiles").innerHTML = `<div class="empty-note">Couldn't load the staff list (${esc(error.message)}). Refresh to try again, or check that the Phase 6b migration has been run.</div>`;
     return;
   }
-  directory = (data||[]).filter(s => s.role === "gm" || s.role === "location_manager" || s.role === "production_manager");
+  directory = (data||[]).filter(s => s.role === "gm" || s.role === "location_manager" || s.role === "production_manager" || s.role === "bookkeeper");
   renderTiles();
 }
 
@@ -456,6 +687,11 @@ async function initApp(){
     return;
   }
 
+  if(myStaff.role === "bookkeeper"){
+    await initBookkeeper();
+    return;
+  }
+
   $("#app-sub").textContent = "Real, live data — scoped to only your assigned location(s).";
 
   const { data: assign } = await sb.from("staff_locations").select("location_id, locations(id,name,type,square_location_id)").eq("staff_id", myStaff.id);
@@ -473,7 +709,7 @@ async function initApp(){
     .order("business_date", { ascending: true });
 
   aggregate(rollups || []);
-  await loadTcPendingCounts();
+  await Promise.all([loadTcPendingCounts(), loadAvailPendingCounts()]);
 
   if(myLocations.length > 1){
     $("#view-portfolio").hidden = false;
@@ -533,7 +769,10 @@ function renderPortfolio(){
     const d = locData[loc.id] || {};
     return `
     <button class="card loc-card" data-loc="${loc.id}">
-      ${tcPending[loc.id] ? `<span class="chip warn lc-tally">${tcPending[loc.id]} timecard req${tcPending[loc.id]===1?"":"s"}</span>` : ""}
+      <div class="lc-tally">
+        ${tcPending[loc.id] ? `<span class="chip warn">${tcPending[loc.id]} timecard req${tcPending[loc.id]===1?"":"s"}</span>` : ""}
+        ${availPending[loc.id] ? `<span class="chip warn">${availPending[loc.id]} availability req${availPending[loc.id]===1?"":"s"}</span>` : ""}
+      </div>
       <div class="lc-head">
         <h3>${esc(loc.name)}</h3>
         <span class="chip ${d.status||"good"}">${d.hasData ? (d.status==="good"?"On target":d.status==="warn"?"Watch":"Attention") : "No data yet"}</span>
@@ -575,8 +814,19 @@ function renderDetail(locId){
   $("#d-txn").textContent = (d.txns||0).toLocaleString();
   $("#d-ticket").textContent = d.ticket==null ? "—" : "$"+d.ticket.toFixed(2);
   $("#d-tc-pending").textContent = tcPending[locId] || 0;
+  $("#d-avail-pending").textContent = availPending[locId] || 0;
   currentTcLocation = loc;
   loadCorrections(locId);
+  loadAvailRequests(locId);
+  loadPtoRequests(locId);
+  scanWeekStart = mondayOf(new Date().toISOString().slice(0,10));
+  scanAnomalies = [];
+  renderScanWkLabel();
+  $("#scan-empty").hidden = false;
+  $("#scan-empty").textContent = "Tap \"Scan this week\" to check for anomalies.";
+  $("#scan-list").innerHTML = "";
+  scheduleWeekStart = mondayOf(new Date().toISOString().slice(0,10));
+  loadScheduleWeek();
 
   const svg = $("#trend-svg");
   const series = d.trendSeries || [];
@@ -714,6 +964,7 @@ function tcResetForm(){
   $("#tc-employee-list").hidden = true;
   $("#tc-form-error").textContent = "";
   tcEmployeeChoice = null;
+  tcSourceOverride = null;
 }
 
 $("#tc-new-btn").addEventListener("click", () => {
@@ -782,6 +1033,7 @@ $("#tc-form").addEventListener("submit", async (e) => {
       reported_clock_in_local: inTime ? `${shiftDate}T${inTime}` : null,
       reported_clock_out_local: outTime ? `${shiftDate}T${outTime}` : null,
       reason: $("#tc-reason").value || null,
+      source: tcSourceOverride || "employee_reported",
     });
     $("#tc-form").classList.remove("open");
     tcResetForm();
@@ -792,6 +1044,723 @@ $("#tc-form").addEventListener("submit", async (e) => {
     errEl.textContent = err.message;
   } finally {
     submitBtn.disabled = false; submitBtn.textContent = "Submit & reconcile";
+  }
+});
+
+/* ---------------------------------------------------------------------
+   REVIEW HOURS VS. SCHEDULE — LM-facing, read-only. Calls the same
+   timecard-corrections Edge Function's scan_week action (Square-only, no
+   Deputy — see that function's header comment). Nothing here writes
+   anything; "Create correction request" just pre-fills the Timecard
+   Corrections form above (with source: system_flagged) so the LM still
+   reviews and submits it themselves through the normal reconcile pipeline.
+   --------------------------------------------------------------------- */
+const SCAN_TYPE_LABEL = { forgot_clock_out:"Forgot to clock out", overlength_vs_scheduled:"Ran long vs. schedule", unusually_long_shift:"Unusually long shift", no_show:"No matching timecard" };
+const SCAN_TYPE_CHIP = { forgot_clock_out:"critical", overlength_vs_scheduled:"warn", unusually_long_shift:"warn", no_show:"serious" };
+
+function renderScanWkLabel(){
+  const weekEnd = addDaysClient(scanWeekStart, 6);
+  $("#scan-wk-label").textContent = `${fmtDateShort(scanWeekStart)} – ${fmtDateShort(weekEnd)}`;
+}
+
+function renderScanList(){
+  $("#scan-list").innerHTML = scanAnomalies.map((a,i) => `
+    <div class="card tc-row" data-idx="${i}">
+      <div class="tc-row-head">
+        <div>
+          <div class="tc-who">${esc(a.employee_name)}</div>
+          <div class="tc-when">${esc(a.shift_date)}${a.clock_in_wall ? ` · clocked in ${esc(a.clock_in_wall)}` : ""}${a.clock_out_wall ? `–${esc(a.clock_out_wall)}` : (a.type==="forgot_clock_out" ? " (still open)" : "")}</div>
+        </div>
+        <span class="chip ${SCAN_TYPE_CHIP[a.type]||"neutral"}">${SCAN_TYPE_LABEL[a.type]||a.type}</span>
+      </div>
+      <div class="tc-rec-reason">${esc(a.description)}</div>
+      <div class="tc-actions">
+        ${a.type !== "no_show" ? `<button class="btn primary small scan-correct" data-idx="${i}">Create correction request${a.recommended_clock_out_local ? " — recommendation ready" : ""}</button>` : ""}
+        <button class="btn small scan-pto" data-idx="${i}">Log PTO/Sick instead</button>
+      </div>
+    </div>
+  `).join("");
+
+  $$(".scan-correct", $("#scan-list")).forEach(btn => btn.addEventListener("click", (e) => {
+    openTcFormFromAnomaly(scanAnomalies[Number(e.currentTarget.dataset.idx)]);
+  }));
+  $$(".scan-pto", $("#scan-list")).forEach(btn => btn.addEventListener("click", (e) => {
+    openPtoFormFromAnomaly(scanAnomalies[Number(e.currentTarget.dataset.idx)]);
+  }));
+}
+
+function openTcFormFromAnomaly(a){
+  tcResetForm();
+  tcEmployeeChoice = { team_member_id: a.team_member_id, name: a.employee_name };
+  tcSourceOverride = "system_flagged";
+  $("#tc-form").classList.add("open");
+  $("#tc-employee").value = a.employee_name;
+  $("#tc-date").value = a.shift_date;
+  if(a.recommended_clock_out_local) $("#tc-out").value = a.recommended_clock_out_local.slice(11);
+  $("#tc-reason").value = `System-flagged (${SCAN_TYPE_LABEL[a.type]||a.type}): ${a.description}`;
+  $("#tc-form").scrollIntoView({ behavior:"smooth", block:"center" });
+}
+
+$("#scan-prev").addEventListener("click", () => {
+  scanWeekStart = addDaysClient(scanWeekStart, -7); scanAnomalies = [];
+  renderScanWkLabel(); renderScanList();
+  $("#scan-empty").hidden = false; $("#scan-empty").textContent = "Week changed — tap \"Scan this week\" to check it.";
+});
+$("#scan-next").addEventListener("click", () => {
+  scanWeekStart = addDaysClient(scanWeekStart, 7); scanAnomalies = [];
+  renderScanWkLabel(); renderScanList();
+  $("#scan-empty").hidden = false; $("#scan-empty").textContent = "Week changed — tap \"Scan this week\" to check it.";
+});
+
+$("#scan-run-btn").addEventListener("click", async () => {
+  if(!currentTcLocation) return;
+  const btn = $("#scan-run-btn");
+  btn.disabled = true; btn.textContent = "Scanning…";
+  try {
+    const res = await tcCall("scan_week", {
+      location_id: currentTcLocation.id, square_location_id: currentTcLocation.square_location_id, week_start: scanWeekStart,
+    });
+    scanAnomalies = res.anomalies || [];
+    $("#scan-empty").hidden = scanAnomalies.length > 0;
+    $("#scan-empty").textContent = "No anomalies found for this week.";
+    renderScanList();
+  } catch(err){
+    scanAnomalies = [];
+    $("#scan-list").innerHTML = "";
+    $("#scan-empty").hidden = false;
+    $("#scan-empty").textContent = "Couldn't scan this week (" + err.message + ").";
+  } finally {
+    btn.disabled = false; btn.textContent = "Scan this week";
+  }
+});
+
+/* ---------------------------------------------------------------------
+   PTO & SICK REQUESTS — LM-facing, pure Supabase (no Gusto/Square PTO API
+   exists — confirmed 2026-09-16: Gusto's time-off endpoints are only
+   reachable via a commercial "Gusto Embedded Payroll" partnership, not a
+   normal small-business account, and Square has no PTO/sick concept at
+   all). Plain log, no approval workflow — same direct-write-under-the-LM's-
+   own-session pattern as Availability Requests' approve step. GMs/COO/
+   production manager see every location (reporting_read); the new
+   'bookkeeper' role sees every location too, via its own narrow
+   bookkeeper_read_all policy — see the migration's header comment.
+   --------------------------------------------------------------------- */
+let ptoRoster = {}; // location_id -> [{team_member_id,name}], own cache — deliberately not shared with scheduleRoster (different Edge Function, kept independent)
+async function ensurePtoRosterLoaded(locId){
+  if(ptoRoster[locId]) return ptoRoster[locId];
+  try {
+    const res = await tcCall("list_roster", { location_id: locId, square_location_id: currentTcLocation.square_location_id });
+    ptoRoster[locId] = res.members || [];
+  } catch(e){ ptoRoster[locId] = []; }
+  return ptoRoster[locId];
+}
+async function populatePtoEmployeeSelect(selectedTeamMemberId){
+  const roster = await ensurePtoRosterLoaded(currentTcLocation.id);
+  const sel = $("#pto-employee");
+  sel.innerHTML = roster.length
+    ? `<option value="">— pick an employee —</option>` + roster.map(m => `<option value="${m.team_member_id}">${esc(m.name)}</option>`).join("")
+    : `<option value="">No active Square team members found for this location</option>`;
+  if(selectedTeamMemberId) sel.value = selectedTeamMemberId;
+  onPtoEmployeeSelectChange();
+}
+function onPtoEmployeeSelectChange(){
+  const sel = $("#pto-employee");
+  const opt = sel.selectedOptions[0];
+  ptoEmployeeChoice = (opt && opt.value) ? { team_member_id: opt.value, name: opt.textContent } : null;
+}
+$("#pto-employee").addEventListener("change", onPtoEmployeeSelectChange);
+
+async function loadPtoRequests(locId){
+  const { data, error } = await sb.from("pto_sick_requests")
+    .select("*").eq("location_id", locId).order("shift_date", { ascending:false }).limit(100);
+  if(error){
+    $("#pto-list").innerHTML = `<div class="empty-note">Couldn't load PTO/Sick requests (${esc(error.message)}).</div>`;
+    return;
+  }
+  renderPtoList(data || []);
+}
+
+function renderPtoList(rows){
+  $("#pto-empty").hidden = rows.length > 0;
+  $("#pto-list").innerHTML = rows.map(r => `
+    <div class="card avail-row" data-id="${r.id}">
+      <div class="avail-row-head">
+        <div>
+          <div class="av-who">${esc(r.employee_name)}</div>
+          <div class="av-when">${esc(r.shift_date)} · ${Number(r.hours)}h · logged ${new Date(r.created_at).toLocaleDateString()}</div>
+        </div>
+        <span class="chip ${r.leave_type==="sick" ? "warn" : "good"}">${r.leave_type==="sick" ? "Sick" : "PTO"}</span>
+      </div>
+      ${r.notes ? `<div class="av-reason">"${esc(r.notes)}"</div>` : ""}
+      <div class="av-actions">
+        <button class="btn small pto-edit">Edit</button>
+      </div>
+    </div>`
+  ).join("");
+
+  $$(".pto-edit", $("#pto-list")).forEach(btn => btn.addEventListener("click", (e) => {
+    const id = e.target.closest(".avail-row").dataset.id;
+    openPtoFormForEdit(id);
+  }));
+}
+
+async function openPtoFormForEdit(id){
+  const { data: r, error } = await sb.from("pto_sick_requests").select("*").eq("id", id).maybeSingle();
+  if(error || !r){ alert("Couldn't load that record: " + (error?.message || "not found")); return; }
+  ptoResetForm();
+  editingPtoId = r.id;
+  $("#pto-date").value = r.shift_date;
+  $("#pto-hours").value = Number(r.hours);
+  $("#pto-type").value = r.leave_type;
+  $("#pto-notes").value = r.notes || "";
+  $("#pto-submit-btn").textContent = "Save changes";
+  $("#pto-form").classList.add("open");
+  await populatePtoEmployeeSelect(r.square_team_member_id);
+  $("#pto-form").scrollIntoView({ behavior:"smooth", block:"center" });
+}
+
+async function openPtoFormFromAnomaly(a){
+  ptoResetForm();
+  $("#pto-date").value = a.shift_date;
+  $("#pto-notes").value = `From "Review hours vs. schedule": ${a.description}`;
+  $("#pto-form").classList.add("open");
+  await populatePtoEmployeeSelect(a.team_member_id);
+  $("#pto-form").scrollIntoView({ behavior:"smooth", block:"center" });
+}
+
+function ptoResetForm(){
+  $("#pto-form").reset();
+  $("#pto-form-error").textContent = "";
+  ptoEmployeeChoice = null;
+  editingPtoId = null;
+  $("#pto-submit-btn").textContent = "Save";
+}
+
+$("#pto-new-btn").addEventListener("click", async () => {
+  ptoResetForm();
+  $("#pto-form").classList.add("open");
+  await populatePtoEmployeeSelect();
+});
+$("#pto-cancel-btn").addEventListener("click", () => {
+  $("#pto-form").classList.remove("open");
+  ptoResetForm();
+});
+
+$("#pto-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errEl = $("#pto-form-error");
+  errEl.textContent = "";
+  if(!ptoEmployeeChoice){
+    errEl.textContent = "Pick an employee from the dropdown — it's pulled straight from Square's own roster.";
+    return;
+  }
+  const shiftDate = $("#pto-date").value;
+  const hours = Number($("#pto-hours").value);
+  if(!shiftDate){ errEl.textContent = "Shift date is required."; return; }
+  if(!hours || hours <= 0 || hours > 24){ errEl.textContent = "Hours must be a number between 0 and 24."; return; }
+
+  const submitBtn = $("#pto-submit-btn");
+  submitBtn.disabled = true; submitBtn.textContent = "Saving…";
+  try {
+    const row = {
+      location_id: currentTcLocation.id,
+      location_name: currentTcLocation.name,
+      employee_name: ptoEmployeeChoice.name,
+      square_team_member_id: ptoEmployeeChoice.team_member_id || null,
+      shift_date: shiftDate,
+      hours,
+      leave_type: $("#pto-type").value,
+      notes: $("#pto-notes").value || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = editingPtoId
+      ? await sb.from("pto_sick_requests").update(row).eq("id", editingPtoId)
+      : await sb.from("pto_sick_requests").insert(row);
+    if(error) throw error;
+    $("#pto-form").classList.remove("open");
+    ptoResetForm();
+    loadPtoRequests(currentTcLocation.id);
+  } catch(err){
+    errEl.textContent = err.message;
+  } finally {
+    submitBtn.disabled = false; submitBtn.textContent = "Save";
+  }
+});
+
+/* ---------------------------------------------------------------------
+   AVAILABILITY REQUESTS — LM-facing, pure Supabase (no Square API exists
+   for employee availability, confirmed against the Labor and Team APIs
+   directly — see the migration's header comment). Approving a request is a
+   plain client-side write under the signed-in LM's own RLS-scoped session;
+   unlike Timecard Corrections there's no Edge Function gate needed for the
+   approve/deny step itself, only for the schedule builder's real Square
+   writes below.
+   --------------------------------------------------------------------- */
+const DOW_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+async function loadAvailPendingCounts(){
+  const { data, error } = await sb.from("employee_availability_pending_counts").select("location_id,pending_count");
+  availPending = {};
+  if(!error) (data||[]).forEach(r => { availPending[r.location_id] = r.pending_count; });
+}
+
+async function loadAvailRequests(locId){
+  const { data, error } = await sb.from("employee_availability_requests")
+    .select("*").eq("location_id", locId).order("created_at", { ascending:false }).limit(50);
+  if(error){
+    $("#avail-list").innerHTML = `<div class="empty-note">Couldn't load requests (${esc(error.message)}).</div>`;
+    return;
+  }
+  renderAvailList(data || []);
+}
+
+function availDetailLine(r){
+  if(r.request_type === "standing"){
+    const avail = r.new_available === false ? "Unavailable" : (r.new_start_time || r.new_end_time) ? `Available ${(r.new_start_time||"?").slice(0,5)}–${(r.new_end_time||"?").slice(0,5)}` : "Available all hours";
+    return `${DOW_NAMES[r.day_of_week]} — ${avail}`;
+  }
+  return `Unavailable ${r.exception_date}`;
+}
+
+function renderAvailList(rows){
+  $("#avail-empty").hidden = rows.length > 0;
+  $("#avail-list").innerHTML = rows.map(r => {
+    const statusChip = r.status === "new" ? "" : `<span class="chip ${r.status==="approved"?"good":"neutral"}">${r.status==="approved"?"Approved":"Denied"}</span>`;
+    return `
+    <div class="card avail-row" data-id="${r.id}" data-type="${r.request_type}">
+      <div class="avail-row-head">
+        <div>
+          <div class="av-who">${esc(r.employee_name)}</div>
+          <div class="av-when">requested ${new Date(r.created_at).toLocaleDateString()}</div>
+        </div>
+        ${statusChip}
+      </div>
+      <div class="av-detail">${availDetailLine(r)}</div>
+      ${r.reason ? `<div class="av-reason">"${esc(r.reason)}"</div>` : ""}
+      ${r.status === "new" ? `
+      <div class="av-actions">
+        <button class="btn primary small av-approve">Approve</button>
+        <button class="btn small av-deny">Deny</button>
+      </div>` : ""}
+    </div>`;
+  }).join("");
+
+  $$(".av-approve", $("#avail-list")).forEach(btn => btn.addEventListener("click", async (e) => {
+    const row = e.target.closest(".avail-row");
+    const id = row.dataset.id;
+    btn.disabled = true; btn.textContent = "Approving…";
+    try {
+      const { data: r, error } = await sb.from("employee_availability_requests").select("*").eq("id", id).single();
+      if(error) throw error;
+      const nowIso = new Date().toISOString();
+      if(r.request_type === "standing"){
+        const { error: upErr } = await sb.from("employee_availability").upsert({
+          square_team_member_id: r.square_team_member_id, employee_name: r.employee_name, location_id: r.location_id,
+          day_of_week: r.day_of_week, available: r.new_available,
+          start_time: r.new_available ? (r.new_start_time || null) : null,
+          end_time: r.new_available ? (r.new_end_time || null) : null,
+          updated_at: nowIso, updated_by_staff_id: myStaff.id,
+        }, { onConflict: "square_team_member_id,day_of_week" });
+        if(upErr) throw upErr;
+      } else {
+        const { error: upErr } = await sb.from("employee_availability_exceptions").upsert({
+          square_team_member_id: r.square_team_member_id, employee_name: r.employee_name, location_id: r.location_id,
+          exception_date: r.exception_date, reason: r.reason || null, created_by_staff_id: myStaff.id,
+        }, { onConflict: "square_team_member_id,exception_date" });
+        if(upErr) throw upErr;
+      }
+      await sb.from("employee_availability_requests").update({
+        status: "approved", reviewed_by_staff_id: myStaff.id, reviewed_at: nowIso, updated_at: nowIso,
+      }).eq("id", id);
+      await loadAvailPendingCounts();
+      if(currentTcLocation){ $("#d-avail-pending").textContent = availPending[currentTcLocation.id] || 0; loadAvailRequests(currentTcLocation.id); loadScheduleWeek(); }
+    } catch(err){
+      alert("Couldn't approve: " + err.message);
+      btn.disabled = false; btn.textContent = "Approve";
+    }
+  }));
+  $$(".av-deny", $("#avail-list")).forEach(btn => btn.addEventListener("click", async (e) => {
+    const id = e.target.closest(".avail-row").dataset.id;
+    const note = prompt("Optional note for why this is being denied:") || null;
+    btn.disabled = true;
+    try {
+      const nowIso = new Date().toISOString();
+      await sb.from("employee_availability_requests").update({
+        status: "denied", denial_note: note, reviewed_by_staff_id: myStaff.id, reviewed_at: nowIso, updated_at: nowIso,
+      }).eq("id", id);
+      await loadAvailPendingCounts();
+      if(currentTcLocation){ $("#d-avail-pending").textContent = availPending[currentTcLocation.id] || 0; loadAvailRequests(currentTcLocation.id); }
+    } catch(err){
+      alert("Couldn't deny: " + err.message);
+      btn.disabled = false;
+    }
+  }));
+}
+
+function availResetForm(){
+  $("#avail-form").reset();
+  $("#avail-employee-list").hidden = true;
+  $("#avail-form-error").textContent = "";
+  availEmployeeChoice = null;
+  setAvailType("standing");
+}
+
+function setAvailType(type){
+  availRequestType = type;
+  $$(".type-toggle button", $("#avail-form")).forEach(b => b.classList.toggle("active", b.dataset.type === type));
+  const standing = type === "standing";
+  $("#avail-day-fld").hidden = !standing;
+  $("#avail-available-fld").hidden = !standing;
+  $("#avail-date-fld").hidden = standing;
+  updateAvailTimeFields();
+}
+function updateAvailTimeFields(){
+  const showTimes = availRequestType === "standing" && $("#avail-available").value === "yes";
+  $("#avail-start-fld").hidden = !showTimes;
+  $("#avail-end-fld").hidden = !showTimes;
+}
+
+$$(".type-toggle button", $("#avail-form")).forEach(b => b.addEventListener("click", () => setAvailType(b.dataset.type)));
+$("#avail-available").addEventListener("change", updateAvailTimeFields);
+
+$("#avail-new-btn").addEventListener("click", () => {
+  availResetForm();
+  $("#avail-form").classList.add("open");
+  $("#avail-employee").focus();
+});
+$("#avail-cancel-btn").addEventListener("click", () => {
+  $("#avail-form").classList.remove("open");
+  availResetForm();
+});
+
+let availAutocompleteTimer = null;
+$("#avail-employee").addEventListener("input", () => {
+  availEmployeeChoice = null;
+  const q = $("#avail-employee").value;
+  clearTimeout(availAutocompleteTimer);
+  if(q.trim().length < 2 || !currentTcLocation?.square_location_id){
+    $("#avail-employee-list").hidden = true;
+    return;
+  }
+  availAutocompleteTimer = setTimeout(async () => {
+    try {
+      const res = await schedCall("lookup_employee", { square_location_id: currentTcLocation.square_location_id, query: q });
+      const list = $("#avail-employee-list");
+      if(!res.members.length){
+        list.innerHTML = `<div style="padding:8px 10px; font-size:12.5px; color:var(--ink-3);">No active Square team members match "${esc(q)}" at this location.</div>`;
+      } else {
+        list.innerHTML = res.members.map(m => `<button type="button" data-id="${m.team_member_id}" data-name="${esc(m.name)}">${esc(m.name)}</button>`).join("");
+        $$("button", list).forEach(b => b.addEventListener("click", () => {
+          availEmployeeChoice = { team_member_id: b.dataset.id, name: b.dataset.name };
+          $("#avail-employee").value = b.dataset.name;
+          list.hidden = true;
+        }));
+      }
+      list.hidden = false;
+    } catch(err){
+      $("#avail-employee-list").hidden = true;
+    }
+  }, 300);
+});
+
+$("#avail-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errEl = $("#avail-form-error");
+  errEl.textContent = "";
+  if(!availEmployeeChoice){
+    errEl.textContent = "Pick an employee from the list — it has to match Square's own roster.";
+    return;
+  }
+  const row = {
+    location_id: currentTcLocation.id,
+    employee_name: availEmployeeChoice.name,
+    square_team_member_id: availEmployeeChoice.team_member_id,
+    request_type: availRequestType,
+    reason: $("#avail-reason").value || null,
+  };
+  if(availRequestType === "standing"){
+    row.day_of_week = Number($("#avail-day").value);
+    const availVal = $("#avail-available").value;
+    row.new_available = availVal !== "no";
+    row.new_start_time = availVal === "yes" ? ($("#avail-start").value || null) : null;
+    row.new_end_time = availVal === "yes" ? ($("#avail-end").value || null) : null;
+  } else {
+    const d = $("#avail-date").value;
+    if(!d){ errEl.textContent = "Pick a date."; return; }
+    row.exception_date = d;
+  }
+
+  const submitBtn = $("#avail-submit-btn");
+  submitBtn.disabled = true; submitBtn.textContent = "Submitting…";
+  try {
+    const { error } = await sb.from("employee_availability_requests").insert(row);
+    if(error) throw error;
+    $("#avail-form").classList.remove("open");
+    availResetForm();
+    await loadAvailPendingCounts();
+    $("#d-avail-pending").textContent = availPending[currentTcLocation.id] || 0;
+    loadAvailRequests(currentTcLocation.id);
+  } catch(err){
+    errEl.textContent = err.message;
+  } finally {
+    submitBtn.disabled = false; submitBtn.textContent = "Submit request";
+  }
+});
+
+/* ---------------------------------------------------------------------
+   SCHEDULE BUILDER — LM-facing. All real Square reads/writes (search,
+   create, update, delete-via-is_deleted, publish) happen server-side in
+   the schedule-shifts Edge Function; this page only ever talks to that one
+   function for shift data, plus Supabase directly for availability/rules.
+   --------------------------------------------------------------------- */
+const SCHED_EDGE_FN_URL = `${SUPABASE_URL}/functions/v1/schedule-shifts`;
+const DOW_KEYS = ["sun","mon","tue","wed","thu","fri","sat"];
+
+function mondayOf(dateStr){
+  const d = new Date(dateStr + "T12:00:00Z");
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() - (day - 1));
+  return d.toISOString().slice(0,10);
+}
+function addDaysClient(dateStr, n){
+  const d = new Date(dateStr + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0,10);
+}
+function fmtDateShort(dateStr){
+  return new Date(dateStr + "T12:00:00Z").toLocaleDateString("en-US", { timeZone:"UTC", month:"short", day:"numeric" });
+}
+
+async function schedCall(action, payload){
+  const { data: { session } } = await sb.auth.getSession();
+  const resp = await fetch(SCHED_EDGE_FN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${session?.access_token || ""}`,
+      "apikey": SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ action, ...payload }),
+  });
+  const body = await resp.json().catch(() => ({}));
+  if(!resp.ok) throw new Error(body.error || `Request failed (${resp.status})`);
+  return body;
+}
+
+async function loadScheduleWeek(){
+  if(!currentTcLocation) return;
+  const weekEnd = addDaysClient(scheduleWeekStart, 6);
+  $("#wk-label").textContent = `${fmtDateShort(scheduleWeekStart)} – ${fmtDateShort(weekEnd)}`;
+  $("#sched-rules").textContent = "Loading…";
+  $("#sched-days").innerHTML = "";
+  try {
+    const res = await schedCall("list_week", {
+      location_id: currentTcLocation.id, square_location_id: currentTcLocation.square_location_id, week_start: scheduleWeekStart,
+    });
+    scheduleShifts = res.shifts || [];
+    scheduleRules = res.rules;
+    if(!scheduleRoster[currentTcLocation.id]){
+      try {
+        const rosterRes = await schedCall("list_roster", { location_id: currentTcLocation.id, square_location_id: currentTcLocation.square_location_id });
+        scheduleRoster[currentTcLocation.id] = rosterRes.members || [];
+      } catch(e){ scheduleRoster[currentTcLocation.id] = []; }
+    }
+    renderScheduleRules();
+    renderScheduleDays();
+  } catch(err){
+    $("#sched-rules").textContent = "";
+    $("#sched-days").innerHTML = `<div class="empty-note">Couldn't load the schedule (${esc(err.message)}) — check that the schedule-shifts Edge Function is deployed and SQUARE_ACCESS_TOKEN is set.</div>`;
+  }
+}
+
+function renderScheduleRules(){
+  if(!scheduleRules){
+    $("#sched-rules").textContent = "No scheduling rules configured yet for this location — headcount targets and hour caps won't be checked until your COO adds a location_scheduling_rules row.";
+    return;
+  }
+  const parts = DOW_KEYS.slice(1).concat(DOW_KEYS[0]).map(k => {
+    const target = scheduleRules.headcount_target?.[k];
+    return target != null ? `${k}:${target}` : null;
+  }).filter(Boolean);
+  $("#sched-rules").textContent = `Headcount targets — ${parts.join(", ")} · default shift ${scheduleRules.default_shift_hours}h · max ${scheduleRules.max_weekly_hours}h/week`;
+}
+
+function employeeName(teamMemberId){
+  if(!teamMemberId) return "Unassigned";
+  const roster = scheduleRoster[currentTcLocation?.id] || [];
+  return roster.find(m => m.team_member_id === teamMemberId)?.name || "(employee not found in current roster)";
+}
+function jobTitle(jobId){
+  return (scheduleJobs || []).find(j => j.id === jobId)?.title || "—";
+}
+
+function renderScheduleDays(){
+  const byDate = new Map();
+  scheduleShifts.forEach(s => {
+    if(!s.date) return;
+    if(!byDate.has(s.date)) byDate.set(s.date, []);
+    byDate.get(s.date).push(s);
+  });
+
+  const days = [];
+  for(let i=0;i<7;i++) days.push(addDaysClient(scheduleWeekStart, i));
+
+  $("#sched-empty").hidden = scheduleShifts.length > 0;
+
+  $("#sched-days").innerHTML = days.map(date => {
+    const dow = new Date(date + "T12:00:00Z").getUTCDay();
+    const shiftsToday = (byDate.get(date) || []).sort((a,b) => (a.start_time||"").localeCompare(b.start_time||""));
+    const target = scheduleRules?.headcount_target?.[DOW_KEYS[dow]];
+    const over = target != null && shiftsToday.length < target;
+    return `
+    <div class="sched-day">
+      <div class="sched-day-head">
+        <span class="dh-name">${DOW_NAMES[dow]}, ${fmtDateShort(date)}</span>
+        <span class="dh-meta${over?" over":""}">${shiftsToday.length}${target!=null?` / ${target} scheduled`:" scheduled"}</span>
+      </div>
+      <div class="shift-list">
+        ${shiftsToday.map(s => `
+          <div class="card shift-card${s.conflict?" has-conflict":""}" data-id="${s.id}">
+            <div class="sc-left">
+              <div class="sc-who">${esc(employeeName(s.team_member_id))} <span style="color:var(--ink-3); font-weight:400;">— ${esc(jobTitle(s.job_id))}</span></div>
+              <div class="sc-meta">${s.is_published ? "Published" : "Draft"}${s.conflict ? " · ⚠ " + esc(s.conflict) : ""}</div>
+            </div>
+            <div class="sc-right"><span class="sc-time">${esc(s.start_time)}–${esc(s.end_time)}</span></div>
+          </div>
+        `).join("") || `<div class="empty-note" style="padding:4px 2px;">Nothing scheduled.</div>`}
+      </div>
+    </div>`;
+  }).join("");
+
+  $$(".shift-card", $("#sched-days")).forEach(card => card.addEventListener("click", () => {
+    const shift = scheduleShifts.find(s => s.id === card.dataset.id);
+    if(shift) openShiftModal(shift);
+  }));
+}
+
+async function ensureJobsLoaded(){
+  if(scheduleJobs) return;
+  try {
+    const res = await schedCall("list_jobs", {});
+    scheduleJobs = res.jobs || [];
+  } catch(e){ scheduleJobs = []; }
+}
+
+async function openShiftModal(shift, defaultDate){
+  editingShiftId = shift ? shift.id : null;
+  scheduleEmployeeChoice = shift && shift.team_member_id ? { team_member_id: shift.team_member_id, name: employeeName(shift.team_member_id) } : null;
+  $("#sched-form-title").textContent = shift ? "Edit shift" : "Add shift";
+  $("#sched-form-error").textContent = "";
+  $("#sched-employee").value = scheduleEmployeeChoice ? scheduleEmployeeChoice.name : "";
+  $("#sched-employee-list").hidden = true;
+  $("#sched-date").value = shift ? shift.date : (defaultDate || scheduleWeekStart);
+  $("#sched-start").value = shift ? shift.start_time : "";
+  $("#sched-end").value = shift ? shift.end_time : "";
+  $("#sched-notes").value = shift ? (shift.notes || "") : "";
+  $("#sched-delete-btn").hidden = !shift;
+
+  await ensureJobsLoaded();
+  $("#sched-job").innerHTML = (scheduleJobs.length ? scheduleJobs : [{id:"",title:"No jobs found on this Square account"}])
+    .map(j => `<option value="${j.id}">${esc(j.title)}</option>`).join("");
+  if(shift && shift.job_id) $("#sched-job").value = shift.job_id;
+
+  $("#sched-form-modal").classList.add("open");
+}
+function closeShiftModal(){
+  $("#sched-form-modal").classList.remove("open");
+  editingShiftId = null;
+  scheduleEmployeeChoice = null;
+}
+
+$("#sched-add-btn").addEventListener("click", () => openShiftModal(null));
+$("#sched-cancel-btn").addEventListener("click", closeShiftModal);
+$("#sched-form-modal").addEventListener("click", (e) => { if(e.target.id === "sched-form-modal") closeShiftModal(); });
+
+let schedAutocompleteTimer = null;
+$("#sched-employee").addEventListener("input", () => {
+  scheduleEmployeeChoice = null;
+  const q = $("#sched-employee").value;
+  clearTimeout(schedAutocompleteTimer);
+  if(q.trim().length < 2 || !currentTcLocation?.square_location_id){
+    $("#sched-employee-list").hidden = true;
+    return;
+  }
+  schedAutocompleteTimer = setTimeout(async () => {
+    try {
+      const res = await schedCall("lookup_employee", { square_location_id: currentTcLocation.square_location_id, query: q });
+      const list = $("#sched-employee-list");
+      list.innerHTML = res.members.length
+        ? res.members.map(m => `<button type="button" data-id="${m.team_member_id}" data-name="${esc(m.name)}">${esc(m.name)}</button>`).join("")
+        : `<div style="padding:8px 10px; font-size:12.5px; color:var(--ink-3);">No matches.</div>`;
+      $$("button", list).forEach(b => b.addEventListener("click", () => {
+        scheduleEmployeeChoice = { team_member_id: b.dataset.id, name: b.dataset.name };
+        $("#sched-employee").value = b.dataset.name;
+        list.hidden = true;
+      }));
+      list.hidden = false;
+    } catch(err){ $("#sched-employee-list").hidden = true; }
+  }, 300);
+});
+
+$("#sched-save-btn").addEventListener("click", async () => {
+  const errEl = $("#sched-form-error");
+  errEl.textContent = "";
+  const date = $("#sched-date").value, start = $("#sched-start").value, end = $("#sched-end").value, jobId = $("#sched-job").value;
+  if(!date || !start || !end){ errEl.textContent = "Date, start, and end are all required."; return; }
+  if(!jobId){ errEl.textContent = "Pick a job."; return; }
+  if($("#sched-employee").value && !scheduleEmployeeChoice){ errEl.textContent = "Pick an employee from the list, or clear the field for an open/unassigned shift."; return; }
+
+  const btn = $("#sched-save-btn");
+  btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    await schedCall("save_shift", {
+      location_id: currentTcLocation.id, square_location_id: currentTcLocation.square_location_id,
+      shift_id: editingShiftId || undefined,
+      team_member_id: scheduleEmployeeChoice ? scheduleEmployeeChoice.team_member_id : undefined,
+      job_id: jobId, date, start_time: start, end_time: end, notes: $("#sched-notes").value || undefined,
+    });
+    closeShiftModal();
+    loadScheduleWeek();
+  } catch(err){
+    errEl.textContent = err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "Save draft";
+  }
+});
+
+$("#sched-delete-btn").addEventListener("click", async () => {
+  if(!editingShiftId || !confirm("Delete this shift? If it's already published, this removes it from Square too.")) return;
+  const btn = $("#sched-delete-btn");
+  btn.disabled = true; btn.textContent = "Deleting…";
+  try {
+    await schedCall("delete_shift", { location_id: currentTcLocation.id, shift_id: editingShiftId });
+    closeShiftModal();
+    loadScheduleWeek();
+  } catch(err){
+    $("#sched-form-error").textContent = err.message;
+    btn.disabled = false; btn.textContent = "Delete shift";
+  }
+});
+
+$("#wk-prev").addEventListener("click", () => { scheduleWeekStart = addDaysClient(scheduleWeekStart, -7); loadScheduleWeek(); });
+$("#wk-next").addEventListener("click", () => { scheduleWeekStart = addDaysClient(scheduleWeekStart, 7); loadScheduleWeek(); });
+
+$("#sched-publish-btn").addEventListener("click", async () => {
+  const draftIds = scheduleShifts.filter(s => !s.is_published).map(s => s.id);
+  if(!draftIds.length){ alert("Nothing to publish — every shift this week is already live."); return; }
+  const conflictCount = scheduleShifts.filter(s => !s.is_published && s.conflict).length;
+  const warn = conflictCount ? `\n\n⚠ ${conflictCount} of these shift(s) conflict with someone's stated availability — check the flagged cards before continuing if you haven't already.` : "";
+  if(!confirm(`Publish ${draftIds.length} draft shift(s) to Square for the week of ${fmtDateShort(scheduleWeekStart)}? Square will email affected employees by default.${warn}`)) return;
+
+  const btn = $("#sched-publish-btn");
+  btn.disabled = true; btn.textContent = "Publishing…";
+  try {
+    await schedCall("publish_week", { location_id: currentTcLocation.id, shift_ids: draftIds });
+    loadScheduleWeek();
+  } catch(err){
+    alert("Couldn't publish: " + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Publish week";
   }
 });
 
@@ -935,6 +1904,65 @@ async function initProductionManager(){
     `Wholesale &amp; Subscription's 3-business-day ship-by tracker, plus Bagging (${bagOpen} in progress) — bagging is Warehouse's job, tracked here since it's part of getting a wholesale/subscription order out the door.`));
 
   $("#pm-craft-list").innerHTML = rows.join("");
+}
+
+/* ---------------------------------------------------------------------
+   BOOKKEEPER — a narrow, single-purpose view. Melissa's staff role
+   (bookkeeper) has exactly one RLS SELECT policy anywhere in the database
+   (bookkeeper_read_all on pto_sick_requests — see the migration's header
+   comment), so this is the only real data this view can show; there's
+   deliberately no location picker, no revenue/labor, nothing else.
+   --------------------------------------------------------------------- */
+async function initBookkeeper(){
+  $("#app-sub").textContent = "PTO & Sick day log — every location, read-only.";
+  $("#view-bookkeeper").hidden = false;
+
+  const thisYear = new Date().getFullYear();
+  const years = [thisYear, thisYear-1, thisYear-2];
+  $("#bk-year").innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+  $("#bk-year").value = String(thisYear);
+  $("#bk-year").addEventListener("change", loadBookkeeperPto);
+
+  await loadBookkeeperPto();
+}
+
+async function loadBookkeeperPto(){
+  const year = $("#bk-year").value;
+  const { data, error } = await sb.from("pto_sick_requests")
+    .select("*")
+    .gte("shift_date", `${year}-01-01`).lte("shift_date", `${year}-12-31`)
+    .order("shift_date", { ascending:false });
+  if(error){
+    $("#bk-summary").innerHTML = "";
+    $("#bk-list").innerHTML = `<div class="empty-note">Couldn't load (${esc(error.message)}) — check that migrations/2026-09-16a and 2026-09-16b have both been run, and that this account's role is really 'bookkeeper'.</div>`;
+    $("#bk-empty").hidden = true;
+    return;
+  }
+  renderBookkeeperList(data || []);
+}
+
+function renderBookkeeperList(rows){
+  const ptoHours = rows.filter(r=>r.leave_type==="pto").reduce((s,r)=>s+Number(r.hours||0),0);
+  const sickHours = rows.filter(r=>r.leave_type==="sick").reduce((s,r)=>s+Number(r.hours||0),0);
+  $("#bk-summary").innerHTML = `
+    <div class="card kpi"><div class="label">PTO logged</div><div class="value tabular">${ptoHours.toFixed(1)}h</div></div>
+    <div class="card kpi"><div class="label">Sick logged</div><div class="value tabular">${sickHours.toFixed(1)}h</div></div>
+    <div class="card kpi"><div class="label">Total requests</div><div class="value tabular">${rows.length}</div></div>
+  `;
+  $("#bk-empty").hidden = rows.length > 0;
+  $("#bk-list").innerHTML = rows.map(r => `
+    <div class="card bk-row">
+      <div>
+        <div class="bk-who">${esc(r.employee_name)} <span style="color:var(--ink-3); font-weight:400;">— ${esc(r.location_name)}</span></div>
+        <div class="bk-meta">${esc(r.shift_date)} · logged ${new Date(r.created_at).toLocaleDateString()}</div>
+        ${r.notes ? `<div class="bk-notes">"${esc(r.notes)}"</div>` : ""}
+      </div>
+      <div class="bk-right">
+        <div class="bk-hours">${Number(r.hours)}h</div>
+        <span class="chip ${r.leave_type==="sick" ? "warn" : "good"}">${r.leave_type==="sick" ? "Sick" : "PTO"}</span>
+      </div>
+    </div>`
+  ).join("");
 }
 
 /* ---------------------------------------------------------------------
