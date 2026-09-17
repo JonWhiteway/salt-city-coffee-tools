@@ -288,6 +288,7 @@ textarea{resize:vertical; min-height:52px;}
       <h1 id="app-title">—</h1>
       <div class="sub" id="app-sub">—</div>
     </div>
+    <a class="btn ghost" id="back-to-company-deck" href="https://claude.ai/code/artifact/9675b23e-ccca-40ef-84c6-ba3ec648da87" hidden style="text-decoration:none;">← Company Command Deck</a>
     <button class="btn ghost" id="sign-out-btn">Sign out</button>
   </div>
   <div class="content">
@@ -537,7 +538,7 @@ const esc = s => (s==null?"":String(s));
 const money = n => n==null ? "—" : "$" + Math.round(n).toLocaleString("en-US");
 const moneyK = n => n==null ? "—" : "$" + (n/1000).toFixed(1) + "K";
 const pct1 = n => n==null ? "—" : n.toFixed(1) + "%";
-const ROLE_LABEL = { gm:"General Manager", location_manager:"Location Manager", production_manager:"Production Manager", bookkeeper:"Bookkeeper" };
+const ROLE_LABEL = { gm:"General Manager", location_manager:"Location Manager", production_manager:"Production Manager", bookkeeper:"Bookkeeper", coo:"COO" };
 const PM_LINKS = {
   cafe: "https://salt-city-coffee-systems.netlify.app",
   wholesale: "https://salt-city-coffee-tools.netlify.app/wholesale-subscription.html",
@@ -581,7 +582,7 @@ async function loadDirectory(){
     $("#staff-tiles").innerHTML = `<div class="empty-note">Couldn't load the staff list (${esc(error.message)}). Refresh to try again, or check that the Phase 6b migration has been run.</div>`;
     return;
   }
-  directory = (data||[]).filter(s => s.role === "gm" || s.role === "location_manager" || s.role === "production_manager" || s.role === "bookkeeper");
+  directory = (data||[]).filter(s => s.role === "gm" || s.role === "location_manager" || s.role === "production_manager" || s.role === "bookkeeper" || s.role === "coo");
   renderTiles();
 }
 
@@ -681,6 +682,7 @@ async function initApp(){
   myStaff = staffRow;
 
   $("#app-title").textContent = `${myStaff.name} — ${ROLE_LABEL[myStaff.role]||myStaff.role}`;
+  $("#back-to-company-deck").hidden = myStaff.role !== "coo";
 
   if(myStaff.role === "production_manager"){
     await initProductionManager();
@@ -692,10 +694,29 @@ async function initApp(){
     return;
   }
 
-  $("#app-sub").textContent = "Real, live data — scoped to only your assigned location(s).";
-
-  const { data: assign } = await sb.from("staff_locations").select("location_id, locations(id,name,type,square_location_id)").eq("staff_id", myStaff.id);
-  myLocations = (assign||[]).map(a => a.locations).filter(Boolean);
+  if(myStaff.role === "coo"){
+    // COO view: not scoped to staff_locations at all (a COO isn't assigned to
+    // specific locations the way an LM/GM is) — instead, show every location
+    // that actually has an LM/GM assigned, so Jon sees exactly the same
+    // portfolio/detail pages each of them sees, for any of them, from his own
+    // sign-in. Reuses the RLS is_full_access() grant a coo already has on
+    // square_daily_rollups etc. (Phase 7) — no new access, just a client-side
+    // way to reach it without needing each person's own PIN.
+    $("#app-sub").textContent = "Real, live data — every location with an LM/GM assigned (COO view).";
+    const mgrIds = directory.filter(s => s.role === "gm" || s.role === "location_manager").map(s => s.id);
+    const { data: assign } = mgrIds.length
+      ? await sb.from("staff_locations").select("location_id, locations(id,name,type,square_location_id)").in("staff_id", mgrIds)
+      : { data: [] };
+    const seen = new Set();
+    myLocations = (assign||[]).map(a => a.locations).filter(Boolean).filter(l => {
+      if(seen.has(l.id)) return false;
+      seen.add(l.id); return true;
+    }).sort((a,b) => a.name.localeCompare(b.name));
+  } else {
+    $("#app-sub").textContent = "Real, live data — scoped to only your assigned location(s).";
+    const { data: assign } = await sb.from("staff_locations").select("location_id, locations(id,name,type,square_location_id)").eq("staff_id", myStaff.id);
+    myLocations = (assign||[]).map(a => a.locations).filter(Boolean);
+  }
 
   if(!myLocations.length){
     $("#view-empty").hidden = false;
