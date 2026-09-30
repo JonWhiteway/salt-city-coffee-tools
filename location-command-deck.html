@@ -314,6 +314,17 @@ textarea{resize:vertical; min-height:52px;}
       <div class="empty-note">Revenue, transactions and labor % are real — pulled from Square and scoped to only the location(s) assigned to you. Walk-Through Audit trend, Safety Incident Log, Service Recovery Log and other role-specific scorecard items aren't wired up yet.</div>
 
       <div class="section-head">
+        <h2>Cafe orders</h2>
+        <span class="hint">Submit and pick orders in the ordering app — status here updates live, read-only.</span>
+      </div>
+      <div class="tc-toolbar">
+        <span class="empty-note" style="padding:0;">Showing open orders only — delivered orders drop off this list.</span>
+        <a class="btn primary small" id="lm-order-app-link" href="#" target="_blank" rel="noopener">Open ordering app →</a>
+      </div>
+      <div class="order-list" id="order-list"></div>
+      <div class="empty-note" id="order-empty" hidden>No open orders for this location.</div>
+
+      <div class="section-head">
         <h2>Timecard corrections</h2>
         <span class="hint">Log what an employee reported, reconcile it against their real Square timecard, then apply or deny — right here.</span>
       </div>
@@ -505,8 +516,20 @@ textarea{resize:vertical; min-height:52px;}
     </div>
 
     <div id="view-pm" hidden>
-      <div class="section-head" style="margin-top:0;"><h2>Your stations</h2><span class="hint">Warehouse Inventory &amp; Order Fulfillment, Roastery, Food Production, Cold Brew Production — tap through to each one's own tracking tool</span></div>
+      <div class="section-head" style="margin-top:0;"><h2>Needs attention</h2><span class="hint" id="pm-exceptions-hint">Stockouts, emergency orders, at-risk ship dates, and receiving discrepancies — everything else is on the stations/scorecard below by design, so this stays short.</span></div>
+      <div class="order-list" id="pm-exceptions-list"></div>
+      <div class="empty-note" id="pm-exceptions-empty" hidden>Nothing flagged right now.</div>
+
+      <div class="section-head"><h2>Your stations</h2><span class="hint">Warehouse Inventory &amp; Order Fulfillment, Roastery, Food Production, Cold Brew Production — tap through to each one's own tracking tool</span></div>
       <div class="grid station-grid" id="pm-stations"></div>
+
+      <div class="section-head"><h2>Wholesale platform orders</h2><span class="hint">The new wholesale platform's own orders — picked/fulfilled/shipped in the same ordering app as Cafe Orders, not the old Wholesale &amp; Subscription tool. Listed here for full visibility even though action happens in that app.</span></div>
+      <div class="tc-toolbar">
+        <span class="empty-note" style="padding:0;">Read-only — same picking app as Cafe Orders handles these.</span>
+        <a class="btn primary small" id="pm-order-app-link" href="#" target="_blank" rel="noopener">Open ordering app →</a>
+      </div>
+      <div class="order-list" id="pm-platform-list"></div>
+      <div class="empty-note" id="pm-platform-empty" hidden>No open wholesale platform orders.</div>
 
       <div class="section-head"><h2>Craft — 65 of 100 pts</h2><span class="hint" id="pm-craft-status">Loading…</span></div>
       <div class="card">
@@ -671,6 +694,7 @@ function isoWeekKey(dateStr){
 
 async function initApp(){
   $("#app-wrap").hidden = false;
+  $("#lm-order-app-link").href = PM_LINKS.cafe;
 
   const { data: { user } } = await sb.auth.getUser();
   const { data: staffRow, error: staffErr } = await sb.from("staff").select("id,name,role").eq("auth_user_id", user.id).maybeSingle();
@@ -840,6 +864,7 @@ function renderDetail(locId){
   loadCorrections(locId);
   loadAvailRequests(locId);
   loadPtoRequests(locId);
+  loadOrders(locId);
   scanWeekStart = mondayOf(new Date().toISOString().slice(0,10));
   scanAnomalies = [];
   renderScanWkLabel();
@@ -872,6 +897,48 @@ function renderDetail(locId){
   } else {
     svg.innerHTML = `<text x="10" y="60" fill="var(--ink-3)" font-size="12">Not enough synced weeks yet to chart a trend.</text>`;
   }
+}
+
+/* ---------------------------------------------------------------------
+   CAFE ORDERS — LM/GM-facing, read-only status for this location's own
+   internal supply orders. Placing/picking still happens in the Salt City
+   Coffee Systems app (PM_LINKS.cafe); this just surfaces live status
+   without making an LM leave Command Deck to check. Reuses
+   fulfillment_worklist_public (source="cafe") — the same view the
+   Production Manager tier already reads — filtered client-side to this
+   location, same pattern as timecard-correction pending counts below.
+   --------------------------------------------------------------------- */
+const ORDER_STAGE_LABEL = { new:"Submitted", picking:"Picking", packed:"Fulfilled — awaiting delivery", shipped:"Enroute" };
+const ORDER_STAGE_CHIP = { new:"neutral", picking:"warn", packed:"good", shipped:"good" };
+
+async function loadOrders(locId){
+  const loc = myLocations.find(l=>l.id===locId);
+  const { data, error } = await sb.from("fulfillment_worklist_public").select("*").eq("source","cafe");
+  if(error){
+    $("#order-list").innerHTML = `<div class="empty-note">Couldn't load orders (${esc(error.message)}).</div>`;
+    $("#order-empty").hidden = true;
+    return;
+  }
+  const rows = (data || []).filter(r => r.destination === loc.name);
+  renderOrdersList(rows);
+}
+
+function renderOrdersList(rows){
+  $("#order-empty").hidden = rows.length > 0;
+  $("#order-list").innerHTML = rows.map(r => `
+    <div class="card tc-row">
+      <div class="tc-row-head">
+        <div>
+          <div class="tc-who">${esc(r.order_label)}</div>
+          <div class="tc-when">${r.item_count} item${r.item_count===1?"":"s"} · placed ${new Date(r.placed_at).toLocaleDateString()}</div>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+          ${r.is_emergency ? `<span class="chip critical">Emergency</span>` : ""}
+          <span class="chip ${ORDER_STAGE_CHIP[r.stage]||"neutral"}">${ORDER_STAGE_LABEL[r.stage]||r.stage}</span>
+        </div>
+      </div>
+      ${r.line_item_summary ? `<div class="tc-reason">${esc(r.line_item_summary)}</div>` : ""}
+    </div>`).join("");
 }
 
 /* ---------------------------------------------------------------------
@@ -1816,15 +1883,80 @@ function pmCraftRow(label, pts, valueHtml, valueLabel, detail, untracked){
   </div>`;
 }
 
+/* ---------------------------------------------------------------------
+   PRODUCTION MANAGER — "Needs attention" (management by exception) and
+   full visibility into the new wholesale platform's own orders. Jon
+   (2026-09-29): "whatever gives our production manager the most
+   visibility and helps with our rule of exception identification."
+   Deliberately narrow — only things that are actually abnormal go here;
+   routine open-order counts stay on the stations/Craft scorecard below,
+   so this list doesn't dilute into noise.
+   --------------------------------------------------------------------- */
+function pmExceptionRow(chipClass, chipLabel, title, detail){
+  return `<div class="card tc-row">
+    <div class="tc-row-head">
+      <div>
+        <div class="tc-who">${title}</div>
+        <div class="tc-when">${detail}</div>
+      </div>
+      <span class="chip ${chipClass}">${chipLabel}</span>
+    </div>
+  </div>`;
+}
+
+function renderPmExceptions({ cafeEmergencyRows, stockoutRows, wholesaleAtRiskRows, discrepRows }){
+  const items = [];
+
+  stockoutRows.forEach(r => items.push(pmExceptionRow("critical", "Stockout",
+    esc(r.item_name), `${esc(r.location_name)} — 0 ${esc(r.unit||"")} on hand (reorder at ${r.reorder_threshold})`)));
+
+  cafeEmergencyRows.forEach(r => items.push(pmExceptionRow("critical", "Emergency order",
+    esc(r.order_label), `${r.item_count} item${r.item_count===1?"":"s"} · ${esc(r.stage)} · placed ${new Date(r.placed_at).toLocaleString()}`)));
+
+  wholesaleAtRiskRows.forEach(r => {
+    const dl = new Date(r.placed_at); dl.setUTCDate(dl.getUTCDate()+4); // rough label only; real cutoff is businessDeadline()
+    const overdue = new Date(r.placed_at).getTime() < Date.now() - 3*24*60*60*1000;
+    items.push(pmExceptionRow(overdue?"critical":"warn", overdue?"Overdue":"Due within 24h",
+      esc(r.order_label), `${esc(r.source)} · ${r.item_count} item${r.item_count===1?"":"s"} · ${esc(r.stage)} · placed ${new Date(r.placed_at).toLocaleDateString()}`));
+  });
+
+  discrepRows.forEach(r => items.push(pmExceptionRow("warn", "Receiving discrepancy",
+    `${esc(r.item_name)} — ${esc(r.location||"")}`,
+    `Ordered ${r.quantity_ordered}, received ${r.quantity_received} (short ${r.quantity_short}) · ${esc((r.receipt_discrepancy_reason||"").replace("_"," "))}${r.receipt_note?" — "+esc(r.receipt_note):""}`)));
+
+  $("#pm-exceptions-empty").hidden = items.length > 0;
+  $("#pm-exceptions-list").innerHTML = items.join("");
+}
+
+const PLATFORM_STAGE_LABEL = { new:"Submitted", picking:"Picking", packed:"Fulfilled — ready to ship", shipped:"Shipped" };
+const PLATFORM_STAGE_CHIP = { new:"neutral", picking:"warn", packed:"good", shipped:"good" };
+
+function renderPmPlatformOrders(rows){
+  $("#pm-platform-empty").hidden = rows.length > 0;
+  $("#pm-platform-list").innerHTML = rows.map(r => `
+    <div class="card tc-row">
+      <div class="tc-row-head">
+        <div>
+          <div class="tc-who">${esc(r.order_label)}</div>
+          <div class="tc-when">${r.item_count} item${r.item_count===1?"":"s"} · placed ${new Date(r.placed_at).toLocaleDateString()}${r.total_value?` · ${money(r.total_value)}`:""}</div>
+        </div>
+        <span class="chip ${PLATFORM_STAGE_CHIP[r.stage]||"neutral"}">${PLATFORM_STAGE_LABEL[r.stage]||r.stage}</span>
+      </div>
+      ${r.line_item_summary ? `<div class="tc-reason">${esc(r.line_item_summary)}</div>` : ""}
+    </div>`).join("");
+}
+
 async function initProductionManager(){
   $("#app-sub").textContent = "Real, live data pulled from each station's own tracking tool — not a location-scoped view like GM/LM.";
   $("#view-pm").hidden = false;
 
   const today = new Date().toISOString().slice(0,10);
 
-  const [cafeRes, worklistRes, invEmergRes, invValRes, roasteryRes, bagRes, bakeRes, cbRes, kegRes, shopSummaryRes] = await Promise.all([
+  $("#pm-order-app-link").href = PM_LINKS.cafe;
+
+  const [cafeRes, worklistRes, invEmergRes, invValRes, roasteryRes, bagRes, bakeRes, cbRes, kegRes, shopSummaryRes, discrepRes] = await Promise.all([
     sb.from("cafe_orders_summary_public").select("*"),
-    sb.from("fulfillment_worklist_public").select("source,order_type,stage,placed_at,is_emergency").in("source",["shopify","bluecart"]),
+    sb.from("fulfillment_worklist_public").select("*"),
     sb.from("inventory_emergencies_public").select("*"),
     sb.from("inventory_value_public").select("*"),
     sb.from("roastery_items").select("phase"),
@@ -1832,7 +1964,8 @@ async function initProductionManager(){
     sb.from("bake_list_items").select("phase").eq("bake_date", today),
     sb.from("cold_brew_batches").select("status").eq("batch_date", today),
     sb.from("keg_batches").select("status").eq("batch_date", today),
-    sb.from("shopify_orders_summary_public").select("*")
+    sb.from("shopify_orders_summary_public").select("*"),
+    sb.from("receiving_discrepancies_public").select("*").limit(25)
   ]);
 
   const cafeRows = cafeRes.data || [];
@@ -1845,6 +1978,9 @@ async function initProductionManager(){
   const cbRows = cbRes.data || [];
   const kegRows = kegRes.data || [];
   const shopRows = shopSummaryRes.data || [];
+  // receiving_discrepancies_public only exists once 2026-09-29_delivery_receiving_discrepancy.sql has
+  // been run — until then discrepRes.error is expected and this just stays empty, no console noise.
+  const discrepRows = discrepRes.data || [];
 
   const anyLive = !cafeRes.error || !worklistRes.error || !roasteryRes.error || !bagRes.error || !bakeRes.error;
   $("#pm-craft-status").textContent = anyLive ? "Live — pulled from each station's own Supabase tables" : "Couldn't load — check that the production-tracking migrations have been run";
@@ -1857,18 +1993,22 @@ async function initProductionManager(){
     d.setUTCHours(23,59,59,999);
     return d;
   };
-  const atRiskOrOverdue = (rows) => rows.filter(r => {
+  const isAtRiskOrOverdue = (r) => {
     const dl = businessDeadline(r.placed_at);
     if(!dl) return false;
-    const ms = dl.getTime() - Date.now();
-    return ms <= 24*60*60*1000;
-  }).length;
+    return (dl.getTime() - Date.now()) <= 24*60*60*1000;
+  };
+  const atRiskOrOverdueRows = (rows) => rows.filter(isAtRiskOrOverdue);
+  const atRiskOrOverdue = (rows) => atRiskOrOverdueRows(rows).length;
 
   /* ---- station cards ---- */
   const cafeOpen = cafeRows.reduce((s,r)=>s+(r.order_count||0),0);
   const cafeEmergency = cafeRows.reduce((s,r)=>s+(r.emergency_count||0),0);
+  const cafeEmergencyRows = worklistRows.filter(r=>r.source==="cafe" && r.is_emergency);
   const wholesaleRows = worklistRows.filter(r=>r.order_type==="wholesale");
   const subRows = worklistRows.filter(r=>r.order_type==="subscription");
+  const platformRows = worklistRows.filter(r=>r.source==="platform");
+  const stockoutRows = invEmergRows.filter(r=>r.is_stockout);
   const bagOpen = bagRows.filter(r=>r.phase!=="ready-to-ship").length;
   const invValue = invValRows.reduce((s,r)=>s+(Number(r.value_at_cost)||0),0);
   const invWithCost = invValRows.reduce((s,r)=>s+(r.items_with_cost||0),0);
@@ -1892,6 +2032,9 @@ async function initProductionManager(){
       `${cbRows.filter(r=>r.status==="complete").length+kegRows.filter(r=>r.status==="complete").length} complete`,
       PM_LINKS.coldbrew, "Open Cold Brew Production")
   ].join("");
+
+  renderPmExceptions({ cafeEmergencyRows, stockoutRows, wholesaleAtRiskRows: atRiskOrOverdueRows(wholesaleRows.concat(subRows)), discrepRows });
+  renderPmPlatformOrders(platformRows);
 
   /* ---- Craft scorecard, grounded in the real 6-item breakdown ---- */
   const rows = [];
@@ -1922,7 +2065,7 @@ async function initProductionManager(){
   rows.push(pmCraftRow("Wholesale order fulfillment", 11,
     worklistRes.error ? "—" : String(wholesaleRows.length+subRows.length),
     worklistRes.error ? "couldn't load" : `open · ${wholesaleAtRisk} due within 24h or overdue`,
-    `Wholesale &amp; Subscription's 3-business-day ship-by tracker, plus Bagging (${bagOpen} in progress) — bagging is Warehouse's job, tracked here since it's part of getting a wholesale/subscription order out the door.`));
+    `3-business-day ship-by tracker across Shopify/BlueCart imports and the new wholesale platform, plus Bagging (${bagOpen} in progress) — bagging is Warehouse's job, tracked here since it's part of getting a wholesale/subscription order out the door. New-platform orders are picked/fulfilled in the same ordering app as Cafe Orders, not the old Wholesale &amp; Subscription tool.`));
 
   $("#pm-craft-list").innerHTML = rows.join("");
 }
