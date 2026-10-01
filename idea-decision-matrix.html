@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Idea Decision Matrix — Salt City Coffee</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============================= TOKENS (matches Salt City Command Deck) ============================= */
+:root{
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA; --surface-raised:#FFFFFF;
+  --ink:#241F18; --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent:#EB6834; --accent-ink:#FFFFFF; --accent-soft:#FCE3D4;
+  --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --good:#0CA30C; --warn:#B8860B; --serious:#C15A34; --critical:#D03B3B;
+  --good-soft:#DCF3DC; --warn-soft:#F7EBC9; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+  --radius:10px; --radius-sm:6px;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+  --shadow-2:0 6px 20px rgba(36,31,24,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+    --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+    --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+    --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+    --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+    --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+    --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+    --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --surface:#1D1811; --surface-alt:#241E16; --surface-raised:#241E16;
+  --ink:#F1EBDC; --ink-2:#C3B9A3; --ink-3:#8D826C; --border:#382F22; --border-soft:#2B2419;
+  --accent:#F0824C; --accent-ink:#1D1811; --accent-soft:#3A2418;
+  --caramel:#D9AE6E; --caramel-soft:#3A2E17;
+  --good:#3FCB3F; --warn:#E0B23B; --serious:#E38A5E; --critical:#E66767;
+  --good-soft:#193119; --warn-soft:#332A11; --serious-soft:#3A2416; --critical-soft:#3A1919;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70;
+  --shadow-1:0 1px 2px rgba(0,0,0,.35); --shadow-2:0 10px 28px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;margin:0;text-wrap:balance;color:var(--ink);}
+a{color:inherit;}
+button{font-family:inherit;}
+::selection{background:var(--accent-soft);color:var(--ink);}
+.mono{font-family:var(--font-mono);}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+
+/* ---- shell ---- */
+.topbar{
+  position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter:blur(8px); border-bottom:1px solid var(--border-soft);
+  padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.tb-left{display:flex;align-items:center;gap:12px;}
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-2);text-decoration:none;padding:5px 9px;border-radius:7px;}
+.back-link:hover{background:var(--surface-alt);color:var(--ink);}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(155deg,#F0824C,#B9852E);display:flex;align-items:center;justify-content:center;color:#191410;font-family:var(--font-display);font-weight:700;font-size:15px;flex:0 0 auto;}
+.tb-title{display:flex;flex-direction:column;line-height:1.25;}
+.tb-title strong{font-family:var(--font-display);font-size:16.5px;font-weight:600;}
+.tb-title span{font-size:11.5px;color:var(--ink-3);}
+.sample-pill{
+  display:inline-flex; align-items:center; gap:6px; background:var(--warn-soft); color:var(--warn);
+  border:1px solid color-mix(in srgb, var(--warn) 35%, transparent); font-size:11px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:5px 10px; border-radius:99px; white-space:nowrap;
+}
+.sample-pill.is-live{background:var(--good-soft);color:var(--good);border-color:color-mix(in srgb, var(--good) 35%, transparent);}
+.content{max-width:1180px;margin:0 auto;padding:22px 28px 72px;}
+
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 0 14px;flex-wrap:wrap;}
+.section-head:first-child{margin-top:0;}
+.section-head h2{font-size:17px;}
+.section-head .hint{font-size:12px;color:var(--ink-3);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-1);padding:16px;}
+.grid{display:grid;gap:14px;}
+.kpi-row{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
+.kpi{padding:14px 16px;}
+.kpi .label{font-size:11.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+.kpi .value{font-family:var(--font-mono);font-size:22px;font-weight:600;margin-top:6px;}
+.kpi .target{font-size:11px;color:var(--ink-3);margin-top:2px;}
+
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-size:13px;font-weight:600;padding:8px 13px;cursor:pointer;}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+.btn.primary:hover{filter:brightness(1.05);}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--ink-2);padding:6px 8px;}
+.btn.ghost:hover{background:var(--surface-alt);color:var(--ink);}
+.btn.sm{padding:5px 9px;font-size:12px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn.block{width:100%;justify-content:center;}
+
+label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:5px;}
+input[type=text],input[type=search],textarea,select{
+  width:100%;font-family:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+}
+textarea{resize:vertical;min-height:64px;}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+.field{margin-bottom:12px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:640px){.field-row{grid-template-columns:1fr;}}
+
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;letter-spacing:.01em;}
+.chip::before{content:"";width:8px;height:8px;flex:0 0 auto;background:currentColor;}
+.chip.good{background:var(--good-soft);color:var(--good);} .chip.good::before{border-radius:50%;}
+.chip.warn{background:var(--warn-soft);color:var(--warn);} .chip.warn::before{border-radius:1.5px;clip-path:polygon(50% 0%,0% 100%,100% 100%);}
+.chip.serious{background:var(--serious-soft);color:var(--serious);} .chip.serious::before{border-radius:1.5px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
+.chip.critical{background:var(--critical-soft);color:var(--critical);} .chip.critical::before{border-radius:1.5px;clip-path:polygon(20% 0%,80% 0%,100% 20%,100% 80%,80% 100%,20% 100%,0% 80%,0% 20%);}
+.chip.neutral{background:var(--surface-alt);color:var(--ink-2);} .chip.neutral::before{border-radius:1.5px;transform:rotate(45deg);}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:700;padding:0 10px 8px;border-bottom:1px solid var(--border);}
+td{padding:10px 10px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.clickable{cursor:pointer;}
+tr.clickable:hover td{background:var(--surface-alt);}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);}
+.table-wrap table{min-width:640px;}
+.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+.right{text-align:right;}
+.empty-note{font-size:12px;color:var(--ink-3);font-style:italic;padding:10px 2px;}
+
+/* ---- identity bar ---- */
+.identity-bar{
+  display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;background:linear-gradient(135deg,var(--accent-soft),var(--surface));
+  border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;
+}
+.identity-bar .field{margin-bottom:0;min-width:170px;flex:1 1 170px;}
+.identity-status{font-size:12px;color:var(--ink-2);}
+.identity-status b{color:var(--ink);}
+
+/* ---- idea intake cards ---- */
+.idea-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-1);display:flex;flex-direction:column;gap:8px;}
+.idea-card .ic-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.idea-card h3{font-size:15px;}
+.idea-card .ic-desc{font-size:12.8px;color:var(--ink-2);}
+.idea-card .ic-meta{font-size:11.5px;color:var(--ink-3);}
+.progress-pips{display:flex;gap:4px;align-items:center;}
+.pip{width:9px;height:9px;border-radius:50%;background:var(--border);flex:0 0 auto;}
+.pip.on{background:var(--accent);}
+.pip-label{font-size:11px;color:var(--ink-3);margin-left:4px;}
+
+/* ---- input sliders (the rating modal) ---- */
+.slider-field{margin-bottom:18px;}
+.slider-field .sf-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;}
+.slider-field .sf-name{font-size:13.3px;font-weight:600;}
+.slider-field .sf-val{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--accent);min-width:18px;text-align:right;}
+.slider-field .sf-desc{font-size:11.5px;color:var(--ink-3);margin-bottom:7px;}
+.slider-field input[type=range]{width:100%;accent-color:var(--accent);height:22px;}
+.slider-field .sf-ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin-top:2px;}
+.slider-field .sf-ends span{max-width:46%;}
+.slider-field .sf-ends span:last-child{text-align:right;}
+
+/* ---- results sliders (everyone's dots on a track, read-only) ---- */
+.result-field{margin-bottom:22px;}
+.result-field .rf-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.result-field .rf-name{font-size:13.3px;font-weight:600;}
+.result-field .rf-you{font-family:var(--font-mono);font-size:12.5px;color:var(--accent);font-weight:700;}
+.result-track{
+  position:relative; height:34px; border-radius:99px; background:var(--surface-alt);
+  border:1px solid var(--border); margin-bottom:4px;
+}
+.result-track .tick{position:absolute; top:0; bottom:0; width:1px; background:var(--border);}
+.result-track .dot{
+  position:absolute; top:50%; width:15px; height:15px; border-radius:50%;
+  background:var(--series-1); border:2px solid var(--surface); box-shadow:var(--shadow-1);
+  transform:translate(-50%,-50%); cursor:default;
+}
+.result-track .dot.mine{ background:var(--accent); width:18px; height:18px; z-index:5; box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent), var(--shadow-1); }
+.result-field .rf-ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);}
+.result-field .rf-ends span{max-width:46%;}
+.result-field .rf-ends span:last-child{text-align:right;}
+.dot-tooltip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:8px;box-shadow:var(--shadow-2);max-width:220px;z-index:200;line-height:1.4;white-space:nowrap;}
+
+/* ---- modal ---- */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,16,10,.5);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px;z-index:100;overflow-y:auto;}
+.modal-overlay[hidden]{display:none;}
+.modal{background:var(--surface);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow-2);max-width:560px;width:100%;padding:22px 24px 24px;}
+.modal.wide{max-width:660px;}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.modal-head h2{font-size:18px;}
+.modal-close{border:none;background:transparent;color:var(--ink-3);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px;}
+.modal-close:hover{background:var(--surface-alt);color:var(--ink);}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+
+/* ---- priority order list (reused pattern from Command Deck's COO Priorities) ---- */
+.pri-list{display:flex;flex-direction:column;gap:8px;}
+.pri-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px;}
+.pri-rank{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--accent);width:22px;flex:0 0 auto;}
+.pri-body{flex:1 1 auto;min-width:0;}
+.pri-title{font-size:13.6px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pri-meta{font-size:11px;color:var(--ink-3);margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.pri-actions{display:flex;gap:2px;flex:0 0 auto;}
+.pri-move{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--ink-3);cursor:pointer;border-radius:6px;font-size:13px;}
+.pri-move:hover{background:var(--surface-alt);color:var(--ink);}
+.pri-move:disabled{opacity:.3;cursor:not-allowed;}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.tab-btn{border:none;background:transparent;padding:9px 14px;font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-left">
+    <div class="brand-mark">S</div>
+    <div class="tb-title"><strong>Idea Decision Matrix</strong><span>Salt City Coffee — Product Development</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="sample-pill" id="data-pill">Sample data</span>
+    <a class="back-link" href="index.html">← Command Deck</a>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="section-head"><h2>Who's rating?</h2><span class="hint">Remembered on this device — used to blind your submission and label it</span></div>
+  <div class="identity-bar">
+    <div class="field">
+      <label for="id-role">Role <span style="font-weight:400;color:var(--ink-3);">(optional)</span></label>
+      <input type="text" id="id-role" placeholder="e.g. CBO, COO, Production Manager…">
+    </div>
+    <div class="field">
+      <label for="id-name">Your name</label>
+      <input type="text" id="id-name" placeholder="e.g. Jon">
+    </div>
+    <button class="btn primary" id="id-save">Save</button>
+    <div class="identity-status" id="id-status"></div>
+  </div>
+
+  <div class="section-head">
+    <h2>Log a new idea</h2>
+    <span class="hint">Anyone can add one — the CBO's usually the one filing these</span>
+  </div>
+  <div class="card">
+    <div class="field-row">
+      <div class="field"><label for="new-title">Idea title</label><input type="text" id="new-title" placeholder="e.g. Oat milk cortado, seasonal"></div>
+      <div class="field"><label for="new-category">Category</label><input type="text" id="new-category" list="cat-list" placeholder="e.g. New Product">
+        <datalist id="cat-list"><option value="New Product"><option value="Menu Item"><option value="Marketing"><option value="Operations"><option value="Retail / Merch"><option value="Wholesale"></datalist>
+      </div>
+    </div>
+    <div class="field"><label for="new-desc">Description</label><textarea id="new-desc" placeholder="What is it, why now, who's asking for it…"></textarea></div>
+    <button class="btn primary" id="new-submit">Add idea</button>
+    <span class="hint" id="new-status" style="margin-left:10px;"></span>
+  </div>
+
+  <div class="section-head">
+    <h2>Awaiting your rating</h2>
+    <span class="hint">Blind — you won't see anyone else's scores on an idea until you submit your own</span>
+  </div>
+  <div class="grid" id="queue-list" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));"></div>
+  <div class="empty-note" id="queue-empty" hidden>Enter your name above to see which ideas are waiting on you.</div>
+
+  <div class="section-head">
+    <h2>Priority order</h2>
+    <span class="hint">Your call — move ideas into the order you actually want to work them, not an average</span>
+  </div>
+  <div class="card" style="padding:12px;">
+    <div class="pri-list" id="pri-list"></div>
+  </div>
+  <div class="empty-note" id="pri-empty" hidden>No ideas logged yet.</div>
+
+  <div class="section-head">
+    <h2>All ideas</h2>
+    <span class="hint">Click a row for the full breakdown</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Idea</th><th>Category</th><th>Status</th><th>Ratings</th><th class="right">Logged</th></tr></thead>
+      <tbody id="all-ideas-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ============ RATING MODAL ============ -->
+<div class="modal-overlay" id="rate-modal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div><h2 id="rate-modal-title">Rate an idea</h2><div class="hint" id="rate-modal-sub"></div></div>
+      <button class="modal-close" data-close="rate-modal">✕</button>
+    </div>
+    <div class="slider-field">
+      <div class="sf-top"><span class="sf-name">Brand Alignment</span><span class="sf-val" id="v-brand_alignment">4</span></div>
+      <div class="sf-desc">Does this feel like Salt City, or does it clash with who we are?</div>
+      <input type="range" min="1" max="7" value="4" id="s-brand_alignment">
+      <div class="sf-ends"><span>1 · Off-brand</span><span>7 · Core identity expression</span></div>
+    </div>
+    <div class="slider-field">
+      <div class="sf-top"><span class="sf-name">Implementation Lift</span><span class="sf-val" id="v-implementation_lift">4</span></div>
+      <div class="sf-desc">How much work is this to actually execute?</div>
+      <input type="range" min="1" max="7" value="4" id="s-implementation_lift">
+      <div class="sf-ends"><span>1 · Major lift (new equipment/training)</span><span>7 · Minimal lift (ready now)</span></div>
+    </div>
+    <div class="slider-field">
+      <div class="sf-top"><span class="sf-name">Longevity</span><span class="sf-val" id="v-longevity">4</span></div>
+      <div class="sf-desc">Fleeting trend, or something that becomes a signature item?</div>
+      <input type="range" min="1" max="7" value="4" id="s-longevity">
+      <div class="sf-ends"><span>1 · Trendy / short shelf life</span><span>7 · Timeless / signature</span></div>
+    </div>
+    <div class="slider-field">
+      <div class="sf-top"><span class="sf-name">Profit Margin</span><span class="sf-val" id="v-profit_margin">4</span></div>
+      <div class="sf-desc">What's the margin look like once it's running?</div>
+      <input type="range" min="1" max="7" value="4" id="s-profit_margin">
+      <div class="sf-ends"><span>1 · Thin margin</span><span>7 · High margin</span></div>
+    </div>
+    <div class="field"><label for="rate-notes">Notes (optional, visible to others once you submit)</label><textarea id="rate-notes" placeholder="Anything the others should see once it unlocks…"></textarea></div>
+    <div class="modal-foot">
+      <button class="btn" data-close="rate-modal">Cancel</button>
+      <button class="btn primary" id="rate-submit">Submit rating</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DETAIL MODAL ============ -->
+<div class="modal-overlay" id="detail-modal" hidden>
+  <div class="modal wide">
+    <div class="modal-head">
+      <div><h2 id="detail-title">Idea</h2><div class="hint" id="detail-sub"></div></div>
+      <button class="modal-close" data-close="detail-modal">✕</button>
+    </div>
+    <div id="detail-desc" style="font-size:13.3px;color:var(--ink-2);margin-bottom:14px;"></div>
+    <div class="field" style="max-width:260px;">
+      <label for="detail-status">Status</label>
+      <select id="detail-status">
+        <option value="new">New</option>
+        <option value="under_review">Under Review</option>
+        <option value="approved">Approved</option>
+        <option value="operationalized">Operationalized</option>
+        <option value="parked">Parked</option>
+      </select>
+    </div>
+    <div id="detail-body"></div>
+  </div>
+</div>
+
+<script>
+/* ============================= CONFIG ============================= */
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const METRICS = [
+  {key:"brand_alignment", label:"Brand Alignment", lowLabel:"1 · Off-brand", highLabel:"7 · Core identity expression"},
+  {key:"implementation_lift", label:"Implementation Lift", lowLabel:"1 · Major lift", highLabel:"7 · Minimal lift"},
+  {key:"longevity", label:"Longevity", lowLabel:"1 · Trendy", highLabel:"7 · Signature item"},
+  {key:"profit_margin", label:"Profit Margin", lowLabel:"1 · Thin margin", highLabel:"7 · High margin"},
+];
+const STATUS_LABEL = {new:"New", under_review:"Under Review", approved:"Approved", operationalized:"Operationalized", parked:"Parked"};
+const STATUS_CHIP = {new:"neutral", under_review:"warn", approved:"serious", operationalized:"good", parked:"critical"};
+
+function sb(path, opts={}) {
+  const headers = Object.assign({
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": "application/json"
+  }, opts.headers || {});
+  return fetch(SUPABASE_URL + "/rest/v1/" + path, Object.assign({}, opts, {headers}));
+}
+function rpc(name, args, opts={}) {
+  const headers = Object.assign({
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": "application/json"
+  }, opts.headers || {});
+  return fetch(SUPABASE_URL + "/rest/v1/rpc/" + name, Object.assign({method:"POST", headers, body: JSON.stringify(args||{})}, opts));
+}
+
+/* ============================= STATE ============================= */
+let ideas = [];              // from public.ideas (includes priority_rank)
+let participationMap = {};   // idea_id -> {rater_count, rater_names} from idea_participation_public
+let myRatingsMap = {};       // idea_id -> [rows] — everything idea_ratings_for_rater(me) unlocked
+let usingSample = true;
+
+/* ============================= SAMPLE FALLBACK ============================= */
+const SAMPLE_IDEAS = [
+  {id:"s1", title:"Oat milk cortado, seasonal maple", description:"Fall LTO built on the existing cortado format.", category:"Menu Item", submitted_by:"CBO", status:"under_review", created_at:"2026-08-20T00:00:00Z", priority_rank:2},
+  {id:"s2", title:"Salt City branded travel mug line", description:"Retail merch — insulated mug, three sizes.", category:"Retail / Merch", submitted_by:"CBO", status:"new", created_at:"2026-08-24T00:00:00Z", priority_rank:3},
+  {id:"s3", title:"Drive-thru pilot at 509", description:"Add a drive-thru lane at the 509 location.", category:"Operations", submitted_by:"CBO", status:"approved", created_at:"2026-07-30T00:00:00Z", priority_rank:1},
+];
+const SAMPLE_PARTICIPATION = {
+  s1: {idea_id:"s1", rater_count:2, rater_names:["(sample) COO","(sample) Production Manager"]},
+  s2: {idea_id:"s2", rater_count:1, rater_names:["(sample) CBO"]},
+  s3: {idea_id:"s3", rater_count:4, rater_names:["(sample) CEO","(sample) CBO","(sample) COO","(sample) Production Manager"]},
+};
+// Only idea s3 has sample ratings pre-loaded, so rating s3 as anyone unlocks it immediately.
+const SAMPLE_RATINGS = {
+  s3: [
+    {idea_id:"s3", rater_role:"CEO", rater_name:"(sample) CEO", brand_alignment:6, implementation_lift:3, longevity:6, profit_margin:5, notes:"Worth the build if 509's volume holds."},
+    {idea_id:"s3", rater_role:"CBO", rater_name:"(sample) CBO", brand_alignment:5, implementation_lift:2, longevity:6, profit_margin:6, notes:"Big lift but this is a real signature move."},
+    {idea_id:"s3", rater_role:"COO", rater_name:"(sample) COO", brand_alignment:6, implementation_lift:2, longevity:7, profit_margin:5, notes:"Staffing model needs work first."},
+    {idea_id:"s3", rater_role:"Production Manager", rater_name:"(sample) Production Manager", brand_alignment:6, implementation_lift:3, longevity:6, profit_margin:4, notes:""},
+  ]
+};
+
+/* ============================= IDENTITY ============================= */
+function loadIdentity(){ try{ return JSON.parse(localStorage.getItem("idm_identity")||"null"); }catch(e){ return null; } }
+function saveIdentity(role,name){ try{ localStorage.setItem("idm_identity", JSON.stringify({role,name})); }catch(e){} }
+function myKnownRatings(){ try{ return JSON.parse(localStorage.getItem("idm_my_ratings")||"{}"); }catch(e){ return {}; } }
+function rememberRating(ideaId, payload){ const m=myKnownRatings(); m[ideaId]=payload; try{ localStorage.setItem("idm_my_ratings", JSON.stringify(m)); }catch(e){} }
+
+function initIdentity(){
+  const id = loadIdentity();
+  if(id){ document.getElementById("id-role").value=id.role||""; document.getElementById("id-name").value=id.name||""; }
+  refreshIdentityStatus();
+  document.getElementById("id-save").addEventListener("click", async ()=>{
+    const role = document.getElementById("id-role").value.trim();
+    const name = document.getElementById("id-name").value.trim();
+    if(!name){ document.getElementById("id-status").textContent="Enter your name first."; return; }
+    saveIdentity(role,name);
+    refreshIdentityStatus();
+    await loadMyUnlockedRatings();
+    renderAll();
+  });
+}
+function refreshIdentityStatus(){
+  const id = loadIdentity();
+  const el = document.getElementById("id-status");
+  el.innerHTML = id && id.name ? `Rating as <b>${escapeHtml(id.name)}</b>${id.role ? ' ('+escapeHtml(id.role)+')' : ''}` : "Not set yet.";
+}
+
+/* ============================= FETCH ============================= */
+async function loadAll(){
+  try{
+    const [ideasRes, participationRes] = await Promise.all([
+      sb("ideas?select=*&order=priority_rank.asc.nullslast,created_at.desc"),
+      sb("idea_participation_public?select=*"),
+    ]);
+    if(!ideasRes.ok || !participationRes.ok) throw new Error("fetch failed");
+    const ideasJson = await ideasRes.json();
+    const participationJson = await participationRes.json();
+
+    if(Array.isArray(ideasJson) && ideasJson.length > 0){
+      ideas = ideasJson;
+      usingSample = false;
+    } else {
+      ideas = SAMPLE_IDEAS.slice();
+      usingSample = true;
+    }
+    participationMap = {};
+    (usingSample ? Object.values(SAMPLE_PARTICIPATION) : participationJson).forEach(r=>participationMap[r.idea_id]=r);
+  } catch(e){
+    ideas = SAMPLE_IDEAS.slice(); usingSample = true;
+    participationMap = {}; Object.values(SAMPLE_PARTICIPATION).forEach(r=>participationMap[r.idea_id]=r);
+  }
+  const pill = document.getElementById("data-pill");
+  if(usingSample){ pill.textContent="Sample data — add a real idea above to go live"; pill.classList.remove("is-live"); }
+  else { pill.textContent="Live — Supabase"; pill.classList.add("is-live"); }
+  await loadMyUnlockedRatings();
+  renderAll();
+}
+
+// The blind-reveal gate: fetch every rating row for every idea I (by name) have
+// also rated. Ideas I haven't personally rated come back with nothing.
+async function loadMyUnlockedRatings(){
+  const id = loadIdentity();
+  myRatingsMap = {};
+  if(!id || !id.name) return;
+  if(usingSample){
+    // Sample mode: unlock s3 (pre-seeded) plus whatever I've rated locally, mixed with the pre-seeded rows.
+    const mine = myKnownRatings();
+    const unlockedIdeaIds = new Set(Object.keys(SAMPLE_RATINGS));
+    Object.keys(mine).forEach(ideaId=>unlockedIdeaIds.add(ideaId));
+    unlockedIdeaIds.forEach(ideaId=>{
+      const rows = (SAMPLE_RATINGS[ideaId]||[]).slice();
+      if(mine[ideaId] && !rows.some(r=>r.rater_name===id.name)) rows.push(Object.assign({rater_name:id.name, rater_role:id.role}, mine[ideaId]));
+      if(rows.length) myRatingsMap[ideaId] = rows;
+    });
+    return;
+  }
+  try{
+    const res = await rpc("idea_ratings_for_rater", {p_rater_name: id.name});
+    if(!res.ok) throw new Error(await res.text());
+    const rows = await res.json();
+    rows.forEach(r=>{ (myRatingsMap[r.idea_id] = myRatingsMap[r.idea_id]||[]).push(r); });
+  } catch(e){ /* leave myRatingsMap empty — treat as not-yet-unlocked rather than break the page */ }
+}
+function haveIRated(ideaId){
+  const id = loadIdentity();
+  if(!id || !id.name) return false;
+  const rows = myRatingsMap[ideaId];
+  return !!(rows && rows.some(r=>r.rater_name===id.name));
+}
+
+/* ============================= RENDER: QUEUE ============================= */
+function renderQueue(){
+  const id = loadIdentity();
+  const list = document.getElementById("queue-list");
+  const empty = document.getElementById("queue-empty");
+  list.innerHTML = "";
+  if(!id || !id.name){ empty.hidden=false; return; }
+  empty.hidden = true;
+  const openIdeas = ideas.filter(i => i.status==="new" || i.status==="under_review");
+  if(openIdeas.length===0){ list.innerHTML = `<div class="empty-note">Nothing open right now.</div>`; return; }
+  openIdeas.forEach(idea=>{
+    const part = participationMap[idea.id] || {rater_count:0, rater_names:[]};
+    const already = haveIRated(idea.id);
+    const card = document.createElement("div");
+    card.className = "idea-card";
+    card.innerHTML = `
+      <div class="ic-head"><h3>${escapeHtml(idea.title)}</h3><span class="chip ${STATUS_CHIP[idea.status]||'neutral'}">${STATUS_LABEL[idea.status]||idea.status}</span></div>
+      <div class="ic-desc">${escapeHtml(idea.description||'')}</div>
+      <div class="ic-meta">${part.rater_count>0 ? part.rater_count+" other rating"+(part.rater_count===1?"":"s")+" already in — blind until you add yours" : "No one's rated this yet"}</div>
+      <button class="btn ${already?'':'primary'} sm block" data-rate="${idea.id}">${already? 'Edit your rating' : 'Rate this idea'}</button>
+    `;
+    list.appendChild(card);
+  });
+  list.querySelectorAll("[data-rate]").forEach(btn=>btn.addEventListener("click", ()=>openRateModal(btn.getAttribute("data-rate"))));
+}
+
+/* ============================= RATE MODAL ============================= */
+let currentRateIdeaId = null;
+function openRateModal(ideaId){
+  const id = loadIdentity();
+  if(!id || !id.name){ alert("Enter your name first."); return; }
+  currentRateIdeaId = ideaId;
+  const idea = ideas.find(i=>i.id===ideaId);
+  document.getElementById("rate-modal-title").textContent = idea ? idea.title : "Rate an idea";
+  document.getElementById("rate-modal-sub").textContent = `Rating as ${id.name}${id.role?' ('+id.role+')':''} — blind until you submit`;
+  const mine = myKnownRatings()[ideaId];
+  METRICS.forEach(m=>{
+    const v = mine ? mine[m.key] : 4;
+    document.getElementById("s-"+m.key).value = v;
+    document.getElementById("v-"+m.key).textContent = v;
+  });
+  document.getElementById("rate-notes").value = mine ? (mine.notes||"") : "";
+  showModal("rate-modal");
+}
+METRICS.forEach(m=>{
+  document.getElementById("s-"+m.key).addEventListener("input", e=>{ document.getElementById("v-"+m.key).textContent = e.target.value; });
+});
+document.getElementById("rate-submit").addEventListener("click", async ()=>{
+  const id = loadIdentity();
+  if(!id || !currentRateIdeaId) return;
+  const payload = {
+    idea_id: currentRateIdeaId,
+    rater_role: id.role || null,
+    rater_name: id.name,
+    brand_alignment: +document.getElementById("s-brand_alignment").value,
+    implementation_lift: +document.getElementById("s-implementation_lift").value,
+    longevity: +document.getElementById("s-longevity").value,
+    profit_margin: +document.getElementById("s-profit_margin").value,
+    notes: document.getElementById("rate-notes").value.trim() || null,
+  };
+  if(usingSample){
+    rememberRating(currentRateIdeaId, payload);
+    hideModal("rate-modal");
+    await loadMyUnlockedRatings();
+    renderAll();
+    return;
+  }
+  try{
+    const res = await sb("idea_ratings?on_conflict=idea_id,rater_name", {
+      method:"POST",
+      headers:{"Prefer":"resolution=merge-duplicates,return=representation"},
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error(await res.text());
+    rememberRating(currentRateIdeaId, payload);
+    hideModal("rate-modal");
+    await loadAll();
+  } catch(e){
+    alert("Couldn't save your rating — try again in a moment.\n" + e.message);
+  }
+});
+
+/* ============================= NEW IDEA ============================= */
+document.getElementById("new-submit").addEventListener("click", async ()=>{
+  const title = document.getElementById("new-title").value.trim();
+  if(!title){ document.getElementById("new-status").textContent="Title's required."; return; }
+  const id = loadIdentity();
+  const payload = {
+    title,
+    description: document.getElementById("new-desc").value.trim() || null,
+    category: document.getElementById("new-category").value.trim() || null,
+    submitted_by: id && id.name ? id.name : null,
+    status: "new"
+  };
+  if(usingSample){
+    payload.id = "local-"+Date.now();
+    payload.created_at = new Date().toISOString();
+    payload.priority_rank = ideas.length ? Math.max(...ideas.map(i=>i.priority_rank||0)) + 1 : 1;
+    ideas.push(payload);
+    clearNewForm();
+    renderAll();
+    return;
+  }
+  try{
+    const res = await sb("ideas", {method:"POST", headers:{"Prefer":"return=representation"}, body: JSON.stringify(payload)});
+    if(!res.ok) throw new Error(await res.text());
+    clearNewForm();
+    await loadAll();
+  } catch(e){
+    document.getElementById("new-status").textContent = "Couldn't save — try again.";
+  }
+});
+function clearNewForm(){
+  document.getElementById("new-title").value="";
+  document.getElementById("new-desc").value="";
+  document.getElementById("new-category").value="";
+  document.getElementById("new-status").textContent="Added.";
+  setTimeout(()=>{ document.getElementById("new-status").textContent=""; }, 2500);
+}
+
+/* ============================= PRIORITY ORDER (manual, not computed) ============================= */
+function orderedIdeas(){
+  // priority_rank ascending, unranked (null) pushed to the end in created_at order
+  return ideas.slice().sort((a,b)=>{
+    const ar = a.priority_rank==null ? Infinity : a.priority_rank;
+    const br = b.priority_rank==null ? Infinity : b.priority_rank;
+    if(ar !== br) return ar - br;
+    return new Date(b.created_at||0) - new Date(a.created_at||0);
+  });
+}
+function renderPriorityList(){
+  const list = document.getElementById("pri-list");
+  const empty = document.getElementById("pri-empty");
+  const ordered = orderedIdeas();
+  list.innerHTML = "";
+  if(ordered.length===0){ empty.hidden=false; return; }
+  empty.hidden = true;
+  ordered.forEach((idea, i)=>{
+    const part = participationMap[idea.id] || {rater_count:0};
+    const row = document.createElement("div");
+    row.className = "pri-row";
+    row.innerHTML = `
+      <div class="pri-rank">${i+1}</div>
+      <div class="pri-body">
+        <div class="pri-title">${escapeHtml(idea.title)}</div>
+        <div class="pri-meta"><span class="chip ${STATUS_CHIP[idea.status]||'neutral'}">${STATUS_LABEL[idea.status]||idea.status}</span><span>${part.rater_count||0} rating${part.rater_count===1?'':'s'} in</span></div>
+      </div>
+      <div class="pri-actions">
+        <button class="pri-move" data-dir="-1" data-id="${idea.id}" title="Move up" ${i===0?"disabled":""}>▲</button>
+        <button class="pri-move" data-dir="1" data-id="${idea.id}" title="Move down" ${i===ordered.length-1?"disabled":""}>▼</button>
+      </div>
+    `;
+    row.addEventListener("click", (e)=>{ if(!e.target.closest(".pri-move")) openDetail(idea.id); });
+    list.appendChild(row);
+  });
+  list.querySelectorAll(".pri-move").forEach(btn=>btn.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    movePriority(btn.getAttribute("data-id"), parseInt(btn.getAttribute("data-dir"),10));
+  }));
+}
+async function movePriority(ideaId, dir){
+  const ordered = orderedIdeas();
+  const i = ordered.findIndex(x=>x.id===ideaId);
+  const j = i + dir;
+  if(i<0 || j<0 || j>=ordered.length) return;
+  [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+  // Re-sequence everyone to 1..N so order is unambiguous, then persist.
+  ordered.forEach((idea, idx)=>{ idea.priority_rank = idx+1; });
+  renderPriorityList();
+  renderTable();
+  await persistPriorityOrder(ordered);
+}
+async function persistPriorityOrder(ordered){
+  if(usingSample) return; // already mutated in memory
+  try{
+    await Promise.all(ordered.map(idea =>
+      sb(`ideas?id=eq.${encodeURIComponent(idea.id)}`, {method:"PATCH", body: JSON.stringify({priority_rank: idea.priority_rank})})
+    ));
+  } catch(e){ /* best effort — a reload will re-sync from Supabase either way */ }
+}
+
+/* ============================= ALL IDEAS TABLE ============================= */
+function renderTable(){
+  const body = document.getElementById("all-ideas-body");
+  body.innerHTML = "";
+  ideas.forEach(idea=>{
+    const part = participationMap[idea.id] || {rater_count:0};
+    const tr = document.createElement("tr");
+    tr.className = "clickable";
+    tr.innerHTML = `
+      <td>${escapeHtml(idea.title)}</td>
+      <td>${escapeHtml(idea.category||'—')}</td>
+      <td><span class="chip ${STATUS_CHIP[idea.status]||'neutral'}">${STATUS_LABEL[idea.status]||idea.status}</span></td>
+      <td class="mono">${part.rater_count||0}</td>
+      <td class="right mono">${fmtDate(idea.created_at)}</td>
+    `;
+    tr.addEventListener("click", ()=>openDetail(idea.id));
+    body.appendChild(tr);
+  });
+}
+
+/* ============================= DETAIL MODAL ============================= */
+let currentDetailId = null;
+function openDetail(ideaId){
+  const idea = ideas.find(i=>i.id===ideaId);
+  if(!idea) return;
+  currentDetailId = ideaId;
+  const part = participationMap[ideaId] || {rater_count:0, rater_names:[]};
+  document.getElementById("detail-title").textContent = idea.title;
+  document.getElementById("detail-sub").textContent = `${idea.category||'Uncategorized'} · logged by ${idea.submitted_by||'—'} · ${fmtDate(idea.created_at)}`;
+  document.getElementById("detail-desc").textContent = idea.description || "No description yet.";
+  document.getElementById("detail-status").value = idea.status;
+
+  const body = document.getElementById("detail-body");
+  const unlocked = haveIRated(ideaId);
+  const id = loadIdentity();
+
+  if(unlocked){
+    const rows = myRatingsMap[ideaId] || [];
+    body.innerHTML = `<div class="section-head" style="margin-top:16px;"><h2 style="font-size:14px;">${rows.length} rating${rows.length===1?'':'s'} in</h2><span class="hint">Unlocked — you submitted your own rating</span></div>`
+      + METRICS.map(m => resultFieldHtml(m, rows, id)).join("")
+      + rows.filter(r=>r.notes).map(r=>`<div class="empty-note" style="font-style:normal;"><b>${escapeHtml(r.rater_name)}${r.rater_role?' ('+escapeHtml(r.rater_role)+')':''}:</b> ${escapeHtml(r.notes)}</div>`).join("");
+    wireResultTooltips(body);
+  } else {
+    body.innerHTML = `
+      <div class="section-head" style="margin-top:16px;"><h2 style="font-size:14px;">Still blind</h2></div>
+      <div class="ic-meta" style="margin-bottom:10px;">${part.rater_count>0 ? part.rater_count+" rating"+(part.rater_count===1?"":"s")+" already logged — submit your own to see them" : "No one's rated this yet — be the first"}</div>
+      <button class="btn primary" id="detail-rate-btn">${part.rater_count>0 ? 'Rate this idea to reveal' : 'Rate this idea'}</button>
+    `;
+    document.getElementById("detail-rate-btn").addEventListener("click", ()=>{ hideModal("detail-modal"); openRateModal(ideaId); });
+  }
+  showModal("detail-modal");
+}
+function resultFieldHtml(metric, rows, id){
+  const dots = rows.map(r=>{
+    const v = r[metric.key];
+    const pct = ((v-1)/6)*100;
+    const mine = id && id.name && r.rater_name===id.name;
+    return {v, pct, mine, name:r.rater_name, role:r.rater_role};
+  });
+  const dotsHtml = dots.map(d => `<div class="dot${d.mine?' mine':''}" style="left:${d.pct}%;" data-name="${escapeAttr(d.name)}" data-role="${escapeAttr(d.role||'')}" data-val="${d.v}"></div>`).join("");
+  const ticks = [1,2,3,4,5,6,7].map(v => `<div class="tick" style="left:${((v-1)/6)*100}%;"></div>`).join("");
+  return `
+    <div class="result-field">
+      <div class="rf-top"><span class="rf-name">${metric.label}</span></div>
+      <div class="result-track">${ticks}${dotsHtml}</div>
+      <div class="rf-ends"><span>${metric.lowLabel}</span><span>${metric.highLabel}</span></div>
+    </div>`;
+}
+let dotTooltipEl = null;
+function wireResultTooltips(container){
+  container.querySelectorAll(".dot").forEach(el=>{
+    el.addEventListener("mouseenter", (e)=>{
+      dotTooltipEl = document.createElement("div");
+      dotTooltipEl.className = "dot-tooltip";
+      const role = el.getAttribute("data-role");
+      dotTooltipEl.textContent = `${el.getAttribute("data-name")}${role?' ('+role+')':''}: ${el.getAttribute("data-val")}`;
+      document.body.appendChild(dotTooltipEl);
+      positionDotTooltip(e);
+    });
+    el.addEventListener("mousemove", positionDotTooltip);
+    el.addEventListener("mouseleave", ()=>{ if(dotTooltipEl){ dotTooltipEl.remove(); dotTooltipEl=null; } });
+  });
+}
+function positionDotTooltip(e){
+  if(!dotTooltipEl) return;
+  dotTooltipEl.style.left = (e.clientX+12)+"px";
+  dotTooltipEl.style.top = (e.clientY+12)+"px";
+}
+document.getElementById("detail-status").addEventListener("change", async (e)=>{
+  const newStatus = e.target.value;
+  const idea = ideas.find(i=>i.id===currentDetailId);
+  if(!idea) return;
+  idea.status = newStatus;
+  if(usingSample){ renderAll(); return; }
+  try{
+    const res = await sb(`ideas?id=eq.${encodeURIComponent(currentDetailId)}`, {method:"PATCH", headers:{"Prefer":"return=representation"}, body: JSON.stringify({status:newStatus})});
+    if(!res.ok) throw new Error(await res.text());
+    await loadAll();
+  } catch(err){ alert("Couldn't update status — try again."); }
+});
+
+/* ============================= MODAL HELPERS ============================= */
+function showModal(id){ document.getElementById(id).hidden = false; }
+function hideModal(id){ document.getElementById(id).hidden = true; }
+document.querySelectorAll("[data-close]").forEach(btn=>btn.addEventListener("click", ()=>hideModal(btn.getAttribute("data-close"))));
+document.querySelectorAll(".modal-overlay").forEach(ov=>ov.addEventListener("click", (e)=>{ if(e.target===ov) ov.hidden=true; }));
+
+/* ============================= UTIL ============================= */
+function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+function fmtDate(d){ if(!d) return "—"; const dt = new Date(d); return dt.toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
+
+/* ============================= INIT ============================= */
+function renderAll(){
+  renderQueue();
+  renderPriorityList();
+  renderTable();
+}
+initIdentity();
+loadAll();
+</script>
+
+</body>
+</html>
