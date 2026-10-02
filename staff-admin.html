@@ -65,13 +65,21 @@ button{font-family:inherit;}
 .pin-key.wide{font-size:12px; font-family:var(--font-body); font-weight:600; color:var(--ink-2);}
 .pin-error{text-align:center; color:var(--critical); font-size:12px; margin-top:12px; min-height:1.4em;}
 
-.topbar{padding:16px 28px; border-bottom:1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;}
+.topbar{padding:16px 28px; border-bottom:1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;}
 .topbar h1{font-size:19px;}
 .topbar .sub{font-size:12px; color:var(--ink-3); margin-top:2px;}
-.btn{border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:13px; font-weight:600; padding:8px 13px; cursor:pointer;}
+.topbar .tb-actions{display:flex; align-items:center; gap:8px;}
+.btn{border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:13px; font-weight:600; padding:8px 13px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center;}
 .btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.btn.primary:hover{filter:brightness(1.05);}
+.btn:disabled{opacity:.5; cursor:not-allowed;}
 .content{padding:24px 28px 64px; max-width:900px; margin:0 auto;}
 .hint{font-size:12px; color:var(--ink-3); margin-bottom:16px;}
+.section-head{margin:30px 0 12px;}
+.section-head:first-child{margin-top:0;}
+.section-head h2{font-size:16px;}
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-1); padding:16px;}
 .assign-table{width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; box-shadow:var(--shadow-1);}
 .assign-table th, .assign-table td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--border-soft); font-size:13px;}
 .assign-table th{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); font-weight:700;}
@@ -84,6 +92,22 @@ button{font-family:inherit;}
 .save-note{font-size:11px; color:var(--ink-3);}
 .save-note.saving{color:var(--accent);}
 .save-note.err{color:var(--critical);}
+
+/* ---- Reset PIN panel ---- */
+.pin-admin-row{display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;}
+.pin-admin-field{flex:1 1 180px; min-width:150px;}
+.pin-admin-field label{display:block; font-size:11.5px; font-weight:600; color:var(--ink-2); margin-bottom:5px;}
+.pin-admin-field select, .pin-admin-field input{
+  width:100%; font-family:inherit; font-size:13.5px; color:var(--ink); background:var(--surface);
+  border:1px solid var(--border); border-radius:8px; padding:8px 10px;
+}
+.pin-admin-field input[type=text].pin-digits{font-family:var(--font-mono); letter-spacing:.3em; text-align:center;}
+.pin-admin-status{font-size:12.5px; margin-top:10px; min-height:1.4em;}
+.pin-admin-status.ok{color:var(--good);}
+.pin-admin-status.err{color:var(--critical);}
+.acct-badge{font-size:10.5px; font-family:var(--font-mono); text-transform:uppercase; padding:2px 7px; border-radius:99px; margin-left:6px;}
+.acct-badge.has{background:var(--good-soft); color:var(--good);}
+.acct-badge.none{background:var(--critical-soft); color:var(--critical);}
 </style>
 </head>
 <body>
@@ -117,9 +141,37 @@ button{font-family:inherit;}
 <div id="app-wrap" hidden>
   <div class="topbar">
     <div><h1>Staff &amp; Location Assignments</h1><div class="sub" id="app-sub">—</div></div>
-    <button class="btn" id="sign-out-btn">Sign out</button>
+    <div class="tb-actions">
+      <a class="btn" href="index.html">← Command Deck</a>
+      <button class="btn" id="sign-out-btn">Sign out</button>
+    </div>
   </div>
   <div class="content">
+
+    <div class="section-head"><h2>Reset or set up a PIN</h2></div>
+    <div class="hint">Forgot a PIN (including your own)? Pick the person, type a new 4-digit PIN, and it takes effect immediately — no script, no waiting. Picking someone who's never logged in before also needs their email, since that's what creates their account.</div>
+    <div class="card">
+      <div class="pin-admin-row">
+        <div class="pin-admin-field" style="flex:2 1 220px;">
+          <label for="pin-admin-person">Person</label>
+          <select id="pin-admin-person"><option value="">Loading staff…</option></select>
+        </div>
+        <div class="pin-admin-field" id="pin-admin-email-field" hidden>
+          <label for="pin-admin-email">Email (new account)</label>
+          <input type="text" id="pin-admin-email" placeholder="name@saltcitycoffee.com">
+        </div>
+        <div class="pin-admin-field" style="flex:0 1 120px;">
+          <label for="pin-admin-pin">New 4-digit PIN</label>
+          <input type="text" id="pin-admin-pin" class="pin-digits" maxlength="4" inputmode="numeric" placeholder="••••">
+        </div>
+        <div class="pin-admin-field" style="flex:0 0 auto;">
+          <button class="btn primary" id="pin-admin-submit">Set PIN</button>
+        </div>
+      </div>
+      <div class="pin-admin-status" id="pin-admin-status"></div>
+    </div>
+
+    <div class="section-head"><h2>Location assignments</h2></div>
     <div class="hint">Toggling a location saves immediately — no separate save button. GM &amp; LM Command Deck pages only show whatever's checked here.</div>
     <div id="table-wrap"><div class="hint">Loading staff…</div></div>
     <div class="save-note" id="save-note"></div>
@@ -134,7 +186,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (sel, root) => (root||document).querySelector(sel);
 const $$ = (sel, root) => Array.from((root||document).querySelectorAll(sel));
 const esc = s => (s==null?"":String(s));
-const ROLE_LABEL = { gm:"GM", location_manager:"LM", production_manager:"Production Manager", coo:"COO" };
+const ROLE_LABEL = { gm:"GM", location_manager:"LM", production_manager:"Production Manager", coo:"COO", ceo:"CEO", cbo:"CBO", product_development:"Product Development", team_member:"Team Member", bookkeeper:"Bookkeeper" };
 
 let directory = [];
 let pinTarget = null;
@@ -142,6 +194,7 @@ let pinDigits = "";
 let allStaff = [];
 let allLocations = [];
 let assignments = new Map(); // staff_id -> Set(location_id)
+let pinAdminStaff = []; // full roster, from staff-pin-admin's list_staff action
 
 async function loadDirectory(){
   const { data, error } = await sb.rpc("staff_login_directory");
@@ -206,6 +259,8 @@ async function initApp(){
   const { data: myStaff, error: myErr } = await sb.from("staff").select("id,name,role").eq("auth_user_id", user.id).maybeSingle();
   if(myErr || !myStaff || !(myStaff.role === "coo" || myStaff.role === "production_manager")){
     $("#table-wrap").innerHTML = `<div class="hint">Signed in, but this account isn't COO/Production Manager — nothing to manage here.</div>`;
+    $("#pin-admin-person").innerHTML = `<option value="">—</option>`;
+    $("#pin-admin-submit").disabled = true;
     return;
   }
   $("#app-sub").textContent = `Signed in as ${myStaff.name} — ${ROLE_LABEL[myStaff.role]}`;
@@ -224,11 +279,12 @@ async function initApp(){
   });
 
   renderTable();
+  loadPinAdminRoster();
 }
 
 function renderTable(){
   if(!allStaff.length){
-    $("#table-wrap").innerHTML = `<div class="hint">No GM or Location Manager accounts exist yet — create one with scripts/set_staff_pin.py first.</div>`;
+    $("#table-wrap").innerHTML = `<div class="hint">No GM or Location Manager accounts exist yet — add one via the Reset or set up a PIN panel above.</div>`;
     return;
   }
   $("#table-wrap").innerHTML = `
@@ -280,6 +336,85 @@ async function toggleAssignment(staffId, locId, chipEl){
   if(input) input.checked = !isOn;
   note.textContent = "Saved."; note.className = "save-note";
 }
+
+/* ============================= RESET / SET UP A PIN ============================= */
+// Backed by the staff-pin-admin Edge Function — it re-checks server-side that
+// the signed-in caller is coo/production_manager before touching anything,
+// so this panel is not the only thing standing between a random visitor and
+// resetting someone's login (same defense-in-depth as the location chips).
+async function callPinAdmin(action, body){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session) throw new Error("Not signed in.");
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/staff-pin-admin`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ action, ...body }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if(!res.ok) throw new Error(data.error || `Request failed (${res.status}).`);
+  return data;
+}
+
+async function loadPinAdminRoster(){
+  const sel = $("#pin-admin-person");
+  try{
+    const { staff } = await callPinAdmin("list_staff", {});
+    pinAdminStaff = staff || [];
+    sel.innerHTML = `<option value="">Choose a person…</option>` + pinAdminStaff.map(s =>
+      `<option value="${s.id}">${esc(s.name)} — ${ROLE_LABEL[s.role]||s.role}${s.has_account ? "" : " (no login yet)"}</option>`
+    ).join("");
+  } catch(e){
+    sel.innerHTML = `<option value="">Couldn't load (${esc(e.message)})</option>`;
+  }
+}
+$("#pin-admin-person").addEventListener("change", () => {
+  const person = pinAdminStaff.find(s => s.id === $("#pin-admin-person").value);
+  const emailField = $("#pin-admin-email-field");
+  const emailInput = $("#pin-admin-email");
+  if(person && !person.has_account){
+    emailField.hidden = false;
+    emailInput.value = "";
+  } else {
+    emailField.hidden = true;
+  }
+  $("#pin-admin-status").textContent = "";
+  $("#pin-admin-status").className = "pin-admin-status";
+});
+$("#pin-admin-pin").addEventListener("input", (e) => {
+  e.target.value = e.target.value.replace(/\D/g, "").slice(0,4);
+});
+$("#pin-admin-submit").addEventListener("click", async () => {
+  const staffId = $("#pin-admin-person").value;
+  const pin = $("#pin-admin-pin").value;
+  const email = $("#pin-admin-email").value.trim();
+  const status = $("#pin-admin-status");
+  const person = pinAdminStaff.find(s => s.id === staffId);
+
+  if(!staffId){ status.textContent = "Pick a person first."; status.className = "pin-admin-status err"; return; }
+  if(!/^\d{4}$/.test(pin)){ status.textContent = "PIN must be exactly 4 digits."; status.className = "pin-admin-status err"; return; }
+
+  const btn = $("#pin-admin-submit");
+  btn.disabled = true;
+  status.textContent = "Saving…"; status.className = "pin-admin-status";
+  try{
+    const body = { staff_id: staffId, pin };
+    if(person && !person.has_account) body.email = email;
+    const result = await callPinAdmin("set_pin", body);
+    status.textContent = result.created
+      ? `Account created and PIN set for ${result.name}.`
+      : `PIN reset for ${result.name}.`;
+    status.className = "pin-admin-status ok";
+    $("#pin-admin-pin").value = "";
+    await loadPinAdminRoster();
+    $("#pin-admin-person").value = "";
+    $("#pin-admin-email-field").hidden = true;
+  } catch(e){
+    status.textContent = e.message;
+    status.className = "pin-admin-status err";
+  } finally {
+    btn.disabled = false;
+  }
+});
 
 (async function boot(){
   const { data: { session } } = await sb.auth.getSession();
