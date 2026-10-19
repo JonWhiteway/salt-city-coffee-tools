@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salt City Academy</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;600;700&display=swap');
+
+:root{
+  /* Full 5-step brand ramps, per the Academy competency style guide */
+  --lead-900:#0D1B2A; --lead-700:#1B365D; --lead-500:#3E5C85; --lead-300:#A8B9D6; --lead-100:#F7F5F2;
+  --craft-900:#2E3323; --craft-700:#6D745A; --craft-500:#B28C4E; --craft-300:#DCCFB5; --craft-100:#F6F2E8;
+  --care-900:#8C3E2A; --care-700:#C75D3D; --care-500:#E48D5B; --care-300:#F4C9A6; --care-100:#FFF6EE;
+
+  --navy:#1B365D; --navy-deep:#0D1B2A; --rust:#C75D3D; --caramel:#6D745A;
+  --ink:#241A12; --ink-soft:#4A3B2E; --muted:#7A6A57;
+  --paper:#FFFFFF; --panel:#F7F5F1; --line:#E3DED6;
+  --green:#4C7A52; --green-tint:#E8F0E8; --amber:#B8863B; --amber-tint:#F5EBD8; --red:#A3453A; --red-tint:#F5E3E0;
+
+  --shadow-sm:0 1px 3px rgba(13,27,42,0.08); --shadow-md:0 4px 16px rgba(13,27,42,0.10); --shadow-lg:0 12px 32px rgba(13,27,42,0.16);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{ font-family:'Montserrat', sans-serif; background:var(--panel); color:var(--ink); min-height:100vh; }
+h1,h2,h3{ font-family:'Oswald', sans-serif; text-transform:uppercase; letter-spacing:0.3px; }
+
+/* ---------- Topbar: real texture, real depth ---------- */
+.topbar{
+  background:linear-gradient(120deg, var(--lead-900) 0%, var(--navy-deep) 55%, #0a1420 100%);
+  background-image:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wAARCABEAZADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD51wc1Jt84E5/eDt/e/wDr0KA4wPvD9ajJ5969o8cXcQNp5HpQU3fcO72704Or5EmQx/jH9RTXiZRnqv8AeHIpANNCuyfdYj6GgSN3IYf7QzS7lI/1Y/AmkMd58nqPyFIZJH43MfakyOyD8Tml8x+gOPYcUBZdg8pv4vl+tJtjA5Yk+wpfLY8thfdjijYv/PRf1p2C4n7v+6/5ijCk/K2PZv8AGgxtjIww9jTcUgBgQcEU5f3nyn7w6H19qAdw2n8DTQSDkdqBgOlHSnP98nseaTFFgFRdx5OFHU+lDtuOAMKOgoY4GwHp1+tLGm4ksSEXkn+lO3QXmLHGCN7khB+Z9hRJLuG0AKg6KP6+tI8hc+gHAA7CmhS7AKCSewo8kHmxM0qxu/IBx69B+dSYjiHaR/8Ax0f40x5GkPzNn27ClbuHoLsQfefJ9FGf1o3ov3Ywf945/Smc05UZ/uqTRcLA0jMME8eg4FNFSCID77gew5NHmKn+rXn+83Jp+oX7AI8DdJlR2Hc015C5HAAHQDtSFixySST3pyxHG5zsX36n6Cj0D1Gqpc4GABySegpzvuwAMKowBQ7ggKo2qO3r7mkRS7BVGSaPIPNjogFJkI4Tp7ntUZ7mpJmXhE5Ve/8AePrTY1ySx6LyaH2Bdwl42r/dHP1pAMRk9ycCkOSST1PNOk+UhP7ox+PekPyEjXe4BOB1J9BSM3mOSB14A/kKf92Enu52/gOtNi+QNJ6cD60WC/Uc/wAvyA8Dr7mnR4Qb2AP90H+dRou48/dHJNDNuOent6U79RW6CsxY5JJJpcBPvDJ/u/40oHljP8R6ewpqozttUZJoARmLnk07y9v3zt9u9POIzti+Z/7w/p/jTNoHLtk+g5osK4b0X7qZ925/SlE0hGFOPZRik3KPuoufVuaXzZOzkfTigAMcz8lXPuaTyT3ZB+NJ8zHux/OnCN+42/U4oC4YjXuz/TgUGU42qAo9BRsX+KRR9OaTcg6KWPq3+FACKjP07d+woJCH5eT/AHj2+lKWZup/CmkEjPQep6UhjiCAD1B70ZVh8wwR3H9aRXKZxyD1B6GniISDMfPqp6j/ABpifmMKMoBIOD0PY0IzIcqxB9qcHKAgdO4NJmMnkFD7cigYplDffjRvccH9KMxf3XH4igIp6SL+PFBjUf8ALVfwzRqLQA8Y6R5/3moMzfwhU/3RSZiXszn34FJ5zZ+XCD/ZGKLhYXyZW5Ktz3NNaNk+8pFGSxyTk+9KHZenT0PQ0tB6jc45BwaexEi7v4h19/emuoGCOjDI9qIvv4PQgj9KPIfmJ3z6UrjDn60gFOlOZGNHQOor8bcf3RSx8Bn/ALo4+tJKMPj0AFDfLGo7tyf6U+pPQYMsQAMk1LKQuIl+6vU+p9aSL5d0noMD6mmGjZD3YqI0jBVGSaczBAUQ8Hq397/61G4xKUH3m+9/hTKNg3EpVQtz2HUnoKcqcbm4Ufr9KR3LYHQDoB0FKw/QduVOg3H1P+FJ+8mOBub2pQgUBpMjPRR1P+AprSMwxwq/3R0piXkOEYH35FX2HJpP3fox/HFR5pRycdaVwsSeZt5QBfpyaYzEnJJJ9af5Lfx4QerHH6UZiT+85/If409Q0ESNpD8vbqT0FOZ1RdkZzn7zf3vb6Ux5WcAcBR0UDAFIAWIAGSaL9gt3FALEADJNOchB5anOOSfU0EiIEA5foT6fSo80bBuSR43bm6LzUZJJz1Jp7jYoj7nlv8KSPhtx6LzQ+wLuLNw+wdEGPx70knyhU9OT9aI13OM9OppY/wB7NluhO4/TrQAjjYgTufmb+lEY4Lnovb1NNZi7Fj1Y5qR/lAjH8PX60B5DSxJyeSetSgFV2D5Sw+dvQelMjUcu33V/U9hTGcseT70baitcc0nVU4Hr3NIAWOAMmiNC5J4AHUntTmcAFUGF7+p+tHqP0Dai/ebJ9F/xo8zH3VUfXk1GBUip3Y7R/OlcLDWkY/xH86aFZjwCak3qv3UH1bmjLsMlyBQAgifuNv8AvHFKFQDmRfovNMYAnufc0qIW6KT9BQApdV+6ufduajdi5yxJqQxgH5nC/rTcoOgJ92odxqwEEfjRnFKrEcdR6GnEIfunafQ0CuL5u4YcbvfofzppjRvuSAez8frSMjL1HHr2pKL9wS7D/IkH8OR6g5/lQIpCPuEAdzxTOR0pDknnJ+tGgajzGg5d+fReaA6j7sa/8C5plABJwB1ov2HYkYBk3gYIOCB0qM1NIPLQR985b6+lRxoZHCjj1PoKGiU+orf6uP6E/rSRcSbv7oJ/SiVg7kqMDoPpTl+SEnu/H4Cn1H0Gxjc6r70o/eTHHc0IdoZvQYH1NLGNkbSeo2ihAxvLvx1Y0kxzIcdB8o/CnR/Ll/7oyPr2piLvYL6nFHQOpI3yxxr6/OfxpI+MyHovT3Palkbe5KjjOB9KSQjhB0X9T3NAhmec+tPjXOWYkKOpH8qaoLEAdTxTmP8ACDlQfz96F3GxHfec4wOgA7ClUBAHOCT90H+dIig5Zvur19/akLFiSaA8gZixJYkk96Q0oBJwAST2qUkW4wuDL3bsnsPf3pWHcb5QQZlJGeijqf8ACgzEcRqIx/s9T+NMzk+9GM+9F+wrdxCec0lSeXt++dvsOtKsmz7igH1PJot3HfsIkLY3P8i+rd/pSmQIu2MYB6sep/wprMScsST6mmjJ6DJov2F6i5py/INx6n7o/rRhY/vDLf3ew+tMJLHJ60D3A+tSSDy0Ef8AEfmb+gojAQea4yAflB7n/CmfNI/csx/M0bCHL8sTN/e+Uf1pEyqOfX5R/WnSEZCqcqoxn19TSSDaFTuBk/U/5FMQRAbtx6KM00kn6mnr8sLH+8cflRCMPv7IN3+fxot0HfqJN8uIweF6+570xFLMF9aD79aevyRk934H0pbsNkK7A/Kv3B09/emYzR1qRQEXewz6D1p7hsJgRjLDLHoPSmMxY5JyaGYsxJOSe9C89TwOtJjFXAG5unp60gLSNj/IoOXPH/6qdwFwPxoEJlUPHze56Upkdhgscenam8U7bgAudoPQdzTAYaXy2xk4UercUplxnYAvv3qMknk5NSxq5IVIwccUnSnZINL8rHkEUxXGq7J0JFOMmTyq/gMUhTPTmjyX6kAD3NGotBCRk46U2pBGg+8//fIzSM6jiNMe7cmgd+wgjJAJ4B7mn7wgxHx6sep/wqP5nPcmniPHLnHt3pryB+Y0AsdoGSacxCLtU5z94j+VBkwCsYKg9fU/WmhMjLHC0B6iKoblshR1NK7Fznp2A9BQzbsADCjoKci4G89B0HqaA8xGXlYx1HX606Rt2FX7q8AU3cRludx606IdXPRefqaPIQ2T5VC985P9KdEpWN5fT5R9T/8AWqNskknJJp8rYCxjonX3PejzDyCMbQz9NvA+tR1LL8oWPuOT9TTEXc2Og7n0FD7DXcUHYm7+JuB9KaBk4FK53MT26Aegp0XyAydxwv1o8g2CX5cRr0XqfU96ZRT4wF+cjIXoPU0bsNkKD5APaQ/+Oj/GoqGJJySST3pVXcfQdSfSkAqJv5Jwo6k9qf5gVdqDHqe5prNuwAMKOgpuDRtsG4UdKeiZ5JwvrQW2/cGPc9aLBcQx4ALkLnt3/KgyBRiMbffuaac5p6QsxH8I9TwKa8g9SOpBGqfNJ17J6/X0pdyx/wCr6/3iP5elM5Y9CSaNg3B3LnLH/AU4fulz/Gw4HoPWggR/e5b+72H1pmSzdyT+tADolVnG77o5b6UkjF3Zj1JzSthF2Dk/xH+lESh3G77o5P0o8g8wf5QiZzgZP1NKPlgJ7s2PyprEuxY9Sc06UbQiei5P1PP+FFxeRGAWIA78CpJcbzt+6OBSRjG5v7o4+tNzSH1FT5mAJwD1PpRJIHbI+6OAPalAxET3Y4H0pmKNgFUbjgUpG4hV6D9fenbNsfu38qCuzjHOOaLBca2AMDpSUuCexp6xhF3vyOy+v/1qNw2E2+WoZgMn7oP86jJLHJOTTnYu2T1NAXau58+w9aGCEVC2eQB6ml+Reg3H1PT8qbuLHn/9VKfl6jn0oGPAooooEFFFFABSUUUAL2ozRRTADRRRQCCiiigQnagUUUDA0lFFABRRRQgCloooAD0pDRRQAnfFLRRQAUUUUAKKKKKAEFOBzRRQAHpQKKKGAGhRRRSGOApcCiikAUuKKKAACjAoopMYoApQBRRSGOAp2B6UUUwAKKeFHpRRUgPVF9BViNFI6CiikxotRRpn7o/KtO1jQkZVfyoorKRpE//Z'), linear-gradient(120deg, var(--lead-900) 0%, var(--navy-deep) 55%, #0a1420 100%);
+  background-size:cover, cover; background-blend-mode:overlay;
+  color:#fff; padding:18px 32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  box-shadow:var(--shadow-lg); position:relative; z-index:10;
+}
+.topbar .brand{ display:flex; align-items:center; gap:12px; }
+.topbar .brand .dot{ width:11px; height:11px; border-radius:50%; background:var(--care-500); box-shadow:0 0 12px var(--care-500); }
+.topbar .brand-name{ font-family:'Oswald',sans-serif; font-weight:700; font-size:19px; letter-spacing:1px; }
+.topbar .brand-sub{ font-size:10.5px; color:#9FB3C8; letter-spacing:2px; text-transform:uppercase; font-family:'Montserrat',sans-serif; }
+.view-toggle{ display:flex; background:rgba(255,255,255,0.10); border-radius:10px; padding:4px; flex-wrap:wrap; backdrop-filter:blur(4px); }
+.view-toggle button{ background:none; border:none; color:#B9C4CE; padding:9px 18px; border-radius:7px; font-family:'Montserrat',sans-serif; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; letter-spacing:0.3px; transition:all .15s; }
+.view-toggle button:hover{ color:#fff; }
+.site-actions{ display:flex; gap:8px; align-items:center; }
+.site-btn{ font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; color:#fff; background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.22); border-radius:8px; padding:8px 12px; text-decoration:none; cursor:pointer; white-space:nowrap; }
+.site-btn:hover{ background:rgba(255,255,255,0.24); }
+.site-btn.ghost{ background:none; color:#B9C4CE; }
+.view-toggle button.active{ background:var(--care-700); color:#fff; box-shadow:var(--shadow-sm); }
+
+main{ max-width:1180px; margin:0 auto; padding:32px; }
+.view{ display:none; }
+.view.active{ display:block; animation:fadeIn .35s ease; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+.page-head{ margin-bottom:26px; }
+.page-head .eyebrow{ font-size:11.5px; letter-spacing:2.5px; color:var(--care-700); font-weight:700; text-transform:uppercase; font-family:'Montserrat',sans-serif; }
+.page-head h1{ font-size:30px; font-weight:700; color:var(--lead-700); margin-top:6px; }
+.page-head .sub{ color:var(--muted); font-size:14px; margin-top:5px; font-family:'Montserrat',sans-serif; }
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.card{
+  background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px 26px; margin-bottom:20px;
+  box-shadow:var(--shadow-sm); transition:box-shadow .2s, transform .2s;
+}
+.card:hover{ box-shadow:var(--shadow-md); }
+.card h2{ font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:16px; font-family:'Montserrat',sans-serif; }
+.card .q{ font-size:17px; font-weight:700; color:var(--lead-700); margin-bottom:2px; font-family:'Oswald',sans-serif; text-transform:none; }
+
+.comp-row{ display:flex; gap:22px; align-items:center; margin-top:14px; }
+.comp-item{ text-align:center; min-width:88px; }
+.comp-item .lbl{ font-size:11.5px; font-weight:700; margin-top:8px; white-space:nowrap; font-family:'Montserrat',sans-serif; text-transform:none; }
+.gate-note{ background:var(--amber-tint); border-left:4px solid var(--amber); border-radius:0 10px 10px 0; padding:13px 16px; margin-top:16px; font-size:13px; color:var(--ink-soft); }
+
+.next-callout{ background:linear-gradient(135deg, var(--lead-700) 0%, var(--lead-900) 100%); color:#fff; border-radius:12px; padding:20px 22px; box-shadow:var(--shadow-md); }
+.next-callout .tag{ font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--care-500); font-weight:700; }
+.next-callout .title{ font-family:'Oswald',sans-serif; font-size:19px; font-weight:700; margin:8px 0 6px; text-transform:none; }
+.next-callout .desc{ font-size:13px; color:#C7D2DC; font-family:'Montserrat',sans-serif; }
+.next-callout a.btn{ display:inline-block; margin-top:14px; background:var(--care-700); color:#fff; padding:9px 18px; border-radius:8px; font-size:12.5px; font-weight:700; text-decoration:none; box-shadow:var(--shadow-sm); }
+
+.feedback-item{ display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); font-size:13px; }
+.feedback-item:last-child{ border-bottom:none; }
+.feedback-item .fdate{ color:var(--muted); font-size:11.5px; }
+
+.roster-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.roster-table th{ text-align:left; padding:9px 10px; font-size:10.5px; letter-spacing:0.6px; text-transform:uppercase; color:var(--muted); border-bottom:2px solid var(--line); }
+.roster-table td{ padding:11px 10px; border-bottom:1px solid var(--line); vertical-align:middle; }
+
+.alert-item{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); }
+.alert-item:last-child{ border-bottom:none; }
+.alert-item .aic{ width:34px; height:34px; border-radius:50%; background:var(--red-tint); color:var(--red); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+.alert-item .aname{ font-weight:700; color:var(--ink); font-size:13px; }
+.alert-item .asub{ color:var(--muted); font-size:11.5px; margin-top:1px; }
+
+.heat-row{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.heat-row .hlabel{ width:135px; font-size:12px; font-weight:600; flex-shrink:0; white-space:nowrap; }
+.heat-bar-track{ flex:1; height:12px; background:var(--panel); border-radius:6px; overflow:hidden; box-shadow:inset 0 1px 3px rgba(13,27,42,0.12); }
+.heat-bar-fill{ height:100%; border-radius:6px; transition:width .5s ease; background-image:linear-gradient(90deg, rgba(255,255,255,0.15), rgba(255,255,255,0)); }
+.heat-row .hval{ width:38px; text-align:right; font-size:12px; font-weight:700; color:var(--muted); }
+
+.content-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--line); }
+.content-row:last-child{ border-bottom:none; }
+.content-row .ctitle{ font-size:13.5px; font-weight:600; }
+.content-row .cmeta{ font-size:11px; color:var(--muted); margin-top:2px; }
+.content-row .cbtn{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; color:var(--ink); }
+.content-row .cbtn.done{ background:var(--green-tint); color:var(--green); border-color:var(--green-tint); }
+
+/* ---------- Progress bar (new: content completion) ---------- */
+.progress-track{ height:8px; background:var(--panel); border-radius:5px; overflow:hidden; box-shadow:inset 0 1px 3px rgba(13,27,42,0.1); margin-top:6px; }
+.progress-fill{ height:100%; border-radius:5px; transition:width .6s ease; }
+.progress-label{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:6px; font-weight:600; }
+
+/* ---------- Radial gauge (new) ---------- */
+.gauge-wrap{ display:flex; align-items:center; gap:16px; }
+.gauge-num{ font-family:'Oswald',sans-serif; font-size:26px; font-weight:700; }
+.gauge-lbl{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+
+/* ---------- Role tabs & Browse grid ---------- */
+.role-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; }
+.role-tabs button{ background:#fff; border:1px solid var(--line); border-radius:20px; padding:9px 18px; font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); font-family:'Montserrat',sans-serif; transition:all .15s; }
+.role-tabs button:hover{ border-color:var(--lead-500); }
+.role-tabs button.active{ background:var(--lead-700); color:#fff; border-color:var(--lead-700); box-shadow:var(--shadow-sm); }
+
+.academy-grid{ display:grid; grid-template-columns:145px repeat(3, 1fr); gap:12px; }
+.academy-grid .col-head{ text-align:center; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; padding:8px 0; font-family:'Montserrat',sans-serif; }
+.academy-grid .row-head{ display:flex; align-items:center; font-size:13px; font-weight:700; color:var(--lead-700); white-space:nowrap; text-transform:none; font-family:'Oswald',sans-serif; }
+.academy-cell{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px; min-height:110px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:var(--shadow-sm); transition:box-shadow .2s; }
+.academy-cell:hover{ box-shadow:var(--shadow-md); }
+.academy-cell.placeholder{ background:var(--panel); border-style:dashed; opacity:0.7; box-shadow:none; }
+.academy-cell .ctitle{ font-size:12.5px; font-weight:700; color:var(--ink); line-height:1.3; font-family:'Montserrat',sans-serif; }
+.academy-cell.placeholder .ctitle{ color:var(--muted); font-weight:600; font-style:italic; }
+.academy-cell .cmeta{ font-size:10.5px; color:var(--muted); margin-top:6px; }
+.academy-cell .ctype{ display:inline-block; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; padding:3px 9px; border-radius:10px; margin-top:8px; align-self:flex-start; }
+.ctype-document{ background:var(--lead-300); color:var(--lead-900); }
+.ctype-video{ background:var(--care-300); color:var(--care-900); }
+.ctype-quiz{ background:var(--craft-300); color:var(--craft-900); }
+.ctype-external_link{ background:var(--panel); color:var(--muted); }
+.coming-soon-badge{ font-size:9.5px; font-weight:700; text-transform:uppercase; color:var(--muted); letter-spacing:0.4px; }
+
+/* ---------- Leader Tools hub (new) ---------- */
+.tools-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; margin-bottom:26px; }
+.tool-card{
+  border-radius:16px; padding:22px 20px; cursor:pointer; color:#fff; position:relative; overflow:hidden;
+  box-shadow:var(--shadow-md); transition:transform .18s, box-shadow .18s; min-height:140px;
+  display:flex; flex-direction:column; justify-content:flex-end;
+}
+.tool-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+.tool-card.disabled{ cursor:default; opacity:0.55; }
+.tool-card.disabled:hover{ transform:none; box-shadow:var(--shadow-md); }
+.tool-card .ticon{ width:34px; height:34px; margin-bottom:10px; }
+.tool-card .ttitle{ font-family:'Oswald',sans-serif; font-size:16px; font-weight:700; text-transform:none; }
+.tool-card .tsub{ font-size:11.5px; color:rgba(255,255,255,0.82); margin-top:4px; font-family:'Montserrat',sans-serif; }
+.tool-card .tbadge{ position:absolute; top:14px; right:14px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; background:rgba(255,255,255,0.2); padding:3px 8px; border-radius:10px; }
+.tool-1on1{ background:linear-gradient(140deg, var(--lead-700), var(--lead-900)); }
+.tool-style{ background:linear-gradient(140deg, var(--craft-700), var(--craft-900)); }
+.tool-behaviors{ background:linear-gradient(140deg, var(--care-700), var(--care-900)); }
+.tool-placeholder{ background:linear-gradient(140deg, #B0A99A, #7A7266); }
+
+/* ---------- Modal (new) ---------- */
+.modal-overlay{ display:none; position:fixed; inset:0; background:rgba(13,27,42,0.55); z-index:100; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; backdrop-filter:blur(2px); }
+.modal-overlay.active{ display:flex; }
+.modal-box{ background:#fff; border-radius:18px; max-width:560px; width:100%; padding:30px 30px 26px; box-shadow:var(--shadow-lg); position:relative; animation:modalIn .25s ease; }
+@keyframes modalIn{ from{opacity:0; transform:translateY(-14px) scale(0.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+.modal-close{ position:absolute; top:18px; right:20px; background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; line-height:1; }
+.modal-close:hover{ color:var(--ink); }
+.modal-box h2{ font-size:20px; color:var(--lead-700); margin-bottom:6px; font-family:'Oswald',sans-serif; }
+.modal-box .modal-sub{ font-size:13px; color:var(--muted); margin-bottom:20px; font-family:'Montserrat',sans-serif; }
+
+.loading{ text-align:center; padding:60px; color:var(--muted); font-style:italic; }
+.error-box{ background:var(--red-tint); color:var(--red); padding:16px 20px; border-radius:10px; margin:20px 0; font-size:14px; }
+footer.note{ text-align:center; padding:24px; font-size:11.5px; color:var(--muted); font-style:italic; }
+
+@media (max-width:900px){
+  .grid2{ grid-template-columns:1fr; } main{ padding:20px; }
+  .academy-grid{ grid-template-columns:80px repeat(3, 1fr); }
+}
+@media (max-width:650px){
+  .academy-grid{ grid-template-columns:1fr; }
+  .academy-grid .row-head{ margin-top:14px; }
+  .comp-row{ gap:10px; }
+  .tools-grid{ grid-template-columns:1fr 1fr; }
+}
+
+/* ---------- My Dashboard tabs (employee self-service) ---------- */
+.emp-tabs{ display:flex; gap:4px; border-bottom:2px solid var(--line); margin-bottom:22px; overflow-x:auto; scrollbar-width:none; }
+.emp-tabs::-webkit-scrollbar{ display:none; }
+.emp-tabs button{ background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px; padding:11px 16px; font-family:'Montserrat',sans-serif; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; white-space:nowrap; letter-spacing:.3px; }
+.emp-tabs button:hover{ color:var(--lead-700); }
+.emp-tabs button.active{ color:var(--lead-700); border-bottom-color:var(--care-700); }
+.emp-badge{ display:none; margin-left:6px; min-width:18px; padding:1px 6px; border-radius:99px; background:var(--care-700); color:#fff; font-size:10.5px; line-height:16px; text-align:center; }
+.emp-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; align-items:start; }
+.emp-stat{ display:flex; flex-direction:column; gap:4px; }
+.emp-label{ font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+.emp-big{ font-family:'Oswald',sans-serif; font-size:28px; font-weight:700; color:var(--lead-700); line-height:1.15; }
+.emp-big span{ font-size:15px; color:var(--muted); margin-left:2px; }
+.emp-big.muted{ color:var(--line); }
+.emp-note{ font-size:12px; color:var(--muted); line-height:1.5; }
+.emp-disclaimer{ font-size:11.5px; color:var(--ink-soft); background:var(--panel); border-radius:8px; padding:9px 11px; margin-top:12px; line-height:1.5; }
+.emp-disclaimer a, .emp-note a{ color:var(--care-700); font-weight:600; }
+.emp-empty{ color:var(--muted); font-size:14px; }
+.emp-top3{ margin:6px 0 0 20px; padding:0; font-size:14.5px; line-height:1.8; }
+.emp-pill{ display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; }
+.emp-pill.green{ background:var(--green-tint); color:var(--green); }
+.emp-pill.amber{ background:var(--amber-tint); color:#8a6223; }
+.emp-pill.red{ background:var(--red-tint); color:var(--red); }
+.emp-pill.muted{ background:var(--panel); color:var(--muted); }
+.emp-stat .emp-pill{ align-self:flex-start; margin-top:4px; }
+.emp-convo{ border:1px solid var(--line); border-radius:10px; margin-bottom:10px; background:#fff; }
+.emp-convo summary{ list-style:none; cursor:pointer; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13.5px; }
+.emp-convo summary::-webkit-details-marker{ display:none; }
+.emp-convo summary::before{ content:'›'; color:var(--care-700); font-weight:700; margin-right:6px; transition:transform .15s; display:inline-block; }
+.emp-convo[open] summary::before{ transform:rotate(90deg); }
+.emp-convo summary > span:first-child{ flex:1; }
+.emp-convo-body{ padding:0 14px 14px 28px; font-size:13px; color:var(--ink-soft); line-height:1.6; }
+details.card.emp-convo{ padding:0; }
+details.card.emp-convo .emp-convo-body{ padding:4px 22px 20px; }
+.emp-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.emp-table th{ text-align:left; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:#fff; background:var(--lead-700); padding:8px 10px; }
+.emp-table td{ padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+.emp-avail td:first-child{ font-weight:600; width:42%; }
+.emp-avail td{ padding:6px 8px; }
+.emp-sub{ font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--care-700); margin:18px 0 8px; }
+.emp-text{ font-size:13.5px; color:var(--ink); line-height:1.6; white-space:pre-wrap; }
+.emp-pip-meta{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; font-size:12.5px; color:var(--muted); }
+.emp-checklist{ list-style:none; margin:12px 0 6px; padding:0; }
+.emp-checklist li{ display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+.emp-check{ flex:0 0 20px; height:20px; border-radius:5px; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; }
+.emp-checklist li.met .emp-check{ background:var(--green); border-color:var(--green); }
+.emp-checkin{ font-size:13px; padding:8px 0; border-bottom:1px solid var(--line); }
+.emp-form label{ display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin:12px 0 5px; }
+.emp-form input, .emp-form select{ width:100%; font-family:inherit; font-size:14px; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
+.emp-form input:focus, .emp-form select:focus{ outline:none; border-color:var(--care-700); }
+.emp-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; }
+.emp-btn{ margin-top:14px; background:var(--care-700); color:#fff; border:none; border-radius:8px; padding:10px 16px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+.emp-btn.ghost{ background:none; color:var(--care-700); border:1px solid var(--care-700); margin-top:0; }
+.emp-btn:disabled{ opacity:.6; cursor:default; }
+.emp-msg{ font-size:12.5px; margin-top:8px; min-height:1em; }
+.emp-msg.ok{ color:var(--green); } .emp-msg.err{ color:var(--red); }
+.emp-req{ display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px; }
+.emp-req-right{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.emp-link{ background:none; border:none; color:var(--care-700); font-size:11.5px; text-decoration:underline; cursor:pointer; padding:0; font-family:inherit; }
+@media (max-width:820px){
+  .emp-stats{ grid-template-columns:1fr; gap:0; }
+  .grid2{ grid-template-columns:1fr; gap:0; }
+  main{ padding:20px 16px; }
+  .emp-table th:nth-child(3), .emp-table td:nth-child(3){ display:none; }
+}
+</style>
+</head>
+<body>
+
+<div id="app-root">
+  <div class="loading">Loading your Academy dashboard&hellip;</div>
+</div>
+
+<footer class="note">Salt City Academy &mdash; built on Salt City's own Supabase project. No third-party login, no external subscription.</footer>
+
+<script>
+/* CONFIGURATION — centralized 2026-09-18: Academy now reads from "Inventory Tracker",
+   the same project the rest of the Command Deck uses. staff.role here is the
+   PERMISSION TIER (9 values: location_manager, gm, production_manager, coo, ceo,
+   cbo, product_development, team_member, bookkeeper) — NOT the old 19-value Academy
+   job track. Academy content targeting now keys off staff.job_title instead (see
+   staffTrack() below); admin/manager gating below is remapped to the new role values
+   (general_manager -> gm) so who has access stays the same as it was before the merge. */
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eXN2Y3ByenZtaHhycm5vZ3FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODMxMTAsImV4cCI6MjEwMDc1OTExMH0.KZXVYcdDa9lKo3YNXbUYnYGOWjS-ZFtlV4YeyzTs_h0';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const STAFF_TABLE = 'staff';
+const MANAGER_ROLES = ['location_manager','gm','production_manager','coo','ceo']; // was general_manager -> gm after centralization
+const ACADEMY_ROLES = ['barista','shift_lead','assistant_manager','location_manager','general_manager'];
+// Who can look up any employee's profile (PTO/Sick, Academy level, coaching) — same tier Jon gave
+// this kind of company-wide visibility to on the Command Deck: CEO, CBO, COO, GM, LM.
+const PROFILE_VIEW_ROLES = ['ceo','cbo','coo','gm','location_manager'];
+
+const COMPETENCY_LABELS = { leadership: 'Leadership', craft: 'Craft', customer_care: 'Customer Care' };
+const COMPETENCY_COLORS = { leadership: '#1B365D', craft: '#6D745A', customer_care: '#C75D3D' };
+
+/* ============================================================================
+   PTO & SICK LEAVE ACCRUAL — verified against the policy's own stated
+   numbers via a standalone test script before being used here. Same
+   logic, not reimplemented.
+   ========================================================================= */
+function calculatePTO(totalHoursWorked){
+  const tier = Math.min(4, Math.floor(totalHoursWorked / 1300));
+  const hoursByTier = { 0: 0, 1: 16, 2: 24, 3: 32, 4: 40 };
+  return hoursByTier[tier];
+}
+function calculateSickLeaveByYear(hoursLogEntries){
+  const hoursByYear = {};
+  for (const entry of hoursLogEntries) {
+    const year = Number(String(entry.period_start).slice(0, 4)); // not new Date(): '2026-01-01' parses as UTC and lands in 2025 in US time zones
+    hoursByYear[year] = (hoursByYear[year] || 0) + parseFloat(entry.hours_worked);
+  }
+  const accrualByYear = {};
+  let totalBalance = 0;
+  for (const [year, hours] of Object.entries(hoursByYear)) {
+    const earned = Math.min(40, hours / 30);
+    accrualByYear[year] = earned;
+    totalBalance += earned;
+  }
+  return { accrualByYear, totalBalance };
+}
+
+const COMPETENCY_ICONS = {
+  leadership: 'data:image/png;base64,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',
+  craft: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAeLElEQVR42u19eZicVZnv7z3nfFt1iCSYxoiOqMjSiYNACAFG047OjFdxuT63sjWIOtoISQeTBub6eJ3qGhfUJB0g6c6Y6ygZYjrp0kcHBJ3rltZxQ3HDlILMCIOSACGBdFL1Leec9/5RX3VXVXcWtnQB9T6pTlJdy/ed97zb710O0KIWtahFLWpRi1rUoha1qEUtalGLWtSiFrWoRS1qUYta1KIWtahFLWpRi1rUoha1qEUteqaInqvXncvlqFgsErJAx65HJtxHcU47owB0dHRwPp/n2t8xA319OQKAw31G7fv7+vJMBG4x+Fli5Jw5Rdq16xEqFtu5UChYYGoWO5fLCWCnqGyMdq7ZPNxi8JNexE6bz+ftZK/p6emazi6dZGFfTsSziDGbiHwwz2KiWcTsM0ESyGdwG4A2AJKYmIktGBYETaCIgRBAmZg1A/uloD3G4gARHmAy+xzp7EYU7Vu/vrDvcNecHc7Kjl2PUD4/YpqN2dRszK1laneuO+PH4Wmk+Qwm7mDLZ4Hta5joFAJmKCVdIQSEIIAIYB5fXQa48gPMPOldEwiVP1T/HBjWMqy10InRIBwA+M8APUiE/7TMu4jwe23sf23q3/HgJGvKLQYfhrk9q5ecI113qTXmLxl8FoH+wnEVBBGYAWstjLFgZlhrLRExVznZcDtV3h2RuPqnYWEIxMwkBAkiASEJQojKdQAw2iDRpkzg+4SUd4Ptzl/99M9fHBkZ0c3EZGom5l61evGVnuvdpJRUxlpYY2CMBQAzLpwsACKi43b96fZhHt9MlesQQggpBYQUUFKiXA7/n9TJu6ZP74iaxTbLZmHuyt5L5ypH3m6tFTpJEmstrLVVVgqi6oOIKnJJx00ICDTZdQBgYywbbU2iddLWFpwRJhprrh/4Ti63UI2MPGCnen3F1MtvxSu1ZJY5joK1NgGRA0ASkTiycgUzs2VmC8Ckkq6f7mP8s9imEns4SSQiEkRQYHbKYWSJxHsuz13u5/NjqnpKSTWNM8B0imW2FW/p8ExlhgFYEJEQgkAkiIQAEUBEqIr3U9fHAFsGM6d2fuxvJsCCJtd6RERsmQCeOa0UzQTwEDODiFoMTjn831IKwcx20kVhQChBrusoow2SRMNYe4BAozBmL5hKDOwnYC+IS8wwIDoIhgbBEDNDALCwzEQQEMRQEBAw7ECQB7AC0zQGtxPRixh8AgEvBmiaUiKjHCXjKJnoldddJTFKKmoWF6cJGNxpgRFSSm4Jw3iFUnK6McbWqmdmsFKCtDb3h4n5JAu632q7WwbBI26clNat23ro2dp2PT1dJyDAdBPzy4yNXg2mDULQDGu5zm1nZuP7riqH8TcHBm55LJfLCaK8fcEzOJ/P22w2K9d/eut9y1cvudzz3H+z1lbtV+0CslTSO1jWt/3LTUMPTw6QADuxU3Q+jespzmnnjl3j8OSGDV86AOAAgD9d1buEPUcGWltb678ws5VKyjhKHmayVzdT+NlEcfBClc+P6KtWL/l0W1vwD+VSqImodgMa13NkHCe/jTLTLsBLkez/9n77bEOX2WxWAsCMl6sZnhS/VVKcnCS6VsMwQMZ1lUrK8dtuWj90RzablYVCwTTDuopmYXA+P2KGh7Py0QXmo1E5+pHnuariUI2HdFEYa9/35jqjBz+z+YrNSUfHI886oNDR8QgVCgXjAZ/zPOfkJDGm3nyw8QNXhVH82ZvWD92Ryy1UzcLcpoiD6xczS4MrBu25Czq+RcB7hBCBtZarsAYRCa2N9nxnwbnzz7hnzfV3/CY7nJXFQpGfTa2yYtWylcE0f3VYjjXRuFljhnE9V8Vh/OOTpp3e1d7eLgYH77DNtKZNl2zIDmdlYVHBLF+97BLPV7clsdbpRqSqLRZSMhFGrUnO27B2x3/WYNhUTQUWi0VKJfzYbG+aHerr62Mi4qqa7ent6hASdzHgsGFRBT+ZwVIKS0A5TnDO4Pqt9zVi6S0GH0Vylvcu/Uxbxr+udCjSJOolx6vY4ztntv354t27z6DZs2ebZ3Jxs9msRAfk7EPOT5SjzomjxJKo8+x1ELiqfCjs3rh++/+tXnOzrWWz5oMpl1sogU6779C933M99w1RmBiqARmYWQcZX4XlaM2GtduuSz1ptT++5yRjRTsS+xIpaDpYTGPCDAK7luCC4RAzM8EQxCixfcKCnrDAXgnaS655LDx1+r7NV2xOeq5ZtsEPvBWNDh8zTBC4slyK/m1j/9C7mpW5zczgKkbNV6zKvtR33F8Q0SytDTfAl5VwhVFgwmwCXsrgFwsS06WSqCBdh89KcC08ZiyMNmDwAWLsAehhEvT6FAatC4mUUsJaez+UWbD7PrM3TfzbFoOfaui0aulbfd+5PUm0nix29zwHtgorWluFF2199ucIi1BJDVYSGYIghQAJQhLrCTlIZljHkSiV4zd97sYdO6vqvJk856b1ohs33cjIAzaXW6jWfvrr98yb36H8jN+ZJFo3JiGMtsZay9bYcZ5NyP4c/lF5XSrqXMkQWVsvubWbwVpmpeScCy7+S/fsuWfee8sthXIulxMjO0eAfHMtpmg2tZw6ylQbH+dyC9WGdUP/GJaib/v+hPgYaQKgmn16ulqJ0s850uYXSsn5rucMBDPcX678h8uW5fN5CwJXEbUWgye3uTZd4FrVyECnBQGU2EvjRD+klBSpbTwSHUPqkGtThE+K4jixYTnSBPFKV8kvXX1d15eXL3/XSVXotWWDJwMUrum6wvfUijA079i4busfa+PKqp1bcc2yNzuO+pZOjAZYHu4ePM9NE4/jYBdXf1RLsIjGnoyOmiWafL0qG41sEHgqSZJ7dGLetbF/6PfVeP4Fz+Aq45b3Ln2f5zlfUEqiVIp+tHHttr/KDmdFYdE41pzL5VQ+n9crVi/9VNDmf2QSvHpMesG8g0B7WNAoLJdBnDAjJiFCa0xABBdMHgEBSzEDbN8rSLQxN2aJwEJUtkqaBBGTFyJw4riOY7TdrXXSOdC/495mAD6oGdRyz6quBdIVP7DWCmutDgLPPVQK/2mwf3uuIcak4eGs2LWrg/cdvPf7rudeHEX18TEA4ziKwij+4GD/9i8cy3UsX73kHZ7nfDlJrEi1AsbRKiJrucRgGQS+l8QaWhuTOnANHjZr13WUMeaPiVUXDa7d8nAul6OpZPKUMZgB6svl6NFHixmZcX6tlHzV+MKRFVLIKI4v3tS/40e1YchYgV7vslc4UvwCwInGGFSlKpU4CCFsEiULXvyiM36xb99PnZkzyw3qsl0AHXZ09PevMsr5JYCMMWYM9wbARGSFIEo0v0mQflCQuoyBLtd1TksSDWNs4+YCM2s/8FQURt+f2fbQm4pz2rlWC71gGFy1USt6l3wiyAQfrVW3zGyVo8ga+wfhoHP9J7+0JzWZXGezVy/L+oEzHIWJRl0SgK3jKGEs38Nlnj9z5mkHgTzyedgJSFnpvu+7jpqgCZhZZzK+Kh0K/3Fj/9DHq89f2ntp20nS/j1IfEwp+eJGhC19cxK0BU5ptPTJjeu3/5+pjJPlVKnmwRWDfMXVi091lbpFayNTj76aNSK2Vmfa/PYkND9869/d/TtgvEqxGh+v+fTXf3ve/LNm+xl/fm18TERkjNW+77Un0K9cc/3GL3d2LpTV91c3yNx5p3wiCLyuMIwmQJG+76owjL+1cd3QB3O5haqz873o7ITccP1t0U9/ePdPXzfvrIIgnOl57ulGGw2qiUiIhNHGCikvXnDh3Nu+8Pkdu7PZrCwWi8ddiqekomPOnCIBsI6S17mekylPkoYLAs85OFpeN9A/9NVsNivz+UJdKJPPj5hsNisP7PU+jFnRAtd1zo5jPSZNRKTK5Uj7gbvkqlVLvpvPVxICxWI75/MFfeWqZW90HfmRSgqQaiWXpZQUJ2av1HR5ZdONtdHYqvTn8zvuB/A/Vl7X9a9e4F4WluNaSSZrGZ6vVFg26wC8qaOj4wWiopkJRLzyI0tO5kT8gYimpeFJFUkyjqdkEukfbFi37Q25HEQ+P3np6pgHvmrZax1X/MwyFFtbC3awEMKCECeRPn/whu27ssNZ2f4L/0RlzK9IyFO01lxfnQHjuo4qhfH/3NQ/9LXDqddsNiurTNt/6A87Hdd5fRwlBhMdPplo/dcb1mz73lSETscd6Mj1dcpKUCH+l++7J1jLpm6jEchoq4nsCgAoFrOHrdooFAoml1uoBtZvuzvRyUrXVbIB5SJjLKQQgVRyaNWqbFBYVDAi1psdz32Z1pNXZ8RhvH5T/9DXjlSdUSgUTLFYrHjIMrlUG/0ECaLaNpiKwycA5t7Km14QSFanTe9+caVaoy7m1J7nCm1M4aa1238zPHx05ySfH9G53EI1sG7H5rAUDQeBq5jZ1GDHMo4THWS81ybCuX7FNUsu9TPeuyerzvA8R4Wl+M49D+prK2Zh5IjfXd1gN32m8N9JbD/peY4Aw9Z+dxQlTERvvvrqxadWXn98oczj+mW1IQ6Izk8SQ7XXQIDQWjME9wOgwjHu+L6+EZPL5UQggw9EUXKv4ziyFsokIlUuhVYIupogbgmjmKnB65ZSwBh70LK5rFAomFT9HtVu5vMjhpkJ0/WmMIx3V2u7eZwSx3EcLcU7K+/YKZ7HErwz9XJxsec5fq16ZmbruEpobX698bPb76pKyLFlB8DFYpHWrPnCqNX2MmbWQohGBgmuYpHc6HuQdVwlE61XVBCohepJgBPc19cpB/OFgwDf4fsuAYBSkhxHCaWk6/muIMLbKyannZ/nKhoQwIUpnsC1iyylAIj+nQhciVOPnarqcuP6oTu1Tq7zPEdOyDpN0tbJzDoIXBWWo20D67ZveSrVGSnTSDD9axwne0mISGuzO0n077Qxd4Xl6JtCoB+ojIR43nrRqUdsV/Qu2+l5zsI4TkxNLG5c15FhGL1zoH/7rU8VHBhPXCy71ffdtzfa2sZEgeMoYYy9LxTxvNl+x+jTncfx96uyM1+UaWt7PN73+BfW3Do61Vj/8YyDKZ+H7el5iwfCK4wxYB5DBjl1hhJmU3x6O33E5nI5MTp67/uTSP9SKXmK1nWF6qiBIsFAZLXt2ry+8EQ2m5VEeMq4caXXrLAPwL5G36Nir48/Jn3cVHQ1E2f9E08Co91aHmvjZgaIBJjxuD6ER9PFeEoMzudhi8Ui9fcP7Y21fU+l4VDYSa7H+L4rTKzXbFw/dGd3d7fzdOFEIjAzKGVoTdFC3k5VwuG4Mbg6toi0mkUCmTpwA8yVAjk8Nnt2x9NWa1V7vGn9tu8lcdKXhk4NdpWF1gYQ1NnT8xZv//799pkwWUSoFuA1xQiH48bgYrFIACAEu9XET00Yk6pLHs3n8zb1cp/WAlVLfTb2b8+Xy9F3fd+rK/UhIpEkxgSB91fWObE/3RTNWKP23PKi2ULS4djH9ExeD6egClmylyVJ8rBSQtTHx5ClUqSDwL9qee/SJVXQpMXgp6XDTGQtM+oQLKaU337q2/MzoS7z+bzNDmfFwJrtDyVadxERSIhG9SnjOLGOUp/70NXZMypMbq7CuecEg4eHhy0AKHYfscxhYxzM1oKAGb29l7Y9FYTscEwpLKrY48H+Hd9JouRTgT8ByiRrmYUU013H2ZrL5VSxku2iFoOflPNRWS+tzSiBRymde5X+jqy1APGskrEnp0w7pgVmZqp6qYdjctUeP/wnkyuVopHG1lQiyDiKtee78x47eO8N6aaQLQY/aZsI2rDhS6Ng+pOUoiZ4AlnLVinHkdKeWuuUHU1yiYg/1Lto7vIPL5l3BCYz0GkLhYKxwOVG68ermHHNBlRhOdZ+4C1f3rvk8ueLPT6utmZ4OJtylX8vhABAthaqVEoAoPMAHLX1c6xg77qul7nS+Y5y5feu/PCyVx2uLrn6/OC6bQ8k2lwupSAiqrPHDMgk1sZRanD5qmWvzedH9FOocaYXLIN3jY3spZ9PMkiHUvDjTTUe8GERo2KxSN3d3Q5ZLigp20mIaY5Dt/b0dE2vbICJ95am69RA//Zb4yi5Pgi8CfbYGAshREZI7OjOdWeq3/ckmMsVn2Chyg5nZSPocbzpuNqZ9vb5VCwW+cKL5rAFPlBp3h+rQSdrmUCYff7Fc25e86mBA7lcToyMjEwSUC1Ug4N3mAs7z9jkZ7x3RmGirbXW972XJNCvufnzO3bs3Ank8xMXdmRkhNN6rm+fM7/jIt/3XlNJ/KOa6RLGGB0E3slcKs2++fM7vlZbD3Y05vbc2ON99n9/Vo+MPGCLhSJPfv3PUwYXi0UAwEULztqnWbxHKfEia9lWRxMyQwe+55tYP3Dnj397Z2cnZOPCDg9n5YoVd5jlqxa9L8j4/1RNJqTAhfYDd+68Czqcr335wh9ccsklky5wZ+d7MTIygnMvPPvfiU2XlGJ646iIJDE6CLzzXjfvzAfXfvr2u440mjAtqLM9q5d+3I3N5+fN73jb/IvnnrXgorOnX7zwXMw7Z/bonXfeNyVVlcdddVSzPT29Szf7gffB2oK7anYnSfS9J007fQ4AWzvUs5phWtl76VxSuBMM1xhbW4DORNCu5zqlg+HcwRu27zpSTVWlo2Jxp+u43zXGWmYeU6djIxqIylEYz990447fTfZZuRxEXx/zlddcNssV/EelZAYApBQwlqETbdny7xAnb9ywobA3nX533KT6uAf0YwlvaW/W2qAyPbYePvQD7/RHD95zVcUrTsOV1A6uWpUNIHibFCIw2lB9yQ8bz/OcsBzdMOtFZ/zuSCnHsXqudTt2xrH+mOe7siF0IqMNCUHTlCuHq/H5RHu8UBARS9Yfc10nk8RJkiTalMuxjqOkUspLeFnkKEaawXrequhUTXMulxOf+eTAg1//xpy3up5zirV1g8XIWstKyDecc/7cHWs/8/XHstmszO6aJQYH7zDzLj673w+8t0dhrEnUlrvCeL6rojj54cPzk2UDywd50aIj1yHX1FePnDu/4zw/cM/SSa09JjLG6MD3XxJq/YqbP7/jK7X2eEwbrVq0QHnupiTRQKUEt9p3bH3fEXGsN/1z/9BXp2IC7RRBcjsFEZikvFFIQbVNfUQgayyEFNMch4a6uy/JpGCFXtG7+N2u5/SE5cZCdWaphNCJfhSEJYVFBZNmr45BFXbaXC4nWMn3xVFyv+PIifVclfrqruW9i7ur8XF2OCvz+RG9fPllJwnH3UqArM+QgUlAxHESSYlN1e963tvg6vcyAytXvsVld8avHUedniR19cnVfK1M4uRbN6750t+t/MiSdjJyF0AzanuRUiYax1EqDJO3DabDyJ5M2U1VlV/Vu+QCV6n/sJap1h5jvE/JxqF+/eCN238KAO+/9h0nTMMJ33BcdXEUxqa+gB46CDxVLkebNq7bdtVUta9MGRxXLGblF794azL/orl/dFyny2prats/iCC0Nsbz3dPOPf+sN7ChLtd1zohjzULU1zJnMr4Ky/H1A+uH/vmp1VQVOZdbqNZef/uD513Q8XgQ+G9LalQ1AGLLkI5SROh8y9+c+blzLzz3lR5531COml/pT6rrjrBSCtLaPCFdWvzj7999aNeuLKYiZJpS1GVs6Fnvkq2ZTNBVOhRqIer7fdmydT1HMDNSKadGKQ+j6CcU7e/EacDMfWXTWLl4pPKfMUg0C2RuzzhbtmwJe1Yv/UowzX936VDU2JDGjqMo0eYuML/S89yZk7SvAkDi+65TKkfvH1g39MWpbD6bUgYzg/r6cnTgQPFEo9y7pJKnJjX9RTVk0vqtWp+h0jUA7BFJNPdIx948FVp5XdfPpRDnTjQdzI7rUHqexIRaL2ZOMhnfOVQKbx5YN/S+qe70n3LcdKwY/uplr3N9OQLwdFNR10czHywEkbF2nwB9m5nvB+F+JtpHbPYLVrFliolspAlGsdYkPRNHMYhIKAXJFpIVOdJCGuaAhZwmYF4MK06GwNuVlBc2TJYdU8HpwSCNDeBJEHhOGCX/gXDmm/fs2aOn8iCvpgHGa3qF/1opdTtAftoUdtTrE4LguM7YjVTnZYEZXHN2kmVbO6qDxsb/p3M8iACqNI6DiKC1QRInT2IkPyee7zlJrH8hkuhv1q8v7HvBj3CYDOFKmTxsLc9Ixykd/eQjhq02fVXPOxoLcuiI98rjhyZNPDbnKIeC1El0pi0QURj/IB6179y0adv+ZhlM2lSpre7PdTubr9icXLVq0Vt93789SbR5hj19fqbvmxlWKUFs+ebHdlPP1q1bDzXT1Nlmqj2i2Q/dw9lsVgqplqeSQROFpXLszVGOuznShqYnzUNmiwqMOZmzxFJKSqz+3tatWw91d3c7zTS3sokGoS2U+fyIPvnlsjeT8d6aJNo0qkgikB+4ynEdKZVIM1Bsj3T20bE8Jn0/V85NIiJSSgnXd6TjKNk4gI0IIkm0dZSz+UO9i+Zu3rw5aaaiveZwsqqZnWu7znUE/cRaFnVIEoNJENjaCKAtTDiTCKeDcbLjKFF1jMbNZ83BlIcRckLl9emxZjWHU1Z+MlfOSEy0iQThIbZ8NwMnuK7zxjhO6k+FSWP1RCe/2pPRF6AIM9Xec9MwmBm0aFFWzOpAoEruz6QUZzaGJlXYrxSFHx5YM3QjAFx77ftPiCl5mbHmFDBeAYHZxDwLhOmw1AZCGzN7IDgEEjyOkXKlLJcswIIZIYGeYEJM4FFY7LUC+wXRowy6Xwr9oC21796wYUOUy+XU/tJ9P1NKvi5uiNer86tLh8J1A/1D1zTLDOkmiIPHprt/MZPx3zvZ8G3fd2UYRl/fuG7o7dlc1u1Ahz7edq67u9vZvHlzcuXVi8/yPOfnltmvrUhJSStHqTiK/3agf/u3mmGcITWDal6xevFiP/C3h2GiGzvvlZLEzLttOX7dTTcV9vb1jU2OGzvmvbFAr3r2UfX/fX15rneigb6+Purr6+O+vj4qzinSpMfEN5zyPb4Zl1we+N7NUZTUza+uXq+12MMqOvumT9Vd7wuLwdXpOStXZl8O3/0lgU40xoKozvEzruvIUil+x6Ybhm4bHs7KRVMsEePx+rLBIHCvLNePT0obyj1VLseFjeu2LZrqYeFT5u1Vp+dYpdZ5rjOzMkYQ9enCwJNhGP/LphuGbsvlFqpFTTC9ta+vMp9rdJqzOgqTXZXJPg354zDWnu9kV1677JJCoWCyw1M3XniqGEyVkpmsC4EL44bR+RVVJ2QUxv/Fof5wLpcTfX0jTTEynwjc0dHBW/JbQrbmMmNNWD1LuBZOISJrDb8NACZT/893BqcM7dAA7RdSTFKIRmC2sq3tBErHKjQNFYvFapM36DDH4VbOFaZ9U32tU9aaUQE28rrnmiWbpRQ3JfH4ycHVE84yGf8VpVL4ASKsv/zyhf6pp6JZjq4R+Xw+Xn7N0o97jvK0rrPDTAQRR3HEzLdUnuq0wMgLzoumCqOzzmMH1W8cR52utbFIsecqxmuMfXBm259f3WznEq3s7TpfKPqJ1vWOYTUeLpfCDRvXDa2casdwKpurOL35eMW1yz4mpBhGYsYRJYLQ2rJS4i/2HXzpV3uuWXY/A4dg+XESiFNRYaq0Fpt0calGRTKzrZsikP5LAGyrryWCqQy3ZVX3OyEhxl5HDhETgZQFZoLhWPCbJQkBsK11H4QUIgrjJ5QR11cKGjqmFM1qloQ/r+hdeqfrOfOSuD6DxMzseg4JIcZgxNrjOp4uGnhs6SWqmbBVeUeSGGit6/LFzNBBxlXlQ2Hfxv7t+WZAs6a8PTKtibJE8mNgfKNmtFJV8iiJtak/4IqnYH82Dh2ozxczw0olZFiOH5YneDemG3fKPf8pz3pUB3RuWLv1m3GU7PQ8V2BiWk5W+o+qD0ofOI6Pxu+bUAxgXUcRs11zY37L4+nYRn7BM7hGikGQH7WV4vGmGUN0jMJtlBIiDOMHT5o2fVNFekdaJ4DXSnE2m5Ub+rf+KInjr0ybFjjMFcAjRYnG87d8LAdePXsPVCo8be2DBEnf94RlfCKf31xKJ9o3xQZtGvigWkK7b99900TAA4BYJKVw6/2c+tztlFxn5eDLOqvMzPuTWK/d2D/0qWY7JLppJ8msWnXpadahVxtjFQsmGCsgyAHII7ASDDmZDpSo1NMi9cXZpuGQIIaxohIusa0cNmrH2vuFEARYYS0Oq1olAEM4IMCHrCUWzORmVFyOZHFw7ZY9lc7Q55BpmapN91ycU9VM5xU+JyQ4l8uJukk72akF7eudwvrWmOHhYXs8m7pb1KIWtahFLWpRi1rUoha1qEUtalGLWtSiFrWoRS1qUYta1KIWtahFLfr/wWmKahErcPsAAAAASUVORK5CYII=',
+  customer_care: 'data:image/png;base64,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',
+};
+const ROLE_LABELS = {
+  barista:'Barista', shift_lead:'Shift Lead', assistant_manager:'Assistant Manager',
+  location_manager:'Location Manager', general_manager:'General Manager',
+  production_manager:'Production Manager', head_baker:'Head Baker', baker:'Baker',
+  brand_ambassador:'Brand Ambassador', product_development:'Product Development',
+  coo:'COO', ceo:'CEO', mobile_bar_manager:'Mobile Bar Manager',
+  assistant_bar_manager:'Assistant Bar Manager', barback:'Barback', bartender:'Bartender',
+  team_member:'Team Member', training_manager:'Training Manager', production_assistant:'Production Assistant',
+  gm:'General Manager', cbo:'Chief Brand Officer', bookkeeper:'Bookkeeper'
+};
+const TYPE_LABELS = { document:'Doc', video:'Video', quiz:'Quiz', external_link:'Link' };
+
+// Academy content is tagged by job track (role_track), not by Command Deck permission
+// tier. staff.role is the permission tier post-centralization, so the track now comes
+// from staff.job_title, normalized to match academy_content.role_track's snake_case keys
+// ("Shift Lead" -> "shift_lead"). Falls back to '' (matches only track-less content) if
+// job_title isn't set yet.
+function staffTrack(profile){
+  const jt = (profile && profile.job_title) || '';
+  return jt.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+let currentUser = null;
+let currentProfile = null;
+// Roles that also have a Command Deck view (they get a "Command Deck" button here).
+const CD_ROLES = ['gm','location_manager','production_manager','bookkeeper','coo','ceo','cbo'];
+async function academySignOut(){ await sb.auth.signOut(); window.location.replace('/'); }
+window.academySignOut = academySignOut;
+let browseRole = 'barista';
+
+async function init(){
+  const { data: { user }, error: authError } = await sb.auth.getUser();
+  if (authError || !user) {
+    // One sign-in for the whole site: the Command Deck home page handles both
+    // team-member email links and manager PINs, then sends people back here.
+    window.location.replace('/');
+    return;
+  }
+  currentUser = user;
+
+  const { data: profile, error: profileError } = await sb
+    .from(STAFF_TABLE).select('*').eq('auth_user_id', user.id).single();
+
+  if (profileError || !profile) {
+    // Not linked to a staff record yet: the home page links new email logins.
+    window.location.replace('/');
+    return;
+  }
+  currentProfile = profile;
+
+  renderShell();
+  await renderEmployeeView();
+  await renderBrowseView();
+  if (MANAGER_ROLES.includes(profile.role)) {
+    document.getElementById('manager-toggle-btn').style.display = 'block';
+  }
+  if (['coo','ceo'].includes(profile.role)) {
+    document.getElementById('content-admin-toggle-btn').style.display = 'block';
+  }
+  if (PROFILE_VIEW_ROLES.includes(profile.role)) {
+    document.getElementById('staff-lookup-toggle-btn').style.display = 'block';
+  }
+}
+
+function renderError(msg){
+  document.getElementById('app-root').innerHTML = `<div style="max-width:600px;margin:80px auto;"><div class="error-box">${msg}</div></div>`;
+}
+
+function renderShell(){
+  document.getElementById('app-root').innerHTML = `
+    <div class="topbar">
+      <div class="brand">
+        <div class="dot"></div>
+        <div><div class="brand-name">Salt City Academy</div><div class="brand-sub">Your Growth Dashboard</div></div>
+      </div>
+      <div class="view-toggle">
+        <button class="active" data-view="employee" onclick="switchView('employee')">My Dashboard</button>
+        <button data-view="assessments" onclick="switchView('assessments')">Leadership Assessments</button>
+        <button data-view="browse" onclick="switchView('browse')">Browse the Academy</button>
+        <button id="manager-toggle-btn" data-view="manager" onclick="switchView('manager')" style="display:none;">Leader Tools</button>
+        <button id="content-admin-toggle-btn" data-view="content-admin" onclick="switchView('content-admin')" style="display:none;">Manage Content</button>
+        <button id="staff-lookup-toggle-btn" data-view="stafflookup" onclick="switchView('stafflookup')" style="display:none;">Staff Lookup</button>
+      </div>
+      <div class="site-actions">
+        ${CD_ROLES.includes(currentProfile.role) ? '<a class="site-btn" href="/">Command Deck &rarr;</a>' : ''}
+        <button class="site-btn ghost" onclick="academySignOut()">Sign out</button>
+      </div>
+    </div>
+    <main>
+      <div class="view active" id="view-employee"><div class="loading">Loading\u2026</div></div>
+      <div class="view" id="view-assessments"><div class="loading">Loading\u2026</div></div>
+      <div class="view" id="view-browse"><div class="loading">Loading\u2026</div></div>
+      <div class="view" id="view-manager"><div class="loading">Loading\u2026</div></div>
+      <div class="view" id="view-content-admin"><div class="loading">Loading\u2026</div></div>
+      <div class="view" id="view-stafflookup"><div class="loading">Loading\u2026</div></div>
+    </main>
+    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal();">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <div id="modal-content"></div>
+      </div>
+    </div>
+  `;
+}
+
+function openModal(html){
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+window.openModal = openModal;
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+window.closeModal = closeModal;
+
+function switchView(view){
+  document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+  if (view === 'manager' && !window._managerLoaded) { renderManagerView(); window._managerLoaded = true; }
+  if (view === 'assessments' && !window._assessmentsLoaded) { renderAssessmentsView(); window._assessmentsLoaded = true; }
+  if (view === 'content-admin' && !window._contentAdminLoaded) { renderContentAdminView(); window._contentAdminLoaded = true; }
+  if (view === 'stafflookup' && !window._stafflookupLoaded) { renderStaffLookupView(); window._stafflookupLoaded = true; }
+}
+window.switchView = switchView;
+
+/* ============================================================================
+   EMPLOYEE VIEW — "My Dashboard", in tabs:
+   Overview · Growth · Coaching · Attendance · PIP · Requests
+   Reads go straight to Supabase (RLS limits each to the signed-in person).
+   Square wage, store list and request submission go through the academy-me
+   edge function, which identifies the caller from their own login.
+   ========================================================================= */
+const GUSTO_URL = 'https://app.gusto.com/';
+const EMP_TABS = [
+  { key:'overview',   label:'Overview' },
+  { key:'growth',     label:'Growth' },
+  { key:'coaching',   label:'Coaching' },
+  { key:'attendance', label:'Attendance' },
+  { key:'pip',        label:'PIP' },
+  { key:'requests',   label:'Requests' },
+];
+const ATT_EVENTS = {
+  late_1_10:{ label:'Late 1–10 minutes', pts:0.5 }, late_11_plus:{ label:'Late 11+ minutes', pts:1 },
+  left_early:{ label:'Left early without approval', pts:1 }, callout_4h_plus:{ label:"Call-out, 4+ hours' notice", pts:1 },
+  callout_under_4h:{ label:"Call-out, under 4 hours' notice", pts:2 }, ncns:{ label:'No-call/no-show', pts:4 },
+};
+const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+let empTab = 'overview';
+let empData = null;   // everything the tabs render from
+let empMe = null;     // academy-me profile response
+
+async function academyMe(payload){
+  const { data: { session } } = await sb.auth.getSession();
+  const r = await fetch(`${SUPABASE_URL}/functions/v1/academy-me`, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${session?.access_token || ''}`, 'apikey':SUPABASE_ANON_KEY },
+    body: JSON.stringify(payload)
+  });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || `Request failed (${r.status})`);
+  return body;
+}
+
+const eToday = () => new Intl.DateTimeFormat('en-CA', { timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+const eAdd = (d, n) => { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0,10); };
+const eDays = (a, b) => Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 86400000);
+const eFmt = d => d ? new Date(String(d).slice(0,10) + 'T12:00:00Z').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', timeZone:'UTC' }) : '—';
+const eTime = t => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2,'0')}${h < 12 ? 'am' : 'pm'}`; };
+const eTenure = d => {
+  if (!d) return '';
+  const m = Math.max(0, Math.floor(eDays(String(d).slice(0,10), eToday()) / 30.44));
+  if (m < 1) return 'less than a month';
+  return m < 12 ? `${m} month${m > 1 ? 's' : ''}` : `${Math.floor(m/12)} yr${m >= 24 ? 's' : ''}${m % 12 ? ` ${m % 12} mo` : ''}`;
+};
+const eMoney = n => n == null ? '—' : '$' + Number(n).toFixed(2);
+const eStatus = s => ({ new:['Pending','amber'], approved:['Approved','green'], denied:['Denied','red'], cancelled:['Withdrawn','muted'] }[s] || [s,'muted']);
+
+/* Attendance points: same math as the LM page (90-day expiry, 1 point earned back per 30 clean days). */
+function empPointsTimeline(events, asOf){
+  const evs = events.filter(e => !e.voided).map(e => ({ id:e.id, day:e.occurred_on, pts:Number(e.points) })).sort((x,y) => x.day.localeCompare(y.day));
+  const out = { total:0, live:{}, nextDrop:null };
+  if (!evs.length) return out;
+  let active = [], lastEvent = null, i = 0;
+  for (let day = evs[0].day; day <= asOf; day = eAdd(day, 1)) {
+    active = active.filter(p => p.exp > day && p.pts > 0);
+    while (i < evs.length && evs[i].day === day) { active.push({ id:evs[i].id, pts:evs[i].pts, exp:eAdd(day, 90) }); lastEvent = day; i++; }
+    if (lastEvent && day !== lastEvent && eDays(lastEvent, day) % 30 === 0) {
+      let remove = 1;
+      for (const p of active) { const take = Math.min(p.pts, remove); p.pts -= take; remove -= take; if (remove <= 0) break; }
+    }
+  }
+  active = active.filter(p => p.pts > 0);
+  active.forEach(p => out.live[p.id] = { pts:p.pts, exp:p.exp });
+  out.total = Math.round(active.reduce((a,p) => a + p.pts, 0) * 10) / 10;
+  if (active.length && lastEvent) {
+    const cleanDrop = eAdd(lastEvent, 30 * (Math.floor(eDays(lastEvent, asOf) / 30) + 1));
+    const firstExp = active.map(p => p.exp).sort()[0];
+    out.nextDrop = cleanDrop < firstExp ? { day:cleanDrop, why:'30 clean days' } : { day:firstExp, why:'a point expires' };
+  }
+  return out;
+}
+function empStanding(pts){
+  if (pts >= 8) return ['Dismissal', 'red'];
+  if (pts >= 7) return ['Final warning', 'red'];
+  if (pts >= 5) return ['Written warning', 'amber'];
+  if (pts >= 3) return ['Coaching conversation', 'amber'];
+  return ['In good standing', 'green'];
+}
+
+async function renderEmployeeView(){
+  const el = document.getElementById('view-employee');
+  const me = currentProfile.id;
+  const [{ data: status }, { data: coaching }, { data: hoursLog }, { data: points }, { data: pips }, { data: content }] = await Promise.all([
+    sb.from('academy_status').select('*').eq('staff_id', me),
+    sb.from('academy_coaching_log').select('*').eq('staff_id', me).order('occurred_at', { ascending:false }),
+    sb.from('staff_hours_log').select('*').eq('staff_id', me).order('period_start'),
+    sb.from('attendance_points').select('*').eq('staff_id', me).order('occurred_on', { ascending:false }),
+    sb.from('pips').select('*').eq('staff_id', me).order('start_date', { ascending:false }),
+    sb.from('academy_content').select('*, academy_progress!left(completed_at, staff_id)').eq('is_active', true).eq('role_track', staffTrack(currentProfile)).order('sort_order'),
+  ]);
+  const pipIds = (pips || []).map(p => p.id);
+  const { data: checkins } = pipIds.length
+    ? await sb.from('pip_checkins').select('*').in('pip_id', pipIds).order('week')
+    : { data: [] };
+  const { data: managers } = await sb.from('staff').select('id,name');
+  empData = { status:status || [], coaching:coaching || [], hoursLog:hoursLog || [], points:points || [], pips:pips || [], checkins:checkins || [], content:content || [],
+              names:Object.fromEntries((managers || []).map(m => [m.id, m.name])) };
+
+  el.innerHTML = `
+    <div class="page-head">
+      <div class="eyebrow">Welcome back</div>
+      <h1>${escapeHtml(currentProfile.name)}</h1>
+      <div class="sub">${escapeHtml(currentProfile.job_title || ROLE_LABELS[currentProfile.role] || currentProfile.role)}</div>
+    </div>
+    <div class="emp-tabs" role="tablist">
+      ${EMP_TABS.map(t => `<button role="tab" data-tab="${t.key}" class="${t.key === empTab ? 'active' : ''}" onclick="empSwitch('${t.key}')">${t.label}<span class="emp-badge" id="emp-badge-${t.key}"></span></button>`).join('')}
+    </div>
+    <div id="emp-tab-body"></div>
+  `;
+  empBadges();
+  empRender();
+  // Square-backed bits load after the page is already usable.
+  academyMe({ action:'profile' }).then(r => { empMe = r; empBadges(); if (['overview','requests'].includes(empTab)) empRender(); })
+    .catch(e => { empMe = { error:e.message }; if (['overview','requests'].includes(empTab)) empRender(); });
+}
+
+function empSwitch(key){
+  empTab = key;
+  document.querySelectorAll('.emp-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === key));
+  empRender();
+}
+window.empSwitch = empSwitch;
+
+function empBadges(){
+  const set = (k, v) => { const b = document.getElementById('emp-badge-' + k); if (b) { b.textContent = v || ''; b.style.display = v ? 'inline-block' : 'none'; } };
+  const pts = empPointsTimeline(empData.points, eToday()).total;
+  set('attendance', pts ? String(pts) : '');
+  set('pip', empData.pips.some(p => ['active','extended'].includes(p.status)) ? '!' : '');
+  const pending = empMe && !empMe.error ? [...(empMe.pto_requests || []), ...(empMe.avail_requests || [])].filter(r => r.status === 'new').length : 0;
+  set('requests', pending ? String(pending) : '');
+}
+
+function empRender(){
+  const body = document.getElementById('emp-tab-body');
+  if (!body) return;
+  const fn = { overview:empOverview, growth:empGrowth, coaching:empCoaching, attendance:empAttendance, pip:empPip, requests:empRequests }[empTab];
+  body.innerHTML = fn();
+  if (empTab === 'requests') empWireRequests();
+}
+
+/* ---------------- Overview ---------------- */
+function empOverview(){
+  const p = currentProfile;
+  const hr = empMe && !empMe.error ? empMe.hr : null;
+  const roleStart = hr?.grade_started_on;
+  const totalHours = empData.hoursLog.reduce((s, h) => s + parseFloat(h.hours_worked), 0);
+  const ptoHours = calculatePTO(totalHours);
+  const ptoTier = Math.min(4, Math.floor(totalHours / 1300));
+  const nextTier = ptoTier < 4 ? (ptoTier + 1) * 1300 : null;
+  const sick = calculateSickLeaveByYear(empData.hoursLog);
+  const sickThisYear = sick.accrualByYear[new Date().getFullYear()] || 0;
+  const ones = empData.coaching.filter(c => c.conversation_type === '1-1' && c.template_notes);
+  const top3 = ones.length ? (ones[0].template_notes.action_items || []).filter(Boolean) : [];
+
+  let wage;
+  if (!empMe) wage = `<div class="emp-big muted">Loading…</div>`;
+  else if (empMe.error) wage = `<div class="emp-big muted">—</div><div class="emp-note">Couldn't reach Square just now.</div>`;
+  else if (!empMe.wage) wage = `<div class="emp-big muted">—</div><div class="emp-note">Your profile isn't linked to Square yet.</div>`;
+  else if (empMe.wage.error) wage = `<div class="emp-big muted">—</div><div class="emp-note">Couldn't reach Square just now.</div>`;
+  else if (!empMe.wage.avg_rate) wage = `<div class="emp-big muted">—</div><div class="emp-note">No shifts ${eFmt(empMe.wage.week_start)} – ${eFmt(empMe.wage.week_end)}.</div>`;
+  else wage = `<div class="emp-big">${eMoney(empMe.wage.avg_rate)}<span>/hr</span></div>
+    <div class="emp-note">${eFmt(empMe.wage.week_start)} – ${eFmt(empMe.wage.week_end)} · ${empMe.wage.hours} hrs${empMe.wage.rates.length > 1 ? ` · rates ${empMe.wage.rates.map(eMoney).join(', ')}` : ''}</div>`;
+
+  return `
+    <div class="emp-stats">
+      <div class="card emp-stat"><div class="emp-label">Hire start date</div>
+        <div class="emp-big">${p.hire_date ? eFmt(p.hire_date) : '—'}</div>
+        <div class="emp-note">${p.hire_date ? eTenure(p.hire_date) + ' with Salt City' : 'Not entered yet. Ask your manager.'}</div></div>
+      <div class="card emp-stat"><div class="emp-label">Role start date</div>
+        <div class="emp-big">${roleStart ? eFmt(roleStart) : (empMe ? '—' : '…')}</div>
+        <div class="emp-note">${roleStart ? `${eTenure(roleStart)} as ${escapeHtml(p.job_title || 'your current role')}` : empMe ? 'Not entered yet. Ask your manager.' : ''}</div></div>
+      <div class="card emp-stat"><div class="emp-label">Last week's avg hourly rate</div>
+        ${wage}
+        <div class="emp-disclaimer">Estimated from your Square timecards and doesn't include tips or adjustments. Your actual pay is in <a href="${GUSTO_URL}" target="_blank" rel="noopener">Gusto ↗</a>.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Top 3 Things to Work On</h2>
+        ${top3.length ? `<ol class="emp-top3">${top3.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ol>
+          <div class="emp-note" style="margin-top:10px;">From your 1-1 on ${eFmt(ones[0].occurred_at)}${ones[0].manager_staff_id && empData.names[ones[0].manager_staff_id] ? ` with ${escapeHtml(empData.names[ones[0].manager_staff_id])}` : ''} · <a href="#" onclick="empSwitch('coaching'); return false;">see all conversations</a></div>`
+        : `<div class="emp-empty">Nothing yet. This fills in from your next 1-1.</div>`}
+      </div>
+      <div class="card">
+        <h2>PTO &amp; Sick Leave</h2>
+        ${!p.hire_date ? `<div class="gate-note">Your company start date hasn't been entered yet. Talk to your manager; accrual can't be calculated without it.</div>` : `
+          <div class="emp-note" style="margin-bottom:14px;">${totalHours.toFixed(0)} hours logged since ${eFmt(p.hire_date)}</div>
+          <div class="q" style="margin-bottom:4px;">PTO: ${ptoHours} hours earned</div>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, (totalHours / (nextTier || 5200)) * 100)}%; background:var(--lead-700);"></div></div>
+          <div class="progress-label"><span>${ptoTier >= 4 ? 'At the 40-hour cap' : `${(nextTier - totalHours).toFixed(0)} hours to next tier (+${calculatePTO(nextTier) - ptoHours} hrs)`}</span></div>
+          <div class="q" style="margin:18px 0 4px;">Sick leave: ${sick.totalBalance.toFixed(1)} hours earned</div>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, (sickThisYear / 40) * 100)}%; background:var(--care-700);"></div></div>
+          <div class="progress-label"><span>${sickThisYear.toFixed(1)} of 40 hours earned this year${sick.totalBalance > sickThisYear ? ' · includes carryover' : ''}</span></div>
+          <div class="emp-disclaimer">This is what you've earned from hours worked. Your official balance, including time you've used, is in <a href="${GUSTO_URL}" target="_blank" rel="noopener">Gusto ↗</a>.</div>
+          <button class="emp-btn ghost" style="margin-top:14px;" onclick="empSwitch('requests')">Request time off →</button>`}
+      </div>
+    </div>`;
+}
+
+/* ---------------- Growth (Academy levels and content) ---------------- */
+function empGrowth(){
+  const byComp = {};
+  empData.status.forEach(s => byComp[s.competency] = s.current_level);
+  const comps = ['leadership','craft','customer_care'];
+  const levels = comps.map(c => byComp[c] || 0);
+  const overall = Math.min(...levels);
+  const behind = comps.find(c => (byComp[c] || 0) === overall);
+  const mine = c => (c.academy_progress || []).find(p => p.staff_id === currentProfile.id);
+  const incomplete = empData.content.filter(c => !(mine(c) && mine(c).completed_at));
+  const next = incomplete.find(c => c.competency === behind) || incomplete[0];
+  return `
+    <div class="grid2">
+      <div class="card">
+        <h2>Where Am I?</h2>
+        <div class="q">Level ${overall} overall</div>
+        <div class="comp-row">${comps.map(c => ringHtml(c, byComp[c] || 0)).join('')}</div>
+        ${levels.some(l => l !== overall) ? `<div class="gate-note">Advancement needs the same level across all three. ${COMPETENCY_LABELS[behind]} is the one holding your overall level at ${overall}.</div>` : ''}
+      </div>
+      <div class="card">
+        <h2>What Should I Learn Next?</h2>
+        ${next ? `<div class="next-callout"><div class="tag">Focus this week</div><div class="title">${escapeHtml(next.title)}</div>
+          <div class="desc">${escapeHtml(next.description || '')}</div>
+          <a class="btn" href="#" onclick="markStarted('${next.id}'); openContentViewModal('${next.id}'); return false;">Start &rarr;</a></div>`
+        : `<div class="emp-empty">You're caught up.</div>`}
+      </div>
+    </div>
+    <div class="card">
+      <h2>My Content</h2>
+      ${empData.content.map(c => {
+        const done = mine(c) && mine(c).completed_at;
+        return `<div class="content-row">
+          <div style="cursor:pointer;" onclick="openContentViewModal('${c.id}')"><div class="ctitle">${escapeHtml(c.title)}</div><div class="cmeta">${COMPETENCY_LABELS[c.competency]} L${c.level} &middot; ${c.estimated_minutes || '?'} min</div></div>
+          <button class="cbtn ${done ? 'done' : ''}" onclick="markComplete('${c.id}', this)">${done ? '✓ Done' : 'Mark Complete'}</button>
+        </div>`;
+      }).join('') || '<div class="emp-empty">No content assigned to your role yet.</div>'}
+    </div>`;
+}
+
+/* ---------------- Coaching ---------------- */
+function empCoaching(){
+  const list = empData.coaching;
+  if (!list.length) return `<div class="card"><h2>Coaching Conversations</h2><div class="emp-empty">No coaching conversations logged yet. Notes from your 1-1s will show up here.</div></div>`;
+  return `<div class="card"><h2>Coaching Conversations</h2>
+    <div class="emp-note" style="margin-bottom:12px;">${list.length} conversation${list.length > 1 ? 's' : ''}, newest first. Open one to see the full form.</div>
+    ${list.map((c, i) => {
+      const top = c.template_notes ? (c.template_notes.action_items || []).filter(Boolean) : [];
+      const who = c.manager_staff_id && empData.names[c.manager_staff_id];
+      return `<details class="emp-convo" ${i === 0 ? 'open' : ''}>
+        <summary><span><strong>${labelConvo(c.conversation_type)}</strong>${who ? ` with ${escapeHtml(who)}` : ''}</span><span class="emp-note">${eFmt(c.occurred_at)}</span></summary>
+        <div class="emp-convo-body">
+          ${c.template_notes ? render1on1Notes(c.template_notes) : ''}
+          ${c.notes ? `<div style="margin-top:6px;"><strong style="color:var(--ink);">Notes:</strong> ${escapeHtml(c.notes)}</div>` : ''}
+          ${!c.template_notes && !c.notes ? '<span class="emp-note">No notes recorded.</span>' : ''}
+        </div>
+      </details>`;
+    }).join('')}
+  </div>`;
+}
+
+/* ---------------- Attendance ---------------- */
+function empAttendance(){
+  const t = eToday();
+  const tl = empPointsTimeline(empData.points, t);
+  const [standing, tone] = empStanding(tl.total);
+  const rows = empData.points;
+  return `
+    <div class="emp-stats">
+      <div class="card emp-stat"><div class="emp-label">Active points</div><div class="emp-big">${tl.total}</div>
+        <div class="emp-pill ${tone}">${standing}</div></div>
+      <div class="card emp-stat"><div class="emp-label">Next point comes off</div>
+        <div class="emp-big">${tl.nextDrop ? eFmt(tl.nextDrop.day) : '—'}</div>
+        <div class="emp-note">${tl.nextDrop ? `when ${tl.nextDrop.why}` : 'Nothing active right now.'}</div></div>
+      <div class="card emp-stat"><div class="emp-label">How points work</div>
+        <div class="emp-note" style="line-height:1.6;">Each point expires after 90 days. Every 30 days with no new events takes 1 point off. At 3 points there's a coaching conversation, 5 a written warning, 7 a final warning, and 8 means dismissal.</div></div>
+    </div>
+    <div class="card"><h2>Events</h2>
+      ${rows.length ? `<table class="emp-table"><thead><tr><th>Date</th><th>What happened</th><th>Points</th><th>Status</th></tr></thead><tbody>
+        ${rows.map(r => {
+          const live = tl.live[r.id];
+          const st = r.voided ? `<span class="emp-pill muted">Removed${r.void_reason ? `: ${escapeHtml(r.void_reason)}` : ''}</span>`
+            : live ? `<span class="emp-pill amber">Active${live.pts < Number(r.points) ? ` (${live.pts} left)` : ''} · expires ${eFmt(live.exp)}</span>`
+            : `<span class="emp-pill green">Cleared</span>`;
+          return `<tr><td>${eFmt(r.occurred_on)}</td><td>${escapeHtml(ATT_EVENTS[r.event]?.label || r.event)}${r.notes ? `<div class="emp-note">${escapeHtml(r.notes)}</div>` : ''}</td><td>${Number(r.points)}</td><td>${st}</td></tr>`;
+        }).join('')}</tbody></table>`
+      : `<div class="emp-empty">No attendance events. Nice work.</div>`}
+      <div class="emp-disclaimer">Approved time off, shift swaps, protected leave, injuries and store closures never count. If something here looks wrong, talk to your manager.</div>
+    </div>`;
+}
+
+/* ---------------- PIP ---------------- */
+function empPip(){
+  const pips = empData.pips;
+  if (!pips.length) return `<div class="card"><h2>Performance Improvement Plan</h2><div class="emp-empty">You're not on a PIP.</div></div>`;
+  const label = { active:['Active','amber'], extended:['Extended','amber'], passed:['Passed','green'], not_passed:['Not passed','red'], cancelled:['Cancelled','muted'] };
+  const t = eToday();
+  return pips.map((p, idx) => {
+    const open = ['active','extended'].includes(p.status);
+    const end = p.extended_to || p.end_date;
+    const goals = Array.isArray(p.goals) ? p.goals : [];
+    const met = goals.filter(g => g.met).length;
+    const cks = empData.checkins.filter(c => c.pip_id === p.id);
+    const [lbl, tone] = label[p.status] || [p.status, 'muted'];
+    const inner = `
+      <div class="emp-pip-meta">
+        <span class="emp-pill ${tone}">${lbl}</span>
+        <span>${eFmt(p.start_date)} – ${eFmt(end)}${p.extended_to ? ' (extended)' : ''}</span>
+        ${open && end ? `<span>${end >= t ? `${eDays(t, end)} days left` : 'ended, waiting on the outcome'}</span>` : ''}
+        ${p.bucket ? `<span>${escapeHtml(BUCKET_LABELS[p.bucket] || p.bucket)}</span>` : ''}
+      </div>
+      ${p.issues ? `<div class="emp-sub">What needs to change</div><div class="emp-text">${escapeHtml(p.issues)}</div>` : ''}
+      <div class="emp-sub">Requirements · ${met} of ${goals.length} met</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${goals.length ? (met / goals.length) * 100 : 0}%; background:var(--green);"></div></div>
+      <ul class="emp-checklist">${goals.map(g => `<li class="${g.met ? 'met' : ''}"><span class="emp-check">${g.met ? '✓' : ''}</span><div><div>${escapeHtml(g.goal)}</div>${g.measure ? `<div class="emp-note">Measured by: ${escapeHtml(g.measure)}</div>` : ''}</div></li>`).join('')}</ul>
+      <div class="emp-note">Your manager marks each requirement as met during check-ins.</div>
+      ${p.support ? `<div class="emp-sub">Support you'll get</div><div class="emp-text">${escapeHtml(p.support)}</div>` : ''}
+      <div class="emp-sub">Weekly check-ins</div>
+      ${cks.length ? cks.map(c => `<div class="emp-checkin"><strong>Week ${c.week}</strong> · ${eFmt(c.checkin_date)}${c.notes ? `<div class="emp-text">${escapeHtml(c.notes)}</div>` : ''}</div>`).join('') : '<div class="emp-note">No check-ins yet.</div>'}
+      ${!open && p.outcome_notes ? `<div class="emp-sub">Outcome</div><div class="emp-text">${escapeHtml(p.outcome_notes)}</div>` : ''}`;
+    return open || idx === 0
+      ? `<div class="card"><h2>Performance Improvement Plan</h2>${inner}</div>`
+      : `<details class="card emp-convo"><summary><span><strong>Past PIP</strong> · ${eFmt(p.start_date)}</span><span class="emp-pill ${tone}">${lbl}</span></summary><div class="emp-convo-body">${inner}</div></details>`;
+  }).join('');
+}
+const BUCKET_LABELS = { leadership:'Leadership', craft:'Craft', customer_care:'Customer care' };
+
+/* ---------------- Requests (availability + PTO/sick) ---------------- */
+function empRequests(){
+  if (!empMe) return `<div class="card"><div class="loading">Loading your stores and requests…</div></div>`;
+  if (empMe.error) return `<div class="card"><div class="error-box">Couldn't load requests (${escapeHtml(empMe.error)}). Refresh to try again.</div></div>`;
+  const locs = empMe.locations || [];
+  const locName = id => (locs.find(l => l.id === id) || {}).name || 'Store';
+  const locSelect = id => locs.length > 1
+    ? `<label>Store</label><select id="${id}">${locs.map(l => `<option value="${l.id}">${escapeHtml(l.name)}</option>`).join('')}</select>`
+    : `<input type="hidden" id="${id}" value="${locs[0] ? locs[0].id : ''}">`;
+  const avail = empMe.availability || [];
+  const byDay = Object.fromEntries(avail.map(a => [a.day_of_week, a]));
+  const hist = (rows, kind) => rows.length ? rows.map(r => {
+    const [lbl, tone] = eStatus(r.status);
+    const what = kind === 'pto'
+      ? `${r.leave_type === 'sick' ? 'Sick' : 'PTO'} · ${eFmt(r.shift_date)} · ${Number(r.hours)}h`
+      : r.request_type === 'standing'
+        ? `${DOW[r.day_of_week]}s: ${r.new_available === false ? 'unavailable' : (r.new_start_time || r.new_end_time) ? `${eTime(r.new_start_time) || 'open'}–${eTime(r.new_end_time) || 'close'}` : 'any time'}`
+        : `Off on ${eFmt(r.exception_date)}`;
+    return `<div class="emp-req"><div><div>${what}</div><div class="emp-note">${locs.length > 1 ? escapeHtml(locName(r.location_id)) + ' · ' : ''}sent ${eFmt(r.created_at)}${r.denial_note && r.status === 'denied' ? ` · "${escapeHtml(r.denial_note)}"` : ''}${r.notes ? ` · ${escapeHtml(r.notes)}` : ''}${r.reason ? ` · ${escapeHtml(r.reason)}` : ''}</div></div>
+      <div class="emp-req-right"><span class="emp-pill ${tone}">${lbl}</span>${r.status === 'new' ? `<button class="emp-link" onclick="empCancel('${kind}','${r.id}')">Withdraw</button>` : ''}</div></div>`;
+  }).join('') : `<div class="emp-empty">Nothing sent yet.</div>`;
+
+  if (!locs.length) return `<div class="card"><div class="gate-note">You're not linked to a store yet, so requests can't be routed to a manager. Ask your manager to add you.</div></div>`;
+
+  return `
+    <div class="grid2">
+      <div class="card">
+        <h2>Request PTO or Sick Time</h2>
+        <div class="emp-note">Goes to your LM to approve. One request per day; use separate requests for multiple days.</div>
+        <div class="emp-form">
+          ${locSelect('pto-loc')}
+          <div class="emp-row">
+            <div><label>Type</label><select id="pto-type"><option value="pto">PTO</option><option value="sick">Sick time</option></select></div>
+            <div><label>Date</label><input type="date" id="pto-date" value="${eToday()}"></div>
+            <div><label>Hours</label><input type="number" id="pto-hours" min="0.5" max="16" step="0.5" placeholder="8"></div>
+          </div>
+          <label>Note for your manager (optional)</label><input type="text" id="pto-notes" maxlength="300" placeholder="e.g. covering a doctor's appointment">
+          <button class="emp-btn" id="pto-submit">Send request</button>
+          <div class="emp-msg" id="pto-msg"></div>
+        </div>
+        <div class="emp-sub">My PTO &amp; sick requests</div>
+        ${hist(empMe.pto_requests || [], 'pto')}
+      </div>
+      <div class="card">
+        <h2>Availability</h2>
+        <div class="emp-sub" style="margin-top:0;">On file now</div>
+        <table class="emp-table emp-avail"><tbody>${DOW.map((d, i) => {
+          const a = byDay[i];
+          const txt = !a ? '<span class="emp-note">Not set</span>' : a.available === false ? 'Unavailable' : (a.start_time || a.end_time) ? `${eTime(a.start_time) || 'Open'} – ${eTime(a.end_time) || 'Close'}` : 'Any time';
+          return `<tr><td>${d}</td><td>${txt}</td></tr>`;
+        }).join('')}</tbody></table>
+        <div class="emp-sub">Ask for a change</div>
+        <div class="emp-form">
+          ${locSelect('av-loc')}
+          <label>What kind of change?</label>
+          <select id="av-kind"><option value="standing">Every week (change my regular availability)</option><option value="one_off">Just one day (I need a day off)</option></select>
+          <div id="av-standing">
+            <div class="emp-row">
+              <div><label>Day</label><select id="av-day">${DOW.map((d, i) => `<option value="${i}">${d}</option>`).join('')}</select></div>
+              <div><label>Available?</label><select id="av-avail"><option value="yes">Yes</option><option value="no">No, not that day</option></select></div>
+            </div>
+            <div class="emp-row" id="av-times">
+              <div><label>From (optional)</label><input type="time" id="av-start"></div>
+              <div><label>Until (optional)</label><input type="time" id="av-end"></div>
+            </div>
+            <div class="emp-note">Leave the times blank if you can work any time that day.</div>
+          </div>
+          <div id="av-oneoff" style="display:none;"><label>Date</label><input type="date" id="av-date" min="${eToday()}" value="${eToday()}"></div>
+          <label>Reason (optional)</label><input type="text" id="av-reason" maxlength="300" placeholder="e.g. new class schedule">
+          <button class="emp-btn" id="av-submit">Send to my manager</button>
+          <div class="emp-msg" id="av-msg"></div>
+        </div>
+        <div class="emp-sub">My availability requests</div>
+        ${hist(empMe.avail_requests || [], 'availability')}
+      </div>
+    </div>`;
+}
+
+function empMsg(id, text, ok){ const el = document.getElementById(id); if (el) { el.textContent = text; el.className = 'emp-msg ' + (ok ? 'ok' : 'err'); } }
+
+async function empRefreshRequests(){
+  try { empMe = await academyMe({ action:'profile' }); } catch (e) { /* keep the old copy */ }
+  empBadges();
+  if (empTab === 'requests') empRender();
+}
+
+function empWireRequests(){
+  const kind = document.getElementById('av-kind');
+  if (!kind) return;
+  const sync = () => {
+    document.getElementById('av-standing').style.display = kind.value === 'standing' ? '' : 'none';
+    document.getElementById('av-oneoff').style.display = kind.value === 'one_off' ? '' : 'none';
+    document.getElementById('av-times').style.display = document.getElementById('av-avail').value === 'yes' ? '' : 'none';
+  };
+  kind.addEventListener('change', sync);
+  document.getElementById('av-avail').addEventListener('change', sync);
+  sync();
+
+  document.getElementById('pto-submit').addEventListener('click', async (e) => {
+    const hours = parseFloat(document.getElementById('pto-hours').value);
+    const date = document.getElementById('pto-date').value;
+    if (!date) return empMsg('pto-msg', 'Pick a date.');
+    if (!(hours > 0 && hours <= 16)) return empMsg('pto-msg', 'Enter how many hours (up to 16).');
+    e.target.disabled = true; e.target.textContent = 'Sending…';
+    try {
+      await academyMe({ action:'request_pto', location_id:document.getElementById('pto-loc').value, shift_date:date, hours,
+        leave_type:document.getElementById('pto-type').value, notes:document.getElementById('pto-notes').value });
+      await empRefreshRequests();
+      empMsg('pto-msg', 'Sent. Your LM will review it.', true);
+    } catch (err) {
+      empMsg('pto-msg', err.message); e.target.disabled = false; e.target.textContent = 'Send request';
+    }
+  });
+
+  document.getElementById('av-submit').addEventListener('click', async (e) => {
+    const k = kind.value;
+    const payload = { action:'request_availability', location_id:document.getElementById('av-loc').value, request_type:k, reason:document.getElementById('av-reason').value };
+    if (k === 'standing') {
+      payload.day_of_week = Number(document.getElementById('av-day').value);
+      payload.new_available = document.getElementById('av-avail').value === 'yes';
+      payload.new_start_time = document.getElementById('av-start').value || null;
+      payload.new_end_time = document.getElementById('av-end').value || null;
+      if (payload.new_start_time && payload.new_end_time && payload.new_end_time <= payload.new_start_time) return empMsg('av-msg', '"Until" needs to be after "From".');
+    } else {
+      payload.exception_date = document.getElementById('av-date').value;
+      if (!payload.exception_date) return empMsg('av-msg', 'Pick a date.');
+    }
+    e.target.disabled = true; e.target.textContent = 'Sending…';
+    try {
+      await academyMe(payload);
+      await empRefreshRequests();
+      empMsg('av-msg', 'Sent. Your manager will review it.', true);
+    } catch (err) {
+      empMsg('av-msg', err.message); e.target.disabled = false; e.target.textContent = 'Send to my manager';
+    }
+  });
+}
+
+async function empCancel(kind, id){
+  if (!confirm('Withdraw this request?')) return;
+  try { await academyMe({ action:'cancel', kind, id }); await empRefreshRequests(); }
+  catch (e) { alert("Couldn't withdraw: " + e.message); }
+}
+window.empCancel = empCancel;
+
+function ringHtml(competency, level){
+  const circumference = 176;
+  const dash = Math.max((level/3) * circumference, level > 0 ? 8 : 0);
+  const color = COMPETENCY_COLORS[competency];
+  return `<div class="comp-item">
+    <svg width="70" height="70" viewBox="0 0 70 70">
+      <circle cx="35" cy="35" r="28" fill="none" stroke="#E3DED6" stroke-width="8"/>
+      <circle cx="35" cy="35" r="28" fill="none" stroke="${color}" stroke-width="8" stroke-dasharray="${dash} ${circumference}" stroke-linecap="round" transform="rotate(-90 35 35)"/>
+      <text x="35" y="40" text-anchor="middle" font-family="Fraunces,serif" font-weight="700" font-size="15" fill="${color}">L${level}</text>
+    </svg>
+    <div class="lbl"><img src="${COMPETENCY_ICONS[competency]}" style="width:18px; height:18px; vertical-align:-4px; margin-right:4px;" alt="">${COMPETENCY_LABELS[competency]}</div></div>`;
+}
+
+async function markComplete(contentId, btn){
+  btn.textContent = '\u2713 Done'; btn.classList.add('done');
+  await sb.from('academy_progress').upsert({ staff_id: currentProfile.id, content_id: contentId, completed_at: new Date().toISOString() }, { onConflict: 'staff_id,content_id' });
+}
+window.markComplete = markComplete;
+async function markStarted(contentId){
+  await sb.from('academy_progress').upsert({ staff_id: currentProfile.id, content_id: contentId, started_at: new Date().toISOString() }, { onConflict: 'staff_id,content_id', ignoreDuplicates: true });
+}
+window.markStarted = markStarted;
+
+/* ============================================================================
+   LEADERSHIP ASSESSMENTS — Five Behaviors and Leadership Style, logged and
+   compared over time. Whoever is logged in when a result is entered is who
+   it's attributed to (via entered_by) — that's the real link to a person,
+   not any code the outside assessment tool itself generates. That external
+   code is still captured, for lookup, but it isn't load-bearing.
+   ========================================================================= */
+const FIVE_BEHAVIORS_DIMS = [
+  { key: 'trust', label: 'Trust', color: '#1F384F' },
+  { key: 'conflict', label: 'Conflict', color: '#9A4526' },
+  { key: 'commitment', label: 'Commitment', color: '#BD8A3F' },
+  { key: 'accountability', label: 'Accountability', color: '#4C7A52' },
+  { key: 'results', label: 'Results', color: '#7A6A57' },
+];
+const STYLE_DIMS = [
+  { key: 'coercive', label: 'Coercive' }, { key: 'authoritative', label: 'Authoritative' },
+  { key: 'affiliative', label: 'Affiliative' }, { key: 'democratic', label: 'Democratic' },
+  { key: 'pacesetting', label: 'Pacesetting' }, { key: 'coaching', label: 'Coaching' },
+];
+
+/* ============================================================================
+   STAFF LOOKUP \u2014 read-only profile lookup for CEO/CBO/COO/GM/LM ("view every
+   employee's profile in case issues arise"). Same PTO/Sick math and status
+   data as My Dashboard, just for someone else and with nothing editable.
+   ========================================================================= */
+async function renderStaffLookupView(){
+  const el = document.getElementById('view-stafflookup');
+
+  // CEO/CBO/COO see everyone; GM/LM are scoped to their own team (people who
+  // share a location with them via staff_locations) \u2014 matches the RLS scoping
+  // on staff_hours_log/staff_leave_pauses (can_view_staff_profile()), so what
+  // shows up here is also what will actually load.
+  let lookupStaff = [];
+  let noLocationAssigned = false;
+  if (['coo','ceo','cbo'].includes(currentProfile.role)) {
+    const { data } = await sb.from(STAFF_TABLE)
+      .select('id, name, job_title, role').eq('is_active', true).order('name');
+    lookupStaff = data || [];
+  } else {
+    const { data: myLocations } = await sb.from('staff_locations').select('location_id').eq('staff_id', currentProfile.id);
+    if (myLocations && myLocations.length) {
+      const locIds = myLocations.map(l => l.location_id);
+      const { data: links } = await sb.from('staff_locations').select('staff_id').in('location_id', locIds);
+      const ids = [...new Set((links || []).map(s => s.staff_id))].filter(id => id !== currentProfile.id);
+      if (ids.length) {
+        const { data } = await sb.from(STAFF_TABLE)
+          .select('id, name, job_title, role').eq('is_active', true).in('id', ids).order('name');
+        lookupStaff = data || [];
+      }
+    } else {
+      noLocationAssigned = true;
+    }
+  }
+
+  el.innerHTML = `
+    <div class="page-head">
+      <div class="eyebrow">Leader Tools</div>
+      <h1>Staff Lookup</h1>
+      <div class="sub">Look up anyone's start date, PTO &amp; Sick Leave balance, Academy level, and recent coaching \u2014 read-only.</div>
+    </div>
+    <div class="card" style="max-width:420px; margin-bottom:20px;">
+      <label style="display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">Employee</label>
+      <select id="lookup-select" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; font-family:inherit;" onchange="loadStaffProfile(this.value)">
+        <option value="">Select someone\u2026</option>
+        ${lookupStaff.filter(s => s.id !== currentProfile.id).map(s => `<option value="${s.id}">${s.name}${s.job_title ? ' \u2014 ' + s.job_title : ''}</option>`).join('')}
+      </select>
+      ${noLocationAssigned ? `<div class="gate-note" style="margin-top:10px;">Ask your COO to assign you a location \u2014 nothing to look up here until then.</div>` : ''}
+    </div>
+    <div id="lookup-result"></div>
+  `;
+}
+
+async function loadStaffProfile(staffId){
+  const resultEl = document.getElementById('lookup-result');
+  if (!staffId) { resultEl.innerHTML = ''; return; }
+  resultEl.innerHTML = '<div class="loading">Loading\u2026</div>';
+
+  const [{ data: person }, { data: status }, { data: hoursLog }, { data: coaching }] = await Promise.all([
+    sb.from(STAFF_TABLE).select('*').eq('id', staffId).single(),
+    sb.from('academy_status').select('*').eq('staff_id', staffId),
+    sb.from('staff_hours_log').select('*').eq('staff_id', staffId).order('period_start'),
+    sb.from('academy_coaching_log').select('*').eq('staff_id', staffId).order('occurred_at', { ascending: false }).limit(5)
+  ]);
+
+  if (!person) { resultEl.innerHTML = '<div class="gate-note">Could not load that profile.</div>'; return; }
+
+  const totalHoursWorked = (hoursLog || []).reduce((sum, h) => sum + parseFloat(h.hours_worked), 0);
+  const ptoHours = calculatePTO(totalHoursWorked);
+  const ptoTier = Math.min(4, Math.floor(totalHoursWorked / 1300));
+  const nextTierHours = ptoTier < 4 ? (ptoTier + 1) * 1300 : null;
+  const sickLeave = calculateSickLeaveByYear(hoursLog || []);
+  const currentYear = new Date().getFullYear();
+  const sickThisYear = sickLeave.accrualByYear[currentYear] || 0;
+
+  const statusByComp = {};
+  (status || []).forEach(s => statusByComp[s.competency] = s.current_level);
+  const levels = ['leadership','craft','customer_care'].map(c => statusByComp[c] || 0);
+  const overallLevel = Math.min(...levels);
+
+  resultEl.innerHTML = `
+    <div class="grid2">
+      <div class="card">
+        <h2>${person.name}</h2>
+        <div class="sub" style="margin-bottom:10px;">${person.job_title || ROLE_LABELS[person.role] || person.role}</div>
+        <div class="q">Level ${overallLevel} overall</div>
+        <div class="comp-row">${['leadership','craft','customer_care'].map(c => ringHtml(c, statusByComp[c] || 0)).join('')}</div>
+      </div>
+      <div class="card">
+        <h2>PTO &amp; Sick Leave</h2>
+        ${!person.hire_date ? `<div class="gate-note">No company start date on file yet \u2014 accrual can't be calculated without it.</div>` : `
+          <div style="font-size:12px; color:var(--muted); margin-bottom:14px;">Start date: ${person.hire_date} &middot; ${totalHoursWorked.toFixed(0)} hours logged to date</div>
+          <div class="q" style="margin-bottom:4px;">PTO: ${ptoHours} hours earned</div>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, (totalHoursWorked / (nextTierHours || 5200)) * 100)}%; background:var(--lead-700);"></div></div>
+          <div class="progress-label"><span>${ptoTier >= 4 ? 'At the 40-hour cap' : `${(nextTierHours - totalHoursWorked).toFixed(0)} hours to next tier (+${calculatePTO(nextTierHours) - ptoHours} hrs)`}</span></div>
+
+          <div class="q" style="margin:18px 0 4px;">Sick Leave: ${sickLeave.totalBalance.toFixed(1)} hours balance</div>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, (sickThisYear / 40) * 100)}%; background:var(--care-700);"></div></div>
+          <div class="progress-label"><span>${sickThisYear.toFixed(1)} of 40 hours earned this year${sickLeave.totalBalance > sickThisYear ? ' &middot; balance includes carryover from prior years' : ''}</span></div>
+          <div style="font-size:11px; color:var(--muted); margin-top:14px;">Reference only, calculated the same way as their own dashboard \u2014 official balance and usage live in Gusto.</div>
+        `}
+      </div>
+      <div class="card" style="grid-column:1 / -1;">
+        <h2>Recent Coaching</h2>
+        ${(coaching && coaching.length) ? coaching.map(c => `
+          <div class="feedback-item" style="flex-direction:column; align-items:stretch;">
+            <div style="display:flex; justify-content:space-between; width:100%;">
+              <span>${labelConvo(c.conversation_type)}</span>
+              <span class="fdate">${timeAgo(c.occurred_at)}</span>
+            </div>
+            ${c.template_notes ? `<div style="margin-top:10px; font-size:12.5px; color:var(--ink-soft); line-height:1.6;">${render1on1Notes(c.template_notes)}</div>` : ''}
+          </div>
+        `).join('') : `<div style="color:var(--muted); font-size:13px;">No coaching conversations logged yet.</div>`}
+      </div>
+    </div>
+  `;
+}
+window.loadStaffProfile = loadStaffProfile;
+
+let assessmentTargetStaffId = null; // who the form logs a result FOR — defaults to self
+
+async function renderAssessmentsView(){
+  const el = document.getElementById('view-assessments');
+  assessmentTargetStaffId = currentProfile.id;
+
+  let teamOptions = '';
+  if (MANAGER_ROLES.includes(currentProfile.role)) {
+    const { data: myLocations } = await sb.from('staff_locations').select('location_id').eq('staff_id', currentProfile.id);
+    let team = [];
+    if (['location_manager','gm','coo','ceo'].includes(currentProfile.role)) {
+      const { data } = await sb.from(STAFF_TABLE).select('id, name').neq('id', currentProfile.id).eq('is_active', true);
+      team = data || [];
+    } else if (myLocations && myLocations.length) {
+      const locIds = myLocations.map(l => l.location_id);
+      const { data: links } = await sb.from('staff_locations').select('staff_id').in('location_id', locIds);
+      const ids = [...new Set((links || []).map(s => s.staff_id))].filter(id => id !== currentProfile.id);
+      if (ids.length) {
+        const { data } = await sb.from(STAFF_TABLE).select('id, name').in('id', ids);
+        team = data || [];
+      }
+    }
+    if (team.length) {
+      teamOptions = team.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    }
+  }
+
+  el.innerHTML = `
+    <div class="page-head">
+      <div class="eyebrow">Leadership development</div>
+      <h1>Leadership Assessments</h1>
+      <div class="sub">Five Behaviors and Leadership Style, tracked over time.</div>
+    </div>
+
+    <div class="card">
+      <h2>Log a New Result</h2>
+      ${teamOptions ? `
+        <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Who is this for?</label>
+        <select id="la-target" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+          <option value="${currentProfile.id}">Myself (${currentProfile.name})</option>
+          ${teamOptions}
+        </select>
+      ` : ''}
+      <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Assessment type</label>
+      <select id="la-type" onchange="renderAssessmentFormFields()" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+        <option value="five_behaviors">Five Behaviors of a Cohesive Team</option>
+        <option value="leadership_style">Leadership Style</option>
+      </select>
+      <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Date taken</label>
+      <input type="date" id="la-date" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+      <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">External reference code (optional)</label>
+      <input type="text" id="la-code" placeholder="e.g. report ID from the assessment tool" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+      <div id="la-score-fields"></div>
+      <button class="cbtn" style="margin-top:8px; background:var(--rust); color:#fff; border:none; padding:10px 18px;" onclick="submitAssessment()">Save Result</button>
+      <div id="la-submit-msg" style="margin-top:10px; font-size:13px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Five Behaviors — Over Time</h2>
+      <div id="fb-chart-holder"><div class="loading">Loading\u2026</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Leadership Style — Over Time</h2>
+      <div id="style-history-holder"><div class="loading">Loading\u2026</div></div>
+    </div>
+  `;
+
+  renderAssessmentFormFields();
+  loadAssessmentHistory();
+}
+
+function renderAssessmentFormFields(){
+  const type = document.getElementById('la-type').value;
+  const holder = document.getElementById('la-score-fields');
+  const dims = type === 'five_behaviors' ? FIVE_BEHAVIORS_DIMS : STYLE_DIMS;
+  holder.innerHTML = dims.map(d => `
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">${d.label} (1\u201310)</label>
+    <input type="number" min="1" max="10" id="la-score-${d.key}" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:12px; font-family:inherit;">
+  `).join('');
+}
+window.renderAssessmentFormFields = renderAssessmentFormFields;
+
+async function submitAssessment(){
+  const targetEl = document.getElementById('la-target');
+  const targetId = targetEl ? targetEl.value : currentProfile.id;
+  const type = document.getElementById('la-type').value;
+  const date = document.getElementById('la-date').value;
+  const code = document.getElementById('la-code').value.trim();
+  const msgEl = document.getElementById('la-submit-msg');
+
+  if (!date) { msgEl.innerHTML = '<span style="color:var(--red);">Pick a date first.</span>'; return; }
+
+  const dims = type === 'five_behaviors' ? FIVE_BEHAVIORS_DIMS : STYLE_DIMS;
+  const results = {};
+  for (const d of dims) {
+    const val = document.getElementById('la-score-' + d.key).value;
+    if (!val) { msgEl.innerHTML = `<span style="color:var(--red);">Fill in ${d.label} first.</span>`; return; }
+    results[d.key] = parseInt(val, 10);
+  }
+  if (type === 'leadership_style') {
+    const top = dims.reduce((a, b) => results[a.key] > results[b.key] ? a : b);
+    results.primary_style = top.key;
+  }
+
+  const { error } = await sb.from('leadership_assessments').insert({
+    staff_id: targetId,
+    assessment_type: type,
+    taken_at: date,
+    external_code: code || null,
+    results: results,
+    entered_by: currentProfile.id,
+  });
+
+  if (error) {
+    msgEl.innerHTML = `<span style="color:var(--red);">Could not save: ${error.message}</span>`;
+    return;
+  }
+  msgEl.innerHTML = '<span style="color:var(--green);">Saved.</span>';
+  loadAssessmentHistory();
+}
+window.submitAssessment = submitAssessment;
+
+async function loadAssessmentHistory(){
+  const { data, error } = await sb.from('leadership_assessments')
+    .select('*').eq('staff_id', currentProfile.id).order('taken_at');
+
+  const fbHolder = document.getElementById('fb-chart-holder');
+  const styleHolder = document.getElementById('style-history-holder');
+
+  if (error || !data) {
+    fbHolder.innerHTML = '<div style="color:var(--muted); font-size:13px;">Could not load history.</div>';
+    styleHolder.innerHTML = '';
+    return;
+  }
+
+  const fbEntries = data.filter(d => d.assessment_type === 'five_behaviors');
+  const styleEntries = data.filter(d => d.assessment_type === 'leadership_style');
+
+  fbHolder.innerHTML = fbEntries.length ? renderFiveBehaviorsChart(fbEntries) : '<div style="color:var(--muted); font-size:13px;">No Five Behaviors results logged yet.</div>';
+  styleHolder.innerHTML = styleEntries.length ? renderStyleHistory(styleEntries) : '<div style="color:var(--muted); font-size:13px;">No Leadership Style results logged yet.</div>';
+}
+
+function renderFiveBehaviorsChart(entries){
+  const w = 560, h = 220, padL = 30, padR = 10, padT = 10, padB = 30;
+  const n = entries.length;
+  const xStep = n > 1 ? (w - padL - padR) / (n - 1) : 0;
+  const yFor = v => padT + (10 - v) / 9 * (h - padT - padB);
+  const xFor = i => padL + i * xStep;
+
+  let svg = `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto;">`;
+  [2,4,6,8,10].forEach(v => {
+    svg += `<line x1="${padL}" y1="${yFor(v)}" x2="${w-padR}" y2="${yFor(v)}" stroke="#E3DED6" stroke-width="1"/>`;
+    svg += `<text x="${padL-6}" y="${yFor(v)+3}" font-size="9" fill="#7A6A57" text-anchor="end">${v}</text>`;
+  });
+  FIVE_BEHAVIORS_DIMS.forEach(dim => {
+    const points = entries.map((e, i) => `${xFor(i)},${yFor(e.results[dim.key] ?? 5)}`).join(' ');
+    svg += `<polyline points="${points}" fill="none" stroke="${dim.color}" stroke-width="2.5"/>`;
+    entries.forEach((e, i) => svg += `<circle cx="${xFor(i)}" cy="${yFor(e.results[dim.key] ?? 5)}" r="3" fill="${dim.color}"/>`);
+  });
+  entries.forEach((e, i) => {
+    svg += `<text x="${xFor(i)}" y="${h-8}" font-size="9" fill="#7A6A57" text-anchor="middle">${e.taken_at}</text>`;
+  });
+  svg += `</svg>`;
+
+  const legend = FIVE_BEHAVIORS_DIMS.map(d => `<span style="display:inline-flex; align-items:center; gap:5px; margin-right:14px; font-size:11.5px; color:var(--muted);"><span style="width:9px;height:9px;border-radius:50%;background:${d.color};display:inline-block;"></span>${d.label}</span>`).join('');
+  return svg + `<div style="margin-top:10px;">${legend}</div>`;
+}
+
+function renderStyleHistory(entries){
+  return entries.map(e => {
+    const top = STYLE_DIMS.reduce((a, b) => (e.results[a.key]||0) > (e.results[b.key]||0) ? a : b);
+    const breakdown = STYLE_DIMS.map(d => `${d.label}: ${e.results[d.key] ?? '?'}`).join(' \u00b7 ');
+    return `<div class="content-row">
+      <div>
+        <div class="ctitle">${e.taken_at} \u2014 Primary: ${top.label}</div>
+        <div class="cmeta">${breakdown}${e.external_code ? ' \u00b7 Ref: ' + e.external_code : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================================
+   BROWSE THE ACADEMY — the full 45-cell pipeline, one role at a time.
+   Placeholder cells (is_active = false) render distinctly, so the shape of
+   the whole path is visible even before every role's content is written.
+   ========================================================================= */
+let allContentCache = null;
+
+async function renderBrowseView(){
+  const el = document.getElementById('view-browse');
+  if (!allContentCache) {
+    const { data } = await sb.from('academy_content').select('*').order('sort_order');
+    allContentCache = data || [];
+  }
+  el.innerHTML = `
+    <div class="page-head">
+      <div class="eyebrow">The full path</div>
+      <h1>Browse the Academy</h1>
+      <div class="sub">Leadership, Craft, and Customer Care, at every level, for every role.</div>
+    </div>
+    <div class="role-tabs">
+      ${ACADEMY_ROLES.map(r => `<button class="${r===browseRole?'active':''}" onclick="setBrowseRole('${r}')">${ROLE_LABELS[r]}</button>`).join('')}
+    </div>
+    <div id="academy-grid-holder"></div>
+  `;
+  renderAcademyGrid();
+}
+
+function setBrowseRole(role){
+  browseRole = role;
+  document.querySelectorAll('.role-tabs button').forEach(b => b.classList.toggle('active', b.textContent === ROLE_LABELS[role]));
+  renderAcademyGrid();
+}
+window.setBrowseRole = setBrowseRole;
+
+/* ============================================================================
+   CONTENT VIEWER — the actual "click and it opens" experience. Handles
+   video (real embed, not a link), documents/external links (open in a new
+   tab), quizzes (honest "not built yet" rather than a dead end pretending
+   to work), and content that's still PENDING_UPLOAD.
+   ========================================================================= */
+function getEmbedUrl(url){
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return null;
+}
+
+async function openContentViewModal(contentId){
+  let item = allContentCache && allContentCache.find(c => c.id === contentId);
+  if (!item) {
+    const { data } = await sb.from('academy_content').select('*').eq('id', contentId).maybeSingle();
+    item = data;
+  }
+  if (!item) return;
+
+  if (!item.content_url || item.content_url === 'PENDING_UPLOAD') {
+    openModal(`
+      <h2>${item.title}</h2>
+      <div class="modal-sub">${item.description || ''}</div>
+      <div class="gate-note">This content hasn't been uploaded yet &mdash; the lesson exists in the Academy structure, but the real video/document link hasn't been added. Nothing to open here yet.</div>
+    `);
+    return;
+  }
+
+  let bodyHtml = '';
+  if (item.content_type === 'video') {
+    const embedUrl = getEmbedUrl(item.content_url);
+    bodyHtml = embedUrl
+      ? `<div style="position:relative; padding-bottom:56.25%; height:0; border-radius:10px; overflow:hidden; margin-bottom:16px;">
+           <iframe src="${embedUrl}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
+         </div>`
+      : `<div class="gate-note">Couldn't recognize this as a YouTube or Vimeo link. <a href="${item.content_url}" target="_blank" rel="noopener">Open it directly</a> instead.</div>`;
+  } else if (item.content_type === 'quiz') {
+    bodyHtml = `<div class="gate-note">The quiz-taking experience isn't built yet &mdash; this cell is reserved in the Academy structure for when it is.</div>`;
+  } else {
+    bodyHtml = `<a href="${item.content_url}" target="_blank" rel="noopener" style="display:inline-block; background:var(--lead-700); color:#fff; padding:11px 20px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:700; margin-bottom:16px;">Open ${item.content_type === 'document' ? 'Document' : 'Link'} &rarr;</a>`;
+  }
+
+  const relevantToMe = !item.role_track || item.role_track === staffTrack(currentProfile);
+  let completeButtonHtml = '';
+  if (relevantToMe) {
+    const { data: existing } = await sb.from('academy_progress').select('*').eq('staff_id', currentProfile.id).eq('content_id', item.id).maybeSingle();
+    const alreadyDone = existing && existing.completed_at;
+    completeButtonHtml = `
+      <button class="cbtn ${alreadyDone ? 'done' : ''}" style="width:100%; padding:11px; font-size:13px; ${alreadyDone ? '' : 'background:var(--green); color:#fff; border:none;'}" onclick="markCompleteFromModal('${item.id}', this)">
+        ${alreadyDone ? '\u2713 Completed' : 'Mark Complete'}
+      </button>`;
+  }
+
+  openModal(`
+    <h2>${item.title}</h2>
+    <div class="modal-sub">${item.description || ''}</div>
+    ${bodyHtml}
+    ${completeButtonHtml}
+  `);
+}
+window.openContentViewModal = openContentViewModal;
+
+async function markCompleteFromModal(contentId, btn){
+  btn.textContent = '\u2713 Completed';
+  btn.classList.add('done');
+  btn.style.background = '';
+  btn.style.color = '';
+  await sb.from('academy_progress').upsert({
+    staff_id: currentProfile.id, content_id: contentId, completed_at: new Date().toISOString()
+  }, { onConflict: 'staff_id,content_id' });
+}
+window.markCompleteFromModal = markCompleteFromModal;
+
+function renderAcademyGrid(){
+  const holder = document.getElementById('academy-grid-holder');
+  const comps = ['leadership','craft','customer_care'];
+  let html = `<div class="academy-grid">
+    <div class="corner"></div>
+    <div class="col-head">Level 1</div><div class="col-head">Level 2</div><div class="col-head">Level 3</div>`;
+
+  comps.forEach(comp => {
+    html += `<div class="row-head" style="color:${COMPETENCY_COLORS[comp]}"><img src="${COMPETENCY_ICONS[comp]}" style="width:28px; height:28px; vertical-align:-8px; margin-right:6px;" alt="">${COMPETENCY_LABELS[comp]}</div>`;
+    for (let lvl = 1; lvl <= 3; lvl++) {
+      const item = allContentCache.find(c => c.role_track === browseRole && c.competency === comp && c.level === lvl);
+      if (!item) { html += `<div class="academy-cell placeholder"><div class="ctitle">Not yet planned</div></div>`; continue; }
+      if (!item.is_active) {
+        html += `<div class="academy-cell placeholder">
+          <div class="ctitle">${item.title.replace(/^.*? — /, '').replace(' (content pending)','')}</div>
+          <div class="coming-soon-badge">Coming Soon</div>
+        </div>`;
+      } else {
+        html += `<div class="academy-cell" style="cursor:pointer;" onclick="openContentViewModal('${item.id}')">
+          <div class="ctitle">${item.title}</div>
+          <div class="cmeta">${item.estimated_minutes || '?'} min</div>
+          <span class="ctype ctype-${item.content_type}">${TYPE_LABELS[item.content_type]}</span>
+        </div>`;
+      }
+    }
+  });
+  html += `</div>`;
+  holder.innerHTML = html;
+}
+
+/* ============================================================================
+   MANAGE CONTENT — COO/CEO only. Same grid pattern as Browse the Academy,
+   but every cell (including empty and placeholder ones) opens an edit
+   form instead of just a preview. Reuses the modal system already built
+   for 1-1s and assessments.
+   ========================================================================= */
+let adminRole = 'barista';
+let adminContentCache = null;
+
+async function renderContentAdminView(){
+  const el = document.getElementById('view-content-admin');
+  const { data, error } = await sb.from('academy_content').select('*').order('sort_order');
+  if (error) {
+    el.innerHTML = `<div class="error-box">Could not load content: ${error.message}</div>`;
+    return;
+  }
+  adminContentCache = data || [];
+
+  el.innerHTML = `
+    <div class="page-head">
+      <div class="eyebrow">COO / CEO Only</div>
+      <h1>Manage Content</h1>
+      <div class="sub">Add or edit any Academy content item &mdash; changes are live immediately.</div>
+    </div>
+    <div class="role-tabs">
+      ${ACADEMY_ROLES.map(r => `<button class="${r===adminRole?'active':''}" onclick="setAdminRole('${r}')">${ROLE_LABELS[r]}</button>`).join('')}
+      <button style="background:var(--lead-700); color:#fff; border-color:var(--lead-700); margin-left:auto;" onclick="openContentAddModal()">+ Add New Content</button>
+    </div>
+    <div id="admin-grid-holder"></div>
+  `;
+  renderAdminGrid();
+}
+
+function setAdminRole(role){
+  adminRole = role;
+  renderContentAdminView();
+}
+window.setAdminRole = setAdminRole;
+
+function renderAdminGrid(){
+  const holder = document.getElementById('admin-grid-holder');
+  const comps = ['leadership','craft','customer_care'];
+  let html = `<div class="academy-grid">
+    <div class="corner"></div>
+    <div class="col-head">Level 1</div><div class="col-head">Level 2</div><div class="col-head">Level 3</div>`;
+
+  comps.forEach(comp => {
+    html += `<div class="row-head" style="color:${COMPETENCY_COLORS[comp]}"><img src="${COMPETENCY_ICONS[comp]}" style="width:28px; height:28px; vertical-align:-8px; margin-right:6px;" alt="">${COMPETENCY_LABELS[comp]}</div>`;
+    for (let lvl = 1; lvl <= 3; lvl++) {
+      const item = adminContentCache.find(c => c.role_track === adminRole && c.competency === comp && c.level === lvl);
+      if (!item) {
+        html += `<div class="academy-cell placeholder" style="cursor:pointer;" onclick="openContentAddModal('${adminRole}','${comp}',${lvl})">
+          <div class="ctitle">Nothing here yet</div>
+          <div class="coming-soon-badge">+ Add</div>
+        </div>`;
+        continue;
+      }
+      const activeBadge = item.is_active ? '' : `<div class="coming-soon-badge">Inactive</div>`;
+      html += `<div class="academy-cell" style="cursor:pointer;" onclick="openContentEditModal('${item.id}')">
+        <div class="ctitle">${item.title}</div>
+        <div class="cmeta">${item.estimated_minutes || '?'} min &middot; ${item.content_type}</div>
+        ${activeBadge}
+      </div>`;
+    }
+  });
+  html += `</div>`;
+  holder.innerHTML = html;
+}
+
+function contentFormHtml(item, presetRole, presetComp, presetLevel){
+  const roleOpts = ACADEMY_ROLES.map(r => `<option value="${r}" ${item && item.role_track===r || presetRole===r ? 'selected' : ''}>${ROLE_LABELS[r]}</option>`).join('');
+  const compOpts = ['leadership','craft','customer_care'].map(c => `<option value="${c}" ${item && item.competency===c || presetComp===c ? 'selected' : ''}>${COMPETENCY_LABELS[c]}</option>`).join('');
+  const lvlOpts = [1,2,3].map(l => `<option value="${l}" ${item && item.level===l || presetLevel===l ? 'selected' : ''}>Level ${l}</option>`).join('');
+  const CONTENT_TYPE_FULL_LABELS = { document:'Document', video:'Video', quiz:'Quiz', external_link:'External Link' };
+  const typeOpts = ['document','video','quiz','external_link'].map(t => `<option value="${t}" ${item && item.content_type===t ? 'selected' : ''}>${CONTENT_TYPE_FULL_LABELS[t]}</option>`).join('');
+
+  return `
+    <input type="hidden" id="ca-id" value="${item ? item.id : ''}">
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Title</label>
+    <input type="text" id="ca-title" value="${item ? escapeHtml(item.title) : ''}" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Description</label>
+    <textarea id="ca-description" rows="3" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit; resize:vertical;">${item ? escapeHtml(item.description || '') : ''}</textarea>
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;">
+        <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Role</label>
+        <select id="ca-role" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">${roleOpts}</select>
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Competency</label>
+        <select id="ca-competency" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">${compOpts}</select>
+      </div>
+      <div style="width:110px;">
+        <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Level</label>
+        <select id="ca-level" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">${lvlOpts}</select>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;">
+        <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Content type</label>
+        <select id="ca-type" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">${typeOpts}</select>
+      </div>
+      <div style="width:110px;">
+        <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Minutes</label>
+        <input type="number" id="ca-minutes" value="${item ? (item.estimated_minutes || '') : ''}" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+      </div>
+    </div>
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Content URL</label>
+    <input type="text" id="ca-url" value="${item ? escapeHtml(item.content_url || '') : ''}" placeholder="YouTube/Vimeo link for video, doc link for documents" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:6px; font-family:inherit;">
+    <div style="font-size:11px; color:var(--muted); margin-bottom:14px;">For video specifically: an unlisted YouTube or Vimeo link, not a file upload.</div>
+    <label style="font-size:13px; display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+      <input type="checkbox" id="ca-active" ${!item || item.is_active ? 'checked' : ''}> Active (visible to employees in this role)
+    </label>
+    <button class="cbtn" style="background:var(--lead-700); color:#fff; border:none; padding:11px 20px; width:100%; font-size:13px;" onclick="submitContentForm()">${item ? 'Save Changes' : 'Create Content'}</button>
+    <div id="ca-msg" style="margin-top:10px; font-size:13px;"></div>
+  `;
+}
+
+function openContentEditModal(contentId){
+  const item = adminContentCache.find(c => c.id === contentId);
+  openModal(`<h2>Edit Content</h2><div class="modal-sub">Changes go live immediately for anyone in this role.</div>${contentFormHtml(item)}`);
+}
+window.openContentEditModal = openContentEditModal;
+
+function openContentAddModal(presetRole, presetComp, presetLevel){
+  openModal(`<h2>Add New Content</h2><div class="modal-sub">Starts inactive by default unless you check the box below.</div>${contentFormHtml(null, presetRole, presetComp, presetLevel)}`);
+}
+window.openContentAddModal = openContentAddModal;
+
+async function submitContentForm(){
+  const id = document.getElementById('ca-id').value;
+  const msgEl = document.getElementById('ca-msg');
+  const title = document.getElementById('ca-title').value.trim();
+  if (!title) { msgEl.innerHTML = '<span style="color:var(--red);">Title is required.</span>'; return; }
+
+  const payload = {
+    title,
+    description: document.getElementById('ca-description').value.trim(),
+    role_track: document.getElementById('ca-role').value,
+    competency: document.getElementById('ca-competency').value,
+    level: parseInt(document.getElementById('ca-level').value, 10),
+    content_type: document.getElementById('ca-type').value,
+    estimated_minutes: document.getElementById('ca-minutes').value ? parseInt(document.getElementById('ca-minutes').value, 10) : null,
+    content_url: document.getElementById('ca-url').value.trim() || 'PENDING_UPLOAD',
+    is_active: document.getElementById('ca-active').checked,
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await sb.from('academy_content').update(payload).eq('id', id));
+  } else {
+    payload.created_by = currentProfile.id;
+    ({ error } = await sb.from('academy_content').insert(payload));
+  }
+
+  if (error) {
+    msgEl.innerHTML = `<span style="color:var(--red);">Could not save: ${error.message}</span>`;
+    return;
+  }
+  msgEl.innerHTML = '<span style="color:var(--green);">Saved.</span>';
+  setTimeout(() => {
+    closeModal();
+    renderContentAdminView();
+  }, 600);
+}
+window.submitContentForm = submitContentForm;
+
+
+/* ============================================================================
+   MANAGER VIEW — team = shared location, except coo/ceo/gm/lm who see everyone.
+   ========================================================================= */
+async function renderManagerView(){
+  // Team analytics (roster, overdue 1-1s, weakest competency, monthly progress,
+  // location snapshot, recent 1-1s, Log a 1-1) moved to the LM page in the
+  // Command Deck on Oct 16 2026 (Team -> Team Development). What stays here is
+  // the Academy-specific tooling: assessment logging and COO/CEO hours entry.
+  const el = document.getElementById('view-manager');
+  let team = [];
+  if (['location_manager','gm','coo','ceo'].includes(currentProfile.role)) {
+    const { data } = await sb.from(STAFF_TABLE).select('*').neq('id', currentProfile.id).eq('is_active', true).order('name');
+    team = data || [];
+  } else {
+    const { data: myLocations } = await sb.from('staff_locations').select('location_id').eq('staff_id', currentProfile.id);
+    if (myLocations && myLocations.length) {
+      const { data: links } = await sb.from('staff_locations').select('staff_id').in('location_id', myLocations.map(l => l.location_id));
+      const ids = [...new Set((links || []).map(s => s.staff_id))].filter(id => id !== currentProfile.id);
+      if (ids.length) { const { data } = await sb.from(STAFF_TABLE).select('*').in('id', ids).order('name'); team = data || []; }
+    }
+  }
+  window._currentTeam = team;
+
+  el.innerHTML = `
+    <div class="page-head">
+      <div class="eyebrow">Leader Tools</div>
+      <h1>${currentProfile.name}</h1>
+      <div class="sub">${currentProfile.job_title || ROLE_LABELS[currentProfile.role] || currentProfile.role}</div>
+    </div>
+
+    <a class="card" href="https://salt-city-coffee-tools.netlify.app/" target="_blank" rel="noopener" style="display:block; text-decoration:none; color:inherit; border-left:4px solid var(--lead-700);">
+      <h2 style="margin-bottom:6px;">Team tools have moved to the LM page &rarr;</h2>
+      <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+        Logging 1-1s, recent 1-1s, weakest competency, monthly progress, PIPs, attendance points, anniversaries and team profiles now live in the Command Deck under <strong>Team &rarr; Team Development</strong>, scoped to your store.
+      </div>
+    </a>
+
+    <div class="tools-grid">
+      <div class="tool-card tool-style" onclick="openAssessmentModal('leadership_style')">
+        <img class="ticon" src="${COMPETENCY_ICONS.craft}" alt="">
+        <div class="ttitle">Leadership Style</div>
+        <div class="tsub">Log a new assessment result</div>
+      </div>
+      <div class="tool-card tool-behaviors" onclick="openAssessmentModal('five_behaviors')">
+        <img class="ticon" src="${COMPETENCY_ICONS.customer_care}" alt="">
+        <div class="ttitle">Five Behaviors</div>
+        <div class="tsub">Log a new assessment result</div>
+      </div>
+      <div class="tool-card tool-placeholder">
+        <div class="tbadge">Coming Soon</div>
+        <div class="ttitle">Team Pulse Survey</div>
+        <div class="tsub">Lencioni-based, every 6 months</div>
+      </div>
+      <div class="tool-card tool-placeholder">
+        <div class="tbadge">Coming Soon</div>
+        <div class="ttitle">360 Review</div>
+        <div class="tsub">LM+ formal review cycle</div>
+      </div>
+      ${['coo','ceo'].includes(currentProfile.role) ? `
+      <div class="tool-card tool-style" onclick="openHoursEntryModal()">
+        <div class="ttitle">Log Hours Worked</div>
+        <div class="tsub">Drives PTO &amp; Sick Leave accrual &middot; COO/CEO only</div>
+      </div>` : ''}
+    </div>
+  `;
+}
+
+function gaugeSvg(pct, color){
+  const r = 26, c = 2 * Math.PI * r;
+  const dash = (pct / 100) * c;
+  return `<svg width="64" height="64" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="${r}" fill="none" stroke="#E3DED6" stroke-width="7"/>
+    <circle cx="32" cy="32" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-dasharray="${dash} ${c}" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+    <text x="32" y="37" text-anchor="middle" font-family="Oswald,sans-serif" font-weight="700" font-size="16" fill="${color}">${pct}%</text>
+  </svg>`;
+}
+
+/* ============================================================================
+   MODAL: Log a 1-1 (dedicated ids, separate from the always-rendered form
+   nowhere else in the DOM — avoids any collision with other views' fields)
+   ========================================================================= */
+function open1on1Modal(){
+  const team = window._currentTeam || [];
+  const html = `
+    <h2>Log a 1-1</h2>
+    <div class="modal-sub">The standard template — the three action items become that person's Top 3 automatically.</div>
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Team member</label>
+    <select id="modal-oo-target" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+      ${team.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+    </select>
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Date of this 1-1</label>
+    <input type="date" id="modal-oo-date" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+    ${ONE_ON_ONE_TEMPLATE.map(f => {
+      if (f.key === 'next_meeting_date') {
+        return `<label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">${f.label}</label>
+          <input type="date" id="modal-oo-field-${f.key}" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">`;
+      }
+      if (f.isTop3) {
+        return `<label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">${f.label}</label>
+          <input type="text" id="modal-oo-field-${f.key}-1" placeholder="1." style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:8px; font-family:inherit;">
+          <input type="text" id="modal-oo-field-${f.key}-2" placeholder="2." style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:8px; font-family:inherit;">
+          <input type="text" id="modal-oo-field-${f.key}-3" placeholder="3." style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">`;
+      }
+      return `<label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">${f.label}</label>
+        <textarea id="modal-oo-field-${f.key}" rows="2" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit; resize:vertical;"></textarea>`;
+    }).join('')}
+    <button class="cbtn" style="background:var(--lead-700); color:#fff; border:none; padding:11px 20px; width:100%; font-size:13px;" onclick="submitModal1on1()">Save 1-1</button>
+    <div id="modal-oo-msg" style="margin-top:10px; font-size:13px;"></div>
+  `;
+  openModal(html);
+}
+window.open1on1Modal = open1on1Modal;
+
+async function submitModal1on1(){
+  const targetId = document.getElementById('modal-oo-target').value;
+  const date = document.getElementById('modal-oo-date').value;
+  const msgEl = document.getElementById('modal-oo-msg');
+
+  if (!date) { msgEl.innerHTML = '<span style="color:var(--red);">Pick a date first.</span>'; return; }
+
+  const templateNotes = {};
+  ONE_ON_ONE_TEMPLATE.forEach(f => {
+    if (f.isTop3) {
+      templateNotes[f.key] = [1,2,3]
+        .map(n => document.getElementById(`modal-oo-field-${f.key}-${n}`).value.trim())
+        .filter(Boolean);
+    } else {
+      templateNotes[f.key] = document.getElementById('modal-oo-field-' + f.key).value.trim();
+    }
+  });
+
+  const { error } = await sb.from('academy_coaching_log').insert({
+    staff_id: targetId,
+    manager_staff_id: currentProfile.id,
+    occurred_at: date,
+    conversation_type: '1-1',
+    template_notes: templateNotes,
+  });
+
+  if (error) {
+    msgEl.innerHTML = `<span style="color:var(--red);">Could not save: ${error.message}</span>`;
+    return;
+  }
+  msgEl.innerHTML = '<span style="color:var(--green);">Saved.</span>';
+  setTimeout(() => {
+    closeModal();
+    window._managerLoaded = false;
+    renderManagerView();
+  }, 700);
+}
+window.submitModal1on1 = submitModal1on1;
+
+/* ============================================================================
+   MODAL: Leadership Style / Five Behaviors assessment (dedicated ids)
+   ========================================================================= */
+function openAssessmentModal(type){
+  const team = window._currentTeam || [];
+  const dims = type === 'five_behaviors' ? FIVE_BEHAVIORS_DIMS : STYLE_DIMS;
+  const title = type === 'five_behaviors' ? 'Five Behaviors of a Cohesive Team' : 'Leadership Style';
+  const html = `
+    <h2>${title}</h2>
+    <div class="modal-sub">Log a new result for yourself or someone on your team.</div>
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Who is this for?</label>
+    <select id="modal-la-target" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+      <option value="${currentProfile.id}">Myself (${currentProfile.name})</option>
+      ${team.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+    </select>
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Date taken</label>
+    <input type="date" id="modal-la-date" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">External reference code (optional)</label>
+    <input type="text" id="modal-la-code" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+    ${dims.map(d => `
+      <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">${d.label} (1&ndash;10)</label>
+      <input type="number" min="1" max="10" id="modal-la-score-${d.key}" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:12px; font-family:inherit;">
+    `).join('')}
+    <button class="cbtn" style="background:var(--craft-700); color:#fff; border:none; padding:11px 20px; width:100%; font-size:13px;" onclick="submitModalAssessment('${type}')">Save Result</button>
+    <div id="modal-la-msg" style="margin-top:10px; font-size:13px;"></div>
+  `;
+  openModal(html);
+}
+window.openAssessmentModal = openAssessmentModal;
+
+/* ============================================================================
+   MODAL: Log Hours Worked — COO/CEO only, matching the RLS restriction.
+   Staff selector covers everyone, since COO/CEO visibility isn't
+   location-scoped.
+   ========================================================================= */
+async function openHoursEntryModal(){
+  const { data: allStaff } = await sb.from(STAFF_TABLE).select('id, name').eq('is_active', true).order('name');
+  const html = `
+    <h2>Log Hours Worked</h2>
+    <div class="modal-sub">This drives PTO and Sick Leave accrual directly \u2014 enter real hours for a real pay period.</div>
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Staff member</label>
+    <select id="hrs-target" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+      ${(allStaff || []).map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+    </select>
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;">
+        <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Period start</label>
+        <input type="date" id="hrs-start" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Period end</label>
+        <input type="date" id="hrs-end" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+      </div>
+    </div>
+    <label style="font-size:12.5px; font-weight:600; display:block; margin-bottom:6px;">Hours worked this period</label>
+    <input type="number" step="0.1" min="0" id="hrs-amount" style="width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px; font-family:inherit;">
+    <button class="cbtn" style="background:var(--lead-700); color:#fff; border:none; padding:11px 20px; width:100%; font-size:13px;" onclick="submitHoursEntry()">Save Hours</button>
+    <div id="hrs-msg" style="margin-top:10px; font-size:13px;"></div>
+  `;
+  openModal(html);
+}
+window.openHoursEntryModal = openHoursEntryModal;
+
+async function submitHoursEntry(){
+  const staffId = document.getElementById('hrs-target').value;
+  const periodStart = document.getElementById('hrs-start').value;
+  const periodEnd = document.getElementById('hrs-end').value;
+  const hours = document.getElementById('hrs-amount').value;
+  const msgEl = document.getElementById('hrs-msg');
+
+  if (!periodStart || !periodEnd || !hours) {
+    msgEl.innerHTML = '<span style="color:var(--red);">Fill in the period and hours first.</span>';
+    return;
+  }
+
+  const { error } = await sb.from('staff_hours_log').insert({
+    staff_id: staffId,
+    period_start: periodStart,
+    period_end: periodEnd,
+    hours_worked: parseFloat(hours),
+    entered_by: currentProfile.id,
+  });
+
+  if (error) {
+    msgEl.innerHTML = `<span style="color:var(--red);">Could not save: ${error.message}</span>`;
+    return;
+  }
+  msgEl.innerHTML = '<span style="color:var(--green);">Saved.</span>';
+  setTimeout(() => closeModal(), 700);
+}
+window.submitHoursEntry = submitHoursEntry;
+
+
+async function submitModalAssessment(type){
+  const targetId = document.getElementById('modal-la-target').value;
+  const date = document.getElementById('modal-la-date').value;
+  const code = document.getElementById('modal-la-code').value.trim();
+  const msgEl = document.getElementById('modal-la-msg');
+
+  if (!date) { msgEl.innerHTML = '<span style="color:var(--red);">Pick a date first.</span>'; return; }
+
+  const dims = type === 'five_behaviors' ? FIVE_BEHAVIORS_DIMS : STYLE_DIMS;
+  const results = {};
+  for (const d of dims) {
+    const val = document.getElementById('modal-la-score-' + d.key).value;
+    if (!val) { msgEl.innerHTML = `<span style="color:var(--red);">Fill in ${d.label} first.</span>`; return; }
+    results[d.key] = parseInt(val, 10);
+  }
+  if (type === 'leadership_style') {
+    const top = dims.reduce((a, b) => results[a.key] > results[b.key] ? a : b);
+    results.primary_style = top.key;
+  }
+
+  const { error } = await sb.from('leadership_assessments').insert({
+    staff_id: targetId,
+    assessment_type: type,
+    taken_at: date,
+    external_code: code || null,
+    results: results,
+    entered_by: currentProfile.id,
+  });
+
+  if (error) {
+    msgEl.innerHTML = `<span style="color:var(--red);">Could not save: ${error.message}</span>`;
+    return;
+  }
+  msgEl.innerHTML = '<span style="color:var(--green);">Saved.</span>';
+  setTimeout(() => closeModal(), 700);
+}
+window.submitModalAssessment = submitModalAssessment;
+
+function renderRecentOneOnOnes(coachingLogs, team){
+  const oneOnOnes = coachingLogs.filter(c => c.conversation_type === '1-1');
+  if (!oneOnOnes.length) return `<div style="color:var(--muted); font-size:13px;">No 1-1s logged yet.</div>`;
+  const nameById = Object.fromEntries(team.map(t => [t.id, t.name]));
+  return oneOnOnes.map((c, i) => `
+    <div class="feedback-item" style="cursor:${c.template_notes ? 'pointer' : 'default'}; flex-direction:column; align-items:stretch;" ${c.template_notes ? `onclick="toggleOneOnOneDetail(${i})"` : ''}>
+      <div style="display:flex; justify-content:space-between; width:100%;">
+        <span>${nameById[c.staff_id] || 'Unknown'} ${c.template_notes ? '<span style="color:var(--rust); font-size:11px;">(view notes)</span>' : ''}</span>
+        <span class="fdate">${timeAgo(c.occurred_at)}</span>
+      </div>
+      ${c.template_notes ? `<div id="oneonone-detail-${i}" style="display:none; margin-top:10px; font-size:12.5px; color:var(--ink-soft); line-height:1.6;">${render1on1Notes(c.template_notes)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function toggleOneOnOneDetail(i){
+  const el = document.getElementById('oneonone-detail-' + i);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+window.toggleOneOnOneDetail = toggleOneOnOneDetail;
+
+async function submit1on1(){
+  const targetId = document.getElementById('oo-target').value;
+  const date = document.getElementById('oo-date').value;
+  const msgEl = document.getElementById('oo-submit-msg');
+
+  if (!date) { msgEl.innerHTML = '<span style="color:var(--red);">Pick a date first.</span>'; return; }
+
+  const templateNotes = {};
+  ONE_ON_ONE_TEMPLATE.forEach(f => {
+    if (f.isTop3) {
+      templateNotes[f.key] = [1,2,3]
+        .map(n => document.getElementById(`oo-field-${f.key}-${n}`).value.trim())
+        .filter(Boolean);
+    } else {
+      templateNotes[f.key] = document.getElementById('oo-field-' + f.key).value.trim();
+    }
+  });
+
+  const { error } = await sb.from('academy_coaching_log').insert({
+    staff_id: targetId,
+    manager_staff_id: currentProfile.id,
+    occurred_at: date,
+    conversation_type: '1-1',
+    template_notes: templateNotes,
+  });
+
+  if (error) {
+    msgEl.innerHTML = `<span style="color:var(--red);">Could not save: ${error.message}</span>`;
+    return;
+  }
+  msgEl.innerHTML = '<span style="color:var(--green);">Saved.</span>';
+  window._managerLoaded = false;
+  renderManagerView();
+}
+window.submit1on1 = submit1on1;
+
+
+function labelConvo(type){
+  const map = { '1-1':'1-1 Conversation', '360':'360 Assessment', 'walkthrough_audit_review':'Audit Trend Review', 'pulse_survey_followup':'Pulse Survey Follow-Up' };
+  return map[type] || type;
+}
+function timeAgo(dateStr){
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return '1 day ago';
+  return `${days} days ago`;
+}
+
+/* ============================================================================
+   1-1 TEMPLATE — the standard six-section format every leader uses.
+   ========================================================================= */
+const ONE_ON_ONE_TEMPLATE = [
+  { key: 'wins', label: 'Wins since last 1-1' },
+  { key: 'challenges', label: 'Current challenges / blockers' },
+  { key: 'academy_progress', label: 'Academy progress discussed' },
+  { key: 'initiative_pyramid', label: 'Initiative Pyramid / escalations worth discussing' },
+  { key: 'action_items', label: 'Top 3 things to work on', isTop3: true },
+  { key: 'next_meeting_date', label: 'Next 1-1 date' },
+];
+
+function render1on1Notes(templateNotes){
+  return ONE_ON_ONE_TEMPLATE.map(f => {
+    if (f.isTop3) {
+      const items = Array.isArray(templateNotes[f.key]) ? templateNotes[f.key].filter(Boolean) : [];
+      const list = items.length
+        ? '<ol style="margin:4px 0 0 18px; padding:0;">' + items.map(i => `<li>${escapeHtml(i)}</li>`).join('') + '</ol>'
+        : '<span style="color:var(--muted); font-style:italic;">not noted</span>';
+      return `<div style="margin-bottom:8px;"><strong style="color:var(--ink);">${f.label}:</strong>${list}</div>`;
+    }
+    return `<div style="margin-bottom:8px;"><strong style="color:var(--ink);">${f.label}:</strong> ${templateNotes[f.key] ? escapeHtml(templateNotes[f.key]) : '<span style="color:var(--muted); font-style:italic;">not noted</span>'}</div>`;
+  }).join('');
+}
+
+function toggleFeedbackDetail(i){
+  const el = document.getElementById('feedback-detail-' + i);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+window.toggleFeedbackDetail = toggleFeedbackDetail;
+
+function toggleTop3History(){
+  const el = document.getElementById('top3-history');
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+window.toggleTop3History = toggleTop3History;
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+init();
+</script>
+
+<script>
+/**
+ * Team Cohesion Integration — Five Behaviors Live Data
+ * =====================================================
+ * Adds a live "Team Cohesion — Five Behaviors" card to the
+ * Salt City Academy's Assessments view.
+ *
+ * Both the Academy and the Five Behaviors system share the same
+ * Supabase project (jtuqwmwbdzrxupomlvln), so this uses the
+ * Academy's existing `sb` client — no second connection needed.
+ *
+ * HOW TO INSTALL:
+ *   1. Open index.html in the Command Deck Netlify folder (Google Drive)
+ *   2. Find the closing </body> tag at the very end
+ *   3. Paste this entire <script> block immediately before </body>
+ *   4. Save and deploy
+ *
+ * That's it. The card appears automatically for GMs and above
+ * whenever they open the Assessments view.
+ */
+(function () {
+
+  /* ── Behavior display config ── */
+  const BEHAVIORS = [
+    { key: 'trust_avg',          label: 'Trust',          color: '#1F967E' },
+    { key: 'conflict_avg',       label: 'Conflict',       color: '#E6A817' },
+    { key: 'commitment_avg',     label: 'Commitment',     color: '#3B82F6' },
+    { key: 'accountability_avg', label: 'Accountability', color: '#EF4444' },
+    { key: 'results_avg',        label: 'Results',        color: '#8B5CF6' },
+  ];
+
+  function bandColor(v) { return v >= 4 ? '#1F967E' : v >= 3 ? '#E6A817' : '#EF4444'; }
+  function bandLabel(v) { return v >= 4 ? 'HIGH'    : v >= 3 ? 'MED'    : 'LOW'; }
+
+  /* ── Render snapshot + trend + history card ── */
+  function renderCohesionCard(scores, locationName) {
+    const cardId = 'fb-cohesion-' + locationName.replace(/\W+/g, '-').toLowerCase();
+
+    if (!scores || !scores.length) {
+      return `
+        <div class="card" id="${cardId}" style="margin-top:20px;">
+          <h2>Team Cohesion — Five Behaviors</h2>
+          <div style="color:var(--muted);font-size:13px;padding:6px 0;">
+            No closed assessment data yet for <strong>${locationName}</strong>.
+            Assessments are launched from your Five Behaviors dashboard and scores
+            appear here automatically once an assessment is closed.
+          </div>
+        </div>`;
+    }
+
+    const latest  = scores[scores.length - 1];
+    const overall = BEHAVIORS.reduce((s, b) => s + (latest[b.key] || 0), 0) / BEHAVIORS.length;
+
+    /* Snapshot grid */
+    const grid = BEHAVIORS.map(b => {
+      const v   = (latest[b.key] || 0).toFixed(1);
+      const pct = ((parseFloat(v) - 1) / 4 * 100).toFixed(0);
+      const c   = bandColor(parseFloat(v));
+      return `
+        <div style="text-align:center;padding:10px 4px;">
+          <div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">${b.label}</div>
+          <div style="font-size:26px;font-weight:800;color:${c};line-height:1;">${v}</div>
+          <div style="font-size:10px;font-weight:700;color:${c};margin:3px 0 8px;">${bandLabel(parseFloat(v))}</div>
+          <div style="height:5px;background:#E3DED6;border-radius:3px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:${c};border-radius:3px;"></div>
+          </div>
+        </div>`;
+    }).join('');
+
+    /* Trend chart — only when 2+ assessments */
+    let trendHtml = '';
+    if (scores.length >= 2) {
+      const W = 560, H = 190, PL = 34, PR = 10, PT = 10, PB = 26;
+      const n   = scores.length;
+      const xFor = i => PL + (i / (n - 1)) * (W - PL - PR);
+      const yFor = v => PT + (5 - Math.min(5, Math.max(1, v))) / 4 * (H - PT - PB);
+
+      let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">`;
+      [1, 2, 3, 4, 5].forEach(v => {
+        svg += `<line x1="${PL}" y1="${yFor(v)}" x2="${W-PR}" y2="${yFor(v)}" stroke="#E3DED6" stroke-width="1"/>`;
+        svg += `<text x="${PL-5}" y="${yFor(v)+4}" font-size="9" fill="#9A8A78" text-anchor="end">${v}</text>`;
+      });
+      BEHAVIORS.forEach(b => {
+        const pts = scores.map((s, i) => `${xFor(i).toFixed(1)},${yFor(s[b.key] || 1).toFixed(1)}`).join(' ');
+        svg += `<polyline points="${pts}" fill="none" stroke="${b.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+        scores.forEach((s, i) => {
+          svg += `<circle cx="${xFor(i).toFixed(1)}" cy="${yFor(s[b.key] || 1).toFixed(1)}" r="3.5" fill="${b.color}"/>`;
+        });
+      });
+      scores.forEach((s, i) => {
+        const lbl = s.assessment_name
+          ? s.assessment_name.substring(0, 14)
+          : new Date(s.closed_at || '').toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        svg += `<text x="${xFor(i).toFixed(1)}" y="${H - 6}" font-size="8.5" fill="#9A8A78" text-anchor="middle">${lbl}</text>`;
+      });
+      svg += `</svg>`;
+
+      const legend = BEHAVIORS.map(b =>
+        `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:11px;color:var(--muted);">
+           <span style="width:8px;height:8px;border-radius:50%;background:${b.color};display:inline-block;"></span>${b.label}
+         </span>`
+      ).join('');
+
+      trendHtml = `
+        <div style="margin-top:22px;">
+          <div style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Trend Over Time</div>
+          ${svg}
+          <div style="margin-top:8px;">${legend}</div>
+        </div>`;
+    }
+
+    /* History list */
+    const historyRows = scores.length > 1
+      ? [...scores].reverse().map(s => {
+          const avg = BEHAVIORS.reduce((sum, b) => sum + (s[b.key] || 0), 0) / BEHAVIORS.length;
+          const dateStr = s.closed_at
+            ? new Date(s.closed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : '—';
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0EBE5;">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--ink);">${s.assessment_name || 'Assessment'}</div>
+                <div style="font-size:11.5px;color:var(--muted);">${dateStr}${s.respondent_count ? ' · ' + s.respondent_count + ' respondents' : ''}</div>
+              </div>
+              <div style="font-size:20px;font-weight:800;color:${bandColor(avg)};min-width:40px;text-align:right;">${avg.toFixed(1)}</div>
+            </div>`;
+        }).join('')
+      : '';
+
+    const latestDate = latest.closed_at
+      ? new Date(latest.closed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : '';
+
+    return `
+      <div class="card" id="${cardId}" style="margin-top:20px;">
+        <h2 style="margin-bottom:3px;">Team Cohesion — Five Behaviors</h2>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:18px;">
+          ${locationName}${latestDate ? ' · ' + latestDate : ''}
+          · Overall <strong style="color:${bandColor(overall)};">${overall.toFixed(1)} / 5.0</strong>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;background:#F7F4F0;border-radius:10px;padding:8px;">
+          ${grid}
+        </div>
+
+        ${trendHtml}
+
+        ${historyRows ? `
+        <div style="margin-top:20px;">
+          <div style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">History</div>
+          ${historyRows}
+        </div>` : ''}
+      </div>`;
+  }
+
+  /* ── Fetch and inject the card(s) ── */
+  async function injectCohesionCards() {
+    /* Remove any cards from a previous render */
+    document.querySelectorAll('[id^="fb-cohesion-"]').forEach(el => el.remove());
+
+    const profile = window.currentProfile;
+    if (!profile) return;
+
+    /* Only show to managers and above */
+    const mgr = ['location_manager', 'gm', 'production_manager', 'coo', 'ceo', 'cbo'];
+    if (!mgr.includes(profile.role)) return;
+
+    const sb = window.sb; /* Academy's existing Supabase client — same project */
+    const container = document.getElementById('view-assessments');
+    if (!container) return;
+
+    let locationIds = [];
+
+    if (['coo', 'ceo', 'cbo'].includes(profile.role)) {
+      /* COO/CEO sees all locations */
+      const { data: locs } = await sb.from('locations').select('id, name').order('name');
+      locationIds = (locs || []).map(l => ({ id: l.id, name: l.name }));
+    } else {
+      /* GMs: resolve their locations from staff_locations */
+      const { data: myLocs } = await sb.from('staff_locations').select('location_id').eq('staff_id', profile.id);
+      if (!myLocs || !myLocs.length) return;
+      const locIds = myLocs.map(l => l.location_id);
+      const { data: locs } = await sb.from('locations').select('id, name').in('id', locIds);
+      locationIds = (locs || []).map(l => ({ id: l.id, name: l.name }));
+    }
+
+    if (!locationIds.length) return;
+
+    /* For each location, fetch closed assessment scores */
+    for (const loc of locationIds) {
+      const { data: scores, error } = await sb
+        .from('assessment_scores')
+        .select(`
+          trust_avg, conflict_avg, commitment_avg, accountability_avg, results_avg,
+          respondent_count,
+          assessments!inner ( id, name, closed_at, location_id )
+        `)
+        .eq('assessments.location_id', loc.id)
+        .order('assessments.closed_at', { ascending: true, foreignTable: 'assessments' });
+
+      if (error) {
+        console.warn('[Team Cohesion] Error fetching scores for', loc.name, error);
+        continue;
+      }
+
+      const flat = (scores || []).map(s => ({
+        trust_avg:          s.trust_avg,
+        conflict_avg:       s.conflict_avg,
+        commitment_avg:     s.commitment_avg,
+        accountability_avg: s.accountability_avg,
+        results_avg:        s.results_avg,
+        respondent_count:   s.respondent_count,
+        assessment_name:    s.assessments?.name,
+        closed_at:          s.assessments?.closed_at,
+      }));
+
+      container.insertAdjacentHTML('beforeend', renderCohesionCard(flat, loc.name));
+    }
+  }
+
+  /* ── Patch renderAssessmentsView ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    const _orig = window.renderAssessmentsView;
+    if (typeof _orig === 'function') {
+      window.renderAssessmentsView = async function () {
+        await _orig.apply(this, arguments);
+        await injectCohesionCards();
+      };
+    }
+  });
+
+})();
+
+</script>
+</body>
+</html>
