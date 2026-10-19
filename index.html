@@ -3797,7 +3797,7 @@ async function loadDirectory(){
     $("#lmgm-staff-tiles").innerHTML = `<div class="empty-note">Couldn't load the staff list (${esc(error.message)}). Refresh to try again, or check that the Phase 6b migration has been run.</div>`;
     return;
   }
-  directory = (data||[]).filter(s => s.role === "gm" || s.role === "location_manager" || s.role === "production_manager" || s.role === "bookkeeper" || s.role === "coo");
+  directory = (data||[]).filter(s => ["gm","location_manager","production_manager","bookkeeper","coo","ceo","cbo"].includes(s.role));
   renderTiles();
 }
 

@@ -108,6 +108,14 @@ button{font-family:inherit;}
 .acct-badge{font-size:10.5px; font-family:var(--font-mono); text-transform:uppercase; padding:2px 7px; border-radius:99px; margin-left:6px;}
 .acct-badge.has{background:var(--good-soft); color:var(--good);}
 .acct-badge.none{background:var(--critical-soft); color:var(--critical);}
+
+/* ---- Roles panel ---- */
+.role-tools{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;}
+.role-tools input, .role-tools select, .role-select{font-family:inherit; font-size:13px; color:var(--ink); background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:7px 10px;}
+.role-tools input{flex:1 1 220px;}
+.role-select.changed{border-color:var(--accent);}
+.role-scroll{max-height:520px; overflow:auto; border-radius:10px;}
+.muted{color:var(--ink-3); font-size:12px;}
 </style>
 </head>
 <body>
@@ -175,6 +183,17 @@ button{font-family:inherit;}
     <div class="hint">Toggling a location saves immediately — no separate save button. GM &amp; LM Command Deck pages only show whatever's checked here.</div>
     <div id="table-wrap"><div class="hint">Loading staff…</div></div>
     <div class="save-note" id="save-note"></div>
+
+    <div id="roles-section" hidden>
+      <div class="section-head"><h2>Roles</h2></div>
+      <div class="hint">Changing a role saves immediately. It decides what each person sees in Command Deck. Promote someone to LM or GM here, then assign their café above and set their PIN.</div>
+      <div class="role-tools">
+        <input type="search" id="role-search" placeholder="Search by name…">
+        <select id="role-filter"><option value="">All roles</option></select>
+      </div>
+      <div class="role-scroll" id="roles-wrap"><div class="hint">Loading…</div></div>
+      <div class="save-note" id="role-note"></div>
+    </div>
   </div>
 </div>
 
@@ -185,7 +204,7 @@ const PIN_PREFIX = "sc-pin-";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (sel, root) => (root||document).querySelector(sel);
 const $$ = (sel, root) => Array.from((root||document).querySelectorAll(sel));
-const esc = s => (s==null?"":String(s));
+const esc = s => (s==null?"":String(s)).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ROLE_LABEL = { gm:"GM", location_manager:"LM", production_manager:"Production Manager", coo:"COO", ceo:"CEO", cbo:"CBO", product_development:"Product Development", team_member:"Team Member", bookkeeper:"Bookkeeper" };
 
 let directory = [];
@@ -280,7 +299,70 @@ async function initApp(){
 
   renderTable();
   loadPinAdminRoster();
+  if(["coo","ceo","cbo"].includes(myStaff.role)){ meId = myStaff.id; $("#roles-section").hidden = false; loadRoles(); }
 }
+
+/* ============================= ROLES ============================= */
+// Writes go through the set_staff_role RPC, which re-checks that the caller
+// is coo/ceo/cbo, blocks changing your own role, and logs to staff_role_changes.
+const ROLE_ORDER = ["ceo","coo","cbo","gm","location_manager","production_manager","product_development","bookkeeper","team_member"];
+let roleStaff = [];
+let meId = null;
+
+async function loadRoles(){
+  const { data, error } = await sb.from("staff").select("id,name,role,job_title,is_active").eq("is_active", true).order("name");
+  if(error){ $("#roles-wrap").innerHTML = `<div class="hint">Couldn't load staff (${esc(error.message)}).</div>`; return; }
+  roleStaff = data || [];
+  const f = $("#role-filter");
+  if(f.options.length === 1) f.innerHTML += ROLE_ORDER.map(r => `<option value="${r}">${ROLE_LABEL[r]}</option>`).join("");
+  renderRoles();
+}
+
+function renderRoles(){
+  const q = $("#role-search").value.trim().toLowerCase();
+  const rf = $("#role-filter").value;
+  const rows = roleStaff
+    .filter(s => (!q || s.name.toLowerCase().includes(q)) && (!rf || s.role === rf))
+    .sort((a,b) => ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role) || a.name.localeCompare(b.name));
+  if(!rows.length){ $("#roles-wrap").innerHTML = `<div class="hint">No one matches.</div>`; return; }
+  $("#roles-wrap").innerHTML = `
+    <table class="assign-table">
+      <thead><tr><th>Name</th><th>Square job title</th><th>Role</th></tr></thead>
+      <tbody>${rows.map(s => `<tr>
+        <td>${esc(s.name)}</td>
+        <td class="muted">${esc(s.job_title||"—")}</td>
+        <td>${s.id === meId
+          ? `<span class="role-tag">${ROLE_LABEL[s.role]||s.role}</span> <span class="muted">(you)</span>`
+          : `<select class="role-select" data-id="${s.id}">${ROLE_ORDER.map(r => `<option value="${r}" ${r===s.role?"selected":""}>${ROLE_LABEL[r]}</option>`).join("")}</select>`}
+        </td></tr>`).join("")}</tbody>
+    </table>`;
+  $$(".role-select", $("#roles-wrap")).forEach(sel => sel.addEventListener("change", () => changeRole(sel)));
+}
+
+async function changeRole(sel){
+  const person = roleStaff.find(s => s.id === sel.dataset.id);
+  const newRole = sel.value, oldRole = person.role;
+  const note = $("#role-note");
+  if(EXEC.includes(newRole) && !confirm(`Make ${person.name} ${ROLE_LABEL[newRole]}? That gives full access to every location and admin page.`)){
+    sel.value = oldRole; return;
+  }
+  note.textContent = "Saving…"; note.className = "save-note saving";
+  const { error } = await sb.rpc("set_staff_role", { p_staff_id: person.id, p_role: newRole });
+  if(error){ sel.value = oldRole; note.textContent = "Couldn't save: " + error.message; note.className = "save-note err"; return; }
+  person.role = newRole;
+  sel.classList.add("changed");
+  note.textContent = `${person.name} is now ${ROLE_LABEL[newRole]}.`; note.className = "save-note";
+  // Location assignments above only list GMs and LMs, so refresh that table.
+  if(["gm","location_manager"].includes(newRole) || ["gm","location_manager"].includes(oldRole)){
+    const { data: staffRows } = await sb.from("staff").select("id,name,role").in("role", ["gm","location_manager"]).order("role").order("name");
+    allStaff = staffRows || [];
+    renderTable();
+  }
+  loadPinAdminRoster();
+}
+const EXEC = ["coo","ceo","cbo"];
+$("#role-search").addEventListener("input", renderRoles);
+$("#role-filter").addEventListener("change", renderRoles);
 
 function renderTable(){
   if(!allStaff.length){
