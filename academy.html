@@ -236,6 +236,12 @@ details.card.emp-convo .emp-convo-body{ padding:4px 22px 20px; }
 .emp-msg.ok{ color:var(--green); } .emp-msg.err{ color:var(--red); }
 .emp-req{ display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px; }
 .emp-req-right{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.l360-card{ display:flex; justify-content:space-between; align-items:center; gap:16px; border-left:4px solid var(--care-700); }
+.l360-card .emp-btn{ margin-top:0; text-decoration:none; white-space:nowrap; }
+.l360-card .emp-btn.ghost{ display:inline-block; padding:10px 16px; border-radius:8px; }
+.l360-title{ font-family:'Oswald',sans-serif; font-size:20px; font-weight:700; color:var(--lead-700); text-transform:uppercase; margin:2px 0 4px; }
+.l360-card .emp-note a{ color:var(--care-700); font-weight:600; }
+@media (max-width:820px){ .l360-card{ flex-direction:column; align-items:flex-start; } }
 .emp-link{ background:none; border:none; color:var(--care-700); font-size:11.5px; text-decoration:underline; cursor:pointer; padding:0; font-family:inherit; }
 @media (max-width:820px){
   .emp-stats{ grid-template-columns:1fr; gap:0; }
@@ -518,20 +524,21 @@ function empStanding(pts){
 async function renderEmployeeView(){
   const el = document.getElementById('view-employee');
   const me = currentProfile.id;
-  const [{ data: status }, { data: coaching }, { data: hoursLog }, { data: points }, { data: pips }, { data: content }] = await Promise.all([
+  const [{ data: status }, { data: coaching }, { data: hoursLog }, { data: points }, { data: pips }, { data: content }, { data: l360s }] = await Promise.all([
     sb.from('academy_status').select('*').eq('staff_id', me),
     sb.from('academy_coaching_log').select('*').eq('staff_id', me).order('occurred_at', { ascending:false }),
     sb.from('staff_hours_log').select('*').eq('staff_id', me).order('period_start'),
     sb.from('attendance_points').select('*').eq('staff_id', me).order('occurred_on', { ascending:false }),
     sb.from('pips').select('*').eq('staff_id', me).order('start_date', { ascending:false }),
     sb.from('academy_content').select('*, academy_progress!left(completed_at, staff_id)').eq('is_active', true).eq('role_track', staffTrack(currentProfile)).order('sort_order'),
+    sb.from('leadership_360s').select('id,status,self_submitted_at,created_at,released_at').eq('subject_staff_id', me).neq('status', 'cancelled').order('created_at', { ascending:false }),
   ]);
   const pipIds = (pips || []).map(p => p.id);
   const { data: checkins } = pipIds.length
     ? await sb.from('pip_checkins').select('*').in('pip_id', pipIds).order('week')
     : { data: [] };
   const { data: managers } = await sb.from('staff').select('id,name');
-  empData = { status:status || [], coaching:coaching || [], hoursLog:hoursLog || [], points:points || [], pips:pips || [], checkins:checkins || [], content:content || [],
+  empData = { l360s:l360s || [], status:status || [], coaching:coaching || [], hoursLog:hoursLog || [], points:points || [], pips:pips || [], checkins:checkins || [], content:content || [],
               names:Object.fromEntries((managers || []).map(m => [m.id, m.name])) };
 
   el.innerHTML = `
@@ -599,7 +606,24 @@ function empOverview(){
   else wage = `<div class="emp-big">${eMoney(empMe.wage.avg_rate)}<span>/hr</span></div>
     <div class="emp-note">${eFmt(empMe.wage.week_start)} – ${eFmt(empMe.wage.week_end)} · ${empMe.wage.hours} hrs${empMe.wage.rates.length > 1 ? ` · rates ${empMe.wage.rates.map(eMoney).join(', ')}` : ''}</div>`;
 
+  const l360 = empData.l360s || [];
+  const open360 = l360.find(r => r.status === 'collecting');
+  const released360 = l360.filter(r => r.status === 'released');
+  const l360Cards = (open360 ? `
+    <div class="card l360-card">
+      <div><div class="emp-label" style="color:var(--care-700);">Leadership 360</div>
+        <div class="l360-title">${open360.self_submitted_at ? 'Your self-assessment is in' : 'Take your 360 self-assessment'}</div>
+        <div class="emp-note">${open360.self_submitted_at ? `Submitted ${eFmt(open360.self_submitted_at)}. Your report opens here once it's released. You can update your answers until then.` : `A 360 was started for you on ${eFmt(open360.created_at)}. Rate yourself on the same 30 statements your team is answering. It takes about 5 minutes.`}</div></div>
+      <a class="emp-btn ${open360.self_submitted_at ? 'ghost' : ''}" href="360.html?self=${open360.id}">${open360.self_submitted_at ? 'Update my answers' : 'Start self-assessment →'}</a>
+    </div>` : '') + (released360.length ? `
+    <div class="card l360-card">
+      <div><div class="emp-label" style="color:var(--care-700);">Leadership 360</div>
+        <div class="l360-title">Your 360 report is ready</div>
+        <div class="emp-note">Released ${eFmt(released360[0].released_at)}. Your style scores are also saved under Leadership Assessments.${released360.length > 1 ? ` Earlier reports: ${released360.slice(1).map(r => `<a href="360.html?report=${r.id}">${eFmt(r.released_at)}</a>`).join(' · ')}` : ''}</div></div>
+      <a class="emp-btn" href="360.html?report=${released360[0].id}">Open my report →</a>
+    </div>` : '');
   return `
+    ${l360Cards}
     <div class="emp-stats">
       <div class="card emp-stat"><div class="emp-label">Hire start date</div>
         <div class="emp-big">${p.hire_date ? eFmt(p.hire_date) : '—'}</div>
@@ -1241,8 +1265,9 @@ function renderStyleHistory(entries){
     const breakdown = STYLE_DIMS.map(d => `${d.label}: ${e.results[d.key] ?? '?'}`).join(' \u00b7 ');
     return `<div class="content-row">
       <div>
-        <div class="ctitle">${e.taken_at} \u2014 Primary: ${top.label}</div>
-        <div class="cmeta">${breakdown}${e.external_code ? ' \u00b7 Ref: ' + e.external_code : ''}</div>
+        <div class="ctitle">${e.taken_at} \u2014 Primary: ${top.label}${e.results && e.results.source === '360' ? ' <span style="font-size:11px; color:var(--care-700); font-weight:700;">360 \u00b7 ' + (e.results.raters || '?') + ' raters</span>' : ''}</div>
+        <div class="cmeta">${breakdown}${e.results && e.results.source === '360' ? '' : (e.external_code ? ' \u00b7 Ref: ' + e.external_code : '')}</div>
+        ${e.results && e.results.l360_id ? `<a href="360.html?report=${e.results.l360_id}" style="font-size:12px; color:var(--care-700); font-weight:600;">Open full 360 report \u2192</a>` : ''}
       </div>
     </div>`;
   }).join('');

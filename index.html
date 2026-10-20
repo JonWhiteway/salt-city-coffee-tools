@@ -953,6 +953,19 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 #sec-lmgm .lm-tab.active{background:var(--sc-navy); border-color:var(--sc-navy); color:#F7F5F2;}
 #sec-lmgm .lm-tabs .lm-back{margin-right:6px;}
 .loc-lm-link{display:inline-flex; align-items:center; gap:6px; margin:0 0 16px;}
+/* Leadership 360s */
+#sec-l360 .l360-how{font-size:13px; line-height:1.6; color:var(--ink-2); margin-bottom:16px;}
+#sec-l360 .l360-row{display:grid; grid-template-columns:minmax(180px,1.2fr) minmax(220px,1.4fr) auto; gap:16px; align-items:center; padding:16px 18px; margin-bottom:10px;}
+#sec-l360 .l360-nm{font-weight:700; font-size:15px;}
+#sec-l360 .l360-meta{font-size:12px; color:var(--ink-3); margin-top:2px;}
+#sec-l360 .l360-counts{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;}
+#sec-l360 .l360-c{font-size:11.5px; padding:3px 9px; border-radius:99px; background:var(--surface-alt); color:var(--ink-2); font-weight:600;}
+#sec-l360 .l360-c.on{background:var(--good-soft); color:var(--good);}
+#sec-l360 .l360-actions{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
+#sec-l360 .l360-past{font-size:12px; color:var(--ink-3); margin-top:6px;}
+#sec-l360 .l360-past a{color:var(--accent);}
+#sec-l360 .l360-msg{font-size:13px; margin-top:8px; min-height:1.2em;}
+@media (max-width:760px){ #sec-l360 .l360-row{grid-template-columns:1fr;} #sec-l360 .l360-actions{justify-content:flex-start;} }
 /* one login for Command Deck + Academy */
 #gate-wrap .tm-email-form{display:flex; gap:8px; flex-wrap:wrap;}
 #gate-wrap .tm-email-form input{flex:1 1 200px; min-width:0; font:inherit; font-size:15px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface-alt); color:var(--ink);}
@@ -1058,6 +1071,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <li><button class="nav-item" data-section="sales"><span class="nav-dot"></span>Sales &amp; Labor</button></li>
       <li><button class="nav-item" data-section="crm"><span class="nav-dot"></span>Customer Journey &amp; Marketing</button></li>
       <li><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
+      <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
     </ul>
     </div>
     <div class="coo-nav-group">
@@ -1342,6 +1356,17 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       </section>
 
       <!-- ============ CALENDAR & EVENTS ============ -->
+      <section class="panel" id="sec-l360">
+        <div class="section-head"><h2 id="l360-head">Your leaders</h2><span class="hint" id="l360-hint">Loading…</span></div>
+        <div class="l360-how card">
+          <b>How it works:</b> Start a 360, then send the rater link to their manager, peers and direct reports (no login needed; answers are anonymous).
+          The leader takes their self-assessment from their Academy dashboard. When enough responses are in, preview the report and release it.
+          Releasing adds the scores to their Academy Leadership Style history and opens the full report for them.
+        </div>
+        <div id="l360-list"><div class="empty-note">Loading…</div></div>
+        <div class="l360-msg" id="l360-msg"></div>
+      </section>
+
       <section class="panel" id="sec-calendar">
         <div class="section-head"><h2>Company Calendar</h2><span class="hint">Live Google Calendar — Company &amp; Marketing</span></div>
         <a class='link-card' href='https://salt-city-coffee-tools.netlify.app/company-calendar' rel='noopener' target='_blank'>
@@ -3588,6 +3613,7 @@ const SECTION_META = {
   sales:      { title:"Sales & Labor", sub:"Square: sales, labor cost, team — portfolio and per-location" },
   crm:        { title:"Customer Journey & Marketing", sub:"CRM in progress — journey stages, marketing calendar, campaigns" },
   academy:    { title:"Academy Engagement", sub:"Leadership · Craft · Customer Care completion and cadence" },
+  l360:       { title:"Leadership 360s", sub:"Six leadership styles · start a 360, share the rater link, release the report" },
   calendar:   { title:"Calendar & Events", sub:"Quarterly events linked to the master company calendar" },
   goals:      { title:"Goals & Projections", sub:"Quarterly and annual goals against current reality" },
   warehouse:  { title:"Warehouse Inventory & Order Fulfillment", sub:"Outgoing orders (cafe, wholesale, subscription), incoming shipments, inventory emergencies & cost, bagging, plus Sysco and the live Inventory Tracker — Assistant Production Manager's station" },
@@ -3611,6 +3637,9 @@ function updateSectionPill(id){
   if((id === "overview" || id === "sales") && squareLive){
     pill.classList.add("is-live"); iconGood.style.display = "block";
     text.textContent = "Live — Square";
+  } else if(id === "l360"){
+    pill.classList.add("is-live"); iconGood.style.display = "block";
+    text.textContent = "Live — Supabase";
   } else if(id === "productdev" && bakeryLive){
     pill.classList.add("is-live"); iconGood.style.display = "block";
     text.textContent = "Live — Supabase";
@@ -3959,6 +3988,115 @@ $("#tm-nomatch-retry").addEventListener("click", async () => {
 });
 
 /* ---------------------------------------------------------------------
+   LEADERSHIP 360s — GMs see the LMs at their stores; COO/CEO/CBO see every
+   LM-and-above. All permission checks are repeated server-side in the
+   l360_* functions; raw answers are never readable from here.
+   --------------------------------------------------------------------- */
+const L360_ROLES = ["location_manager","gm","production_manager","coo","ceo","cbo"];
+const L360_ROLE_LABEL = { location_manager:"Location Manager", gm:"General Manager", production_manager:"Production Manager", coo:"COO", ceo:"CEO", cbo:"CBO" };
+let l360Loaded = false;
+const l360Url = q => `${location.origin}/360.html?${q}`;
+
+async function l360Load(){
+  if(!myStaff) return;
+  const isExec = ["coo","ceo","cbo"].includes(myStaff.role);
+  const list = $("#l360-list");
+  try{
+    let subjects = [];
+    if(isExec){
+      const { data, error } = await sb.from("staff").select("id,name,role,job_title,is_active").in("role", L360_ROLES).neq("id", myStaff.id).order("name");
+      if(error) throw error;
+      subjects = (data||[]).filter(s => s.is_active !== false);
+    } else if(myStaff.role === "gm"){
+      const locIds = myLocations.map(l => l.id);
+      const { data, error } = locIds.length ? await sb.from("staff_locations").select("staff_id, staff(id,name,role,job_title,is_active)").in("location_id", locIds) : { data: [] };
+      if(error) throw error;
+      const seen = new Set();
+      subjects = (data||[]).map(r => r.staff).filter(s => s && s.role === "location_manager" && s.is_active !== false && !seen.has(s.id) && seen.add(s.id)).sort((a,b) => a.name.localeCompare(b.name));
+    }
+    $("#l360-head").textContent = isExec ? "Every leader" : "Your LMs";
+    $("#l360-hint").textContent = isExec ? "LMs, GMs and leadership: anyone you can run a 360 for" : "LMs at your stores";
+    if(!subjects.length){ list.innerHTML = `<div class="empty-note">No one to show yet. LMs appear here once they're assigned to one of your stores in Staff Admin.</div>`; return; }
+    const ids = subjects.map(s => s.id);
+    const [{ data: runs }, { data: sl }] = await Promise.all([
+      sb.from("leadership_360s").select("*").in("subject_staff_id", ids).order("created_at", { ascending:false }),
+      sb.from("staff_locations").select("staff_id, locations(name)").in("staff_id", ids),
+    ]);
+    const runIds = (runs||[]).map(r => r.id);
+    const { data: cnt } = runIds.length ? await sb.rpc("l360_counts", { p_ids: runIds }) : { data: [] };
+    const counts = {};
+    (cnt||[]).forEach(c => { (counts[c.assessment_id] ||= {})[c.rater_type] = Number(c.n); });
+    const stores = {};
+    (sl||[]).forEach(r => { if(r.locations) (stores[r.staff_id] ||= []).push(r.locations.name); });
+    list.innerHTML = subjects.map(s => {
+      const mine = (runs||[]).filter(r => r.subject_staff_id === s.id && r.status !== "cancelled");
+      const cur = mine[0];
+      const past = mine.filter(r => r !== cur && r.status === "released");
+      const c = cur ? (counts[cur.id] || {}) : {};
+      const raters = (c.manager||0) + (c.peer||0) + (c.direct_report||0);
+      const chip = (label, n) => `<span class="l360-c ${n ? "on" : ""}">${label} ${n || 0}</span>`;
+      let status = `<span class="chip neutral">No 360 yet</span>`, actions = `<button class="btn primary small" data-act="start" data-id="${s.id}" data-name="${lmEsc(s.name)}">Start 360</button>`;
+      if(cur && cur.status === "collecting"){
+        status = `<span class="chip warn">Collecting since ${new Date(cur.created_at).toLocaleDateString()}</span>
+          <div class="l360-counts">${chip("Self", c.self ? "✓" : 0)}${chip("Manager", c.manager)}${chip("Peers", c.peer)}${chip("Direct reports", c.direct_report)}</div>`;
+        actions = `<button class="btn small" data-act="copy" data-url="${lmEsc(l360Url("t=" + cur.rater_token))}">Copy rater link</button>
+          <a class="btn small" href="${lmEsc(l360Url("report=" + cur.id))}" target="_blank" rel="noopener">Preview</a>
+          ${(cur.initiated_by === myStaff.id || isExec) ? `<button class="btn primary small" data-act="release" data-id="${cur.id}" data-name="${lmEsc(s.name)}" data-n="${raters}" ${raters ? "" : "disabled title='No rater responses yet'"}>Release</button>` : ""}
+          <button class="btn ghost small" data-act="cancel" data-id="${cur.id}" data-name="${lmEsc(s.name)}">Cancel</button>`;
+      } else if(cur && cur.status === "released"){
+        status = `<span class="chip good">Released ${new Date(cur.released_at).toLocaleDateString()}</span>
+          <div class="l360-counts">${chip("Self", c.self ? "✓" : 0)}${chip("Raters", raters)}</div>`;
+        actions = `<a class="btn small" href="${lmEsc(l360Url("report=" + cur.id))}" target="_blank" rel="noopener">Open report</a>
+          <button class="btn primary small" data-act="start" data-id="${s.id}" data-name="${lmEsc(s.name)}">Start new 360</button>`;
+      }
+      return `<div class="card l360-row">
+        <div><div class="l360-nm">${lmEsc(s.name)}</div><div class="l360-meta">${lmEsc(L360_ROLE_LABEL[s.role] || s.role)}${stores[s.id] ? " · " + lmEsc(stores[s.id].join(", ")) : ""}</div>
+          ${past.length ? `<div class="l360-past">Earlier: ${past.map(p => `<a href="${lmEsc(l360Url("report=" + p.id))}" target="_blank" rel="noopener">${new Date(p.released_at).toLocaleDateString()}</a>`).join(" · ")}</div>` : ""}</div>
+        <div>${status}</div>
+        <div class="l360-actions">${actions}</div></div>`;
+    }).join("");
+  }catch(err){
+    list.innerHTML = `<div class="empty-note">Couldn't load 360s (${lmEsc(err.message)}).</div>`;
+  }
+}
+function l360Msg(t, ok){ const m = $("#l360-msg"); m.textContent = t; m.style.color = ok ? "var(--good)" : "var(--critical)"; }
+$("#l360-list").addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if(!b) return;
+  const act = b.dataset.act;
+  if(act === "copy"){
+    try{ await navigator.clipboard.writeText(b.dataset.url); b.textContent = "Copied!"; setTimeout(() => b.textContent = "Copy rater link", 1800); }
+    catch(_){ prompt("Copy this rater link:", b.dataset.url); }
+    return;
+  }
+  if(act === "start"){
+    if(!confirm(`Start a Leadership 360 for ${b.dataset.name}?\n\nYou'll get a rater link to send to their manager, peers and direct reports. ${b.dataset.name.split(" ")[0]} will see a self-assessment to-do in the Academy.`)) return;
+    b.disabled = true;
+    const { data, error } = await sb.rpc("l360_start", { p_subject: b.dataset.id });
+    if(error || !data){ b.disabled = false; return l360Msg(error ? error.message : "Couldn't start the 360. Try again."); }
+    const url = l360Url("t=" + data.rater_token);
+    try{ await navigator.clipboard.writeText(url); l360Msg(`360 started for ${b.dataset.name}. Rater link copied, ready to paste into a text or email.`, true); }
+    catch(_){ l360Msg(`360 started for ${b.dataset.name}. Use "Copy rater link" to share it.`, true); }
+    return l360Load();
+  }
+  if(act === "release"){
+    if(!confirm(`Release ${b.dataset.name}'s 360 report?\n\n${b.dataset.n} rater response(s) so far. Once released they'll see the full report in the Academy, the scores go into their Leadership Style history, and no more responses are accepted.`)) return;
+    b.disabled = true;
+    const { error } = await sb.rpc("l360_release", { p_id: b.dataset.id });
+    if(error){ b.disabled = false; return l360Msg(error.message); }
+    l360Msg(`Released. ${b.dataset.name} can open the report from their Academy dashboard.`, true);
+    return l360Load();
+  }
+  if(act === "cancel"){
+    if(!confirm(`Cancel ${b.dataset.name}'s 360? The rater link stops working and the responses so far won't be used.`)) return;
+    const { error } = await sb.rpc("l360_cancel", { p_id: b.dataset.id });
+    if(error) return l360Msg(error.message);
+    l360Msg("Cancelled.", true);
+    return l360Load();
+  }
+});
+document.querySelectorAll('.nav-item[data-section="l360"]').forEach(btn => btn.addEventListener("click", () => { l360Load(); }));
+
+/* ---------------------------------------------------------------------
    APP — real, RLS-scoped data for whoever is signed in
    --------------------------------------------------------------------- */
 function isoWeekKey(dateStr){
@@ -3981,6 +4119,9 @@ async function initApp(){
     if(!linked) return;
     ({ data: staffRow, error: staffErr } = await sb.from("staff").select("id,name,role").eq("auth_user_id", user.id).maybeSingle());
   }
+  // Came here from a page that needed a sign-in (e.g. 360.html?report=…): go back.
+  const nextUrl = new URLSearchParams(location.search).get("next");
+  if(staffRow && nextUrl && /^\/(?!\/)/.test(nextUrl)){ location.replace(nextUrl); return; }
   // Team members (and any role without a Command Deck view) use the Academy.
   if(staffRow && !CD_ROLES.includes(staffRow.role)){ location.replace("academy.html"); return; }
   $("#global-sign-out-btn").hidden = false;
@@ -4234,6 +4375,10 @@ function setupStoreSelect(){
   sel.innerHTML = (multi && isLM ? `<option value="all">All my stores</option>` : "")
     + myLocations.map(l => `<option value="${l.id}">${lmEsc(l.name)}</option>`).join("");
   $("#lm-storebar").hidden = !multi || !LM_NAV_ROLES.includes(myStaff.role);
+  // A one-store LM doesn't need the name/role header or a store picker: drop the
+  // whole bar so the page starts at the content. (.topbar sets display, so [hidden] won't do.)
+  const lmTop = document.querySelector("#lmgm-app-wrap > .topbar");
+  if(lmTop) lmTop.style.display = (isLM && !multi) ? "none" : "";
   sel.value = multi && isLM ? "all" : myLocations[0].id;
   sel.addEventListener("change", () => {
     if(sel.value === "all"){ showPortfolioMode(); }
