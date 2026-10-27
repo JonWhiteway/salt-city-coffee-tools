@@ -278,6 +278,7 @@ function locked(title, body){
 async function raterMode(token){
   const { data, error } = await sb.rpc("l360_rater_info", { p_token: token });
   if(error || !data) return locked("Link not found", "This 360 link isn't valid. Check with whoever sent it to you.");
+  if(data.kind === "gm_360"){ location.replace("gm360.html" + location.search); return; }
   if(data.status !== "collecting") return locked("This 360 is closed", "It's no longer taking responses. Thanks for checking in.");
   const first = esc(String(data.subject_name).split(" ")[0]);
   let rel = null;
@@ -312,9 +313,10 @@ async function raterMode(token){
 async function selfMode(id){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ location.replace("/?next=" + encodeURIComponent(location.pathname + location.search)); return; }
-  const { data: rows, error } = await sb.from("leadership_360s").select("id,status,subject_staff_id,self_submitted_at").eq("id", id);
+  const { data: rows, error } = await sb.from("leadership_360s").select("id,kind,status,subject_staff_id,self_submitted_at").eq("id", id);
   const row = rows && rows[0];
   if(error || !row) return locked("360 not found", "This self-assessment link isn't valid for your account.");
+  if(row.kind === "gm_360"){ location.replace("gm360.html" + location.search); return; }
   if(row.status !== "collecting") return locked("This 360 is closed", `<a href="academy.html">Back to the Academy</a>`);
   $("#app").innerHTML = `
     <div class="hero"><div class="eyebrow">Your self-assessment</div><h1>How do you see yourself lead?</h1>
@@ -339,6 +341,7 @@ async function reportMode(id){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ location.replace("/?next=" + encodeURIComponent(location.pathname + location.search)); return; }
   const { data: r, error } = await sb.rpc("l360_report", { p_id: id });
+  if(r && r.kind === "gm_360"){ location.replace("gm360.html" + location.search); return; }
   if(error) return locked("Report not available yet", esc(error.message) + `<br><br><a href="academy.html">Back to the Academy</a>`);
   $("#report-actions").hidden = false;
   const counts = r.counts || {}, groups = r.groups || {};

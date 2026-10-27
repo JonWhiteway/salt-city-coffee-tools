@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety &amp; Health · Salt City</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;600;700&display=swap');
+/* Safety & Health log for LMs, GMs and leadership.
+   Injuries -> safety_incidents (OSHA-recordable computed in the database).
+   Health inspections -> health_inspections + health_violations (repeats flagged by health_violations_flagged).
+   Both feed the GM Scorecard (Craft: safety 3, inspection result 2, resolution 3) and the health payout cap. */
+:root{
+  --lead-900:#0D1B2A; --lead-700:#1B365D; --lead-100:#EEF2F8;
+  --craft-700:#6D745A; --care-700:#C75D3D;
+  --ink:#241A12; --ink-soft:#4A3B2E; --muted:#7A6A57;
+  --paper:#FFFFFF; --panel:#F7F5F1; --line:#E3DED6;
+  --green:#4C7A52; --green-tint:#E8F0E8; --amber:#B8863B; --amber-tint:#F5EBD8; --red:#A3453A; --red-tint:#F5E3E0;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{ font-family:'Montserrat',sans-serif; background:var(--panel); color:var(--ink); min-height:100vh; line-height:1.5; }
+h1,h2,h3{ font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:.3px; }
+.topbar{ background:linear-gradient(120deg,var(--lead-900),#0a1420); color:#fff; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.topbar .brand-name{ font-family:'Oswald',sans-serif; font-weight:700; font-size:18px; letter-spacing:1px; }
+.topbar .brand-sub{ font-size:10.5px; color:#9FB3C8; letter-spacing:2px; text-transform:uppercase; }
+.topbar a{ color:#fff; font-size:12px; font-weight:700; text-decoration:none; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); border-radius:8px; padding:8px 12px; }
+main{ max-width:880px; margin:0 auto; padding:24px 16px 80px; }
+.page-head{ margin-bottom:16px; display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+.eyebrow{ font-size:11.5px; letter-spacing:2.5px; color:var(--care-700); font-weight:700; text-transform:uppercase; }
+.page-head h1{ font-size:28px; color:var(--lead-700); margin-top:4px; }
+.tabs{ display:flex; gap:4px; background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:4px; margin-bottom:16px; flex-wrap:wrap; }
+.tabs button{ flex:1; min-width:120px; border:0; background:none; padding:9px 12px; border-radius:7px; font-family:inherit; font-weight:700; font-size:13px; color:var(--muted); cursor:pointer; }
+.tabs button[aria-selected=true]{ background:var(--lead-700); color:#fff; }
+.card{ background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:16px; box-shadow:0 1px 3px rgba(13,27,42,.08); }
+.card h2{ font-family:'Montserrat',sans-serif; font-size:12.5px; letter-spacing:1.5px; color:var(--muted); font-weight:700; margin-bottom:12px; }
+.lab{ display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; }
+.help{ font-size:12px; color:var(--muted); margin-top:3px; }
+input[type=text], input[type=date], input[type=time], input[type=number], textarea, select{ width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); font-family:inherit; font-size:14px; color:var(--ink); }
+textarea{ min-height:64px; resize:vertical; }
+.field{ margin-bottom:14px; }
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.check{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); margin-bottom:8px; cursor:pointer; font-size:14px; }
+.check input{ margin-top:4px; width:18px; height:18px; }
+.btn{ display:inline-block; background:var(--care-700); color:#fff; border:none; border-radius:8px; padding:10px 16px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; text-decoration:none; }
+.btn.navy{ background:var(--lead-700); } .btn.ghost{ background:var(--panel); color:var(--ink); border:1px solid var(--line); }
+.btn.small{ padding:6px 10px; font-size:12px; }
+.btn:disabled{ opacity:.5; cursor:default; }
+.msg{ font-size:13.5px; padding:11px 14px; border-radius:8px; margin-bottom:14px; }
+.msg.error{ background:var(--red-tint); color:var(--red); } .msg.ok{ background:var(--green-tint); color:var(--green); } .msg.info{ background:var(--paper); border:1px solid var(--line); color:var(--ink-soft); }
+.osha{ font-size:13px; padding:8px 12px; border-radius:8px; margin:6px 0 14px; }
+.osha.yes{ background:var(--red-tint); color:var(--red); } .osha.no{ background:var(--green-tint); color:var(--green); }
+.viol{ border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:10px; background:var(--panel); }
+.viol .row{ display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:8px; }
+.item{ border-top:1px solid var(--line); padding:12px 0; }
+.item:first-child{ border-top:0; }
+.item-head{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.item-title{ font-weight:700; }
+.meta{ font-size:12.5px; color:var(--muted); }
+.pill{ display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; background:var(--panel); color:var(--muted); margin-left:4px; }
+.pill.green{ background:var(--green-tint); color:var(--green); } .pill.amber{ background:var(--amber-tint); color:#7A5A20; } .pill.red{ background:var(--red-tint); color:var(--red); }
+.vlist{ margin:8px 0 0; display:grid; gap:8px; }
+.vline{ background:var(--panel); border-radius:8px; padding:8px 10px; font-size:13.5px; display:grid; gap:6px; }
+.vline .acts{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+.vline input[type=date]{ width:auto; padding:5px 8px; font-size:12.5px; }
+.steps{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.hidden{ display:none !important; }
+@media (max-width:620px){ .grid2, .grid3{ grid-template-columns:1fr; } .page-head h1{ font-size:24px; } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><div class="brand-name">Salt City Coffee</div><div class="brand-sub">Safety &amp; Health</div></div>
+  <a href="/">&larr; Command Deck</a>
+</div>
+<main id="app"><div class="msg info">Loading&hellip;</div></main>
+
+<script>
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eXN2Y3ByenZtaHhycm5vZ3FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODMxMTAsImV4cCI6MjEwMDc1OTExMH0.KZXVYcdDa9lKo3YNXbUYnYGOWjS-ZFtlV4YeyzTs_h0';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const app = document.getElementById('app');
+const EXEC = ['coo','ceo','cbo','production_manager'];
+const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
+const today = () => new Intl.DateTimeFormat('en-CA', { timeZone:'America/New_York' }).format(new Date());
+const fmtD = d => d ? new Date(String(d).slice(0,10) + 'T12:00:00Z').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', timeZone:'UTC' }) : '—';
+const fmtT = t => t ? new Date(t).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit', timeZone:'America/New_York' }) : '';
+const SEV = { critical:['Critical','red'], priority:['Priority','amber'], non_critical:['Non-critical',''] };
+const RESULT = { pass:['Passed','green'], pass_corrected:['Passed, corrected on site','amber'], fail:['Failed','red'] };
+const params = new URLSearchParams(location.search);
+let me = null, locs = [], team = [], tab = params.get('tab') || 'injury';
+
+function flash(text, kind){ const m = document.getElementById('msg'); m.innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : ''; if (text) window.scrollTo({ top:0, behavior:'smooth' }); }
+const locOptions = sel => locs.map(l => `<option value="${l.id}" ${l.id === sel ? 'selected' : ''}>${esc(l.name)}</option>`).join('');
+
+function shell(){
+  app.innerHTML = `
+    <div class="page-head"><div><div class="eyebrow">LM dashboard · feeds the GM Scorecard</div><h1>Safety &amp; Health</h1></div></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-t="injury" aria-selected="${tab==='injury'}">Report an injury</button>
+      <button role="tab" data-t="mock" aria-selected="${tab==='mock'}">Mock inspection</button>
+      <button role="tab" data-t="inspection" aria-selected="${tab==='inspection'}">Log a county inspection</button>
+      <button role="tab" data-t="history" aria-selected="${tab==='history'}">History &amp; follow-up</button>
+    </div>
+    <div id="msg"></div>
+    <div id="body"></div>`;
+  app.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { tab = b.dataset.t; history.replaceState(null, '', '?tab=' + tab); shell(); }));
+  ({ injury:injuryForm, mock:mockForm, inspection:inspectionForm, history:historyView })[tab]();
+}
+
+/* ---------- injury ---------- */
+function injuryForm(){
+  const body = document.getElementById('body');
+  body.innerHTML = `<div class="card">
+    <h2>Report an injury</h2>
+    <p class="help" style="margin-bottom:14px;">Log every injury the same day, even small ones. The questions below decide whether it's OSHA-recordable; you don't need to know the rules.</p>
+    <div class="grid3">
+      <div class="field"><label class="lab" for="i-loc">Cafe</label><select id="i-loc">${locOptions()}</select></div>
+      <div class="field"><label class="lab" for="i-date">Date</label><input type="date" id="i-date" value="${today()}"></div>
+      <div class="field"><label class="lab" for="i-time">Time (optional)</label><input type="time" id="i-time"></div>
+    </div>
+    <div class="field"><label class="lab" for="i-who">Who was hurt?</label>
+      <select id="i-who"><option value="">Pick a team member…</option>${team.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}<option value="other">Someone else (type the name)</option></select>
+      <input type="text" id="i-name" class="hidden" placeholder="Name" style="margin-top:6px;"></div>
+    <div class="field"><label class="lab" for="i-what">What happened?</label><textarea id="i-what" placeholder="Where, what they were doing, what caused it"></textarea></div>
+    <div class="grid2">
+      <div class="field"><label class="lab" for="i-type">Type of injury</label><select id="i-type"><option>Burn</option><option>Cut</option><option>Slip, trip or fall</option><option>Strain or sprain</option><option>Other</option></select></div>
+      <div class="field"><label class="lab" for="i-part">Body part</label><input type="text" id="i-part" placeholder="e.g. left hand"></div>
+    </div>
+    <label class="lab">What care was needed?</label>
+    <label class="check"><input type="checkbox" id="i-med"> <span><b>Medical treatment beyond first aid</b><br><span class="help">Stitches, prescription medicine, a doctor treating it (not just checking it). Ice, bandages and over-the-counter medicine are first aid.</span></span></label>
+    <label class="check"><input type="checkbox" id="i-restricted"> <span><b>Restricted or light duty afterward</b><br><span class="help">They couldn't do their normal job for at least one shift.</span></span></label>
+    <div class="field"><label class="lab" for="i-days">Days away from work because of it</label><input type="number" id="i-days" min="0" value="0" style="max-width:120px;"></div>
+    <div id="i-osha" class="osha no">First aid only: logged, not OSHA-recordable.</div>
+    <div class="field"><label class="lab" for="i-prev">What will we change so it doesn't happen again?</label><textarea id="i-prev"></textarea></div>
+    <label class="check"><input type="checkbox" id="i-gm"> <span>I've told my GM today</span></label>
+    <button class="btn navy" id="i-save">Save injury report</button>
+  </div>`;
+  const who = document.getElementById('i-who'), name = document.getElementById('i-name');
+  who.addEventListener('change', () => name.classList.toggle('hidden', who.value !== 'other'));
+  const upd = () => {
+    const rec = document.getElementById('i-med').checked || document.getElementById('i-restricted').checked || Number(document.getElementById('i-days').value) > 0;
+    const o = document.getElementById('i-osha');
+    o.className = 'osha ' + (rec ? 'yes' : 'no');
+    o.textContent = rec ? 'OSHA-recordable. This counts against the safety score, so double-check the details.' : 'First aid only: logged, not OSHA-recordable.';
+  };
+  ['i-med','i-restricted','i-days'].forEach(id => document.getElementById(id).addEventListener('input', upd));
+  document.getElementById('i-save').addEventListener('click', async e => {
+    const what = document.getElementById('i-what').value.trim();
+    if (!what) return flash('Describe what happened.', 'error');
+    if (!who.value || (who.value === 'other' && !name.value.trim())) return flash('Pick who was hurt.', 'error');
+    const med = document.getElementById('i-med').checked, rest = document.getElementById('i-restricted').checked, days = Math.max(0, Number(document.getElementById('i-days').value) || 0);
+    e.target.disabled = true;
+    const { error } = await sb.from('safety_incidents').insert({
+      location_id: document.getElementById('i-loc').value, occurred_on: document.getElementById('i-date').value, occurred_time: document.getElementById('i-time').value || null,
+      injured_staff_id: who.value !== 'other' ? who.value : null, injured_name: who.value === 'other' ? name.value.trim() : (team.find(t => t.id === who.value) || {}).name,
+      what_happened: what, injury_type: document.getElementById('i-type').value, body_part: document.getElementById('i-part').value.trim() || null,
+      first_aid_only: !(med || rest || days > 0), medical_treatment: med, restricted_duty: rest, days_away: days,
+      prevention_steps: document.getElementById('i-prev').value.trim() || null,
+      gm_notified_at: document.getElementById('i-gm').checked ? new Date().toISOString() : null, reported_by: me.id });
+    e.target.disabled = false;
+    if (error) return flash(error.message, 'error');
+    flash('Injury report saved.', 'ok'); injuryForm();
+  });
+}
+
+/* ---------- mock inspection ----------
+   Built on the NYS Sanitary Code Subpart 14-1 inspection the county runs (red = critical, blue = non-critical),
+   written for how our cafes actually operate. Each "Fail" becomes a violation with an owner and fix-by date,
+   followed up in History exactly like a county inspection. Mock results never touch the GM Scorecard's
+   inspection points; they exist to make the real one boring. */
+const MOCK = [
+  { sec:'Food source & condition', items:[
+    ['f1','critical','All food, milk and pastries come from approved suppliers; nothing made at home'],
+    ['f2','critical','No expired, spoiled or past-date items (milk, alt-milks, cold brew, pastries, sandwiches); dented or swollen cans pulled'],
+  ]},
+  { sec:'Temperatures', items:[
+    ['t1','critical','Every fridge and under-counter cooler at 45°F or below. Probe the milk and write each temp in the note'],
+    ['t2','critical','Milk and alt-milk pitchers aren\'t sitting out; cartons go back in the fridge between drinks'],
+    ['t3','critical','Cold brew, cut fruit, sandwiches and other cold grab-and-go at 45°F or below'],
+    ['t4','critical','Hot food held at 140°F or above; anything reheated reaches 165°F (N/A if no hot food)'],
+    ['t5','critical','House-made items (cold brew concentrate, syrups, toppings) cooled and stored per our recipe, labeled with date made'],
+    ['t6','non_critical','A thermometer in every cooler, and a working, calibrated probe thermometer on site'],
+  ]},
+  { sec:'Hands & health', items:[
+    ['h1','critical','Hand sinks reachable, used only for handwashing, stocked with soap and paper towels, sign posted'],
+    ['h2','critical','Staff wash hands when they should (start of shift, after trash, phone, face, raw food). Watch for 5 minutes'],
+    ['h3','critical','No bare-hand contact with ready-to-eat food: pastries, toast, garnishes, ice (tongs, tissue or gloves)'],
+    ['h4','critical','No one working sick; the shift lead can explain our illness policy'],
+    ['h5','non_critical','Hair restrained; personal drinks covered and away from prep areas; no eating on the line'],
+  ]},
+  { sec:'Contamination & chemicals', items:[
+    ['c1','critical','Chemicals labeled and stored below and away from food, cups and lids'],
+    ['c2','critical','Allergens stored and labeled; nut or alt-milk items kept from cross-contact; staff can name the allergens in a drink'],
+    ['c3','non_critical','Sanitizer buckets and wiping cloths at the right strength (test strip) and cloths kept in solution'],
+    ['c4','non_critical','Ice scoop stored outside the ice, handle up; ice bin clean'],
+    ['c5','non_critical','Food covered, labeled, dated and stored 6" off the floor'],
+    ['c6','non_critical','Cups, lids, straws and sleeves protected from contamination and dispensed properly'],
+  ]},
+  { sec:'Equipment & cleaning', items:[
+    ['e1','non_critical','Steam wands purged and wiped after every drink; drip trays and group heads clean'],
+    ['e2','non_critical','Three-compartment sink set up wash-rinse-sanitize (or dish machine at its sanitizing temp or strength)'],
+    ['e3','non_critical','Blenders, pitchers, scoops and food-contact surfaces clean and in good repair'],
+  ]},
+  { sec:'Facility', items:[
+    ['p1','critical','No live pests or fresh droppings anywhere'],
+    ['p2','non_critical','Pest control service log on file and current; doors and screens sealed'],
+    ['p3','non_critical','Plumbing: no leaks; ice machine and drains have proper air gaps'],
+    ['p4','non_critical','Floors, walls, ceilings, vents clean and in repair; lights shielded'],
+    ['p5','non_critical','Trash and recycling covered, back of house and dumpster area clean'],
+    ['p6','non_critical','Restrooms clean and stocked, self-closing door, handwash sign posted'],
+  ]},
+  { sec:'Paperwork & postings', items:[
+    ['d1','non_critical','Health permit posted and current; choking first-aid poster posted'],
+    ['d2','non_critical','Temperature logs filled in for every shift this week'],
+    ['d3','non_critical','Last county inspection report on file, with its fixes done'],
+  ]},
+];
+function mockForm(){
+  const body = document.getElementById('body');
+  const row = ([id, sev, text]) => `<div class="vline" data-mid="${id}" data-sev="${sev}">
+      <div><span class="pill ${sev === 'critical' ? 'red' : ''}">${sev === 'critical' ? 'Red · critical' : 'Blue'}</span> ${esc(text)}</div>
+      <div class="acts">
+        <label><input type="radio" name="m-${id}" value="pass"> Pass</label>
+        <label><input type="radio" name="m-${id}" value="fail"> Fail</label>
+        <label><input type="radio" name="m-${id}" value="na"> N/A</label>
+      </div>
+      <div class="m-fail hidden" style="display:grid; gap:6px;">
+        <input type="text" class="m-note" placeholder="What you saw (temps, where, who)">
+        <div class="grid3">
+          <label class="check" style="margin:0;"><input type="checkbox" class="m-cos"> <span>Fixed on the spot</span></label>
+          <select class="m-owner" aria-label="Owner"><option value="">Owner…</option>${team.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select>
+          <input type="date" class="m-due" aria-label="Fix by">
+        </div>
+      </div>
+    </div>`;
+  body.innerHTML = `<div class="card">
+      <h2>How a mock inspection works</h2>
+      <ul class="meta" style="padding-left:18px; display:grid; gap:4px;">
+        <li><b>When:</b> once a quarter per cafe, unannounced, by the GM. LMs can run their own any time as practice.</li>
+        <li><b>How:</b> walk it like the county does: hand sinks and coolers first, then the bar, back of house, restrooms and paperwork. About 30 minutes; probe the milk.</li>
+        <li><b>Grading (same as the county):</b> red items are critical. A red fail that isn't fixed on the spot = <b>fail</b>; a red fail fixed on the spot = <b>passed, corrected</b>; blue items only = <b>pass</b>.</li>
+        <li><b>After:</b> walk the LM through it before you leave. Every fail gets an owner and a fix-by date, then follow it in History: write-up in 24 hours, plan in 48, fixed, team retrained.</li>
+        <li>Mock results don't change the GM Scorecard. They're practice for the real inspection.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Mock inspection</h2>
+      <div class="grid2">
+        <div class="field"><label class="lab" for="m-loc">Cafe</label><select id="m-loc">${locOptions()}</select></div>
+        <div class="field"><label class="lab" for="m-date">Date</label><input type="date" id="m-date" value="${today()}"></div>
+      </div>
+      ${MOCK.map(s => `<h2 style="margin:16px 0 8px;">${esc(s.sec)}</h2><div class="vlist">${s.items.map(row).join('')}</div>`).join('')}
+      <div class="field" style="margin-top:16px;"><label class="lab" for="m-notes">Overall notes for the LM</label><textarea id="m-notes"></textarea></div>
+      <div id="m-sum" class="osha no">Answer each item to see the result.</div>
+      <button class="btn navy" id="m-save">Save mock inspection</button>
+    </div>`;
+  const tally = () => {
+    const rows = [...body.querySelectorAll('[data-mid]')];
+    const ans = rows.map(r => ({ r, v: (r.querySelector('input[type=radio]:checked') || {}).value }));
+    ans.forEach(a => a.r.querySelector('.m-fail').classList.toggle('hidden', a.v !== 'fail'));
+    const done = ans.filter(a => a.v).length, applicable = ans.filter(a => a.v && a.v !== 'na').length, passed = ans.filter(a => a.v === 'pass').length;
+    const redOpen = ans.filter(a => a.v === 'fail' && a.r.dataset.sev === 'critical' && !a.r.querySelector('.m-cos').checked).length;
+    const redFixed = ans.filter(a => a.v === 'fail' && a.r.dataset.sev === 'critical' && a.r.querySelector('.m-cos').checked).length;
+    const result = redOpen ? 'fail' : redFixed ? 'pass_corrected' : 'pass';
+    const s = document.getElementById('m-sum');
+    s.className = 'osha ' + (result === 'pass' ? 'no' : 'yes');
+    s.textContent = `${done} of ${rows.length} answered · ${applicable ? Math.round(100 * passed / applicable) : 0}% passed · would be graded: ${RESULT[result][0]}${redOpen ? ` (${redOpen} red item${redOpen > 1 ? 's' : ''} not fixed)` : ''}`;
+    return { ans, rows, done, applicable, passed, result };
+  };
+  body.addEventListener('change', tally);
+  document.getElementById('m-save').addEventListener('click', async e => {
+    const t = tally();
+    if (t.done < t.rows.length) return flash(`${t.rows.length - t.done} item(s) still unanswered. Mark each Pass, Fail or N/A.`, 'error');
+    const fails = t.ans.filter(a => a.v === 'fail');
+    const missingDue = fails.filter(a => !a.r.querySelector('.m-cos').checked && !a.r.querySelector('.m-due').value);
+    if (missingDue.length) { missingDue[0].r.scrollIntoView({ block:'center', behavior:'smooth' }); return flash('Give each fail that wasn’t fixed on the spot a fix-by date.', 'error'); }
+    const textOf = id => MOCK.flatMap(s => s.items).find(i => i[0] === id)[2];
+    const checklist = Object.fromEntries(t.ans.map(a => [a.r.dataset.mid, { v:a.v, note:a.r.querySelector('.m-note').value.trim() || null }]));
+    e.target.disabled = true;
+    const { data: insp, error } = await sb.from('health_inspections').insert({
+      location_id: document.getElementById('m-loc').value, inspected_on: document.getElementById('m-date').value, inspection_type: 'mock',
+      agency: 'Salt City mock inspection', inspector: me.name, result: t.result, checklist, score_pct: t.applicable ? Math.round(100 * t.passed / t.applicable) : null,
+      notes: document.getElementById('m-notes').value.trim() || null, entered_by: me.id }).select('id').single();
+    if (error) { e.target.disabled = false; return flash(error.message, 'error'); }
+    if (fails.length) {
+      const { error: e2 } = await sb.from('health_violations').insert(fails.map(a => ({
+        inspection_id: insp.id, code: 'Mock ' + a.r.dataset.mid.toUpperCase(), severity: a.r.dataset.sev,
+        description: textOf(a.r.dataset.mid) + (a.r.querySelector('.m-note').value.trim() ? ' — ' + a.r.querySelector('.m-note').value.trim() : ''),
+        corrected_on_site: a.r.querySelector('.m-cos').checked, owner_staff_id: a.r.querySelector('.m-owner').value || null,
+        due_date: a.r.querySelector('.m-due').value || null })));
+      if (e2) { e.target.disabled = false; return flash('Mock saved, but its fails didn’t: ' + e2.message, 'error'); }
+    }
+    tab = 'history'; history.replaceState(null, '', '?tab=history'); shell();
+    flash(`Mock inspection saved: ${RESULT[t.result][0]}, ${fails.length} fail(s). Follow them up below.`, 'ok');
+  });
+}
+
+/* ---------- inspection ---------- */
+function violationHtml(i){
+  return `<div class="viol" data-v="${i}">
+    <div class="row"><b>Violation ${i + 1}</b><button class="btn ghost small" data-rm="${i}">Remove</button></div>
+    <div class="grid3">
+      <div class="field"><label class="lab">Item # on the report</label><input type="text" class="v-code" placeholder="e.g. 5-1.1"></div>
+      <div class="field"><label class="lab">Severity</label><select class="v-sev"><option value="critical">Critical</option><option value="priority">Priority</option><option value="non_critical" selected>Non-critical</option></select></div>
+      <div class="field"><label class="lab">Fix by</label><input type="date" class="v-due"></div>
+    </div>
+    <div class="field"><label class="lab">What the inspector wrote</label><textarea class="v-desc"></textarea></div>
+    <div class="field"><label class="lab">How we'll fix it (and retrain)</label><textarea class="v-plan"></textarea></div>
+    <div class="grid2">
+      <div class="field"><label class="lab">Owner</label><select class="v-owner"><option value="">—</option>${team.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></div>
+      <label class="check" style="align-self:end;"><input type="checkbox" class="v-cos"> <span>Corrected on site during the inspection</span></label>
+    </div>
+  </div>`;
+}
+function inspectionForm(){
+  const body = document.getElementById('body');
+  body.innerHTML = `<div class="card">
+    <h2>Log a health inspection</h2>
+    <p class="help" style="margin-bottom:14px;">Enter it the day of the inspection, from the inspector's write-up. Same day: tell your GM. Within 24 hours: share the write-up. Within 48 hours: file the correction plan (both are marked under History).</p>
+    <div class="grid3">
+      <div class="field"><label class="lab" for="h-loc">Cafe</label><select id="h-loc">${locOptions()}</select></div>
+      <div class="field"><label class="lab" for="h-date">Inspection date</label><input type="date" id="h-date" value="${today()}"></div>
+      <div class="field"><label class="lab" for="h-type">Type</label><select id="h-type"><option value="routine">Routine</option><option value="reinspection">Re-inspection</option><option value="complaint">Complaint</option><option value="pre_operational">Pre-operational</option><option value="other">Other</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label class="lab" for="h-result">Result</label><select id="h-result"><option value="pass">Passed</option><option value="pass_corrected">Passed, items corrected on site</option><option value="fail">Failed</option></select></div>
+      <div class="field"><label class="lab" for="h-insp">Inspector (optional)</label><input type="text" id="h-insp"></div>
+    </div>
+    <div class="field"><label class="lab" for="h-notes">Notes (optional)</label><textarea id="h-notes"></textarea></div>
+    <h2 style="margin-top:6px;">Violations</h2>
+    <div id="viols"></div>
+    <button class="btn ghost" id="h-add">+ Add a violation</button>
+    <p class="help" style="margin:6px 0 14px;">No violations? Leave this empty. A violation with the same item # as the last inspection is flagged as a repeat automatically.</p>
+    <label class="check"><input type="checkbox" id="h-gm"> <span>I've told my GM today</span></label>
+    <button class="btn navy" id="h-save">Save inspection</button>
+  </div>`;
+  const box = document.getElementById('viols'); let n = 0;
+  const add = () => { box.insertAdjacentHTML('beforeend', violationHtml(n++)); };
+  box.addEventListener('click', e => { const r = e.target.closest('[data-rm]'); if (r) r.closest('.viol').remove(); });
+  document.getElementById('h-add').addEventListener('click', add);
+  document.getElementById('h-save').addEventListener('click', async e => {
+    const viols = [...box.querySelectorAll('.viol')].map(v => ({
+      code: v.querySelector('.v-code').value.trim() || null, severity: v.querySelector('.v-sev').value, due_date: v.querySelector('.v-due').value || null,
+      description: v.querySelector('.v-desc').value.trim(), fix_plan: v.querySelector('.v-plan').value.trim() || null,
+      owner_staff_id: v.querySelector('.v-owner').value || null, corrected_on_site: v.querySelector('.v-cos').checked }));
+    if (viols.some(v => !v.description)) return flash('Each violation needs what the inspector wrote.', 'error');
+    if (viols.some(v => !v.corrected_on_site && !v.due_date)) return flash('Give each violation not corrected on site a fix-by date.', 'error');
+    e.target.disabled = true;
+    const { data: insp, error } = await sb.from('health_inspections').insert({
+      location_id: document.getElementById('h-loc').value, inspected_on: document.getElementById('h-date').value, inspection_type: document.getElementById('h-type').value,
+      result: document.getElementById('h-result').value, inspector: document.getElementById('h-insp').value.trim() || null, notes: document.getElementById('h-notes').value.trim() || null,
+      gm_notified_at: document.getElementById('h-gm').checked ? new Date().toISOString() : null, entered_by: me.id }).select('id').single();
+    if (error) { e.target.disabled = false; return flash(error.message, 'error'); }
+    if (viols.length) {
+      const { error: e2 } = await sb.from('health_violations').insert(viols.map(v => ({ ...v, inspection_id: insp.id })));
+      if (e2) { e.target.disabled = false; return flash('Inspection saved, but violations failed: ' + e2.message, 'error'); }
+    }
+    tab = 'history'; history.replaceState(null, '', '?tab=history'); shell(); flash('Inspection saved. Mark the 24-hour write-up and 48-hour plan here when they’re done.', 'ok');
+  });
+}
+
+/* ---------- history ---------- */
+async function historyView(){
+  const body = document.getElementById('body');
+  body.innerHTML = '<div class="msg info">Loading…</div>';
+  const ids = locs.map(l => l.id);
+  const [{ data: insps, error: e1 }, { data: viols }, { data: inj, error: e3 }] = await Promise.all([
+    sb.from('health_inspections').select('*').in('location_id', ids).eq('voided', false).order('inspected_on', { ascending:false }).limit(50),
+    sb.from('health_violations_flagged').select('*').in('location_id', ids).order('created_at'),
+    sb.from('safety_incidents').select('*').in('location_id', ids).eq('voided', false).order('occurred_on', { ascending:false }).limit(50),
+  ]);
+  if (e1 || e3) { body.innerHTML = `<div class="msg error">${esc((e1 || e3).message)}</div>`; return; }
+  const lname = id => (locs.find(l => l.id === id) || {}).name || '';
+  const tname = id => (team.find(t => t.id === id) || {}).name || '';
+  const t = today();
+  const inspHtml = (insps || []).map(i => {
+    const vs = (viols || []).filter(v => v.inspection_id === i.id);
+    const open = vs.filter(v => !v.corrected_on_site && !v.fixed_on);
+    const late = open.filter(v => v.due_date && v.due_date < t);
+    const needsSteps = vs.some(v => !v.corrected_on_site);
+    return `<div class="item">
+      <div class="item-head"><div class="item-title">${esc(lname(i.location_id))} · ${fmtD(i.inspected_on)} ${i.inspection_type === 'mock' ? `<span class="pill">Mock${i.score_pct != null ? ' · ' + i.score_pct + '%' : ''}</span>` : '<span class="pill">County</span>'}<span class="pill ${RESULT[i.result][1]}">${RESULT[i.result][0]}</span>${vs.some(v => v.is_repeat) ? '<span class="pill red">Repeat violation</span>' : ''}${late.length ? `<span class="pill red">${late.length} past due</span>` : open.length ? `<span class="pill amber">${open.length} open</span>` : vs.length ? '<span class="pill green">All fixed</span>' : ''}</div>
+        <div class="meta">${esc(i.inspection_type.replace('_',' '))}${i.inspector ? ' · ' + esc(i.inspector) : ''}</div></div>
+      ${needsSteps ? `<div class="steps">
+        ${i.report_filed_at ? `<span class="pill green">Write-up shared ${fmtT(i.report_filed_at)}</span>` : `<button class="btn ghost small" data-step="report_filed_at" data-id="${i.id}">Mark write-up shared (24h)</button>`}
+        ${i.plan_filed_at ? `<span class="pill green">Plan filed ${fmtT(i.plan_filed_at)}</span>` : `<button class="btn ghost small" data-step="plan_filed_at" data-id="${i.id}">Mark correction plan filed (48h)</button>`}
+      </div>` : ''}
+      ${vs.length ? `<div class="vlist">${vs.map(v => `<div class="vline">
+        <div><span class="pill ${SEV[v.severity][1]}">${SEV[v.severity][0]}</span>${v.is_repeat ? '<span class="pill red">Repeat</span>' : ''} ${v.code ? '<b>' + esc(v.code) + '</b> · ' : ''}${esc(v.description)}</div>
+        ${v.fix_plan ? `<div class="meta">Plan: ${esc(v.fix_plan)}</div>` : ''}
+        <div class="acts meta">${v.corrected_on_site ? 'Corrected on site' : `${tname(v.owner_staff_id) ? esc(tname(v.owner_staff_id)) + ' · ' : ''}fix by ${fmtD(v.due_date)}
+          ${v.fixed_on ? ` · <span class="pill green">Fixed ${fmtD(v.fixed_on)}</span>` : ` · <input type="date" value="${t}" id="fx-${v.id}" aria-label="Fixed on"> <button class="btn navy small" data-fix="${v.id}">Mark fixed</button>`}`}
+          ${v.retraining_done ? '<span class="pill green">Team retrained</span>' : `<button class="btn ghost small" data-retrain="${v.id}">Mark team retrained</button>`}</div>
+      </div>`).join('')}</div>` : '<div class="meta" style="margin-top:6px;">No violations.</div>'}
+    </div>`;
+  }).join('') || '<div class="meta">No inspections logged yet.</div>';
+  const injHtml = (inj || []).map(x => `<div class="item">
+    <div class="item-head"><div class="item-title">${esc(lname(x.location_id))} · ${fmtD(x.occurred_on)} · ${esc(x.injured_name || '')} <span class="pill ${x.osha_recordable ? 'red' : 'green'}">${x.osha_recordable ? 'OSHA-recordable' : 'First aid'}</span></div>
+      <div class="meta">${esc(x.injury_type || '')}${x.body_part ? ' · ' + esc(x.body_part) : ''}${x.days_away ? ` · ${x.days_away} day(s) away` : ''}</div></div>
+    <div class="meta" style="margin-top:4px;">${esc(x.what_happened)}${x.prevention_steps ? `<br><b>Change:</b> ${esc(x.prevention_steps)}` : ''}</div></div>`).join('') || '<div class="meta">No injuries logged.</div>';
+  body.innerHTML = `<div class="card"><h2>Health inspections</h2>${inspHtml}</div><div class="card"><h2>Injuries</h2>${injHtml}</div>`;
+  body.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', async () => {
+    b.disabled = true; const { error } = await sb.from('health_inspections').update({ [b.dataset.step]: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', b.dataset.id);
+    if (error) { b.disabled = false; return flash(error.message, 'error'); } historyView();
+  }));
+  body.querySelectorAll('[data-fix]').forEach(b => b.addEventListener('click', async () => {
+    b.disabled = true; const { error } = await sb.from('health_violations').update({ fixed_on: document.getElementById('fx-' + b.dataset.fix).value || today(), updated_at: new Date().toISOString() }).eq('id', b.dataset.fix);
+    if (error) { b.disabled = false; return flash(error.message, 'error'); } historyView();
+  }));
+  body.querySelectorAll('[data-retrain]').forEach(b => b.addEventListener('click', async () => {
+    b.disabled = true; const { error } = await sb.from('health_violations').update({ retraining_done: true, updated_at: new Date().toISOString() }).eq('id', b.dataset.retrain);
+    if (error) { b.disabled = false; return flash(error.message, 'error'); } historyView();
+  }));
+}
+
+(async () => {
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { location.replace('/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
+    const { data: prof } = await sb.from('staff').select('id,name,role').eq('auth_user_id', user.id).single();
+    me = prof;
+    if (!me || ![...EXEC, 'gm', 'location_manager', 'ceo'].includes(me.role)) { app.innerHTML = '<div class="msg info">The Safety &amp; Health log is for Location Managers, GMs and leadership.</div>'; return; }
+    if (EXEC.includes(me.role)) {
+      const { data } = await sb.from('locations').select('id,name').eq('type','cafe').order('name'); locs = data || [];
+    } else {
+      const { data } = await sb.from('staff_locations').select('location_id, locations(id,name,type)').eq('staff_id', me.id);
+      locs = (data || []).map(r => r.locations).filter(l => l && l.type === 'cafe').sort((a,b) => a.name.localeCompare(b.name));
+    }
+    if (!locs.length) { app.innerHTML = '<div class="msg info">You don’t have a cafe assigned in the Command Deck yet.</div>'; return; }
+    const { data: links } = await sb.from('staff_locations').select('staff_id').in('location_id', locs.map(l => l.id));
+    const ids = [...new Set((links || []).map(r => r.staff_id))];
+    const { data: ppl } = ids.length ? await sb.from('staff').select('id,name').in('id', ids).neq('is_active', false).order('name') : { data: [] };
+    team = ppl || [];
+    shell();
+  } catch (e) { app.innerHTML = `<div class="msg error">${esc(e.message || e)}</div>`; }
+})();
+</script>
+</body>
+</html>

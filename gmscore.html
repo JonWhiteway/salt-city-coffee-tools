@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GM Scorecard · Salt City Academy</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;600;700&display=swap');
+/* GM Scorecard, live. Everything comes from gm_scorecard(staff, year) in Supabase, which reads
+   Square sales/labor, store audits, the waste log, the coaching log and the GM 360.
+   ?gm=STAFF_ID&year=YYYY  (a GM without ?gm sees their own; COO/CEO/CBO get a GM picker) */
+:root{
+  --lead-900:#0D1B2A; --lead-700:#1B365D; --lead-100:#EEF2F8;
+  --craft-700:#6D745A; --craft-100:#F2F1E8;
+  --care-700:#C75D3D; --care-100:#FFF6EE;
+  --ink:#241A12; --ink-soft:#4A3B2E; --muted:#7A6A57;
+  --paper:#FFFFFF; --panel:#F7F5F1; --line:#E3DED6;
+  --green:#4C7A52; --green-tint:#E8F0E8; --amber:#B8863B; --amber-tint:#F5EBD8; --red:#A3453A; --red-tint:#F5E3E0;
+  --money:#2F7A4F;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{ font-family:'Montserrat',sans-serif; background:var(--panel); color:var(--ink); min-height:100vh; line-height:1.5; }
+h1,h2,h3{ font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:.3px; }
+.topbar{ background:linear-gradient(120deg,var(--lead-900),#0a1420); color:#fff; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.topbar .brand-name{ font-family:'Oswald',sans-serif; font-weight:700; font-size:18px; letter-spacing:1px; }
+.topbar .brand-sub{ font-size:10.5px; color:#9FB3C8; letter-spacing:2px; text-transform:uppercase; }
+.topbar a{ color:#fff; font-size:12px; font-weight:700; text-decoration:none; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); border-radius:8px; padding:8px 12px; }
+main{ max-width:960px; margin:0 auto; padding:28px 16px 80px; }
+.page-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+.eyebrow{ font-size:11.5px; letter-spacing:2.5px; color:var(--care-700); font-weight:700; text-transform:uppercase; }
+.page-head h1{ font-size:30px; color:var(--lead-700); margin-top:4px; }
+.sub{ color:var(--muted); font-size:14px; margin-top:2px; }
+.pickers{ display:flex; gap:8px; flex-wrap:wrap; }
+select{ padding:9px 12px; border:1px solid var(--line); border-radius:8px; background:var(--paper); font-family:inherit; font-size:14px; color:var(--ink); }
+.card{ background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:16px; box-shadow:0 1px 3px rgba(13,27,42,.08); }
+.card h2{ font-family:'Montserrat',sans-serif; font-size:12.5px; letter-spacing:1.5px; color:var(--muted); font-weight:700; margin-bottom:12px; }
+.msg{ font-size:13.5px; padding:11px 14px; border-radius:8px; margin-bottom:14px; }
+.msg.error{ background:var(--red-tint); color:var(--red); }
+.msg.info{ background:var(--paper); color:var(--ink-soft); border:1px solid var(--line); }
+.msg.amber{ background:var(--amber-tint); color:#7A5A20; }
+.hero{ display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:center; }
+.big{ font-family:'Oswald',sans-serif; font-size:64px; line-height:1; color:var(--lead-700); }
+.big small{ font-size:22px; color:var(--muted); }
+.hero-side .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+.pill{ display:inline-block; font-size:12px; font-weight:700; padding:4px 10px; border-radius:99px; background:var(--panel); color:var(--ink-soft); }
+.pill.green{ background:var(--green-tint); color:var(--green); } .pill.amber{ background:var(--amber-tint); color:#7A5A20; } .pill.red{ background:var(--red-tint); color:var(--red); }
+.bars{ display:grid; gap:10px; margin-top:4px; }
+.bar-row{ display:grid; grid-template-columns:120px 1fr 92px; gap:10px; align-items:center; font-size:13px; }
+.track{ position:relative; height:14px; background:var(--panel); border:1px solid var(--line); border-radius:99px; overflow:hidden; }
+.fill{ position:absolute; left:0; top:0; bottom:0; border-radius:99px; }
+.tracked{ position:absolute; left:0; top:0; bottom:0; border-right:2px dashed rgba(0,0,0,.25); }
+.minline{ position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--ink); opacity:.55; }
+.bar-row .n{ text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+.legend{ font-size:12px; color:var(--muted); margin-top:8px; }
+.status-strip{ display:flex; gap:8px; flex-wrap:wrap; font-size:12.5px; }
+.metric{ border-top:1px solid var(--line); padding:12px 0; display:grid; grid-template-columns:1fr auto; gap:6px 14px; }
+.metric:first-of-type{ border-top:0; }
+.mname{ font-weight:700; }
+.mname .tag{ font-size:10.5px; font-weight:700; letter-spacing:.05em; padding:2px 7px; border-radius:99px; margin-left:6px; vertical-align:middle; text-transform:uppercase; }
+.tag.live{ background:var(--green-tint); color:var(--green); } .tag.partial{ background:var(--amber-tint); color:#7A5A20; }
+.tag.no_data{ background:var(--panel); color:var(--muted); border:1px solid var(--line); } .tag.no_tool{ background:var(--red-tint); color:var(--red); }
+.tag.money{ background:#E3F1E8; color:var(--money); }
+.mpts{ font-family:'Oswald',sans-serif; font-size:20px; color:var(--lead-700); text-align:right; white-space:nowrap; }
+.mpts small{ font-size:13px; color:var(--muted); font-family:'Montserrat',sans-serif; }
+.mdetail{ grid-column:1 / -1; font-size:13px; color:var(--ink-soft); }
+.mneeds{ grid-column:1 / -1; font-size:12.5px; color:var(--muted); }
+.mneeds b{ color:var(--ink-soft); }
+.locs{ grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:6px; }
+.loc{ font-size:12px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:4px 8px; }
+.loc b{ font-variant-numeric:tabular-nums; }
+.comp-h{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:4px; }
+.comp-h h3{ font-size:20px; }
+.comp-h span{ font-size:12.5px; color:var(--muted); }
+.lead h3{ color:var(--lead-700); } .craft h3{ color:var(--craft-700); } .care h3{ color:var(--care-700); }
+.lead{ border-left:4px solid var(--lead-700); } .craft{ border-left:4px solid var(--craft-700); } .care{ border-left:4px solid var(--care-700); }
+.small{ font-size:12.5px; color:var(--muted); }
+.todo{ display:grid; gap:8px; }
+.todo li{ margin-left:18px; font-size:13.5px; }
+@media (max-width:620px){ .hero{ grid-template-columns:1fr; gap:10px; } .big{ font-size:52px; } .bar-row{ grid-template-columns:90px 1fr 80px; } .page-head h1{ font-size:25px; } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><div class="brand-name">Salt City Academy</div><div class="brand-sub">General Manager Scorecard</div></div>
+  <a href="academy.html">&larr; Academy</a>
+</div>
+<main id="app"><div class="msg info">Loading&hellip;</div></main>
+
+<script>
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eXN2Y3ByenZtaHhycm5vZ3FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODMxMTAsImV4cCI6MjEwMDc1OTExMH0.KZXVYcdDa9lKo3YNXbUYnYGOWjS-ZFtlV4YeyzTs_h0';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const EXEC = ['coo','ceo','cbo'];
+const COMPS = [
+  { key:'lead', label:'Leadership', max:55, min:28, total:'leadership', color:'var(--lead-700)' },
+  { key:'craft', label:'Craft', max:29, min:15, total:'craft', color:'var(--craft-700)' },
+  { key:'care', label:'Customer Care', max:16, min:8, total:'customer_care', color:'var(--care-700)' },
+];
+const STATUS = { live:'Live', partial:'Partly live', no_data:'Waiting for data', no_tool:'No tool yet' };
+const app = document.getElementById('app');
+const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
+const num = (n, d = 1) => n == null ? '–' : Number(n).toFixed(d).replace(/\.0+$/, '');
+const fmt = d => d ? new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', timeZone:'UTC' }) : '';
+const params = new URLSearchParams(location.search);
+const thisYear = Number(new Intl.DateTimeFormat('en-CA', { timeZone:'America/New_York', year:'numeric' }).format(new Date()));
+let me = null, gms = [];
+
+function payoutLabel(t){
+  const p = t.payout_pct;
+  if (t.leadership < t.minimums.leadership || t.craft < t.minimums.craft || t.customer_care < t.minimums.customer_care) return ['No payout yet: below a competency minimum', 'red'];
+  if (t.points < 60) return ['No payout yet: below 60', 'red'];
+  return [`${p}% of target bonus`, p >= 100 ? 'green' : 'amber'];
+}
+
+function render(sc){
+  const t = sc.totals;
+  const [pl, pc] = payoutLabel(t);
+  const metrics = sc.metrics;
+  const counts = { live:0, partial:0, no_data:0, no_tool:0 };
+  metrics.forEach(m => counts[m.status]++);
+  const pts = m => m.points == null ? null : Number(m.points);
+  const ptsHtml = m => `<div class="mpts">${pts(m) == null ? '–' : num(pts(m), 2)}<small> / ${m.max}</small></div>`;
+  const locHtml = m => (m.by_location || []).some(l => l.value != null) ? `<div class="locs">${m.by_location.map(l => `<span class="loc">${esc(l.location)} <b>${l.value == null ? '–' : num(l.value, 1) + (m.unit || '')}</b>${l.target != null ? ` / ${num(l.target,0)}%` : ''}${l.points != null ? ` · ${num(l.points, 1)} pts` : ''}${l.visits ? ` · ${l.visits} visits` : ''}${l.repeat != null ? ` · ${num(l.repeat, 1)}% repeat` : ''}${l.members ? ` · ${l.members} members` : ''}${l.audits ? ` · ${l.audits} audits` : ''}</span>`).join('')}</div>` : '';
+  const metricHtml = m => `<div class="metric">
+      <div class="mname">${esc(m.name)}<span class="tag ${m.status}">${STATUS[m.status]}</span>${m.money ? '<span class="tag money">$</span>' : ''}</div>
+      ${ptsHtml(m)}
+      ${m.status === 'live' || m.status === 'partial' ? `<div class="mdetail">${m.actual != null && m.unit ? `Group: <b>${num(m.actual, 1)}${esc(m.unit)}</b>` : ''}${m.target ? ` · target ${esc(m.target)}, zero at ${esc(m.floor)}` : ''}${m.detail ? (m.actual != null && m.unit ? ' · ' : '') + esc(m.detail) : ''}${m.source ? ` <span class="small">· ${esc(m.source)}</span>` : ''}</div>` : ''}
+      ${locHtml(m)}
+      ${m.note ? `<div class="mneeds">${esc(m.note)}</div>` : ''}
+      ${m.needs ? `<div class="mneeds"><b>${m.status === 'partial' ? 'To finish automating:' : m.status === 'no_data' ? 'Waiting on:' : 'Tool needed:'}</b> ${esc(m.needs)}</div>` : ''}
+    </div>`;
+
+  const bars = COMPS.map(c => {
+    const got = Number(t[c.total]), tracked = Number(t.tracked[c.total]);
+    return `<div class="bar-row"><div>${c.label}</div>
+      <div class="track" title="${num(got,1)} of ${c.max}">
+        <div class="tracked" style="width:${100 * tracked / c.max}%"></div>
+        <div class="fill" style="width:${100 * got / c.max}%; background:${c.color};"></div>
+        <div class="minline" style="left:${100 * c.min / c.max}%"></div></div>
+      <div class="n">${num(got,1)} / ${c.max}</div></div>`;
+  }).join('');
+
+  const head = `
+    <div class="page-head">
+      <div><div class="eyebrow">GM Scorecard · ${sc.year}${sc.trial ? ' · practice year' : ''}</div><h1>${esc(sc.gm.name)}</h1>
+        <div class="sub">${(sc.locations || []).map(esc).join(' · ') || 'No cafes assigned'} · ${fmt(sc.period_start)} – ${fmt(sc.period_end)}</div></div>
+      <div class="pickers">
+        ${EXEC.includes(me.role) && gms.length > 1 ? `<select id="pick-gm" aria-label="General Manager">${gms.map(g => `<option value="${g.id}" ${g.id === sc.gm.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}</select>` : ''}
+        <select id="pick-year" aria-label="Year">${[2027, 2026].concat(thisYear > 2027 ? [thisYear] : []).filter((v,i,a) => a.indexOf(v) === i).sort((a,b) => b-a).map(y => `<option ${y === sc.year ? 'selected' : ''}>${y}</option>`).join('')}</select>
+      </div>
+    </div>`;
+
+  app.innerHTML = head + `
+    ${sc.trial ? `<div class="msg amber">Practice year. Official scoring starts Q1 2027; use ${sc.year} to see how the scorecard works and what's still missing.</div>` : ''}
+    <div class="card">
+      <div class="hero">
+        <div class="big">${num(t.points,1)}<small> / 100</small></div>
+        <div class="hero-side">
+          <div><b>Points earned so far</b>, live from the Command Deck. ${t.tracked_max} of 100 points can be measured automatically today${t.pace_pct != null ? `; on those, ${esc(sc.gm.name)} is at <b>${t.pace_pct}%</b>` : ''}.</div>
+          <div class="row"><span class="pill ${pc}">${pl}</span><span class="pill">Money results ${num(t.money,1)} / 45</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>By competency</h2>
+      <div class="bars">${bars}</div>
+      <div class="legend">Solid = earned. Dashed line = points measurable today. Black tick = the minimum needed for any payout (28 / 15 / 8).</div>
+    </div>
+    <div class="card">
+      <h2>How automatic is it?</h2>
+      <div class="status-strip">
+        <span class="pill green">${counts.live} live</span><span class="pill amber">${counts.partial} partly live</span>
+        <span class="pill">${counts.no_data} waiting for data</span><span class="pill red">${counts.no_tool} need a tool</span>
+      </div>
+      <p class="small" style="margin-top:8px;">"Waiting for data" means the Command Deck already has the tool, but nothing has been logged for these cafes yet. "Needs a tool" lists what would make the metric automatic.</p>
+    </div>
+    ${COMPS.map(c => `<div class="card ${c.key}">
+      <div class="comp-h"><h3>${c.label}</h3><span>${num(t[c.total],1)} of ${c.max} · minimum ${c.min}</span></div>
+      ${metrics.filter(m => m.comp === c.key).map(metricHtml).join('')}
+    </div>`).join('')}
+    <div class="card">
+      <h2>How scores turn into pay</h2>
+      <ul class="todo"><li>Below 60: no payout. 60–80: 50% of target at 60, rising 2% a point to 90% at 80. 81–89: 100%. 90–100: 100% at 90, rising 5% a point to 150%.</li>
+      <li>At least half the points in each competency (Leadership 28, Craft 15, Customer Care 8), or no payout.</li>
+      <li>A repeat health violation caps payout at 100%, and above 100% requires being on Academy pace. Neither can be checked automatically yet.</li></ul>
+    </div>`;
+
+  const gp = document.getElementById('pick-gm'), yp = document.getElementById('pick-year');
+  const go = () => { const q = new URLSearchParams(); if (gp) q.set('gm', gp.value); else if (params.get('gm')) q.set('gm', params.get('gm')); q.set('year', yp.value); location.search = q.toString(); };
+  gp && gp.addEventListener('change', go); yp.addEventListener('change', go);
+}
+
+(async () => {
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { location.replace('/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
+    const { data: prof } = await sb.from('staff').select('id,name,role').eq('auth_user_id', user.id).single();
+    me = prof;
+    if (!me) { app.innerHTML = '<div class="msg error">Your sign-in isn\'t linked to a staff profile.</div>'; return; }
+    let gmId = params.get('gm');
+    if (EXEC.includes(me.role)) {
+      const { data } = await sb.from('staff').select('id,name').eq('role','gm').neq('is_active', false).order('name');
+      gms = data || [];
+      if (!gmId) gmId = gms[0] && gms[0].id;
+    } else if (me.role === 'gm') gmId = me.id;
+    else { app.innerHTML = '<div class="msg info">The GM Scorecard is visible to General Managers and the COO, CEO and CBO.</div>'; return; }
+    if (!gmId) { app.innerHTML = '<div class="msg info">No active General Managers found.</div>'; return; }
+    const year = Number(params.get('year')) || Math.max(thisYear, 2026);
+    const { data: sc, error } = await sb.rpc('gm_scorecard', { p_staff: gmId, p_year: year });
+    if (error) { app.innerHTML = `<div class="msg error">${esc(error.message)}</div>`; return; }
+    render(sc);
+  } catch (e) { app.innerHTML = `<div class="msg error">${esc(e.message || e)}</div>`; }
+})();
+</script>
+</body>
+</html>

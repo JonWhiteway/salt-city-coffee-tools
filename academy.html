@@ -521,6 +521,18 @@ function empStanding(pts){
   return ['In good standing', 'green'];
 }
 
+/* GM 360 scorecard: 4 points, earned on completion (Leadership competency). */
+function gm360ScoreCard(sc){
+  if (!sc) return '';
+  return `
+    <div class="card l360-card" style="border-left-color:var(--lead-700);">
+      <div><div class="emp-label" style="color:var(--lead-700);">GM Scorecard · 360 &amp; Goleman · ${sc.year}</div>
+        <div class="l360-title">${sc.points} of ${sc.max} points</div>
+        <div class="emp-note">${sc.checks.map(c => `${c.done ? '✓' : '○'} ${escapeHtml(c.label)}`).join('<br>')}</div></div>
+      <a class="emp-btn" href="gmscore.html">Open my full GM scorecard →</a>
+    </div>`;
+}
+
 async function renderEmployeeView(){
   const el = document.getElementById('view-employee');
   const me = currentProfile.id;
@@ -531,14 +543,17 @@ async function renderEmployeeView(){
     sb.from('attendance_points').select('*').eq('staff_id', me).order('occurred_on', { ascending:false }),
     sb.from('pips').select('*').eq('staff_id', me).order('start_date', { ascending:false }),
     sb.from('academy_content').select('*, academy_progress!left(completed_at, staff_id)').eq('is_active', true).eq('role_track', staffTrack(currentProfile)).order('sort_order'),
-    sb.from('leadership_360s').select('id,status,self_submitted_at,created_at,released_at').eq('subject_staff_id', me).neq('status', 'cancelled').order('created_at', { ascending:false }),
+    sb.from('leadership_360s').select('id,kind,cycle,status,self_submitted_at,created_at,released_at').eq('subject_staff_id', me).neq('status', 'cancelled').order('created_at', { ascending:false }),
   ]);
   const pipIds = (pips || []).map(p => p.id);
   const { data: checkins } = pipIds.length
     ? await sb.from('pip_checkins').select('*').in('pip_id', pipIds).order('week')
     : { data: [] };
   const { data: managers } = await sb.from('staff').select('id,name');
-  empData = { l360s:l360s || [], status:status || [], coaching:coaching || [], hoursLog:hoursLog || [], points:points || [], pips:pips || [], checkins:checkins || [], content:content || [],
+  // GM 360 scorecard (4 completion points) — GMs only.
+  const gm360Score = currentProfile.role === 'gm'
+    ? (await sb.rpc('gm360_scorecard', { p_staff: me })).data : null;
+  empData = { gm360Score, l360s:l360s || [], status:status || [], coaching:coaching || [], hoursLog:hoursLog || [], points:points || [], pips:pips || [], checkins:checkins || [], content:content || [],
               names:Object.fromEntries((managers || []).map(m => [m.id, m.name])) };
 
   el.innerHTML = `
@@ -606,22 +621,31 @@ function empOverview(){
   else wage = `<div class="emp-big">${eMoney(empMe.wage.avg_rate)}<span>/hr</span></div>
     <div class="emp-note">${eFmt(empMe.wage.week_start)} – ${eFmt(empMe.wage.week_end)} · ${empMe.wage.hours} hrs${empMe.wage.rates.length > 1 ? ` · rates ${empMe.wage.rates.map(eMoney).join(', ')}` : ''}</div>`;
 
+  // Two 360 types share leadership_360s: the Goleman leadership-style 360 (360.html)
+  // and the GM 360 (gm360.html). One card per type: open self-rating, then latest report.
   const l360 = empData.l360s || [];
-  const open360 = l360.find(r => r.status === 'collecting');
-  const released360 = l360.filter(r => r.status === 'released');
-  const l360Cards = (open360 ? `
+  const l360Cards = ['gm_360','goleman'].map(kind => {
+    const list = l360.filter(r => (r.kind || 'goleman') === kind);
+    const isGm = kind === 'gm_360';
+    const page = isGm ? 'gm360.html' : '360.html';
+    const label = isGm ? `GM 360` : 'Leadership 360';
+    const open360 = list.find(r => r.status === 'collecting');
+    const released360 = list.filter(r => r.status === 'released');
+    const cyc = r => r.cycle ? ` · ${escapeHtml(r.cycle)}` : '';
+    return (open360 ? `
     <div class="card l360-card">
-      <div><div class="emp-label" style="color:var(--care-700);">Leadership 360</div>
+      <div><div class="emp-label" style="color:var(--care-700);">${label}${cyc(open360)}</div>
         <div class="l360-title">${open360.self_submitted_at ? 'Your self-assessment is in' : 'Take your 360 self-assessment'}</div>
-        <div class="emp-note">${open360.self_submitted_at ? `Submitted ${eFmt(open360.self_submitted_at)}. Your report opens here once it's released. You can update your answers until then.` : `A 360 was started for you on ${eFmt(open360.created_at)}. Rate yourself on the same 30 statements your team is answering. It takes about 5 minutes.`}</div></div>
-      <a class="emp-btn ${open360.self_submitted_at ? 'ghost' : ''}" href="360.html?self=${open360.id}">${open360.self_submitted_at ? 'Update my answers' : 'Start self-assessment →'}</a>
+        <div class="emp-note">${open360.self_submitted_at ? `Submitted ${eFmt(open360.self_submitted_at)}. Your report opens here once it's released. You can update your answers until then.` : `A 360 was started for you on ${eFmt(open360.created_at)}. Rate yourself on the same ${isGm ? '30 statements your LMs, peers and leadership' : '30 statements your team'} are answering. It takes about ${isGm ? '10' : '5'} minutes.`}</div></div>
+      <a class="emp-btn ${open360.self_submitted_at ? 'ghost' : ''}" href="${page}?self=${open360.id}">${open360.self_submitted_at ? 'Update my answers' : 'Start self-assessment →'}</a>
     </div>` : '') + (released360.length ? `
     <div class="card l360-card">
-      <div><div class="emp-label" style="color:var(--care-700);">Leadership 360</div>
+      <div><div class="emp-label" style="color:var(--care-700);">${label}${cyc(released360[0])}</div>
         <div class="l360-title">Your 360 report is ready</div>
-        <div class="emp-note">Released ${eFmt(released360[0].released_at)}. Your style scores are also saved under Leadership Assessments.${released360.length > 1 ? ` Earlier reports: ${released360.slice(1).map(r => `<a href="360.html?report=${r.id}">${eFmt(r.released_at)}</a>`).join(' · ')}` : ''}</div></div>
-      <a class="emp-btn" href="360.html?report=${released360[0].id}">Open my report →</a>
+        <div class="emp-note">Released ${eFmt(released360[0].released_at)}. ${isGm ? 'Your scores are also saved under Leadership Assessments.' : 'Your style scores are also saved under Leadership Assessments.'}${released360.length > 1 ? ` Earlier reports: ${released360.slice(1).map(r => `<a href="${page}?report=${r.id}">${r.cycle ? escapeHtml(r.cycle) : eFmt(r.released_at)}</a>`).join(' · ')}` : ''}</div></div>
+      <a class="emp-btn" href="${page}?report=${released360[0].id}">Open my report →</a>
     </div>` : '');
+  }).join('') + gm360ScoreCard(empData.gm360Score);
   return `
     ${l360Cards}
     <div class="emp-stats">
@@ -1121,7 +1145,7 @@ async function renderAssessmentsView(){
     <div class="page-head">
       <div class="eyebrow">Leadership development</div>
       <h1>Leadership Assessments</h1>
-      <div class="sub">Five Behaviors and Leadership Style, tracked over time.</div>
+      <div class="sub">Five Behaviors, Leadership Style and the GM 360, tracked over time.</div>
     </div>
 
     <div class="card">
@@ -1155,6 +1179,11 @@ async function renderAssessmentsView(){
     <div class="card">
       <h2>Leadership Style — Over Time</h2>
       <div id="style-history-holder"><div class="loading">Loading\u2026</div></div>
+    </div>
+
+    <div class="card" id="gm360-history-card" style="display:none;">
+      <h2>GM 360 — Over Time</h2>
+      <div id="gm360-history-holder"></div>
     </div>
   `;
 
@@ -1231,6 +1260,28 @@ async function loadAssessmentHistory(){
 
   fbHolder.innerHTML = fbEntries.length ? renderFiveBehaviorsChart(fbEntries) : '<div style="color:var(--muted); font-size:13px;">No Five Behaviors results logged yet.</div>';
   styleHolder.innerHTML = styleEntries.length ? renderStyleHistory(styleEntries) : '<div style="color:var(--muted); font-size:13px;">No Leadership Style results logged yet.</div>';
+  const gmEntries = data.filter(d => d.assessment_type === 'gm_360');
+  if (gmEntries.length) {
+    document.getElementById('gm360-history-card').style.display = 'block';
+    document.getElementById('gm360-history-holder').innerHTML = renderGm360History(gmEntries);
+  }
+}
+
+/* GM 360 results filed on release (numbers only; comments stay in the report). */
+function renderGm360History(entries){
+  const f = n => n == null ? '\u2013' : Number(n).toFixed(2);
+  return entries.slice().reverse().map(e => {
+    const r = e.results || {}, co = r.competency_others || {}, cs = r.competency_self || {};
+    const groups = ['below','beside','above'].filter(g => r.groups && r.groups[g])
+      .map(g => `${({ below:'LMs', beside:'Peers', above:'Leadership' })[g]} ${f(r.groups[g].avg)} (${r.groups[g].n})`).join(' \u00b7 ');
+    return `<div class="content-row">
+      <div>
+        <div class="ctitle">${escapeHtml(r.cycle || e.taken_at)} \u2014 Overall ${f(r.overall)} / 5 <span style="font-size:11px; color:var(--care-700); font-weight:700;">${r.raters || '?'} raters \u00b7 self ${f(r.self_overall)}</span></div>
+        <div class="cmeta">Leadership ${f(co.lead)} (self ${f(cs.lead)}) \u00b7 Craft ${f(co.craft)} (self ${f(cs.craft)}) \u00b7 Customer Care ${f(co.care)} (self ${f(cs.care)})${groups ? ' \u00b7 ' + groups : ''}</div>
+        ${r.l360_id ? `<a href="gm360.html?report=${r.l360_id}" style="font-size:12px; color:var(--care-700); font-weight:600;">Open full GM 360 report \u2192</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderFiveBehaviorsChart(entries){
@@ -1634,11 +1685,24 @@ async function renderManagerView(){
         <div class="ttitle">Team Pulse Survey</div>
         <div class="tsub">Lencioni-based, every 6 months</div>
       </div>
+      ${['coo','ceo','cbo'].includes(currentProfile.role) ? `
+      <a class="tool-card tool-style" href="gm360.html" style="text-decoration:none; color:inherit;">
+        <div class="ttitle">GM 360</div>
+        <div class="tsub">Start, share, release &amp; scorecard &middot; COO/CEO/CBO</div>
+      </a>
+      <a class="tool-card tool-style" href="gmscore.html" style="text-decoration:none; color:inherit;">
+        <div class="ttitle">GM Scorecard</div>
+        <div class="tsub">Live 100-point scorecard by GM &middot; COO/CEO/CBO</div>
+      </a>` : `
       <div class="tool-card tool-placeholder">
         <div class="tbadge">Coming Soon</div>
         <div class="ttitle">360 Review</div>
         <div class="tsub">LM+ formal review cycle</div>
-      </div>
+      </div>`}
+      <a class="tool-card tool-style" href="safety.html" style="text-decoration:none; color:inherit;">
+        <div class="ttitle">Safety &amp; Health</div>
+        <div class="tsub">Report an injury &middot; log a health inspection &middot; track fixes</div>
+      </a>
       ${['coo','ceo'].includes(currentProfile.role) ? `
       <div class="tool-card tool-style" onclick="openHoursEntryModal()">
         <div class="ttitle">Log Hours Worked</div>
