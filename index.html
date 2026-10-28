@@ -1102,7 +1102,6 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <li><button class="nav-item active" data-section="overview"><span class="nav-dot"></span>Overview</button></li>
       <li><button class="nav-item" data-section="sales"><span class="nav-dot"></span>Sales &amp; Labor</button></li>
       <li><button class="nav-item" data-section="crm"><span class="nav-dot"></span>Customer Journey &amp; Marketing</button></li>
-      <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
     </ul>
     </div>
     <div class="coo-nav-group">
@@ -1126,8 +1125,9 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
     <div class="exec-nav-group" hidden>
     <div class="nav-group-label">Performance</div>
     <ul class="nav-list">
-      <li><button class="nav-item" data-section="performance"><span class="nav-dot"></span>Performance Roundup</button></li>
-      <li><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
+      <li class="exec-only"><button class="nav-item" data-section="performance"><span class="nav-dot"></span>Performance Roundup</button></li>
+      <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
+      <li class="exec-only"><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
     </ul>
     </div>
     <div class="sidebar-foot coo-nav-group">
@@ -4369,7 +4369,7 @@ function perfRender(){
         <td>${["location_manager","gm","production_manager"].includes(l.role) ? `<span class="${l.last_received && tdDays(String(l.last_received).slice(0,10), t) <= 30 ? "perf-ok" : "perf-bad"}">${ago(l.last_received)}</span>` : `<span class="perf-dim">${ago(l.last_received)}</span>`}</td>
         <td>${l360Cell(l.l360)}</td>
         <td>${l.role === "gm" ? gm360Cell(l.gm360) : `<span class="perf-dim">—</span>`}</td></tr>`).join("")}</tbody></table></div>
-    <p class="perf-note">Start, share and release Leadership 360s in Company → Leadership 360s.</p>
+    <p class="perf-note">Start, share and release Leadership 360s in Performance → Leadership 360s.</p>
 
     <div class="perf-two" style="margin-top:22px;">
       <div id="perf-ann"><div class="section-head" style="margin-top:0"><h2>Anniversaries &amp; birthdays</h2><span class="hint">LM and above · next 60 days</span></div>
@@ -4440,7 +4440,9 @@ async function initApp(){
   } else {
     window.__commandDeckGate.showPortalOnly();
   }
-  $$(".exec-nav-group").forEach(el => el.hidden = !EXEC_ROLES.includes(myStaff.role));
+  // Performance group: execs see everything; GMs see only Leadership 360s (they start 360s for their LMs).
+  $$(".exec-nav-group").forEach(el => el.hidden = !(EXEC_ROLES.includes(myStaff.role) || myStaff.role === "gm"));
+  $$(".exec-nav-group .exec-only").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
   if(myStaff.role === "location_manager") window.__commandDeckGate.enableLmNav();
   else if(LM_NAV_ROLES.includes(myStaff.role)) window.__commandDeckGate.hideLmEntryPoints();
 
