@@ -303,9 +303,12 @@ async function raterMode(token){
   wireScale(sync);
   $("#submit").addEventListener("click", async () => {
     $("#submit").disabled = true; $("#submit").textContent = "Submitting…";
-    const { error } = await sb.rpc("l360_submit", { p_token: token, p_rater_type: rel, p_answers: answers });
+    const { data: receipt, error } = await sb.rpc("l360_submit_v2", { p_token: token, p_rater_type: rel, p_answers: answers });
     if(error){ $("#err").textContent = error.message; $("#submit").disabled = false; $("#submit").textContent = "Submit my feedback →"; return; }
-    done("Feedback received", `Thank you. Your answers are confidential and only appear as part of group averages. You can close this page.`);
+    done("Feedback received", `Thank you. Your answers are confidential and only appear as part of group averages.
+      <span style="display:block;margin:22px auto 6px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Your receipt code</span>
+      <span style="display:inline-block;font-family:'Oswald',sans-serif;font-size:30px;letter-spacing:4px;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 18px">${esc(receipt || "")}</span>
+      <span style="display:block;margin-top:12px">If you picked the wrong relationship or need your answers removed, send this code to whoever sent you the link. It only identifies your submission, not your answers. You can close this page.</span>`);
   });
 }
 

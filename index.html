@@ -953,6 +953,29 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 #sec-lmgm .lm-tab.active{background:var(--sc-navy); border-color:var(--sc-navy); color:#F7F5F2;}
 #sec-lmgm .lm-tabs .lm-back{margin-right:6px;}
 .loc-lm-link{display:inline-flex; align-items:center; gap:6px; margin:0 0 16px;}
+/* Performance roundup (C-suite) */
+#sec-performance .perf-kpis{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin-bottom:6px;}
+#sec-performance .perf-kpis .kpi{text-align:left; cursor:pointer; font:inherit; color:inherit; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);}
+#sec-performance .perf-kpis .kpi:hover{border-color:var(--accent);}
+#sec-performance .perf-kpis .kpi .delta{color:var(--ink-3);}
+#sec-performance .perf-note{font-size:12.5px; color:var(--ink-3); line-height:1.55; margin:6px 2px 0;}
+#sec-performance .perf-sub{font-size:11.5px; color:var(--ink-3);}
+#sec-performance td a{color:var(--accent); font-weight:600; text-decoration:none;}
+#sec-performance td a:hover{text-decoration:underline;}
+#sec-performance .perf-sc{display:flex; align-items:center; gap:10px;}
+#sec-performance .perf-bar{position:relative; width:110px; height:8px; border-radius:99px; background:var(--surface-alt); overflow:hidden; flex:0 0 auto;}
+#sec-performance .perf-bar span{position:absolute; left:0; top:0; bottom:0; border-radius:99px; background:var(--accent);}
+#sec-performance .perf-bar i{position:absolute; left:0; top:0; bottom:0; border-right:2px dashed var(--ink-3); opacity:.5;}
+#sec-performance .perf-ok{color:var(--good); font-weight:600;}
+#sec-performance .perf-bad{color:var(--critical); font-weight:600;}
+#sec-performance .perf-warn{color:var(--warn); font-weight:600;}
+#sec-performance .perf-dim{color:var(--ink-3);}
+#sec-performance .perf-two{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(320px,1fr));}
+#sec-performance .perf-list{list-style:none; margin:0; padding:0;}
+#sec-performance .perf-list li{display:flex; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px solid var(--border-soft); font-size:13px;}
+#sec-performance .perf-list li:last-child{border-bottom:0;}
+#sec-performance .perf-list .when{color:var(--ink-3); white-space:nowrap; font-size:12.5px;}
+#sec-performance .card{padding:14px 16px;}
 /* Leadership 360s */
 #sec-l360 .l360-how{font-size:13px; line-height:1.6; color:var(--ink-2); margin-bottom:16px;}
 #sec-l360 .l360-row{display:grid; grid-template-columns:minmax(180px,1.2fr) minmax(220px,1.4fr) auto; gap:16px; align-items:center; padding:16px 18px; margin-bottom:10px;}
@@ -965,6 +988,15 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 #sec-l360 .l360-past{font-size:12px; color:var(--ink-3); margin-top:6px;}
 #sec-l360 .l360-past a{color:var(--accent);}
 #sec-l360 .l360-msg{font-size:13px; margin-top:8px; min-height:1.2em;}
+#sec-l360 .l360-resp{grid-column:1/-1; border-top:1px solid var(--border-soft); padding-top:12px;}
+#sec-l360 .l360-resp-head{font-size:12px; color:var(--ink-3); margin-bottom:8px; line-height:1.5;}
+#sec-l360 .l360-resp-t{width:100%; border-collapse:collapse; font-size:13px;}
+#sec-l360 .l360-resp-t th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); padding:6px 8px; border-bottom:1px solid var(--border-soft);}
+#sec-l360 .l360-resp-t td{padding:8px; border-bottom:1px solid var(--border-soft); vertical-align:middle;}
+#sec-l360 .l360-resp-t tr.removed td{color:var(--ink-3);}
+#sec-l360 .l360-resp-t tr.removed b{text-decoration:line-through;}
+#sec-l360 .l360-resp-t select{font:inherit; font-size:13px; padding:5px 8px; border:1px solid var(--border); border-radius:8px; background:var(--surface);}
+#sec-l360 .l360-was{font-size:11px; color:var(--ink-3); margin-top:2px;}
 @media (max-width:760px){ #sec-l360 .l360-row{grid-template-columns:1fr;} #sec-l360 .l360-actions{justify-content:flex-start;} }
 /* one login for Command Deck + Academy */
 #gate-wrap .tm-email-form{display:flex; gap:8px; flex-wrap:wrap;}
@@ -1070,7 +1102,6 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <li><button class="nav-item active" data-section="overview"><span class="nav-dot"></span>Overview</button></li>
       <li><button class="nav-item" data-section="sales"><span class="nav-dot"></span>Sales &amp; Labor</button></li>
       <li><button class="nav-item" data-section="crm"><span class="nav-dot"></span>Customer Journey &amp; Marketing</button></li>
-      <li><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
       <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
     </ul>
     </div>
@@ -1090,6 +1121,13 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <li><button class="nav-item" data-section="coldbrewprod"><span class="nav-dot"></span>Cold Brew Production</button></li>
       <li><button class="nav-item" data-section="roastery"><span class="nav-dot"></span>Roastery</button></li>
       <li><button class="nav-item" data-section="productdev"><span class="nav-dot"></span>Product Development</button></li>
+    </ul>
+    </div>
+    <div class="exec-nav-group" hidden>
+    <div class="nav-group-label">Performance</div>
+    <ul class="nav-list">
+      <li><button class="nav-item" data-section="performance"><span class="nav-dot"></span>Performance Roundup</button></li>
+      <li><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
     </ul>
     </div>
     <div class="sidebar-foot coo-nav-group">
@@ -1325,6 +1363,12 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
           <div><div class="lc-title">Open Marketing Planning →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/marketing-planning.html — submit campaign requests, move them through the planning board. Not wired to a CRM yet — see note below.</div></div>
           <div class="arrow">↗</div>
         </a>
+      </section>
+
+      <!-- ============ PERFORMANCE ROUNDUP (COO / CEO / CBO) ============ -->
+      <section class="panel" id="sec-performance">
+        <div class="section-head"><h2>At a glance</h2><span class="hint" id="perf-hint">Loading…</span></div>
+        <div id="perf-body"><div class="empty-note">Loading…</div></div>
       </section>
 
       <!-- ============ ACADEMY ENGAGEMENT ============ -->
@@ -3612,6 +3656,7 @@ const SECTION_META = {
   overview:   { title:"Overview", sub:"Portfolio pulse — company-wide, trailing 30 days" },
   sales:      { title:"Sales & Labor", sub:"Square: sales, labor cost, team — portfolio and per-location" },
   crm:        { title:"Customer Journey & Marketing", sub:"CRM in progress — journey stages, marketing calendar, campaigns" },
+  performance:{ title:"Performance Roundup", sub:"COO / CEO / CBO · GM and LM measurables, people, audits and 360s across every cafe" },
   academy:    { title:"Academy Engagement", sub:"Leadership · Craft · Customer Care completion and cadence" },
   l360:       { title:"Leadership 360s", sub:"Six leadership styles · start a 360, share the rater link, release the report" },
   calendar:   { title:"Calendar & Events", sub:"Quarterly events linked to the master company calendar" },
@@ -3637,7 +3682,7 @@ function updateSectionPill(id){
   if((id === "overview" || id === "sales") && squareLive){
     pill.classList.add("is-live"); iconGood.style.display = "block";
     text.textContent = "Live — Square";
-  } else if(id === "l360"){
+  } else if(id === "l360" || id === "performance"){
     pill.classList.add("is-live"); iconGood.style.display = "block";
     text.textContent = "Live — Supabase";
   } else if(id === "productdev" && bakeryLive){
@@ -4019,7 +4064,7 @@ async function l360Load(){
     if(!subjects.length){ list.innerHTML = `<div class="empty-note">No one to show yet. LMs appear here once they're assigned to one of your stores in Staff Admin.</div>`; return; }
     const ids = subjects.map(s => s.id);
     const [{ data: runs }, { data: sl }] = await Promise.all([
-      sb.from("leadership_360s").select("*").in("subject_staff_id", ids).order("created_at", { ascending:false }),
+      sb.from("leadership_360s").select("*").in("subject_staff_id", ids).or("kind.is.null,kind.eq.goleman").order("created_at", { ascending:false }),
       sb.from("staff_locations").select("staff_id, locations(name)").in("staff_id", ids),
     ]);
     const runIds = (runs||[]).map(r => r.id);
@@ -4040,6 +4085,7 @@ async function l360Load(){
         status = `<span class="chip warn">Collecting since ${new Date(cur.created_at).toLocaleDateString()}</span>
           <div class="l360-counts">${chip("Self", c.self ? "✓" : 0)}${chip("Manager", c.manager)}${chip("Peers", c.peer)}${chip("Direct reports", c.direct_report)}</div>`;
         actions = `<button class="btn small" data-act="copy" data-url="${lmEsc(l360Url("t=" + cur.rater_token))}">Copy rater link</button>
+          <button class="btn small" data-act="responses" data-id="${cur.id}">Responses</button>
           <a class="btn small" href="${lmEsc(l360Url("report=" + cur.id))}" target="_blank" rel="noopener">Preview</a>
           ${(cur.initiated_by === myStaff.id || isExec) ? `<button class="btn primary small" data-act="release" data-id="${cur.id}" data-name="${lmEsc(s.name)}" data-n="${raters}" ${raters ? "" : "disabled title='No rater responses yet'"}>Release</button>` : ""}
           <button class="btn ghost small" data-act="cancel" data-id="${cur.id}" data-name="${lmEsc(s.name)}">Cancel</button>`;
@@ -4053,11 +4099,46 @@ async function l360Load(){
         <div><div class="l360-nm">${lmEsc(s.name)}</div><div class="l360-meta">${lmEsc(L360_ROLE_LABEL[s.role] || s.role)}${stores[s.id] ? " · " + lmEsc(stores[s.id].join(", ")) : ""}</div>
           ${past.length ? `<div class="l360-past">Earlier: ${past.map(p => `<a href="${lmEsc(l360Url("report=" + p.id))}" target="_blank" rel="noopener">${new Date(p.released_at).toLocaleDateString()}</a>`).join(" · ")}</div>` : ""}</div>
         <div>${status}</div>
-        <div class="l360-actions">${actions}</div></div>`;
+        <div class="l360-actions">${actions}</div>
+        ${cur && cur.status === "collecting" ? `<div class="l360-resp" id="l360-resp-${cur.id}" hidden></div>` : ""}</div>`;
     }).join("");
   }catch(err){
     list.innerHTML = `<div class="empty-note">Couldn't load 360s (${lmEsc(err.message)}).</div>`;
   }
+}
+const L360_GROUPS = { manager:"Manager", peer:"Peer", direct_report:"Direct report" };
+async function l360LoadResponses(aid){
+  const panel = $("#l360-resp-" + aid);
+  panel.innerHTML = `<div class="empty-note">Loading responses…</div>`;
+  const { data, error } = await sb.rpc("l360_responses", { p_id: aid });
+  if(error){ panel.innerHTML = `<div class="empty-note">Couldn't load (${lmEsc(error.message)}).</div>`; return; }
+  const rows = data || [];
+  if(!rows.length){ panel.innerHTML = `<div class="empty-note">No rater responses yet.</div>`; return; }
+  panel.innerHTML = `<div class="l360-resp-head">Each rater sees a receipt code when they submit. Match the code they give you to fix their group or remove their response. Answers are never shown.</div>
+    <table class="l360-resp-t"><thead><tr><th>Receipt</th><th>Submitted</th><th>Group</th><th></th></tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.removed_at ? "removed" : ""}">
+      <td><b>${lmEsc(r.receipt)}</b></td>
+      <td>${new Date(r.submitted_at).toLocaleString([], { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" })}</td>
+      <td>${r.removed_at ? `<span class="chip neutral">Removed</span>` : `<select class="l360-group" data-rid="${r.id}" data-aid="${aid}" data-receipt="${lmEsc(r.receipt)}">${Object.entries(L360_GROUPS).map(([k,v]) => `<option value="${k}" ${k===r.rater_type?"selected":""}>${v}</option>`).join("")}</select>`}
+        ${r.original_type && !r.removed_at ? `<div class="l360-was">was ${lmEsc(L360_GROUPS[r.original_type] || r.original_type)}</div>` : ""}</td>
+      <td style="text-align:right">${r.removed_at
+        ? `<button class="btn ghost small" data-act="resp-restore" data-rid="${r.id}" data-aid="${aid}" data-receipt="${lmEsc(r.receipt)}">Restore</button>`
+        : `<button class="btn ghost small" data-act="resp-remove" data-rid="${r.id}" data-aid="${aid}" data-receipt="${lmEsc(r.receipt)}">Remove</button>`}</td>
+    </tr>`).join("")}</tbody></table>`;
+  panel.querySelectorAll(".l360-group").forEach(sel => sel.addEventListener("change", async () => {
+    sel.disabled = true;
+    const { error } = await sb.rpc("l360_response_set", { p_response: sel.dataset.rid, p_rater_type: sel.value });
+    if(error){ l360Msg(error.message); sel.disabled = false; return; }
+    l360Msg(`Response ${sel.dataset.receipt} moved to ${L360_GROUPS[sel.value]}.`, true);
+    await l360LoadResponses(sel.dataset.aid);
+    l360RefreshCounts();
+  }));
+}
+// Re-draw the list but keep any open response panels open.
+async function l360RefreshCounts(){
+  const open = [...document.querySelectorAll(".l360-resp")].filter(p => !p.hidden).map(p => p.id.replace("l360-resp-", ""));
+  await l360Load();
+  for(const id of open){ const p = $("#l360-resp-" + id); if(p){ p.hidden = false; l360LoadResponses(id); } }
 }
 function l360Msg(t, ok){ const m = $("#l360-msg"); m.textContent = t; m.style.color = ok ? "var(--good)" : "var(--critical)"; }
 $("#l360-list").addEventListener("click", async e => {
@@ -4067,6 +4148,21 @@ $("#l360-list").addEventListener("click", async e => {
     try{ await navigator.clipboard.writeText(b.dataset.url); b.textContent = "Copied!"; setTimeout(() => b.textContent = "Copy rater link", 1800); }
     catch(_){ prompt("Copy this rater link:", b.dataset.url); }
     return;
+  }
+  if(act === "responses"){
+    const panel = $("#l360-resp-" + b.dataset.id);
+    if(!panel.hidden){ panel.hidden = true; return; }
+    panel.hidden = false;
+    return l360LoadResponses(b.dataset.id);
+  }
+  if(act === "resp-remove" || act === "resp-restore"){
+    if(act === "resp-remove" && !confirm(`Remove response ${b.dataset.receipt}? It stops counting toward the report. You can restore it until the 360 is released.`)) return;
+    b.disabled = true;
+    const { error } = await sb.rpc("l360_response_set", { p_response: b.dataset.rid, p_remove: act === "resp-remove" });
+    if(error){ b.disabled = false; return l360Msg(error.message); }
+    l360Msg(act === "resp-remove" ? `Response ${b.dataset.receipt} removed.` : `Response ${b.dataset.receipt} restored.`, true);
+    await l360LoadResponses(b.dataset.aid);
+    return l360RefreshCounts();
   }
   if(act === "start"){
     if(!confirm(`Start a Leadership 360 for ${b.dataset.name}?\n\nYou'll get a rater link to send to their manager, peers and direct reports. ${b.dataset.name.split(" ")[0]} will see a self-assessment to-do in the Academy.`)) return;
@@ -4095,6 +4191,205 @@ $("#l360-list").addEventListener("click", async e => {
   }
 });
 document.querySelectorAll('.nav-item[data-section="l360"]').forEach(btn => btn.addEventListener("click", () => { l360Load(); }));
+
+/* ---------------------------------------------------------------------
+   PERFORMANCE ROUNDUP — COO/CEO/CBO only. One RPC (performance_roundup,
+   exec-checked server-side) returns stores, people, audits, 360s and every
+   GM/LM scorecard total; store-team (Square timecards, 60 days) supplies
+   team headcounts so 1-1 coverage can be shown per cafe.
+   --------------------------------------------------------------------- */
+const PERF_LEVELS = [[96,"Exceptional","good"],[90,"Exceeding","good"],[81,"Performing to Standard","good"],[60,"Approaching","warn"],[0,"Below Standard","critical"]];
+const perfLevel = p => PERF_LEVELS.find(l => Number(p) >= l[0]) || PERF_LEVELS[4];
+const PERF_ROLE = { location_manager:"LM", gm:"GM", production_manager:"Production Mgr", coo:"COO", ceo:"CEO", cbo:"CBO" };
+let perfData = null, perfLoading = false, perfTeams = {};
+
+function perfStanding(pts){
+  if(pts >= 8) return ["Dismissal", "critical"];
+  if(pts >= 7) return ["Final warning", "critical"];
+  if(pts >= 5) return ["Written warning", "serious"];
+  if(pts >= 3) return ["Coaching conversation", "warn"];
+  return ["Under 3", "neutral"];
+}
+function perfNextYearly(dateStr, t){
+  if(!dateStr) return null;
+  const md = dateStr.slice(5, 10), y = Number(t.slice(0, 4));
+  const fix = yy => md === "02-29" && !(yy%4===0 && (yy%100!==0 || yy%400===0)) ? `${yy}-02-28` : `${yy}-${md}`;
+  let d = fix(y); if(d < t) d = fix(y + 1);
+  return d;
+}
+function perfCoverage(storeId){
+  const team = perfTeams[storeId];
+  if(!team) return null;
+  if(team.error) return { error: team.error };
+  const t = lmToday(), last = perfData.last_1on1 || {};
+  const members = (team.members || []).filter(m => m.role === "team_member" && m.shifts_60d > 0);
+  const covered = members.filter(m => last[m.staff_id] && tdDays(String(last[m.staff_id]).slice(0,10), t) <= 30).length;
+  return { team: members.length, covered };
+}
+
+async function perfLoad(force){
+  if(!myStaff || !EXEC_ROLES.includes(myStaff.role) || perfLoading) return;
+  if(perfData && !force){ perfRender(); return; }
+  perfLoading = true;
+  $("#perf-hint").textContent = "Loading…";
+  try{
+    const { data, error } = await sb.rpc("performance_roundup", { p_year: null });
+    if(error) throw error;
+    perfData = data; perfTeams = {};
+    perfRender();
+    await Promise.all((data.stores || []).map(async st => {
+      try{ perfTeams[st.id] = await lmFn("store-team", { location_id: st.id }); }
+      catch(e){ perfTeams[st.id] = { error: e.message }; }
+    }));
+    perfRender();
+  }catch(err){
+    $("#perf-body").innerHTML = `<div class="empty-note">Couldn't load the roundup (${lmEsc(err.message || String(err))}).</div>`;
+    $("#perf-hint").textContent = "";
+  }finally{ perfLoading = false; }
+}
+
+function perfRender(){
+  const d = perfData; if(!d) return;
+  const t = lmToday(), horizon = lmAddDays(t, 60), y = d.year;
+  const stores = d.stores || [], leaders = d.leaders || [];
+  const sum = (arr, f) => arr.reduce((a, x) => a + (Number(f(x)) || 0), 0);
+  const fmtD = x => x ? lmFmtDate(String(x).slice(0,10)) : "—";
+  const ago = x => x ? tdAgo(x) : "never";
+
+  // ---- anniversaries (leaders, next 60 days)
+  const ann = [];
+  leaders.forEach(l => {
+    const w = perfNextYearly(l.hire_date, t);
+    if(w && w <= horizon){ const yrs = Number(w.slice(0,4)) - Number(l.hire_date.slice(0,4)); if(yrs > 0) ann.push({ date:w, name:l.name, role:l.role, what:`${yrs}-year work anniversary` }); }
+    const b = perfNextYearly(l.birthday, t);
+    if(b && b <= horizon) ann.push({ date:b, name:l.name, role:l.role, what:"Birthday" });
+    const g = perfNextYearly(l.grade_started_on, t);
+    if(g && g <= horizon){ const yrs = Number(g.slice(0,4)) - Number(l.grade_started_on.slice(0,4)); if(yrs > 0) ann.push({ date:g, name:l.name, role:l.role, what:`${yrs} year${yrs>1?"s":""} in current grade` }); }
+  });
+  ann.sort((a, b) => a.date.localeCompare(b.date));
+
+  // ---- coverage totals (once store-team answers)
+  const cov = stores.map(st => perfCoverage(st.id));
+  const covReady = cov.every(c => c);
+  const covTeam = sum(cov.filter(c => c && !c.error), c => c.team), covDone = sum(cov.filter(c => c && !c.error), c => c.covered);
+
+  const att = d.attendance || [], pips = d.pips || [];
+  const flagged = att.filter(a => Number(a.points) >= 3);
+  const l360s = leaders.map(l => l.l360).filter(Boolean);
+  const collecting = l360s.filter(r => r.status === "collecting").length;
+  const releasedYr = l360s.filter(r => r.status === "released" && String(r.released_at).startsWith(String(y))).length;
+  const walkN = sum(stores, s => s.walk && s.walk.n), shopN = sum(stores, s => s.shopper && s.shopper.n);
+  const avgOf = key => { const xs = stores.filter(s => s[key] && s[key].n).map(s => ({ n:s[key].n, a:Number(s[key].avg) })); const n = sum(xs, x => x.n); return n ? Math.round(10 * xs.reduce((a,x) => a + x.n * x.a, 0) / n) / 10 : null; };
+  const walkAvg = avgOf("walk"), shopAvg = avgOf("shopper");
+
+  const kpi = (jump, label, value, sub) => `<button type="button" class="card kpi" data-perf-jump="${jump}"><div class="label">${label}</div><div class="value tabular">${value}</div><div class="delta">${sub}</div></button>`;
+
+  const scRow = (r, kind) => {
+    const url = kind === "gm" ? `gmscore.html?gm=${encodeURIComponent(r.id)}&year=${y}&from=cd` : `lmscore.html?lm=${encodeURIComponent(r.id)}&year=${y}&from=cd`;
+    if(r.error) return `<tr><td><a href="${url}" target="_blank" rel="noopener">${lmEsc(r.name)}</a></td><td>${lmEsc((r.locations||[]).join(", "))}</td>${kind === "lm" ? "<td></td>" : ""}<td colspan="2" class="perf-dim">Couldn't score (${lmEsc(r.error)})</td><td></td></tr>`;
+    const pts = Number(r.points) || 0, tm = Number(r.tracked_max) || 0, lv = r.pace_pct != null ? perfLevel(r.pace_pct) : null;
+    return `<tr>
+      <td><a href="${url}" target="_blank" rel="noopener">${lmEsc(r.name)}</a></td>
+      <td>${lmEsc((r.locations||[]).join(", ") || "—")}</td>
+      ${kind === "lm" ? `<td>${lmEsc(r.gm || "—")}</td>` : ""}
+      <td><div class="perf-sc"><div class="perf-bar" title="${pts} of 100 earned; ${tm} measurable today"><i style="width:${tm}%"></i><span style="width:${pts}%"></span></div><span class="num">${pts.toFixed(1)}</span><span class="perf-sub">/ ${tm} measurable</span></div></td>
+      <td>${lv ? `<span class="chip ${lv[2]}">${r.pace_pct}% · ${lv[1]}</span>` : "—"}</td>
+      <td class="right"><a href="${url}" target="_blank" rel="noopener">Scorecard ↗</a></td></tr>`;
+  };
+
+  const auditCell = a => {
+    if(!a || !a.n) return `<span class="perf-dim">None in ${y}</span>`;
+    const L = a.latest;
+    return `<div><b class="num">${Number(L.total).toFixed(0)}%</b> <span class="perf-sub">${fmtD(L.date)}</span></div>
+      <div class="perf-sub">L ${L.lead ?? "–"} · C ${L.craft ?? "–"} · CC ${L.care ?? "–"}${a.n > 1 ? ` · avg ${a.avg}% (${a.n})` : ""}</div>`;
+  };
+  const covCell = st => {
+    const c = perfCoverage(st.id);
+    if(!c) return `<span class="perf-dim">Loading…</span>`;
+    if(c.error) return `<span class="perf-dim" title="${lmEsc(c.error)}">Unavailable</span>`;
+    if(!c.team) return `<span class="perf-dim">No team found</span>`;
+    const pct = Math.round(100 * c.covered / c.team);
+    return `<span class="${pct >= 80 ? "perf-ok" : pct >= 50 ? "perf-warn" : "perf-bad"}">${c.covered} of ${c.team}</span> <span class="perf-sub">(${pct}%)</span>`;
+  };
+
+  const l360Cell = r => {
+    if(!r) return `<span class="perf-dim">None yet</span>`;
+    if(r.status === "released") return `<a href="${lmEsc(l360Url("report=" + r.id))}" target="_blank" rel="noopener">Released ${fmtD(r.released_at)}</a>`;
+    if(r.status === "collecting") return `<span class="chip warn">Collecting</span> <span class="perf-sub">${r.raters} rater${r.raters === 1 ? "" : "s"}${r.self_done !== undefined ? ` · self ${r.self_done ? "✓" : "–"}` : ""}</span>`;
+    return lmEsc(r.status);
+  };
+
+  const gm360Cell = r => {
+    if(!r) return `<span class="perf-dim">None yet</span>`;
+    const cyc = r.cycle ? ` <span class="perf-sub">${lmEsc(r.cycle)}</span>` : "";
+    if(r.status === "released") return `<span class="chip good">Released ${fmtD(r.released_at)}</span>${cyc}`;
+    if(r.status === "collecting") return `<span class="chip warn">Collecting</span> <span class="perf-sub">${r.raters} rater${r.raters === 1 ? "" : "s"}</span>${cyc}`;
+    return lmEsc(r.status) + cyc;
+  };
+  const gmRows = (d.gm_scorecards || []).map(r => scRow(r, "gm")).join("");
+  const lmRows = (d.lm_scorecards || []).slice().sort((a,b) => (a.gm||"").localeCompare(b.gm||"") || (a.locations||[""])[0].localeCompare((b.locations||[""])[0])).map(r => scRow(r, "lm")).join("");
+
+  $("#perf-hint").textContent = `${y}${y < 2027 ? " · practice year" : ""} · as of ${fmtD(d.as_of)}`;
+  $("#perf-body").innerHTML = `
+    <div class="perf-kpis">
+      ${kpi("perf-att", "Attendance issues", flagged.length, `at 3+ active points · ${att.length} with any`)}
+      ${kpi("perf-att", "Open PIPs", pips.length, pips.length ? `${pips.filter(p => p.end_date && p.end_date < t).length} past their end date` : "none open")}
+      ${kpi("perf-stores", "1-1s · last 30 days", d.one_on_ones_30d, covReady ? (covTeam ? `${covDone} of ${covTeam} team members covered` : "no teams found") : "checking team coverage…")}
+      ${kpi("perf-leaders", "Leadership 360s", collecting, `collecting · ${releasedYr} released in ${y}`)}
+      ${kpi("perf-stores", "Walk-through audits", walkN, walkN ? `${y} · avg ${walkAvg}%` : `none logged in ${y}`)}
+      ${kpi("perf-stores", "Secret shopper visits", shopN, shopN ? `${y} · avg ${shopAvg}%` : `none logged in ${y}`)}
+      ${kpi("perf-ann", "Leader anniversaries", ann.length, "next 60 days")}
+    </div>
+
+    <div class="section-head" id="perf-sc"><h2>GM scorecards</h2><span class="hint">Score earned so far out of 100 · level is the pace on what's measurable today</span></div>
+    <div class="table-wrap"><table><thead><tr><th>GM</th><th>Cafes</th><th>Score</th><th>On pace for</th><th></th></tr></thead>
+      <tbody>${gmRows || `<tr><td colspan="5" class="perf-dim">No active GMs.</td></tr>`}</tbody></table></div>
+
+    <div class="section-head"><h2>LM scorecards</h2><span class="hint">LM Measurables: Leadership 30 · Craft 45 · Customer Care 25</span></div>
+    <div class="table-wrap"><table><thead><tr><th>LM</th><th>Cafe</th><th>GM</th><th>Score</th><th>On pace for</th><th></th></tr></thead>
+      <tbody>${lmRows || `<tr><td colspan="6" class="perf-dim">No active LMs.</td></tr>`}</tbody></table></div>
+    <p class="perf-note">The dashed mark is how many of the 100 points can be measured automatically today; the rest show as "No tool yet" or "Waiting for data" on each scorecard.</p>
+
+    <div class="section-head" id="perf-stores"><h2>By cafe</h2><span class="hint">Attendance and PIPs as logged in Team Development · 1-1 coverage = team members who worked in the last 60 days with a 1-1 in the last 30</span></div>
+    <div class="table-wrap"><table style="min-width:900px"><thead><tr><th>Cafe</th><th>GM / LM</th><th>Attendance 3+</th><th>Open PIPs</th><th>1-1 coverage</th><th>Latest walk-through</th><th>Latest secret shopper</th></tr></thead>
+      <tbody>${stores.map(st => `<tr>
+        <td><b>${lmEsc(st.name)}</b></td>
+        <td>${st.gm ? `<a href="gmscore.html?gm=${encodeURIComponent(st.gm.id)}&year=${y}&from=cd" target="_blank" rel="noopener">${lmEsc(st.gm.name)}</a>` : "—"}<div class="perf-sub">${st.lm ? `<a href="lmscore.html?lm=${encodeURIComponent(st.lm.id)}&year=${y}&from=cd" target="_blank" rel="noopener">${lmEsc(st.lm.name)}</a>` : "No LM"}</div></td>
+        <td><span class="num ${st.att_flagged ? "perf-bad" : ""}">${st.att_flagged}</span> <span class="perf-sub">(${st.att_any} with any)</span></td>
+        <td class="num ${st.pips_open ? "perf-warn" : ""}">${st.pips_open}</td>
+        <td>${covCell(st)}</td>
+        <td>${auditCell(st.walk)}</td>
+        <td>${auditCell(st.shopper)}</td></tr>`).join("") || `<tr><td colspan="7" class="perf-dim">No cafes with a GM or LM assigned.</td></tr>`}</tbody></table></div>
+
+    <div class="section-head" id="perf-leaders"><h2>Leaders · 1-1s and 360s</h2><span class="hint">LM and above · 1-1s from the coaching log</span></div>
+    <div class="table-wrap"><table style="min-width:820px"><thead><tr><th>Leader</th><th>1-1s given (30 days)</th><th>Last 1-1 received</th><th>Leadership 360</th><th>GM 360</th></tr></thead>
+      <tbody>${leaders.map(l => `<tr>
+        <td><b>${lmEsc(l.name)}</b><div class="perf-sub">${lmEsc(PERF_ROLE[l.role] || l.role)}${l.locations ? " · " + lmEsc(l.locations.join(", ")) : ""}</div></td>
+        <td>${["location_manager","gm"].includes(l.role) ? `<span class="num ${l.given_30d ? "" : "perf-bad"}">${l.given_30d}</span>${l.last_given ? ` <span class="perf-sub">last ${ago(l.last_given)}</span>` : ""}` : `<span class="num">${l.given_30d}</span>`}</td>
+        <td>${["location_manager","gm","production_manager"].includes(l.role) ? `<span class="${l.last_received && tdDays(String(l.last_received).slice(0,10), t) <= 30 ? "perf-ok" : "perf-bad"}">${ago(l.last_received)}</span>` : `<span class="perf-dim">${ago(l.last_received)}</span>`}</td>
+        <td>${l360Cell(l.l360)}</td>
+        <td>${l.role === "gm" ? gm360Cell(l.gm360) : `<span class="perf-dim">—</span>`}</td></tr>`).join("")}</tbody></table></div>
+    <p class="perf-note">Start, share and release Leadership 360s in Company → Leadership 360s.</p>
+
+    <div class="perf-two" style="margin-top:22px;">
+      <div id="perf-ann"><div class="section-head" style="margin-top:0"><h2>Anniversaries &amp; birthdays</h2><span class="hint">LM and above · next 60 days</span></div>
+        <div class="card"><ul class="perf-list">${ann.length ? ann.map(a => `<li><span><b>${lmEsc(a.name)}</b> <span class="perf-sub">${lmEsc(PERF_ROLE[a.role] || a.role)}</span><br>${lmEsc(a.what)}</span><span class="when">${a.date === t ? "Today" : fmtD(a.date)}</span></li>`).join("") : `<li class="perf-dim">Nothing in the next 60 days. Birthdays and grade dates come from each leader's HR details in Staff Admin.</li>`}</ul></div></div>
+      <div id="perf-att"><div class="section-head" style="margin-top:0"><h2>Attendance &amp; PIPs</h2><span class="hint">Active points (90-day expiry, 1 back per 30 clean days)</span></div>
+        <div class="card"><ul class="perf-list">
+          ${att.map(a => { const [lbl, cls] = perfStanding(Number(a.points)); return `<li><span><b>${lmEsc(a.name)}</b> <span class="perf-sub">${lmEsc(a.location || "")}</span></span><span><span class="num">${a.points}</span> pts <span class="chip ${cls}">${lbl}</span></span></li>`; }).join("") || `<li class="perf-dim">No one has active attendance points.</li>`}
+        </ul>
+        <div style="font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); font-weight:700; margin:14px 0 4px;">Open PIPs</div>
+        <ul class="perf-list">
+          ${pips.map(p => `<li><span><b>${lmEsc(p.name)}</b> <span class="perf-sub">${lmEsc(p.location || "")} · ${lmEsc((p.bucket || "").replace("_"," "))}</span></span><span class="when ${p.end_date && p.end_date < t ? "perf-bad" : ""}">${p.status === "extended" ? "Extended to " : "Ends "}${fmtD(p.end_date)}</span></li>`).join("") || `<li class="perf-dim">No open PIPs.</li>`}
+        </ul></div></div>
+    </div>`;
+
+  $$("#perf-body [data-perf-jump]").forEach(b => b.addEventListener("click", () => {
+    const el = document.getElementById(b.dataset.perfJump); if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+  }));
+}
+document.querySelectorAll('.nav-item[data-section="performance"]').forEach(btn => btn.addEventListener("click", () => { perfLoad(); }));
+
 
 /* ---------------------------------------------------------------------
    APP — real, RLS-scoped data for whoever is signed in
@@ -4145,6 +4440,7 @@ async function initApp(){
   } else {
     window.__commandDeckGate.showPortalOnly();
   }
+  $$(".exec-nav-group").forEach(el => el.hidden = !EXEC_ROLES.includes(myStaff.role));
   if(myStaff.role === "location_manager") window.__commandDeckGate.enableLmNav();
   else if(LM_NAV_ROLES.includes(myStaff.role)) window.__commandDeckGate.hideLmEntryPoints();
 
