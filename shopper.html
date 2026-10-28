@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<title>Salt City Secret Shopper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one phone-width column. Visit details, then the visit in order (arrive, order, wait, hand-off, the drink), a sticky score ticket at the bottom, and a Results view for managers. */
+:root {
+  --bg: #eef2f0; --surface: #ffffff; --ink: #1b2422; --muted: #5d6b67; --line: #d5ddda;
+  --care: #2f5f8a; --care-soft: #e2ebf4;
+  --craft: #7a4a2c; --craft-soft: #f2e7df;
+  --yes: #1f7a4d; --yes-soft: #dcf0e5; --no: #b23a2e; --no-soft: #f8e1de; --na: #6b7672; --na-soft: #e7ebea;
+  --ticket: #fffdf8; --ticket-ink: #2a2622;
+  --f-display: "Gloock", Georgia, "Times New Roman", serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111816; --surface: #19211f; --ink: #e4ebe8; --muted: #98a6a2; --line: #2c3835;
+  --care: #8fb5de; --care-soft: #1d2b3b; --craft: #d9a883; --craft-soft: #33251b;
+  --yes: #5fc993; --yes-soft: #17352a; --no: #f08a7e; --no-soft: #3d1f1b; --na: #a2aeaa; --na-soft: #252e2c;
+  --ticket: #1f2624; --ticket-ink: #e9e4dc; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111816; --surface: #19211f; --ink: #e4ebe8; --muted: #98a6a2; --line: #2c3835;
+  --care: #8fb5de; --care-soft: #1d2b3b; --craft: #d9a883; --craft-soft: #33251b;
+  --yes: #5fc993; --yes-soft: #17352a; --no: #f08a7e; --no-soft: #3d1f1b; --na: #a2aeaa; --na-soft: #252e2c;
+  --ticket: #1f2624; --ticket-ink: #e9e4dc; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 640px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 150px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--care); outline-offset: 2px; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+header { display: grid; gap: 6px; margin-bottom: 18px; }
+.eyebrow { font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 9vw, 46px); line-height: 1; margin: 0; letter-spacing: -.01em; }
+.lede { margin: 4px 0 0; color: var(--muted); max-width: 60ch; }
+
+.views { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 4px; margin: 14px 0 20px; width: fit-content; }
+.views button { border: 0; background: transparent; padding: 7px 16px; border-radius: 99px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.views button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+.brief { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px; margin-bottom: 18px; }
+.brief h2 { font-size: 13px; letter-spacing: .07em; text-transform: uppercase; margin: 0; color: var(--muted); }
+.brief ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 15px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; margin-bottom: 18px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label, .field .lab { font-size: 13px; font-weight: 600; color: var(--muted); }
+.field input, .field select, .field textarea { width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.field textarea { min-height: 70px; resize: vertical; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 420px) { .row2 { grid-template-columns: 1fr; } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { border: 1px solid var(--line); background: var(--bg); border-radius: 99px; padding: 6px 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.stage { margin: 26px 0 10px; display: flex; align-items: baseline; gap: 10px; }
+.stage h2 { font-family: var(--f-display); font-weight: 400; font-size: 26px; margin: 0; }
+.stage .when { font-size: 13px; color: var(--muted); }
+.pill { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; }
+.pill.care { color: var(--care); background: var(--care-soft); }
+.pill.craft { color: var(--craft); background: var(--craft-soft); }
+
+.items { display: grid; gap: 10px; }
+.item { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.item.care { --c: var(--care); }
+.item.craft { --c: var(--craft); }
+.item .q { font-weight: 600; line-height: 1.35; }
+.item .hint { font-size: 13.5px; color: var(--muted); margin-top: -4px; }
+.item .meta { display: flex; gap: 8px; align-items: center; }
+.ans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ans.two { grid-template-columns: repeat(2, 1fr); }
+.ans button { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 9px 4px; font-weight: 700; cursor: pointer; }
+.ans button[data-v="yes"][aria-pressed="true"] { background: var(--yes-soft); border-color: var(--yes); color: var(--yes); }
+.ans button[data-v="no"][aria-pressed="true"] { background: var(--no-soft); border-color: var(--no); color: var(--no); }
+.ans button[data-v="na"][aria-pressed="true"] { background: var(--na-soft); border-color: var(--na); color: var(--na); }
+
+.ticketbar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(6px); border-top: 1px solid var(--line); z-index: 5; }
+.ticket { max-width: 640px; margin: 0 auto; background: var(--ticket); color: var(--ticket-ink); border: 1px dashed var(--line); border-radius: 10px; padding: 8px 12px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 10px; align-items: center; font-family: var(--f-mono); }
+.ticket .t { display: grid; }
+.ticket .t small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.ticket .t b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.ticket .t.care b { color: var(--care); }
+.ticket .t.craft b { color: var(--craft); }
+.ticket .left { font-family: var(--f-body); font-size: 12px; opacity: .75; }
+@media (max-width: 420px) { .ticket { grid-template-columns: repeat(3, minmax(0, 1fr)); } .ticket .left { grid-column: 1 / -1; } }
+
+.actions { display: grid; gap: 10px; margin-top: 22px; }
+.primary { border: 0; background: var(--ink); color: var(--bg); border-radius: 12px; padding: 14px; font-weight: 700; font-size: 17px; cursor: pointer; }
+.primary:disabled { opacity: .45; cursor: not-allowed; }
+.secondary { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px; font-weight: 600; cursor: pointer; }
+.msg { font-size: 14.5px; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+.msg.ok { border-color: var(--yes); color: var(--yes); background: var(--yes-soft); }
+.msg.err { border-color: var(--no); color: var(--no); background: var(--no-soft); }
+.copybox { width: 100%; min-height: 140px; font-family: var(--f-mono); font-size: 12.5px; border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--bg); }
+
+/* results */
+.loc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.loc { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 2px; }
+.loc h3 { margin: 0; font-size: 15px; }
+.loc .n { font-size: 12.5px; color: var(--muted); }
+.loc .big { font-family: var(--f-mono); font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.loc .split { font-family: var(--f-mono); font-size: 12.5px; display: flex; gap: 10px; }
+.loc .split .c1 { color: var(--care); } .loc .split .c2 { color: var(--craft); }
+.tbl { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 520px; }
+th { text-align: left; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+details summary { cursor: pointer; color: var(--care); font-weight: 600; font-size: 13.5px; }
+.misses { margin: 6px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); }
+.empty { color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; padding: 18px; }
+footer { margin-top: 26px; font-size: 13px; color: var(--muted); }
+.locname { font-family: var(--f-display); font-size: 24px; line-height: 1.1; }
+.notice { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 6px; }
+.notice h2 { font-family: var(--f-display); font-weight: 400; font-size: 26px; margin: 0; }
+.adm h2.sec { font-family: var(--f-display); font-weight: 400; font-size: 26px; margin: 26px 0 10px; }
+.adm .linkbox { display: grid; gap: 10px; background: var(--bg); border: 1px dashed var(--line); border-radius: 12px; padding: 12px; }
+.adm .linkbox code { font-family: var(--f-mono); font-size: 13px; word-break: break-all; }
+.adm .qr { background: #fff; padding: 10px; border-radius: 10px; width: fit-content; }
+.adm .btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.adm .btnrow button, .adm .btnrow a { flex: 0 0 auto; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 14px; font-weight: 600; cursor: pointer; color: var(--ink); text-decoration: none; font-size: 14px; }
+.adm .st { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; background: var(--na-soft); color: var(--na); white-space: nowrap; }
+.adm .st.done { background: var(--yes-soft); color: var(--yes); }
+.adm .st.wait { background: var(--care-soft); color: var(--care); }
+.adm td button { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: 600; cursor: pointer; margin: 0 4px 4px 0; }
+.adm .loc .pts { font-size: 12.5px; color: var(--muted); }
+.adm .loc button { margin-top: 6px; justify-self: start; border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.adm .vlist { display: grid; gap: 10px; margin-bottom: 18px; }
+.adm .vcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; }
+.adm .vcard .top { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
+.adm .vcard .sub { font-size: 13.5px; color: var(--muted); }
+.adm .vcard ul { margin: 4px 0 0; padding-left: 18px; font-size: 14px; }
+.done{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 18px;display:grid;gap:8px;margin-top:10px}
+.done h2{font-family:var(--f-display);font-weight:400;font-size:30px;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow">Salt City Coffee · Mystery visit</div>
+    <h1>Secret Shopper</h1>
+    <p class="lede" id="lede">Visit like any guest, then answer what you saw. You don't need to know anything about coffee: every question is about what you noticed, heard or tasted.</p>
+  </header>
+
+  <section id="boot-view"><div class="notice"><p>Loading…</p></div></section>
+
+  <section id="bad-view" hidden><div class="notice"><h2 id="bad-title">This link isn't working</h2><p id="bad-text"></p></div></section>
+
+  <section id="form-view" hidden>
+    <div class="brief">
+      <h2>Before you go</h2>
+      <ol>
+        <li>Use the <b>$10 gift card</b> we sent you to order <b>anything you like</b>: a drink, food, or both. Pay with it like any guest.</li>
+        <li>Ask the barista one question, like <b>"What would you recommend?"</b> or <b>"What's the difference between a latte and a cappuccino?"</b></li>
+        <li>Note the time you get in line and the time your drink is in your hand.</li>
+        <li>Fill this out right after the visit, before you forget. You'll only see questions for what you ordered. Mark N/A when something didn't apply.</li>
+      </ol>
+    </div>
+
+    <div class="card" aria-label="Visit details">
+      <div class="field">
+        <span class="lab" id="loc-lab">Location</span>
+        <div class="locname" id="loc-name" aria-labelledby="loc-lab"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="f-date">Date</label><input id="f-date" type="date"></div>
+        <div class="field"><label for="f-time">Time you arrived</label><input id="f-time" type="time"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="f-order">What you ordered</label><input id="f-order" type="text" placeholder="Iced vanilla latte and a muffin"></div>
+        <div class="field"><label for="f-wait">Minutes from ordering to drink in hand</label><input id="f-wait" type="number" min="0" step="1" inputmode="numeric" placeholder="6"></div>
+      </div>
+      <div class="field">
+        <span class="lab" id="got-lab">What did you get? (pick all that apply)</span>
+        <div class="chips" id="got-chips" role="group" aria-labelledby="got-lab"></div>
+      </div>
+      <div class="field">
+        <span class="lab" id="stay-lab">How you ordered</span>
+        <div class="chips" id="stay-chips" role="group" aria-labelledby="stay-lab"></div>
+      </div>
+    </div>
+
+    <div id="stages"></div>
+
+    <div class="stage"><h2>Overall</h2></div>
+    <div class="card">
+      <div class="field">
+        <span class="lab" id="ret-lab">How likely are you to come back?</span>
+        <div class="chips" id="ret-chips" role="group" aria-labelledby="ret-lab"></div>
+      </div>
+      <div class="field"><label for="f-best">Best moment of the visit</label><textarea id="f-best" placeholder="The barista remembered…"></textarea></div>
+      <div class="field"><label for="f-fix">One thing we should fix</label><textarea id="f-fix" placeholder="The condiment bar was out of…"></textarea></div>
+      <div class="field"><label for="f-name">Your name or initials</label><input id="f-name" type="text" autocomplete="off"></div>
+    </div>
+
+    <div class="actions">
+      <div id="form-msg" class="msg" hidden></div>
+      <button type="button" class="primary" id="btn-save">Submit visit</button>
+    </div>
+  </section>
+
+  <section id="admin-view" class="adm" hidden>
+    <div class="card">
+      <h2 style="margin:0;font-size:18px">Arrange a visit</h2>
+      <div class="row2">
+        <div class="field"><label for="a-loc">Cafe</label><select id="a-loc"></select></div>
+        <div class="field"><label for="a-note">Shopper (only you see this)</label><input id="a-note" type="text" placeholder="Name, and when you sent the gift card"></div>
+      </div>
+      <button type="button" class="primary" id="a-create">Create visit link</button>
+      <div id="a-msg" class="msg" hidden></div>
+      <div class="linkbox" id="a-made" hidden>
+        <div><b id="a-made-loc"></b> · code <b id="a-made-code"></b> · expires <span id="a-made-exp"></span></div>
+        <code id="a-made-link"></code>
+        <div class="qr" id="a-qr"></div>
+        <div class="btnrow"><button type="button" id="a-copy">Copy link</button><a id="a-dl" download="secret-shopper-qr.png" href="#">Download QR code</a></div>
+        <div class="sub" style="font-size:13.5px;color:var(--muted)">Send the link or QR code with the $10 eGift card. It works once, for this cafe only.</div>
+      </div>
+    </div>
+
+    <h2 class="sec">By location</h2>
+    <p class="lede" style="margin-top:-6px">This year's average visit score. It feeds the LM's Secret shopper (10 points: full at 90%, zero at 70%) and the GM's Group secret shopper (5 points).</p>
+    <div class="loc-grid" id="a-grid"></div>
+    <div id="a-detail"></div>
+
+    <h2 class="sec">Visit links</h2>
+    <div class="tbl"><table><thead><tr><th>Cafe</th><th>Shopper</th><th>Created</th><th>Status</th><th>Visit</th><th></th></tr></thead><tbody id="a-rows"></tbody></table></div>
+  </section>
+
+  <section id="done-view" hidden>
+    <div class="done"><h2>Thank you!</h2><p>Your visit is in. We really appreciate you taking the time to help our team get better.</p></div>
+  </section>
+</div>
+
+
+<div class="ticketbar" id="ticketbar" hidden>
+  <div class="ticket" aria-live="polite">
+    <div class="t care"><small>Care</small><b id="s-care">–</b></div>
+    <div class="t craft"><small>Craft</small><b id="s-craft">–</b></div>
+    <div class="t"><small>Visit</small><b id="s-total">–</b></div>
+    <div class="left" id="s-left"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  var CODE = (new URLSearchParams(location.search).get("v") || "").trim().toUpperCase();
+  var INVITE = null;
+  var STAY = ["For here", "To go"];
+  function stayOpts() { return INVITE && INVITE.drive_thru ? STAY.concat(["Drive-thru"]) : STAY; }
+  var RETURN = ["Definitely", "Probably", "Not sure", "Probably not"];
+
+  // Every item is observable by a guest with no coffee knowledge; standards come from the Barista Guide.
+  var STAGES = [
+    { id: "arrive", title: "Arriving", when: "first minute", items: [
+      { id: "c1", p: "care", q: "Someone greeted you (said hello) before you had to get their attention.", hint: "We aim to beat you to the counter.", show: "inside" },
+      { id: "d1", p: "care", q: "You were greeted at the speaker within a few seconds of pulling up.", show: "dt" },
+      { id: "d2", p: "care", q: "The voice at the speaker was friendly and easy to hear and understand.", show: "dt" },
+      { id: "c2", p: "care", q: "The person who greeted you smiled and made eye contact.", show: "inside" },
+      { id: "c3", p: "care", q: "Staff stopped side conversations or other tasks to focus on you." },
+      { id: "c4", p: "care", q: "The counter, condiment area and floor looked clean and tidy.", show: "inside" },
+      { id: "c5", p: "care", q: "Tables were clean and dirty dishes had been cleared.", na: true, show: "inside" },
+      { id: "d3", p: "care", q: "The drive-thru lane, menu board and window area looked clean and tidy.", show: "dt" }
+    ]},
+    { id: "order", title: "Ordering", when: "at the register", items: [
+      { id: "c6", p: "care", q: "You didn't feel rushed while you decided." },
+      { id: "c7", p: "care", q: "The barista helped you order (explained the menu or sizes) without assuming you knew how it works." },
+      { id: "c8", p: "care", q: "Your question got a helpful, friendly answer.", hint: "Clear and confident, without being snobby or making you feel silly." },
+      { id: "c9", p: "care", q: "If you asked for a recommendation, they asked what you like before suggesting something.", na: true },
+      { id: "k1", p: "craft", q: "Your order was repeated back or confirmed, including any changes you asked for." }
+    ]},
+    { id: "wait", title: "While you waited", when: "order to pick-up", items: [
+      { id: "c10", p: "care", q: "If the wait felt long, someone let you know your order was coming.", na: true },
+      { id: "c11", p: "care", q: "Someone checked on the seating area (clearing tables, offering samples or chatting with guests).", na: true, show: "inside" }
+    ]},
+    { id: "handoff", title: "The hand-off", when: "getting your order", items: [
+      { id: "c12", p: "care", q: "Your order was handed off with your name." },
+      { id: "c13", p: "care", q: "They used a full sentence and made eye contact.", hint: "For example: \"Here's your oat latte, Sam. Enjoy!\" rather than just \"Latte.\"" },
+      { id: "c14", p: "care", q: "Someone thanked you or invited you back on your way out." },
+      { id: "c15", p: "care", q: "If anything was wrong, they fixed it quickly and kindly, without blaming anyone.", na: true }
+    ]},
+    { id: "drink", title: "Your order", when: "first sips and bites", items: [
+      { id: "k2", p: "craft", q: "You got exactly what you ordered, including any changes you asked for." },
+      { id: "k3", p: "craft", q: "Your drink looked appealing when you got it: neat, with no drips or spills on the cup.", show: "drink" },
+      { id: "k4", p: "craft", q: "The cup was filled properly (not short or overflowing).", show: "drink" },
+      { id: "k5", p: "craft", q: "Your hot drink was hot but pleasant to sip right away (not scalding, not lukewarm).", show: "hot" },
+      { id: "k6", p: "craft", q: "Your cold drink was cold and well mixed, with the right amount of ice.", show: "cold" },
+      { id: "k7", p: "craft", q: "Your drink tasted good: you'd happily order it again.", show: "drink" }
+    ]},
+    { id: "serve", title: "Food, to-go and grab-and-go", when: "the details", items: [
+      { id: "k8", p: "craft", q: "Your to-go cup had its lid on securely.", show: "togo" },
+      { id: "d4", p: "craft", q: "Everything was packed to drive away: a carrier for more than one drink, food bagged with napkins.", na: true, show: "dt" },
+      { id: "k14", show: "inside", p: "craft", q: "The grab-and-go case was well stocked and neat, with every item clearly labeled.", hint: "Look even if you didn't buy anything from it. Mark N/A if this location doesn't have one.", na: true },
+      { id: "k12", p: "craft", q: "Your food looked neat and appetizing when it came out.", show: "food" },
+      { id: "k13", p: "craft", q: "Your food tasted good: you'd happily order it again.", show: "food" }
+    ]}
+  ];
+  var ALL = [];
+  STAGES.forEach(function (s) { s.items.forEach(function (it) { ALL.push(it); }); });
+
+  var DRAFT_KEY = "scc-shopper-draft-" + CODE;
+  var state = blank();
+
+  function blank() {
+    return { location: "", date: today(), time: "", order: "", wait: "", stay: "", got: [], ret: "", best: "", fix: "", name: "", answers: {} };
+  }
+  function today() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function $(id) { return document.getElementById(id); }
+  function el(tag, attrs, text) { var e = document.createElement(tag); if (attrs) Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); }); if (text != null) e.textContent = text; return e; }
+
+  function loadDraft() { try { var raw = localStorage.getItem(DRAFT_KEY); if (raw) { var d = JSON.parse(raw); if (d && typeof d === "object") state = Object.assign(blank(), d, { answers: d.answers || {}, got: Array.isArray(d.got) ? d.got : [] }); } } catch (e) {} }
+  function saveDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); } catch (e) {} }
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+
+  // ---- scoring (pure) ----
+  // question logic: which questions apply to this visit
+  var GOT = ["Hot drink", "Cold drink", "Food"];
+  function applies(it, st) {
+    var g = st.got || [];
+    switch (it.show) {
+      case "hot": return g.indexOf("Hot drink") >= 0;
+      case "cold": return g.indexOf("Cold drink") >= 0;
+      case "drink": return g.indexOf("Hot drink") >= 0 || g.indexOf("Cold drink") >= 0;
+      case "food": return g.indexOf("Food") >= 0;
+      case "togo": return (st.stay === "To go" || st.stay === "Drive-thru") && (g.indexOf("Hot drink") >= 0 || g.indexOf("Cold drink") >= 0);
+      case "inside": return st.stay !== "Drive-thru";
+      case "dt": return st.stay === "Drive-thru";
+      default: return true;
+    }
+  }
+  function live() { return ALL.filter(function (it) { return applies(it, state); }); }
+  function prune() { ALL.forEach(function (it) { if (!applies(it, state)) delete state.answers[it.id]; }); }
+
+  function score(answers) {
+    var out = { care: { yes: 0, no: 0 }, craft: { yes: 0, no: 0 }, answered: 0 };
+    var L = live();
+    L.forEach(function (it) {
+      var v = answers[it.id];
+      if (v) out.answered++;
+      if (v === "yes") out[it.p].yes++;
+      else if (v === "no") out[it.p].no++;
+    });
+    function pct(b) { var n = b.yes + b.no; return n ? Math.round((b.yes / n) * 100) : null; }
+    var c = pct(out.care), k = pct(out.craft);
+    var total = (c != null && k != null) ? Math.round((c + k) / 2) : (c != null ? c : k);
+    return { care: c, craft: k, total: total, answered: out.answered, of: L.length };
+  }
+
+  // ---- render form ----
+  function chipGroup(containerId, options, key) {
+    var box = $(containerId); box.textContent = "";
+    options.forEach(function (opt, i) {
+      var b = el("button", { type: "button", id: containerId + "-" + i, "aria-pressed": String(state[key] === opt) }, opt);
+      b.addEventListener("click", function () { state[key] = state[key] === opt ? "" : opt; if (key === "location" && state.stay === "Drive-thru" && state.location !== "Clay") state.stay = ""; if (key === "location") chipGroup("stay-chips", stayOpts(), "stay"); if (key === "stay" || key === "location") { prune(); renderStages(); renderTicket(); } saveDraft(); chipGroup(containerId, options, key); });
+      box.appendChild(b);
+    });
+  }
+
+  function gotChips() {
+    var box = $("got-chips"); box.textContent = "";
+    GOT.forEach(function (opt, i) {
+      var on = state.got.indexOf(opt) >= 0;
+      var b = el("button", { type: "button", id: "got-chips-" + i, "aria-pressed": String(on) }, opt);
+      b.addEventListener("click", function () {
+        if (on) state.got = state.got.filter(function (x) { return x !== opt; }); else state.got = state.got.concat([opt]);
+        prune(); saveDraft(); gotChips(); renderStages(); renderTicket();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function renderStages() {
+    var root = $("stages"); root.textContent = "";
+    STAGES.forEach(function (s) {
+      var shown = s.items.filter(function (it) { return applies(it, state); });
+      if (!shown.length) return;
+      var h = el("div", { "class": "stage" });
+      h.appendChild(el("h2", null, s.title));
+      h.appendChild(el("span", { "class": "when" }, s.when));
+      root.appendChild(h);
+      var list = el("div", { "class": "items" });
+      shown.forEach(function (it) {
+        var card = el("div", { "class": "item " + it.p, id: "item-" + it.id });
+        var meta = el("div", { "class": "meta" });
+        meta.appendChild(el("span", { "class": "pill " + it.p }, it.p === "care" ? "Customer Care" : "Craft"));
+        card.appendChild(meta);
+        card.appendChild(el("div", { "class": "q" }, it.q));
+        if (it.hint) card.appendChild(el("div", { "class": "hint" }, it.hint));
+        var ans = el("div", { "class": "ans" + (it.na ? "" : " two"), role: "group", "aria-label": it.q });
+        var opts = [["yes", "Yes"], ["no", "No"]];
+        if (it.na) opts.push(["na", "N/A"]);
+        opts.forEach(function (o) {
+          var b = el("button", { type: "button", id: "a-" + it.id + "-" + o[0], "data-v": o[0], "aria-pressed": String(state.answers[it.id] === o[0]) }, o[1]);
+          b.addEventListener("click", function () {
+            state.answers[it.id] = state.answers[it.id] === o[0] ? undefined : o[0];
+            if (!state.answers[it.id]) delete state.answers[it.id];
+            saveDraft();
+            ans.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(state.answers[it.id] === x.getAttribute("data-v"))); });
+            renderTicket();
+          });
+          ans.appendChild(b);
+        });
+        card.appendChild(ans);
+        list.appendChild(card);
+      });
+      root.appendChild(list);
+    });
+  }
+
+  function fmt(n) { return n == null ? "–" : n + "%"; }
+  function renderTicket() {
+    var s = score(state.answers);
+    $("s-care").textContent = fmt(s.care);
+    $("s-craft").textContent = fmt(s.craft);
+    $("s-total").textContent = fmt(s.total);
+    var left = s.of - s.answered;
+    $("s-left").textContent = left ? left + " question" + (left === 1 ? "" : "s") + " left" : "All answered";
+  }
+
+  function bindFields() {
+    [["f-date", "date"], ["f-time", "time"], ["f-order", "order"], ["f-wait", "wait"], ["f-best", "best"], ["f-fix", "fix"], ["f-name", "name"]].forEach(function (p) {
+      var input = $(p[0]); input.value = state[p[1]] || "";
+      input.addEventListener("input", function () { state[p[1]] = input.value; saveDraft(); });
+    });
+  }
+
+  function renderForm() {
+    $("loc-name").textContent = state.location;
+    chipGroup("stay-chips", stayOpts(), "stay");
+    gotChips();
+    chipGroup("ret-chips", RETURN, "ret");
+    renderStages();
+    bindFields();
+    renderTicket();
+  }
+
+  function showMsg(text, kind) { var m = $("form-msg"); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); m.hidden = false; }
+
+  function missing() {
+    var unanswered = live().filter(function (it) { return !state.answers[it.id]; });
+    if (!state.got.length) return { text: "Tell us what you got: hot drink, cold drink, food, or a mix.", target: "got-chips" };
+    if (unanswered.length) return { text: unanswered.length + " question" + (unanswered.length === 1 ? " is" : "s are") + " still blank. Answer Yes, No or N/A for each.", target: "item-" + unanswered[0].id };
+    return null;
+  }
+
+  function show(id) { ["boot-view","bad-view","form-view","admin-view","done-view"].forEach(function (v) { $(v).hidden = v !== id; }); $("ticketbar").hidden = id !== "form-view"; }
+  function bad(title, text) { $("bad-title").textContent = title; $("bad-text").textContent = text; show("bad-view"); }
+
+  async function save() {
+    var miss = missing();
+    if (miss) { showMsg(miss.text, "err"); var t = $(miss.target); if (t) t.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
+    var btn = $("btn-save"); btn.disabled = true; btn.textContent = "Sending…";
+    var L = live();
+    var visit = { date: state.date, time: state.time, ordered: state.order, got: state.got.slice(), how: state.stay,
+                  wait_min: state.wait === "" ? null : Number(state.wait), come_back: state.ret, best: state.best, fix: state.fix, shopper: state.name };
+    var answers = L.map(function (it) { return { id: it.id, p: it.p, q: it.q, a: state.answers[it.id] }; });
+    try {
+      var r = await sb.rpc("secret_shopper_submit", { p_code: CODE, p_visit: visit, p_answers: answers });
+      if (r.error) throw r.error;
+      clearDraft(); state = blank();
+      show("done-view"); window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {
+      var m = e && e.message || "";
+      if (/already been submitted|not valid/.test(m)) showMsg(m, "err");
+      else showMsg("Couldn't send just now. Check your connection and tap Submit again; your answers are still here.", "err");
+    } finally { btn.disabled = false; btn.textContent = "Submit visit"; }
+  }
+
+  async function bootShopper() {
+    var r = await sb.rpc("secret_shopper_invite_info", { p_code: CODE });
+    if (r.error) return bad("Something went wrong", "Check your connection and reload this page.");
+    var info = r.data || {};
+    if (!info.ok) {
+      if (info.reason === "used") return bad("Thank you!", "This visit has already been submitted.");
+      if (info.reason === "expired") return bad("This link has expired", "Ask the person who sent it for a new one.");
+      return bad("This link isn't working", "Check that you opened the full link, or ask the person who sent it for a new one.");
+    }
+    INVITE = info;
+    loadDraft();
+    state.location = info.location;
+    if (state.stay === "Drive-thru" && !info.drive_thru) state.stay = "";
+    renderForm();
+    show("form-view");
+  }
+
+  // ---------- admin (COO / CEO / CBO) ----------
+  var ADM = null;
+  var QTEXT = {}; ALL.forEach(function (it) { QTEXT[it.id] = it.q; });
+  function linkFor(code) { return location.origin + location.pathname + "?v=" + code; }
+  function d8(s) { return s ? new Date(s).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : ""; }
+  function amsg(text, kind) { var m = $("a-msg"); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); m.hidden = !text; }
+  function copy(text, okText) { try { navigator.clipboard.writeText(text).then(function () { amsg(okText, "ok"); }, function () { amsg(text, ""); }); } catch (e) { amsg(text, ""); } }
+
+  function showMade(inv, locName) {
+    var link = linkFor(inv.code);
+    $("a-made").hidden = false; $("a-made-loc").textContent = locName; $("a-made-code").textContent = inv.code;
+    $("a-made-exp").textContent = new Date(inv.expires_on + "T12:00").toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+    $("a-made-link").textContent = link;
+    var box = $("a-qr"); box.textContent = "";
+    if (window.QRCode) {
+      new QRCode(box, { text: link, width: 200, height: 200, colorDark: "#1b2422", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+      setTimeout(function () { var c = box.querySelector("canvas"); if (c) { $("a-dl").href = c.toDataURL("image/png"); $("a-dl").download = "secret-shopper-" + locName.replace(/\W+/g, "-") + "-" + inv.code + ".png"; } }, 60);
+    }
+    $("a-copy").onclick = function () { copy(link, "Link copied."); };
+  }
+
+  function renderAdmin() {
+    var sel = $("a-loc"); if (!sel.options.length) ADM.locations.forEach(function (l) { sel.appendChild(el("option", { value: l.id }, l.name)); });
+    var rows = $("a-rows"); rows.textContent = "";
+    if (!ADM.invites.length) { var tr = el("tr"); var td = el("td", { colspan: "6" }, "No visits arranged yet this year."); tr.appendChild(td); rows.appendChild(tr); }
+    ADM.invites.forEach(function (v) {
+      var tr = el("tr");
+      tr.appendChild(el("td", null, v.location));
+      tr.appendChild(el("td", null, v.note || ""));
+      tr.appendChild(el("td", { "class": "num" }, d8(v.created_at)));
+      var expired = !v.used_at && new Date(v.expires_on + "T23:59") < new Date();
+      var st = v.used_at ? ["done", "Submitted " + d8(v.used_at)] : v.cancelled ? ["", "Cancelled"] : expired ? ["", "Expired"] : ["wait", "Waiting"];
+      var td = el("td"); td.appendChild(el("span", { "class": "st " + st[0] }, st[1])); tr.appendChild(td);
+      tr.appendChild(el("td", { "class": "num" }, v.total == null ? "–" : v.total + "%"));
+      var act = el("td");
+      if (!v.used_at && !v.cancelled && !expired) {
+        var b1 = el("button", { type: "button" }, "Link & QR"); b1.onclick = function () { showMade(v, v.location); window.scrollTo({ top: 0, behavior: "smooth" }); }; act.appendChild(b1);
+        var b2 = el("button", { type: "button" }, "Cancel"); b2.onclick = async function () {
+          if (b2.dataset.sure !== "1") { b2.dataset.sure = "1"; b2.textContent = "Tap to confirm"; return; }
+          var r = await sb.rpc("secret_shopper_invite_cancel", { p_id: v.id }); if (r.error) amsg(r.error.message, "err"); loadAdmin(); };
+        act.appendChild(b2);
+      }
+      tr.appendChild(act); rows.appendChild(tr);
+    });
+    var grid = $("a-grid"); grid.textContent = "";
+    ADM.locations.forEach(function (l) {
+      var vs = ADM.invites.filter(function (v) { return v.location_id === l.id && v.total != null; });
+      var c = el("div", { "class": "loc" });
+      c.appendChild(el("h3", null, l.name));
+      c.appendChild(el("div", { "class": "n" }, vs.length + " visit" + (vs.length === 1 ? "" : "s")));
+      var a = function (k) { return vs.length ? Math.round(vs.reduce(function (s, v) { return s + Number(v[k] || 0); }, 0) / vs.length) : null; };
+      var tot = a("total");
+      c.appendChild(el("div", { "class": "big" }, tot == null ? "–" : tot + "%"));
+      var sp = el("div", { "class": "split" }); sp.appendChild(el("span", { "class": "c1" }, "Care " + (vs.length ? a("care") + "%" : "–"))); sp.appendChild(el("span", { "class": "c2" }, "Craft " + (vs.length ? a("craft") + "%" : "–"))); c.appendChild(sp);
+      if (tot != null) c.appendChild(el("div", { "class": "pts" }, "LM " + (Math.round(100 * 10 * Math.max(0, Math.min(1, (tot - 70) / 20))) / 100) + " of 10"));
+      if (vs.length) { var b = el("button", { type: "button" }, "See visits"); b.onclick = function () { loadDetail(l); }; c.appendChild(b); }
+      grid.appendChild(c);
+    });
+  }
+
+  async function loadDetail(l) {
+    var box = $("a-detail"); box.textContent = "";
+    var r = await sb.rpc("secret_shopper_visits", { p_location: l.id, p_year: new Date().getFullYear() });
+    if (r.error) { box.appendChild(el("div", { "class": "msg err" }, r.error.message)); return; }
+    box.appendChild(el("h3", { style: "margin:4px 0 10px" }, l.name + " visits"));
+    var list = el("div", { "class": "vlist" });
+    (r.data || []).forEach(function (v) {
+      var c = el("div", { "class": "vcard" });
+      var top = el("div", { "class": "top" }); top.appendChild(el("span", null, d8(v.date + "T12:00") + (v.how ? " · " + v.how : ""))); top.appendChild(el("span", null, v.total + "%")); c.appendChild(top);
+      var vi = v.visit || {};
+      c.appendChild(el("div", { "class": "sub" }, "Care " + v.care + "% · Craft " + v.craft + "%" + (vi.ordered ? " · " + vi.ordered : "") + (vi.wait_min != null ? " · " + vi.wait_min + " min wait" : "")));
+      var ul = el("ul");
+      var misses = (v.answers || []).filter(function (a) { return a.a === "no"; });
+      if (!misses.length) ul.appendChild(el("li", null, "No misses"));
+      misses.forEach(function (a) { ul.appendChild(el("li", null, "Missed: " + (a.q || QTEXT[a.id] || a.id))); });
+      var n = v.notes || {};
+      if (n.best) ul.appendChild(el("li", null, "Best: " + n.best));
+      if (n.fix) ul.appendChild(el("li", null, "Fix: " + n.fix));
+      if (vi.come_back) ul.appendChild(el("li", null, "Come back: " + vi.come_back));
+      c.appendChild(ul); list.appendChild(c);
+    });
+    box.appendChild(list); box.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function loadAdmin() {
+    var r = await sb.rpc("secret_shopper_admin", { p_year: new Date().getFullYear() });
+    if (r.error) {
+      if (/not allowed/i.test(r.error.message)) return bad("Managers only", "Arranging secret shopper visits is for the COO, CEO and CBO. If a shopper sent you here, open the full link they were given.");
+      return bad("Something went wrong", r.error.message);
+    }
+    ADM = r.data; renderAdmin(); show("admin-view");
+  }
+
+  async function bootAdmin() {
+    $("eyebrow").textContent = "Salt City Coffee · Command Deck";
+    $("lede").textContent = "Arrange each visit here, then send the shopper their one-time link with the $10 eGift card. Results flow into the LM and GM scorecards.";
+    var s = await sb.auth.getSession();
+    if (!s.data || !s.data.session) { location.href = "/?next=" + encodeURIComponent(location.pathname.replace(/^\//, "")); return; }
+    $("a-create").onclick = async function () {
+      var btn = $("a-create"); btn.disabled = true; amsg("");
+      var sel = $("a-loc"), name = sel.options[sel.selectedIndex].text;
+      var r = await sb.rpc("secret_shopper_invite_create", { p_location: sel.value, p_note: $("a-note").value });
+      btn.disabled = false;
+      if (r.error) return amsg(r.error.message, "err");
+      $("a-note").value = ""; showMade(r.data, name); loadAdmin();
+    };
+    loadAdmin();
+  }
+
+  // ---- wire up ----
+  $("btn-save").addEventListener("click", save);
+  (CODE ? bootShopper() : bootAdmin()).catch(function () { bad("Something went wrong", "Check your connection and reload this page."); });
+})();
+</script>
+</body>
+</html>
