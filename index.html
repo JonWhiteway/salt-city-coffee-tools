@@ -87,6 +87,8 @@ button{font-family:inherit;}
   font-size:13.3px; font-weight:500; position:relative;
 }
 .nav-item:hover{background:#241D14; color:#FBF6EB;}
+a.nav-item.nav-link{text-decoration:none;}
+.nav-item .nav-ext{margin-left:auto; opacity:.6; font-size:12px;}
 .nav-item.active{background:#2C2115; color:#FBF6EB;}
 .nav-item.active::before{content:""; position:absolute; left:-14px; top:6px; bottom:6px; width:3px; border-radius:2px; background:#F0824C;}
 .nav-dot{width:6px; height:6px; border-radius:50%; background:#8C7F65; flex:0 0 auto;}
@@ -1127,6 +1129,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
     <ul class="nav-list">
       <li class="exec-only"><button class="nav-item" data-section="performance"><span class="nav-dot"></span>Performance Roundup</button></li>
       <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
+      <li class="exec-only"><a class="nav-item nav-link" href="shopper.html" target="_blank" rel="noopener" title="Arrange visits, send shopper links and see results (opens in a new tab)"><span class="nav-dot"></span>Secret Shopper<span class="nav-ext" aria-hidden="true">↗</span></a></li>
       <li class="exec-only"><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
     </ul>
     </div>
