@@ -1133,6 +1133,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <li class="exec-only"><button class="nav-item" data-section="performance"><span class="nav-dot"></span>Performance Roundup</button></li>
       <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
       <li class="exec-only"><button class="nav-item" data-section="lmgm" data-audits="walkthrough"><span class="nav-dot"></span>Walk-Through Audits</button></li>
+      <li class="gm-only"><a class="nav-item nav-link" href="walkthrough.html" target="_blank" rel="noopener" title="Score a cafe walk-through (opens the walk-through page)"><span class="nav-dot"></span>Walk-Through Audit<span class="nav-ext" aria-hidden="true">↗</span></a></li>
       <li class="exec-only"><button class="nav-item" data-section="lmgm" data-audits="secret_shopper"><span class="nav-dot"></span>Secret Shopper</button></li>
       <li class="exec-only"><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
     </ul>
@@ -2086,7 +2087,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <div id="au-wt-wrap">
       <div class="section-head" style="margin-top:10px;"><h2 id="lm-anchor-audits">Walk-throughs</h2>
         <div class="pf-toolbar"><a class="btn small" href="https://drive.google.com/file/d/1XGZBZV76P2nMQyFepPgtmmyXHemmsLek/view" target="_blank" rel="noopener">Audit sheet ↗</a>
-        <button type="button" class="btn primary small" id="pf-wt-new" hidden>+ New walk-through</button></div></div>
+        <button type="button" class="btn primary small" id="pf-wt-new" hidden>Start a walk-through ↗</button></div></div>
       <div class="card lm-pad" id="pf-wt"></div>
 
       </div>
@@ -4460,6 +4461,7 @@ async function initApp(){
   // Performance group: execs see everything; GMs see only Leadership 360s (they start 360s for their LMs).
   $$(".exec-nav-group").forEach(el => el.hidden = !(EXEC_ROLES.includes(myStaff.role) || myStaff.role === "gm"));
   $$(".exec-nav-group .exec-only").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
+  $$(".exec-nav-group .gm-only").forEach(el => el.style.display = myStaff.role === "gm" ? "" : "none");
   if(myStaff.role === "location_manager") window.__commandDeckGate.enableLmNav();
   else if(LM_NAV_ROLES.includes(myStaff.role)) window.__commandDeckGate.hideLmEntryPoints();
 
@@ -5890,7 +5892,7 @@ async function loadWasteTodo(locId){
 function renderWalkthroughs(locId){
   const rows = (pfAudits[locId]||[]).filter(a => a.audit_type === "walkthrough");
   if(!rows.length){
-    $("#pf-wt").innerHTML = `<div class="empty-note">No walk-through audits recorded for this store yet.${pfCanWalk() ? ' Use "+ New walk-through" to score one.' : " Your GM records them here after each walk-through."}</div>`;
+    $("#pf-wt").innerHTML = `<div class="empty-note">No walk-through audits recorded for this cafe yet.${pfCanWalk() ? ' Use "Start a walk-through ↗" to score one on the walk-through page.' : ""}</div>`;
     return;
   }
   const last = rows[0], [band, bcls] = pfBand(last.total_score);
@@ -6070,6 +6072,7 @@ function pfOpenAuditForm(type){
 function recScore(card){ const row = card.querySelector('.pf-item[data-tag="recovery"]'); const on = row?.querySelector(".pf-tri button.on"); return on ? Number(row.dataset.pts) * Number(on.dataset.v) : null; }
 
 function pfOpenShopperVisit(a){
+  if(a.audit_type === "walkthrough") return pfOpenWalkVisit(a);
   const v = a.visit || {}, n = a.notes || {}, pct = x => x == null ? "—" : Math.round(x) + "%";
   const lab = x => x === "yes" ? `<span class="chip good">Yes</span>` : x === "no" ? `<span class="chip critical">No</span>` : `<span class="chip neutral">N/A</span>`;
   const GRP = { care:"Customer Care", craft:"Craft", lead:"Leadership", leadership:"Leadership" };
@@ -6090,9 +6093,29 @@ function pfOpenShopperVisit(a){
     lmModalClose(); pfAfterAuditChange();
   });
 }
+function pfOpenWalkVisit(a){
+  const v = a.visit || {}, n = a.notes || {};
+  const lab = x => x === "yes" ? `<span class="chip good">Yes</span>` : x === "no" ? `<span class="chip critical">No</span>` : `<span class="chip neutral">N/A</span>`;
+  const [band, bcls] = pfBand(Number(a.total_score));
+  lmModal(`<h3>Walk-through audit</h3><div class="sub">${lmEsc(myLocations.find(l => l.id === a.location_id)?.name||"")} · ${lmFmtDate(a.visit_date)}${a.arrival_time ? " " + a.arrival_time.slice(0,5) : ""}${a.daypart ? " · " + DAYPART[a.daypart] : ""}${a.auditor ? " · " + lmEsc(a.auditor) : ""}</div>
+    <div class="pf-sticky"><span>Total <b>${pf1(a.total_score)}</b>/100 <span class="chip ${bcls}">${band}</span></span>${Object.keys(RUBRICS.walkthrough.max).map(c => `<span>${COMP[c]} <b>${pf1(a[c+"_score"])}</b>/${RUBRICS.walkthrough.max[c]}</span>`).join("")}</div>
+    <dl class="lm-dl"><dt>Leader on duty</dt><dd>${lmEsc(v.leader_on_duty || "—")}</dd><dt>Reviewed with</dt><dd>${lmEsc(v.reviewed_with || "—")}</dd><dt>Context</dt><dd>${lmEsc(a.context || "—")}</dd>
+      <dt>Biggest win</dt><dd>${lmEsc(n.best || "—")}</dd><dt>Top fix</dt><dd>${lmEsc(n.fix || "—")}</dd></dl>
+    ${Object.keys(RUBRICS.walkthrough.max).map(c => `<div class="pf-comp-head"><span>${COMP[c]}</span><span class="muted">${pf1(a[c+"_score"])} / ${RUBRICS.walkthrough.max[c]}</span></div>
+      ${a.scores.filter(x => x.p === c).map(x => `<div class="pf-item"><div class="lbl">${lmEsc(x.q)}${x.note ? `<div class="muted" style="font-size:12px;">${lmEsc(x.note)}</div>` : ""}</div><div class="pts">${x.w}</div><div>${lab(x.a)}</div></div>`).join("")}`).join("")}
+    ${pfCanWalk() ? `<div class="lm-form" style="margin-top:12px;"><div class="lm-form-actions"><button type="button" class="btn ghost sm" id="pf-au-void">Delete this walk-through</button></div></div>` : ""}`);
+  $("#lm-modal-card").classList.add("wide");
+  const vb = $("#pf-au-void");
+  if(vb) vb.addEventListener("click", async () => {
+    const reason = prompt("Why delete this walk-through? It comes off every score and scorecard."); if(!reason) return;
+    const { error } = await sb.from("store_audits").update({ voided:true, void_reason:reason, updated_at:new Date().toISOString() }).eq("id", a.id);
+    if(error){ alert(`Couldn't delete: ${error.message}`); return; }
+    lmModalClose(); pfAfterAuditChange();
+  });
+}
 function pfOpenAudit(id){
   const a = Object.values(pfAudits).flat().find(x => x.id === id); if(!a) return;
-  if(a.audit_type === "secret_shopper" && Array.isArray(a.scores)) return pfOpenShopperVisit(a);
+  if(Array.isArray(a.scores)) return pfOpenShopperVisit(a);
   const R = RUBRICS[a.audit_type], [band, bcls] = pfBand(a.total_score);
   const lab = v => v === 1 ? `<span class="chip good">Met</span>` : v === 0.5 ? `<span class="chip warn">Partly</span>` : v === 0 ? `<span class="chip critical">Missed</span>` : "—";
   const v = a.visit || {};
@@ -6113,7 +6136,10 @@ function pfOpenAudit(id){
   });
 }
 
-$("#pf-wt-new").addEventListener("click", () => pfOpenAuditForm("walkthrough"));
+$("#pf-wt-new").addEventListener("click", () => {
+  const loc = pfFormLoc();
+  window.open("walkthrough.html" + (loc ? "?loc=" + encodeURIComponent(loc) : ""), "_blank", "noopener");
+});
 
 /* ---------------- C-suite audits view (Performance → Walk-Through Audits / Secret Shopper) ---------------- */
 function auOpen(mode){
