@@ -955,6 +955,11 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 #sec-lmgm .lm-tab.active{background:var(--sc-navy); border-color:var(--sc-navy); color:#F7F5F2;}
 #sec-lmgm .lm-tabs .lm-back{margin-right:6px;}
 .loc-lm-link{display:inline-flex; align-items:center; gap:6px; margin:0 0 16px;}
+/* C-suite audits view (Performance → Walk-Through Audits / Secret Shopper) lives inside #sec-lmgm so it shares the LM page styles and modal */
+#sec-lmgm.audits-mode #lm-tabs, #sec-lmgm.audits-mode #lm-storebar, #sec-lmgm.audits-mode #lmgm-app-wrap > .topbar,
+#sec-lmgm.audits-mode #lmgm-view-portfolio, #sec-lmgm.audits-mode #lmgm-view-detail, #sec-lmgm.audits-mode #lmgm-view-empty{display:none !important;}
+#sec-lmgm.audits-mode #lmgm-view-audits{display:block !important;}
+#sec-lmgm #au-store{font:inherit; font-size:13px; padding:6px 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--ink);}
 /* Performance roundup (C-suite) */
 #sec-performance .perf-kpis{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin-bottom:6px;}
 #sec-performance .perf-kpis .kpi{text-align:left; cursor:pointer; font:inherit; color:inherit; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);}
@@ -1089,8 +1094,6 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <div class="nav-group-label">Performance</div>
       <ul class="nav-list">
         <li><button class="nav-item lm-nav" data-lmview="performance" data-anchor="lm-anchor-waste"><span class="nav-dot"></span>Waste</button></li>
-        <li><button class="nav-item lm-nav" data-lmview="performance" data-anchor="lm-anchor-audits"><span class="nav-dot"></span>Walk-Through Audits</button></li>
-        <li><button class="nav-item lm-nav" data-lmview="performance" data-anchor="lm-anchor-shopper"><span class="nav-dot"></span>Secret Shopper</button></li>
       </ul>
       <div class="nav-group-label">Team</div>
       <ul class="nav-list">
@@ -1129,7 +1132,8 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
     <ul class="nav-list">
       <li class="exec-only"><button class="nav-item" data-section="performance"><span class="nav-dot"></span>Performance Roundup</button></li>
       <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
-      <li class="exec-only"><a class="nav-item nav-link" href="shopper.html" target="_blank" rel="noopener" title="Arrange visits, send shopper links and see results (opens in a new tab)"><span class="nav-dot"></span>Secret Shopper<span class="nav-ext" aria-hidden="true">↗</span></a></li>
+      <li class="exec-only"><button class="nav-item" data-section="lmgm" data-audits="walkthrough"><span class="nav-dot"></span>Walk-Through Audits</button></li>
+      <li class="exec-only"><button class="nav-item" data-section="lmgm" data-audits="secret_shopper"><span class="nav-dot"></span>Secret Shopper</button></li>
       <li class="exec-only"><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
     </ul>
     </div>
@@ -1826,22 +1830,6 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
         <div class="lm-table-wrap"><table class="lm-table"><thead><tr><th>Date</th><th>Item</th><th class="num">Qty</th><th>Reason</th><th class="num">Est. $</th><th>Notes</th><th></th></tr></thead><tbody id="pf-w-recent"></tbody></table></div>
       </div>
 
-      <div class="section-head"><h2 id="lm-anchor-audits">Store walk-through audits</h2>
-        <div class="pf-toolbar"><a class="btn small" href="https://drive.google.com/file/d/1XGZBZV76P2nMQyFepPgtmmyXHemmsLek/view" target="_blank" rel="noopener">Audit sheet ↗</a>
-        <button type="button" class="btn primary small" id="pf-wt-new" hidden>+ New walk-through</button></div></div>
-      <div class="card lm-pad" id="pf-wt"></div>
-
-      <div class="section-head"><h2 id="lm-anchor-shopper">Secret shopper scores</h2>
-        <div class="pf-toolbar"><select id="pf-ss-year" aria-label="Year"></select><button type="button" class="btn primary small" id="pf-ss-new" hidden>+ Log a visit</button></div></div>
-      <div class="card lm-pad" id="pf-ss"></div>
-
-      <div id="pf-portfolio-wrap" hidden>
-        <div class="section-head"><h2>Portfolio rollup</h2><span class="hint" id="pf-portfolio-hint">Every store you oversee, this quarter</span></div>
-        <div class="card lm-pad"><div class="lm-table-wrap"><table class="lm-table">
-          <thead><tr><th>Store</th><th>LM</th><th class="num">Shopper visits</th><th class="num">Qtr avg</th><th>QoQ</th><th class="num">L /20</th><th class="num">C /35</th><th class="num">CC /45</th><th class="num">Recovery /6</th><th class="num">Last walk-through</th></tr></thead>
-          <tbody id="pf-portfolio-body"></tbody></table></div>
-          <div class="empty-note" style="padding-bottom:0;">Read the arrow with the context notes, not on its own. The gap between the best and worst store matters as much as the average.</div></div>
-      </div>
     </div>
 
     <div class="lm-view" data-lmview="teamdev" hidden>
@@ -2088,6 +2076,32 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
             <button type="button" class="btn primary small" id="lmgm-sched-save-btn">Save draft</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div id="lmgm-view-audits" hidden>
+      <div class="section-head" style="margin-top:0;"><h2 id="au-title">Walk-through audits</h2>
+        <div class="pf-toolbar"><label for="au-store" style="font-size:12.5px; color:var(--ink-3);">Cafe</label><select id="au-store" aria-label="Cafe"></select>
+          <a class="btn small" id="au-arrange" href="shopper.html" target="_blank" rel="noopener" hidden>Arrange a visit ↗</a></div></div>
+      <div id="au-wt-wrap">
+      <div class="section-head" style="margin-top:10px;"><h2 id="lm-anchor-audits">Walk-throughs</h2>
+        <div class="pf-toolbar"><a class="btn small" href="https://drive.google.com/file/d/1XGZBZV76P2nMQyFepPgtmmyXHemmsLek/view" target="_blank" rel="noopener">Audit sheet ↗</a>
+        <button type="button" class="btn primary small" id="pf-wt-new" hidden>+ New walk-through</button></div></div>
+      <div class="card lm-pad" id="pf-wt"></div>
+
+      </div>
+      <div id="au-ss-wrap" hidden>
+      <div class="section-head" style="margin-top:10px;"><h2 id="lm-anchor-shopper">Secret shopper visits</h2>
+        <div class="pf-toolbar"><select id="pf-ss-year" aria-label="Year"></select><button type="button" class="btn primary small" id="pf-ss-new" hidden>+ Log a visit</button></div></div>
+      <div class="card lm-pad" id="pf-ss"></div>
+
+      </div>
+      <div id="pf-portfolio-wrap" hidden>
+        <div class="section-head"><h2>All cafes · this quarter</h2><span class="hint" id="pf-portfolio-hint">Every store you oversee, this quarter</span></div>
+        <div class="card lm-pad"><div class="lm-table-wrap"><table class="lm-table">
+          <thead><tr><th>Cafe</th><th>LM</th><th class="num">Walk-throughs</th><th class="num">Last walk-through</th><th class="num">Shopper visits</th><th class="num">Shopper avg</th><th>QoQ</th><th class="num">Care</th><th class="num">Craft</th></tr></thead>
+          <tbody id="pf-portfolio-body"></tbody></table></div>
+          <div class="empty-note" style="padding-bottom:0;">Aim for three shopper visits per cafe each quarter. Read the arrow as a trend, not a verdict on one visit.</div></div>
       </div>
     </div>
 
@@ -4688,6 +4702,7 @@ function setupStoreSelect(){
 }
 
 function showPortfolioMode(){
+  $("#sec-lmgm").classList.remove("audits-mode");
   currentDetailLocId = null;
   $("#lm-store-select").value = "all";
   $("#lmgm-view-detail").hidden = true;
@@ -4697,6 +4712,7 @@ function showPortfolioMode(){
 }
 
 function openStore(locId){
+  $("#sec-lmgm").classList.remove("audits-mode");
   $("#lmgm-view-portfolio").hidden = true;
   $("#lmgm-view-detail").hidden = false;
   $("#lmgm-back-to-portfolio").hidden = myLocations.length < 2 || myStaff.role !== "location_manager";
@@ -5744,8 +5760,13 @@ const pfQ = d => `${d.slice(0,4)}-Q${Math.floor((Number(d.slice(5,7))-1)/3)+1}`;
 const pfPrevQ = q => { let [y, n] = [Number(q.slice(0,4)), Number(q.slice(-1))]; n--; if(!n){ n = 4; y--; } return `${y}-Q${n}`; };
 const pfAvg = arr => arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : null;
 const pf1 = n => n == null ? "—" : (Math.round(n*10)/10).toLocaleString("en-US");
-const pfCanWalk = () => ["coo","ceo","cbo","production_manager","gm"].includes(myStaff?.role);
-const pfCanShop = () => ["coo","ceo","cbo","production_manager"].includes(myStaff?.role);
+// Walk-throughs and secret shopper are C-suite only (Oct 29): same as shopper.html.
+const pfCanWalk = () => EXEC_ROLES.includes(myStaff?.role);
+const pfCanShop = () => EXEC_ROLES.includes(myStaff?.role);
+const pfAuditsMode = () => $("#sec-lmgm").classList.contains("audits-mode");
+let auMode = "walkthrough", auLocId = null;
+const pfFormLoc = () => pfAuditsMode() ? auLocId : currentDetailLocId;
+function pfAfterAuditChange(){ if(pfAuditsMode()) auLoad(); else if(currentDetailLocId) loadPerformance(currentDetailLocId); }
 
 let pfItems = null;           // [{id,name,unit,unit_cost}]
 let pfWaste = {};             // location_id -> rows
@@ -5754,7 +5775,7 @@ let pfWasteTodo = {};         // location_id -> todo or null
 
 async function loadPerformance(locId){
   $("#pf-wt-new").hidden = !pfCanWalk();
-  $("#pf-ss-new").hidden = !pfCanShop();
+  $("#pf-ss-new").hidden = true; // shopper visits come from shopper.html
   if(!$("#pf-w-date").value) $("#pf-w-date").value = lmToday();
   $("#pf-w-date").max = lmToday();
   if(!pfItems){
@@ -5905,36 +5926,33 @@ function pfShopYears(locId){
   (pfAudits[locId]||[]).filter(a => a.audit_type === "secret_shopper").forEach(a => ys.add(a.visit_date.slice(0,4)));
   return [...ys].sort().reverse();
 }
-$("#pf-ss-year").addEventListener("change", () => renderShopper(currentDetailLocId));
+$("#pf-ss-year").addEventListener("change", () => renderShopper(pfFormLoc()));
 function renderShopper(locId){
+  // Visits come from shopper.html (Yes / No / N/A answers); scores are % of Yes, stored as care / craft / total %.
   const sel = $("#pf-ss-year"), years = pfShopYears(locId);
   const keep = years.includes(sel.value) ? sel.value : years[0];
   sel.innerHTML = years.map(y => `<option ${y===keep?"selected":""}>${y}</option>`).join("");
-  const year = keep;
   const all = (pfAudits[locId]||[]).filter(a => a.audit_type === "secret_shopper");
-  const rows = all.filter(a => a.visit_date.startsWith(year)).sort((a,b) => a.visit_date.localeCompare(b.visit_date));
-  const qAvg = q => { const r = all.filter(a => pfQ(a.visit_date) === q); return r.length ? pfAvg(r.map(a => Number(a.total_score))) : null; };
-  const yearAll = { t:[], l:[], c:[], cc:[], r:[], w:[] };
-  const body = [1,2,3,4].map(n => {
-    const q = `${year}-Q${n}`, v = rows.filter(a => pfQ(a.visit_date) === q);
-    const avg = v.length ? pfAvg(v.map(a => Number(a.total_score))) : null;
-    const g = k => pfAvg(v.map(a => Number(a[k])).filter(x => !isNaN(x)));
-    const waits = v.map(a => Number(a.visit?.drink_minutes)).filter(x => x > 0);
-    v.forEach(a => { yearAll.t.push(+a.total_score); yearAll.l.push(+a.leadership_score); yearAll.c.push(+a.craft_score); yearAll.cc.push(+a.customer_care_score); if(a.recovery_score != null) yearAll.r.push(+a.recovery_score); });
-    yearAll.w.push(...waits);
-    const visits = [0,1,2].map(i => v[i] ? `<button type="button" class="td-person" data-audit="${v[i].id}">${pf1(v[i].total_score)}</button>` : `<span class="muted">—</span>`);
-    return `<tr><td><b>Q${n}</b></td>${visits.map(x => `<td class="num">${x}</td>`).join("")}<td class="num"><b>${pf1(avg)}</b></td><td>${pfArrow(avg, qAvg(pfPrevQ(q)))}</td>
-      <td class="num">${pf1(g("leadership_score"))}</td><td class="num">${pf1(g("craft_score"))}</td><td class="num">${pf1(g("customer_care_score"))}</td><td class="num">${pf1(g("recovery_score"))}</td>
-      <td class="num">${pf1(pfAvg(waits))}</td><td class="muted">${[...new Set(v.map(a => DAYPART[a.daypart]).filter(Boolean))].join(", ")}</td>
-      <td class="muted">${lmEsc(v.map(a => a.context).filter(Boolean).join("; "))}</td></tr>`;
+  const rows = all.filter(a => a.visit_date.startsWith(keep));
+  const pct = n => n == null || isNaN(n) ? "—" : Math.round(n) + "%";
+  const avgK = (arr, k) => pfAvg(arr.map(a => Number(a[k])).filter(x => !isNaN(x)));
+  if(!all.length){ $("#pf-ss").innerHTML = `<div class="empty-note">No secret shopper visits for this cafe yet. Use "Arrange a visit ↗" to send a shopper.</div>`; return; }
+  const quarters = [1,2,3,4].map(n => {
+    const q = `${keep}-Q${n}`, v = rows.filter(a => pfQ(a.visit_date) === q), pv = all.filter(a => pfQ(a.visit_date) === pfPrevQ(q));
+    return `<tr><td><b>Q${n}</b></td><td class="num">${v.length}</td><td class="num"><b>${pct(avgK(v,"total_score"))}</b></td><td>${v.length ? pfArrow(avgK(v,"total_score"), pv.length ? avgK(pv,"total_score") : null) : ""}</td><td class="num">${pct(avgK(v,"customer_care_score"))}</td><td class="num">${pct(avgK(v,"craft_score"))}</td></tr>`;
   }).join("");
-  const latest = all[0];
-  const [band, bcls] = latest ? pfBand(latest.total_score) : ["",""];
+  const latest = all[0], [band, bcls] = pfBand(Number(latest.total_score));
   $("#pf-ss").innerHTML = `
-    ${latest ? `<div class="pf-score" style="margin-bottom:10px;"><span class="muted" style="font-size:12.5px;">Latest visit ${lmFmtDate(latest.visit_date)}</span><span class="big" style="font-size:26px;">${pf1(latest.total_score)}</span><span class="muted">/ 100</span><span class="chip ${bcls}">${band}</span></div>` : ""}
-    <div class="lm-table-wrap"><table class="lm-table"><thead><tr><th>Quarter</th><th class="num">Visit 1</th><th class="num">Visit 2</th><th class="num">Visit 3</th><th class="num">Qtr avg</th><th>QoQ</th><th class="num">L /20</th><th class="num">C /35</th><th class="num">CC /45</th><th class="num">Recovery /6</th><th class="num">Drink wait (min)</th><th>Dayparts</th><th>Context</th></tr></thead>
-    <tbody>${body}<tr><td><b>Year</b></td><td colspan="3"></td><td class="num"><b>${pf1(pfAvg(yearAll.t))}</b></td><td></td><td class="num">${pf1(pfAvg(yearAll.l))}</td><td class="num">${pf1(pfAvg(yearAll.c))}</td><td class="num">${pf1(pfAvg(yearAll.cc))}</td><td class="num">${pf1(pfAvg(yearAll.r))}</td><td class="num">${pf1(pfAvg(yearAll.w))}</td><td colspan="2"></td></tr></tbody></table></div>
-    <div class="empty-note" style="padding-bottom:0;">Three visits per quarter, read as a trend, never as a single-visit verdict. Recovery is the planted service-recovery score, pulled out of Customer Care.${!all.length ? " No visits recorded yet." : ""}</div>`;
+    <div class="pf-score" style="margin-bottom:10px;"><span class="muted" style="font-size:12.5px;">Latest visit ${lmFmtDate(latest.visit_date)}</span><span class="big" style="font-size:26px;">${pct(latest.total_score)}</span><span class="chip ${bcls}">${band}</span></div>
+    <div class="lm-table-wrap"><table class="lm-table"><thead><tr><th>Quarter</th><th class="num">Visits</th><th class="num">Avg</th><th>QoQ</th><th class="num">Care</th><th class="num">Craft</th></tr></thead><tbody>${quarters}</tbody></table></div>
+    <div class="lm-sublabel">Every visit in ${keep}</div>
+    ${rows.length ? `<div class="lm-table-wrap"><table class="lm-table"><thead><tr><th>Date</th><th>Shopper</th><th>Ordered</th><th class="num">Care</th><th class="num">Craft</th><th class="num">Total</th><th></th></tr></thead><tbody>
+      ${rows.map(a => { const v = a.visit || {}; return `<tr><td>${lmFmtDate(a.visit_date)}${a.arrival_time ? ` <span class="muted">${a.arrival_time.slice(0,5)}</span>` : ""}${(v.how || a.context) ? `<div class="muted" style="font-size:12px;">${lmEsc(v.how || a.context)}</div>` : ""}</td>
+        <td class="muted">${lmEsc(a.auditor || "—")}</td><td class="muted">${lmEsc(v.ordered || (v.got||[]).join(", ") || "—")}</td>
+        <td class="num">${pct(a.customer_care_score)}</td><td class="num">${pct(a.craft_score)}</td><td class="num"><b>${pct(a.total_score)}</b></td>
+        <td style="white-space:nowrap; text-align:right;"><button type="button" class="btn ghost sm" data-audit="${a.id}">View</button>${pfCanShop() ? `<button type="button" class="btn ghost sm" data-audit-del="${a.id}">Delete</button>` : ""}</td></tr>`; }).join("")}
+      </tbody></table></div>` : `<div class="empty-note">No visits in ${keep}.</div>`}
+    <div class="empty-note" style="padding-bottom:0;">Shoppers answer Yes / No / N/A; each score is the share of Yes answers. A deleted response comes off every score, scorecard and report.</div>`;
 }
 
 /* ---------------- GM / exec portfolio rollup ---------------- */
@@ -5956,20 +5974,23 @@ async function renderPortfolioRollup(){
     const avg = k => pfAvg(cur.map(a => Number(a[k])).filter(x => !isNaN(x)));
     const wt = A.filter(a => a.location_id === l.id && a.audit_type === "walkthrough").sort((a,b) => b.visit_date.localeCompare(a.visit_date))[0];
     const lm = (lms||[]).filter(r => r.location_id === l.id && r.staff?.role === "location_manager").map(r => r.staff.name).join(", ");
-    return `<tr><td>${lmEsc(l.name)}</td><td class="muted">${lmEsc(lm || "—")}</td><td class="num">${cur.length}/3</td><td class="num"><b>${pf1(avg("total_score"))}</b></td>
-      <td>${pfArrow(avg("total_score"), prev.length ? pfAvg(prev.map(a => +a.total_score)) : null)}</td>
-      <td class="num">${pf1(avg("leadership_score"))}</td><td class="num">${pf1(avg("craft_score"))}</td><td class="num">${pf1(avg("customer_care_score"))}</td><td class="num">${pf1(avg("recovery_score"))}</td>
-      <td class="num">${wt ? `${pf1(wt.total_score)} <span class="muted">${lmFmtDate(wt.visit_date)}</span>` : "—"}</td></tr>`;
+    const wq = A.filter(a => a.location_id === l.id && a.audit_type === "walkthrough" && pfQ(a.visit_date) === q).length;
+    const pc = n => n == null ? "—" : Math.round(n) + "%";
+    return `<tr><td>${lmEsc(l.name)}</td><td class="muted">${lmEsc(lm || "—")}</td>
+      <td class="num">${wq}</td><td class="num">${wt ? `${pf1(wt.total_score)} <span class="muted">${lmFmtDate(wt.visit_date)}</span>` : "—"}</td>
+      <td class="num">${cur.length}/3</td><td class="num"><b>${pc(avg("total_score"))}</b></td>
+      <td>${cur.length ? pfArrow(avg("total_score"), prev.length ? pfAvg(prev.map(a => +a.total_score)) : null) : ""}</td>
+      <td class="num">${pc(avg("customer_care_score"))}</td><td class="num">${pc(avg("craft_score"))}</td></tr>`;
   }).join("");
 }
 
 /* ---------------- Audit form (both types) ---------------- */
 function pfOpenAuditForm(type){
-  const R = RUBRICS[type], loc = myLocations.find(l => l.id === currentDetailLocId);
+  const formLoc = pfFormLoc(), R = RUBRICS[type], loc = myLocations.find(l => l.id === formLoc);
   const shopper = type === "secret_shopper";
   const items = c => R.comps[c].map(([label, pts, tag], i) => `
     <div class="pf-item" data-key="${pfKey(c,i)}" data-pts="${pts}" data-comp="${c}" ${tag?`data-tag="${tag}"`:""}>
-      <div class="lbl">${i+1}. ${lmEsc(label)}${c==="craft" && type==="walkthrough" && i===8 ? ` <span class="muted">(this week: ${$("#pf-w-pct").textContent} of sales)</span>` : ""}</div>
+      <div class="lbl">${i+1}. ${lmEsc(label)}${c==="craft" && type==="walkthrough" && i===8 && !pfAuditsMode() ? ` <span class="muted">(this week: ${$("#pf-w-pct").textContent} of sales)</span>` : ""}</div>
       <div class="pts">${pts}</div>
       <div class="pf-tri" role="group" aria-label="Score"><button type="button" data-v="1">Met</button><button type="button" data-v="0.5">Partly</button><button type="button" data-v="0">Missed</button></div>
       <div class="note" hidden><input type="text" placeholder="${shopper ? "One line: what happened (required below full points)" : "Note"}"></div>
@@ -6030,7 +6051,7 @@ function pfOpenAuditForm(type){
       if(shopper && v < 1 && !note) missingNote++;
     });
     if(missingNote){ err.textContent = `Add a one-line note for each item below full points (${missingNote} missing).`; return; }
-    const row = { location_id: currentDetailLocId, audit_type: type, visit_date: $("#pf-au-date").value, auditor: $("#pf-au-who").value.trim(),
+    const row = { location_id: formLoc, audit_type: type, visit_date: $("#pf-au-date").value, auditor: $("#pf-au-who").value.trim(),
       context: $("#pf-au-context").value.trim() || null, scores, notes,
       leadership_score: sub.leadership||0, craft_score: sub.craft||0, customer_care_score: sub.customer_care||0, total_score: total };
     if(shopper){
@@ -6043,13 +6064,35 @@ function pfOpenAuditForm(type){
     const { error } = await sb.from("store_audits").insert(row);
     btn.disabled = false;
     if(error){ err.textContent = `Couldn't save: ${error.message}`; return; }
-    lmModalClose(); loadPerformance(currentDetailLocId);
+    lmModalClose(); pfAfterAuditChange();
   });
 }
 function recScore(card){ const row = card.querySelector('.pf-item[data-tag="recovery"]'); const on = row?.querySelector(".pf-tri button.on"); return on ? Number(row.dataset.pts) * Number(on.dataset.v) : null; }
 
+function pfOpenShopperVisit(a){
+  const v = a.visit || {}, n = a.notes || {}, pct = x => x == null ? "—" : Math.round(x) + "%";
+  const lab = x => x === "yes" ? `<span class="chip good">Yes</span>` : x === "no" ? `<span class="chip critical">No</span>` : `<span class="chip neutral">N/A</span>`;
+  const GRP = { care:"Customer Care", craft:"Craft", lead:"Leadership", leadership:"Leadership" };
+  const groups = [...new Set(a.scores.map(x => x.p))];
+  lmModal(`<h3>Secret shopper visit</h3><div class="sub">${lmEsc(myLocations.find(l => l.id === a.location_id)?.name||"")} · ${lmFmtDate(a.visit_date)}${a.arrival_time ? " " + a.arrival_time.slice(0,5) : ""}${a.auditor ? " · " + lmEsc(a.auditor) : ""}</div>
+    <div class="pf-sticky"><span>Total <b>${pct(a.total_score)}</b></span><span>Care <b>${pct(a.customer_care_score)}</b></span><span>Craft <b>${pct(a.craft_score)}</b></span></div>
+    <dl class="lm-dl"><dt>Ordered</dt><dd>${lmEsc(v.ordered || "—")}</dd><dt>Got</dt><dd>${lmEsc((v.got||[]).join(", ") || "—")}</dd><dt>For here / to go</dt><dd>${lmEsc(v.how || a.context || "—")}</dd>
+      <dt>Wait</dt><dd>${v.wait_min != null ? v.wait_min + " min" : "—"}</dd><dt>Would come back</dt><dd>${lmEsc(v.come_back || "—")}</dd>
+      <dt>Best part</dt><dd>${lmEsc(n.best || "—")}</dd><dt>One thing to fix</dt><dd>${lmEsc(n.fix || "—")}</dd></dl>
+    ${groups.map(g => `<div class="pf-comp-head"><span>${GRP[g] || lmEsc(g)}</span></div>${a.scores.filter(x => x.p === g).map(x => `<div class="pf-item"><div class="lbl">${lmEsc(x.q)}</div><div class="pts"></div><div>${lab(x.a)}</div></div>`).join("")}`).join("")}
+    ${pfCanShop() ? `<div class="lm-form" style="margin-top:12px;"><div class="lm-form-actions"><button type="button" class="btn ghost sm" id="pf-au-void">Delete this response</button></div></div>` : ""}`);
+  $("#lm-modal-card").classList.add("wide");
+  const vb = $("#pf-au-void");
+  if(vb) vb.addEventListener("click", async () => {
+    const reason = prompt("Why delete this secret shopper response? It comes off every score and report."); if(!reason) return;
+    const { error } = await sb.from("store_audits").update({ voided:true, void_reason:reason, updated_at:new Date().toISOString() }).eq("id", a.id);
+    if(error){ alert(`Couldn't delete: ${error.message}`); return; }
+    lmModalClose(); pfAfterAuditChange();
+  });
+}
 function pfOpenAudit(id){
   const a = Object.values(pfAudits).flat().find(x => x.id === id); if(!a) return;
+  if(a.audit_type === "secret_shopper" && Array.isArray(a.scores)) return pfOpenShopperVisit(a);
   const R = RUBRICS[a.audit_type], [band, bcls] = pfBand(a.total_score);
   const lab = v => v === 1 ? `<span class="chip good">Met</span>` : v === 0.5 ? `<span class="chip warn">Partly</span>` : v === 0 ? `<span class="chip critical">Missed</span>` : "—";
   const v = a.visit || {};
@@ -6059,18 +6102,58 @@ function pfOpenAudit(id){
     ${a.audit_type === "secret_shopper" ? `<dl class="lm-dl"><dt>Order</dt><dd>${lmEsc(v.order||"—")}${v.order_total!=null ? " · " + lmMoney2(v.order_total) : ""}</dd><dt>Wait</dt><dd>Drink ${v.drink_minutes ?? "—"} min · Food ${v.food_minutes ?? "—"} min</dd><dt>Guests in line</dt><dd>${v.guests_in_line ?? "—"}</dd><dt>Lead visible</dt><dd>${v.lead_visible || "—"}</dd></dl>` : ""}
     ${Object.keys(R.comps).map(c => `<div class="pf-comp-head"><span>${COMP[c]}</span><span class="muted">${pf1(a[c+"_score"])} / ${R.max[c]}</span></div>
       ${R.comps[c].map(([label, pts], i) => { const k = pfKey(c,i); return `<div class="pf-item"><div class="lbl">${i+1}. ${lmEsc(label)}${a.notes?.[k] ? `<div class="muted" style="font-size:12px;">${lmEsc(a.notes[k])}</div>` : ""}</div><div class="pts">${pts}</div><div>${lab(a.scores?.[k])}</div></div>`; }).join("")}`).join("")}
-    ${(a.audit_type === "walkthrough" ? pfCanWalk() : pfCanShop()) ? `<div class="lm-form" style="margin-top:12px;"><div class="lm-form-actions"><button type="button" class="btn ghost sm" id="pf-au-void">Void this audit</button></div></div>` : ""}`);
+    ${(a.audit_type === "walkthrough" ? pfCanWalk() : pfCanShop()) ? `<div class="lm-form" style="margin-top:12px;"><div class="lm-form-actions"><button type="button" class="btn ghost sm" id="pf-au-void">${a.audit_type === "secret_shopper" ? "Delete this response" : "Void this audit"}</button></div></div>` : ""}`);
   $("#lm-modal-card").classList.add("wide");
   const vb = $("#pf-au-void");
   if(vb) vb.addEventListener("click", async () => {
-    const reason = prompt("Why void this audit?"); if(!reason) return;
+    const reason = prompt(a.audit_type === "secret_shopper" ? "Why delete this secret shopper response? It comes off every score and report." : "Why void this audit?"); if(!reason) return;
     const { error } = await sb.from("store_audits").update({ voided:true, void_reason:reason, updated_at:new Date().toISOString() }).eq("id", a.id);
     if(error){ alert(`Couldn't void: ${error.message}`); return; }
-    lmModalClose(); loadPerformance(currentDetailLocId);
+    lmModalClose(); pfAfterAuditChange();
   });
 }
 
 $("#pf-wt-new").addEventListener("click", () => pfOpenAuditForm("walkthrough"));
+
+/* ---------------- C-suite audits view (Performance → Walk-Through Audits / Secret Shopper) ---------------- */
+function auOpen(mode){
+  if(!EXEC_ROLES.includes(myStaff?.role)) return;
+  auMode = mode;
+  $("#sec-lmgm").classList.add("audits-mode");
+  $$(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.audits === mode));
+  const t = mode === "walkthrough";
+  $("#topbar-title").textContent = t ? "Walk-Through Audits" : "Secret Shopper";
+  $("#topbar-sub").textContent = t ? "C-suite · score a cafe walk-through; results feed the LM and GM scorecards" : "C-suite · every shopper visit by cafe · delete a response that shouldn't count";
+  const sel = $("#au-store");
+  if(!sel.options.length) sel.innerHTML = myLocations.map(l => `<option value="${l.id}">${lmEsc(l.name)}</option>`).join("");
+  if(auLocId && myLocations.some(l => l.id === auLocId)) sel.value = auLocId; else auLocId = sel.value || null;
+  $("#au-title").textContent = "Choose a cafe";
+  $("#au-wt-wrap").hidden = !t; $("#au-ss-wrap").hidden = t; $("#au-arrange").hidden = t;
+  window.scrollTo({ top:0, behavior:"instant" });
+  auLoad();
+}
+async function auLoad(){
+  if(!auLocId){ $("#pf-wt").innerHTML = $("#pf-ss").innerHTML = `<div class="empty-note">No cafes found.</div>`; return; }
+  const locId = auLocId, nm = myLocations.find(l => l.id === locId)?.name || "";
+  $("#lm-anchor-audits").textContent = `${nm} · walk-throughs`; $("#lm-anchor-shopper").textContent = `${nm} · secret shopper visits`;
+  $("#pf-wt-new").hidden = !pfCanWalk(); $("#pf-ss-new").hidden = true;
+  const { data, error } = await sb.from("store_audits").select("*").eq("location_id", locId).gte("visit_date", lmAddDays(lmToday(), -400)).order("visit_date", { ascending:false });
+  if(locId !== auLocId) return;
+  if(error){ $("#pf-wt").innerHTML = $("#pf-ss").innerHTML = `<div class="empty-note">Couldn't load audits (${lmEsc(error.message)}).</div>`; return; }
+  pfAudits[locId] = (data || []).filter(a => !a.voided).sort((a,b) => b.visit_date.localeCompare(a.visit_date) || String(b.created_at).localeCompare(String(a.created_at)));
+  renderWalkthroughs(locId); renderShopper(locId); renderPortfolioRollup();
+}
+$("#au-store").addEventListener("change", e => { auLocId = e.target.value; auLoad(); });
+$$(".nav-item[data-audits]").forEach(b => b.addEventListener("click", () => auOpen(b.dataset.audits)));
+$$(".nav-item:not([data-audits])").forEach(b => b.addEventListener("click", () => $("#sec-lmgm").classList.remove("audits-mode")));
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-audit-del]");
+  if(!b || !b.closest("#sec-lmgm") || !pfCanShop()) return;
+  const reason = prompt("Why delete this secret shopper response? It comes off every score and report."); if(!reason) return;
+  const { error } = await sb.from("store_audits").update({ voided:true, void_reason:reason, updated_at:new Date().toISOString() }).eq("id", b.dataset.auditDel);
+  if(error){ alert(`Couldn't delete: ${error.message}`); return; }
+  pfAfterAuditChange();
+});
 $("#pf-ss-new").addEventListener("click", () => pfOpenAuditForm("secret_shopper"));
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-audit]");

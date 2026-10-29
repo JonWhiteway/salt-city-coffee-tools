@@ -111,7 +111,7 @@ h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 10v
 .ticket .t b { font-size: 20px; font-variant-numeric: tabular-nums; }
 .ticket .t.care b { color: #A9C8E6; }
 .ticket .t.craft b { color: var(--gold); }
-.ticket .left { font-family: var(--f-body); font-size: 12px; opacity: .75; }
+.ticket .left { font-family: var(--f-body); font-size: 13px; opacity: .9; grid-column: 1 / -1; text-align: center; }
 @media (max-width: 420px) { .ticket { grid-template-columns: repeat(3, minmax(0, 1fr)); } .ticket .left { grid-column: 1 / -1; } }
 
 .actions { display: grid; gap: 10px; margin-top: 22px; }
@@ -273,9 +273,6 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); }
 
 <div class="ticketbar" id="ticketbar" hidden>
   <div class="ticket" aria-live="polite">
-    <div class="t care"><small>Care</small><b id="s-care">–</b></div>
-    <div class="t craft"><small>Craft</small><b id="s-craft">–</b></div>
-    <div class="t"><small>Visit</small><b id="s-total">–</b></div>
     <div class="left" id="s-left"></div>
   </div>
 </div>
@@ -450,11 +447,9 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); }
   }
 
   function fmt(n) { return n == null ? "–" : n + "%"; }
+  // Shoppers never see a score (Oct 29): the bar only counts what's left, so scores can't steer their answers.
   function renderTicket() {
     var s = score(state.answers);
-    $("s-care").textContent = fmt(s.care);
-    $("s-craft").textContent = fmt(s.craft);
-    $("s-total").textContent = fmt(s.total);
     var left = s.of - s.answered;
     $("s-left").textContent = left ? left + " question" + (left === 1 ? "" : "s") + " left" : "All answered";
   }
@@ -556,7 +551,7 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); }
       tr.appendChild(el("td", null, v.note || ""));
       tr.appendChild(el("td", { "class": "num" }, d8(v.created_at)));
       var expired = !v.used_at && new Date(v.expires_on + "T23:59") < new Date();
-      var st = v.used_at ? ["done", "Submitted " + d8(v.used_at)] : v.cancelled ? ["", "Cancelled"] : expired ? ["", "Expired"] : ["wait", "Waiting"];
+      var st = v.deleted ? ["", "Deleted"] : v.used_at ? ["done", "Submitted " + d8(v.used_at)] : v.cancelled ? ["", "Cancelled"] : expired ? ["", "Expired"] : ["wait", "Waiting"];
       var td = el("td"); td.appendChild(el("span", { "class": "st " + st[0] }, st[1])); tr.appendChild(td);
       tr.appendChild(el("td", { "class": "num" }, v.total == null ? "–" : v.total + "%"));
       var act = el("td");
