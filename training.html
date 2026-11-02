@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barista Training · Salt City Academy</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;600;700&display=swap');
+:root{
+  --lead-900:#0D1B2A; --lead-700:#1B365D; --lead-500:#3E5C85; --lead-100:#EEF2F8;
+  --craft-700:#6D745A; --craft-500:#B28C4E; --craft-100:#F6F2E8;
+  --care-900:#8C3E2A; --care-700:#C75D3D; --care-500:#E48D5B; --care-100:#FFF6EE;
+  --ink:#241A12; --ink-soft:#4A3B2E; --muted:#7A6A57; --paper:#fff; --panel:#F7F5F1; --line:#E3DED6;
+  --green:#4C7A52; --green-tint:#E8F0E8; --amber:#B8863B; --amber-tint:#F5EBD8; --red:#A3453A; --red-tint:#F5E3E0;
+  --shadow-sm:0 1px 3px rgba(13,27,42,.08); --shadow-md:0 4px 16px rgba(13,27,42,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:var(--panel);color:var(--ink);min-height:100vh;font-size:14px}
+h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.3px}
+button,input,select,textarea{font-family:inherit;font-size:14px}
+a{color:var(--care-700)}
+.topbar{background:linear-gradient(120deg,var(--lead-900),#0a1420);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--care-500);box-shadow:0 0 10px var(--care-500)}
+.brand-name{font-family:'Oswald';font-weight:700;font-size:18px;letter-spacing:1px}
+.brand-sub{font-size:10px;color:#9FB3C8;letter-spacing:2px;text-transform:uppercase}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.site-btn{color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer}
+.top-actions select{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 10px;font-weight:700}
+.top-actions select option{color:#000}
+main{max-width:1100px;margin:0 auto;padding:24px 20px 80px}
+.eyebrow{font-size:11px;letter-spacing:2.5px;color:var(--care-700);font-weight:700;text-transform:uppercase}
+.page-head{margin-bottom:18px}
+.page-head h1{font-size:28px;color:var(--lead-700);margin-top:4px}
+.page-head .sub{color:var(--muted);margin-top:4px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);margin-bottom:16px}
+.card h2{font-size:16px;color:var(--lead-700);margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.btn{background:var(--care-700);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--care-900)}
+.btn.navy{background:var(--lead-700)} .btn.navy:hover{background:var(--lead-900)}
+.btn.ghost{background:none;color:var(--lead-700);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--lead-100)}
+.btn.green{background:var(--green)}
+.btn.sm{padding:6px 10px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:default}
+.muted{color:var(--muted)} .small{font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:20px;padding:3px 9px;white-space:nowrap}
+.chip.open{background:#EEE;color:#555} .chip.owned{background:var(--lead-100);color:var(--lead-700)}
+.chip.released{background:var(--amber-tint);color:#7a5418} .chip.verified{background:var(--green-tint);color:var(--green)}
+.chip.late{background:var(--red-tint);color:var(--red)} .chip.np{background:var(--care-100);color:var(--care-900)}
+.trainee{cursor:pointer;transition:transform .15s} .trainee:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.trainee .name{font-family:'Oswald';font-size:19px;color:var(--lead-700);text-transform:uppercase}
+.bar{height:8px;background:#EEE9E1;border-radius:6px;overflow:hidden;margin:10px 0 8px}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--craft-700),var(--care-700))}
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.dots i{font-style:normal;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:6px;background:#EEE;color:#777}
+.dots i.v{background:var(--green-tint);color:var(--green)} .dots i.o{background:var(--lead-100);color:var(--lead-700)} .dots i.r{background:var(--amber-tint);color:#7a5418} .dots i.l{background:var(--red-tint);color:var(--red)}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:var(--red-tint);color:var(--red);margin-bottom:8px;font-size:13px}
+.alert.amber{background:var(--amber-tint);color:#7a5418}
+.alert b{color:inherit}
+.stagetabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
+.stagetabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;color:var(--ink-soft);text-align:left}
+.stagetabs button small{display:block;font-weight:600;font-size:10.5px;color:var(--muted)}
+.stagetabs button.active{background:var(--lead-700);color:#fff;border-color:var(--lead-700)} .stagetabs button.active small{color:#C9D5E6}
+.own{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-radius:12px;padding:14px 16px;margin-bottom:14px;border:1px solid var(--line);background:var(--paper)}
+.own.owned{background:var(--lead-100);border-color:#C9D5E6} .own.released{background:var(--amber-tint);border-color:#E8D3AE} .own.verified{background:var(--green-tint);border-color:#C6DAC7}
+.own .big{font-weight:700;font-size:15px}
+.block{border:1px solid var(--line);border-radius:12px;background:var(--paper);margin-bottom:10px;overflow:hidden}
+.block.got_it{border-left:5px solid var(--green)} .block.needs_practice{border-left:5px solid var(--care-700)} .block.not_covered{border-left:5px solid #AAA}
+.bhead{display:grid;grid-template-columns:62px 1fr auto;gap:10px;padding:12px 14px;align-items:start}
+.bhead .time{font-weight:700;color:var(--lead-700)} .bhead .time small{display:block;color:var(--muted);font-weight:600;font-size:11px}
+.bhead .t{font-weight:700} .bhead .w{color:var(--ink-soft);font-size:13px;margin-top:2px}
+.cdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.c-culture{background:#8E6BA8} .c-leadership{background:var(--lead-700)} .c-craft{background:var(--craft-700)} .c-care{background:var(--care-700)} .c-admin{background:#9A9A9A}
+.rate{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.rate button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 9px;font-size:12px;font-weight:700;cursor:pointer;color:var(--ink-soft)}
+.rate button.on.got_it{background:var(--green);color:#fff;border-color:var(--green)}
+.rate button.on.needs_practice{background:var(--care-700);color:#fff;border-color:var(--care-700)}
+.rate button.on.not_covered{background:#777;color:#fff;border-color:#777}
+.rate button:disabled{cursor:default;opacity:.6}
+.bbody{padding:0 14px 12px 86px}
+details.say summary{cursor:pointer;font-weight:700;color:var(--care-700);font-size:12.5px;padding:4px 0}
+details.say ul{margin:6px 0 4px 18px} details.say li{margin-bottom:4px;line-height:1.45}
+.look{font-size:12.5px;color:var(--ink-soft);margin-top:4px} .look b{color:var(--green)}
+.so{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border-radius:8px;background:var(--craft-100);margin-top:6px;font-size:13px;cursor:pointer}
+.so input{width:18px;height:18px;margin-top:1px;accent-color:var(--green);flex:0 0 auto}
+.so .by{font-size:11px;color:var(--muted)}
+.note{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-top:6px;font-size:13px}
+.bnote{font-size:12.5px;color:var(--ink-soft);margin-top:6px;font-style:italic}
+.carry{border:1px dashed var(--care-500);background:var(--care-100);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.carry h3{font-size:13px;color:var(--care-900);margin-bottom:6px}
+.carry li{margin:3px 0 3px 18px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+label.f{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin:10px 0 4px}
+.inp{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:#fff}
+.pin{letter-spacing:10px;font-size:26px;text-align:center;font-weight:700}
+.modal-overlay{position:fixed;inset:0;background:rgba(13,27,42,.55);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow:auto}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:22px;position:relative;box-shadow:0 12px 32px rgba(13,27,42,.25)}
+.modal h2{font-size:20px;color:var(--lead-700);margin-bottom:4px}
+.modal .x{position:absolute;right:12px;top:8px;border:none;background:none;font-size:26px;cursor:pointer;color:var(--muted)}
+.err{background:var(--red-tint);color:var(--red);padding:8px 10px;border-radius:8px;margin-top:10px;font-size:13px;display:none}
+.scale{display:flex;gap:6px} .scale button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 0;font-weight:700;cursor:pointer}
+.scale button.on{background:var(--lead-700);color:#fff;border-color:var(--lead-700)}
+.list-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.list-row:last-child{border-bottom:none}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--lead-900);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;z-index:60;display:none}
+.loading{padding:60px;text-align:center;color:var(--muted)}
+.mats li{margin:3px 0 3px 18px;font-size:13px}
+.hist li{font-size:12.5px;margin:4px 0 4px 16px;color:var(--ink-soft)}
+.checkin{background:var(--lead-100);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+@media (max-width:640px){
+  .bhead{grid-template-columns:52px 1fr}
+  .rate{grid-column:1/-1;justify-content:flex-start}
+  .bbody{padding-left:14px}
+  main{padding:16px 14px 80px}
+  .page-head h1{font-size:23px}
+}
+@media print{.topbar,.btn,.rate,.own .btn{display:none!important} body{background:#fff}}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">Loading…</div></div>
+<div class="modal-overlay" id="ov" onclick="if(event.target===this)closeModal()"><div class="modal"><button class="x" onclick="closeModal()">&times;</button><div id="mc"></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eXN2Y3ByenZtaHhycm5vZ3FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODMxMTAsImV4cCI6MjEwMDc1OTExMH0.KZXVYcdDa9lKo3YNXbUYnYGOWjS-ZFtlV4YeyzTs_h0';
+const sb = window.sb || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const FULL = ['production_manager','coo','ceo','cbo'];
+const MANAGERS = ['gm','location_manager', ...FULL];
+const RATES = [['got_it','Got it'],['needs_practice','Needs practice'],['not_covered','Not covered']];
+const COMP = {culture:'Culture',leadership:'Leadership',craft:'Craft',care:'Customer Care',admin:'Admin'};
+const STALE_HOURS = 6;
+
+const S = { me:null, locs:[], loc:null, stages:[], items:[], names:{}, staff:[], tracks:[], days:[], trainers:[],
+            track:null, stage:null, marks:[], checkins:[], events:[], selfView:false };
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+const addDays = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); };
+const fmtD = iso => iso ? new Date(iso + 'T12:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'}) : '—';
+const fmtT = ts => ts ? new Date(ts).toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : '';
+const hoursSince = ts => (Date.now() - new Date(ts).getTime()) / 36e5;
+const nm = id => S.names[id] || 'Someone';
+const first = id => nm(id).split(' ')[0];
+function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = 'none', 2600); }
+function openModal(h){ document.getElementById('mc').innerHTML = h; document.getElementById('ov').classList.add('show'); const f = document.querySelector('#mc input, #mc select, #mc textarea'); if (f) setTimeout(() => f.focus(), 50); }
+function closeModal(){ document.getElementById('ov').classList.remove('show'); }
+function showErr(m){ const e = document.getElementById('merr'); if (e){ e.textContent = m; e.style.display = 'block'; } else alert(m); }
+const errMsg = e => (e && (e.message || e.error_description)) || String(e);
+async function rpc(fn, args){ const { data, error } = await sb.rpc(fn, args); if (error) throw new Error(errMsg(error)); return data; }
+
+/* ---------------- boot ---------------- */
+async function init(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if (!user){ location.replace('/?next=' + encodeURIComponent('training.html' + location.search)); return; }
+  const { data: me } = await sb.from('staff').select('*').eq('auth_user_id', user.id).single();
+  if (!me){ location.replace('/'); return; }
+  S.me = me;
+  const [st, it, staff] = await Promise.all([
+    sb.from('training_stages').select('*').order('sort'),
+    sb.from('training_plan_items').select('*').order('sort'),
+    sb.from('staff').select('id,name,job_title,role,is_active'),
+  ]);
+  S.stages = st.data || []; S.items = it.data || []; S.staff = staff.data || [];
+  S.names = Object.fromEntries(S.staff.map(s => [s.id, s.name]));
+
+  if (!MANAGERS.includes(me.role)) { S.selfView = true; return openSelf(); }
+
+  let locs;
+  if (FULL.includes(me.role)) {
+    locs = (await sb.from('locations').select('id,name,type').eq('type','cafe').order('name')).data || [];
+  } else {
+    const ids = ((await sb.from('staff_locations').select('location_id').eq('staff_id', me.id)).data || []).map(r => r.location_id);
+    locs = ids.length ? ((await sb.from('locations').select('id,name,type').in('id', ids).order('name')).data || []) : [];
+  }
+  S.locs = locs;
+  const params = new URLSearchParams(location.search);
+  let saved = null; try { saved = localStorage.getItem('training_loc'); } catch(e){}
+  S.loc = locs.find(l => l.id === params.get('loc')) || locs.find(l => l.id === saved) || locs[0] || null;
+  if (!S.loc){ shell(); document.getElementById('main').innerHTML = `<div class="card">You aren't assigned to a store yet. Ask Jon to add you on Team &amp; Locations.</div>`; return; }
+  await loadStore();
+  const t = params.get('t');
+  if (t && S.tracks.find(x => x.id === t)) openTrack(t, params.get('s'));
+  else renderBoard();
+  setInterval(refresh, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+}
+
+function shell(){
+  document.getElementById('app').innerHTML = `
+  <div class="topbar">
+    <div class="brand"><div class="dot"></div><div><div class="brand-name">Barista Training</div><div class="brand-sub">Salt City Academy · Barista Beginner</div></div></div>
+    <div class="top-actions">
+      ${S.locs.length > 1 ? `<select onchange="switchLoc(this.value)">${S.locs.map(l => `<option value="${l.id}" ${S.loc && l.id === S.loc.id ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select>` : (S.loc ? `<span class="site-btn" style="cursor:default">${esc(S.loc.name)}</span>` : '')}
+      ${S.track && !S.selfView ? `<button class="site-btn" onclick="renderBoard()">&larr; All trainees</button>` : ''}
+      <a class="site-btn" href="academy.html">Academy</a>
+    </div>
+  </div>
+  <main id="main"></main>`;
+}
+
+async function switchLoc(id){ S.loc = S.locs.find(l => l.id === id); try { localStorage.setItem('training_loc', id); } catch(e){} S.track = null; await loadStore(); renderBoard(); }
+
+async function loadStore(){
+  const { data: tracks } = await sb.from('training_tracks').select('*').eq('location_id', S.loc.id).order('start_date', { ascending:false });
+  S.tracks = tracks || [];
+  const ids = S.tracks.map(t => t.id);
+  S.days = ids.length ? ((await sb.from('training_days').select('*').in('track_id', ids)).data || []) : [];
+  S.allMarks = ids.length ? ((await sb.from('training_marks').select('track_id,key,kind,status').in('track_id', ids)).data || []) : [];
+  try { S.trainers = await rpc('training_trainers', { p_location: S.loc.id }) || []; } catch(e){ S.trainers = []; }
+}
+
+async function refresh(){
+  if (!S.loc || document.querySelector('#ov.show')) return;
+  if (S.track){ await loadTrack(S.track.id); renderTrack(); }
+  else { await loadStore(); renderBoard(); }
+}
+
+/* ---------------- status helpers ---------------- */
+function dayState(d){
+  if (!d) return 'open';
+  if (d.verified_at) return 'verified';
+  if (d.owner_id) return 'owned';
+  if (d.released_at) return 'released';
+  return 'open';
+}
+function dayLate(d){ return d && !d.verified_at && d.scheduled_on && d.scheduled_on < todayISO(); }
+function stageOf(key){ return S.stages.find(s => s.key === key) || { key, label:key, title:'' }; }
+function trackDays(tid){ return S.stages.map(s => S.days.find(d => d.track_id === tid && d.stage === s.key) || { track_id:tid, stage:s.key }); }
+function currentStage(tid){ const ds = trackDays(tid); return ds.find(d => !d.verified_at) || null; }
+function attention(t){
+  const out = [];
+  trackDays(t.id).forEach(d => {
+    const st = stageOf(d.stage);
+    if (d.owner_id && hoursSince(d.owned_at) > STALE_HOURS) out.push(['late', `${st.label}: ${first(d.owner_id)} has had it ${Math.round(hoursSince(d.owned_at))} hrs. Release or take it back.`]);
+    if (d.released_at && !d.verified_at && hoursSince(d.released_at) > 24) out.push(['amber', `${st.label}: released ${fmtT(d.released_at)}, waiting for you to verify.`]);
+    if (dayLate(d) && !d.owner_id && !d.released_at && d.stage !== 'w2') out.push(['late', `${st.label} was scheduled ${fmtD(d.scheduled_on)} and isn't done.`]);
+  });
+  return out;
+}
+
+/* ---------------- board ---------------- */
+function renderBoard(){
+  S.track = null; history.replaceState(null, '', 'training.html');
+  shell();
+  const active = S.tracks.filter(t => ['active','paused'].includes(t.status));
+  const done = S.tracks.filter(t => !['active','paused'].includes(t.status));
+  const today = todayISO(), tomorrow = addDays(today, 1);
+  const upcoming = S.days.filter(d => !d.verified_at && (d.scheduled_on === today || d.scheduled_on === tomorrow) && active.some(t => t.id === d.track_id))
+    .sort((a, b) => a.scheduled_on.localeCompare(b.scheduled_on));
+  const alerts = active.flatMap(t => attention(t).map(a => [a[0], `<b>${esc(nm(t.staff_id))}</b> · ${esc(a[1])}`, t.id]));
+  const noPin = S.trainers.filter(t => !t.has_pin).length;
+
+  document.getElementById('main').innerHTML = `
+  <div class="page-head row" style="justify-content:space-between;align-items:flex-end">
+    <div><div class="eyebrow">Barista Beginner · ${esc(S.loc.name)}</div><h1>Trainees</h1>
+      <div class="sub">Pick a name to open their schedule, the trainer notes and the sign-offs.</div></div>
+    <button class="btn" onclick="startModal()">+ Start training</button>
+  </div>
+  ${alerts.length ? `<div class="card"><h2>Needs attention</h2>${alerts.map(a => `<div class="alert ${a[0] === 'amber' ? 'amber' : ''}" style="cursor:pointer" onclick="openTrack('${a[2]}')">${a[1]}</div>`).join('')}</div>` : ''}
+  <div class="grid">
+    ${active.map(trackCard).join('') || `<div class="card muted">Nobody is in training at ${esc(S.loc.name)}. Start someone with the button above.</div>`}
+  </div>
+  <div class="grid" style="margin-top:4px">
+    <div class="card">
+      <h2>Prep for today &amp; tomorrow</h2>
+      ${upcoming.length ? upcoming.map(d => { const st = stageOf(d.stage); const t = S.tracks.find(x => x.id === d.track_id);
+        return `<details style="margin-bottom:8px"><summary style="cursor:pointer"><b>${d.scheduled_on === today ? 'Today' : 'Tomorrow'}</b> · ${esc(nm(t.staff_id))} · ${esc(st.label)} ${esc(st.title)}${d.scheduled_trainer ? ` · trainer ${esc(first(d.scheduled_trainer))}` : ' · <span style="color:var(--red)">no trainer yet</span>'}</summary>
+          <ul class="mats" style="margin-top:6px">${(st.materials || []).map(m => `<li>${esc(m)}</li>`).join('')}</ul></details>`; }).join('')
+        : `<div class="muted small">Nothing scheduled for today or tomorrow. Set dates and trainers inside each trainee.</div>`}
+    </div>
+    <div class="card">
+      <h2>Trainers &amp; PINs</h2>
+      <div class="small muted" style="margin-bottom:8px">Trainers tap their name and enter their PIN to claim a day, then use it again to give the day back. ${noPin ? `<b style="color:var(--care-700)">${noPin} without a PIN.</b>` : ''}</div>
+      <div style="max-height:260px;overflow:auto">${S.trainers.map(t => `<div class="list-row"><span>${esc(t.name)} <span class="small muted">${esc(t.job_title || '')}</span></span>
+        ${t.locked ? '<span class="chip late">Locked 15 min</span>' : ''}<button class="btn ${t.has_pin ? 'ghost' : ''} sm" onclick="pinModal('${t.id}')">${t.has_pin ? 'Reset PIN' : 'Set PIN'}</button></div>`).join('') || '<div class="muted small">No staff assigned to this store.</div>'}</div>
+    </div>
+  </div>
+  ${done.length ? `<details class="card"><summary style="cursor:pointer;font-weight:700">Finished or stopped (${done.length})</summary><div class="grid" style="margin-top:12px">${done.map(trackCard).join('')}</div></details>` : ''}`;
+}
+
+function trackCard(t){
+  const ds = trackDays(t.id);
+  const v = ds.filter(d => d.verified_at).length;
+  const cur = currentStage(t.id);
+  const np = (S.allMarks || []).filter(m => m.track_id === t.id && m.status === 'needs_practice').length;
+  let chip = '';
+  if (t.status === 'complete') chip = '<span class="chip verified">Complete</span>';
+  else if (t.status === 'paused') chip = '<span class="chip open">Paused</span>';
+  else if (t.status === 'stopped') chip = '<span class="chip open">Stopped</span>';
+  else if (cur){
+    const st = stageOf(cur.stage), s = dayState(cur);
+    chip = s === 'owned' ? `<span class="chip owned">${esc(st.label)} · ${esc(first(cur.owner_id))} has it</span>`
+      : s === 'released' ? `<span class="chip released">${esc(st.label)} · ready to verify</span>`
+      : dayLate(cur) ? `<span class="chip late">${esc(st.label)} · was ${fmtD(cur.scheduled_on)}</span>`
+      : `<span class="chip open">${esc(st.label)} · ${cur.scheduled_on ? fmtD(cur.scheduled_on) : 'not scheduled'}</span>`;
+  }
+  return `<div class="card trainee" onclick="openTrack('${t.id}')">
+    <div class="row" style="justify-content:space-between"><div class="name">${esc(nm(t.staff_id))}</div>${chip}</div>
+    <div class="small muted">Started ${fmtD(t.start_date)} · Day 30 ${fmtD(addDays(t.start_date, 30))}</div>
+    <div class="bar"><span style="width:${Math.round(100 * v / S.stages.length)}%"></span></div>
+    <div class="row small" style="justify-content:space-between"><span>${v} of ${S.stages.length} verified</span>${np ? `<span class="chip np">${np} needs practice</span>` : ''}</div>
+    <div class="dots">${ds.map(d => { const s = dayState(d); return `<i class="${s === 'verified' ? 'v' : s === 'owned' ? 'o' : s === 'released' ? 'r' : dayLate(d) && d.stage !== 'w2' ? 'l' : ''}">${esc(stageOf(d.stage).label.replace('Weeks ', 'Wk '))}</i>`; }).join('')}</div>
+  </div>`;
+}
+
+function startModal(){
+  const busy = new Set(S.tracks.filter(t => ['active','paused'].includes(t.status)).map(t => t.staff_id));
+  const here = new Set(S.trainers.map(t => t.id));
+  const opts = S.staff.filter(s => s.is_active && !busy.has(s.id)).sort((a, b) => (here.has(b.id) - here.has(a.id)) || a.name.localeCompare(b.name));
+  openModal(`<h2>Start training</h2><div class="muted small">Creates their 90-day plan at ${esc(S.loc.name)} with default dates you can change.</div>
+    <label class="f">New hire</label>
+    <select class="inp" id="st-who"><option value="">Choose…</option>${opts.map(s => `<option value="${s.id}">${esc(s.name)}${here.has(s.id) ? '' : ' (other store)'}</option>`).join('')}</select>
+    <div class="small muted" style="margin-top:4px">Not listed? Add them on Team &amp; Locations first (or wait for the nightly Square sync).</div>
+    <label class="f">Day 1 date</label><input class="inp" type="date" id="st-date" value="${todayISO()}">
+    <div class="err" id="merr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="doStart(this)">Start</button></div>`);
+}
+async function doStart(b){
+  const who = document.getElementById('st-who').value, d = document.getElementById('st-date').value;
+  if (!who || !d) return showErr('Pick a person and a date.');
+  b.disabled = true;
+  try { const id = await rpc('training_start', { p_staff: who, p_location: S.loc.id, p_start: d }); closeModal(); await loadStore(); openTrack(id, 'd1'); toast('Training started'); }
+  catch(e){ showErr(errMsg(e)); b.disabled = false; }
+}
+
+function pinModal(staffId){
+  openModal(`<h2>${esc(nm(staffId))}: set PIN</h2><div class="muted small">Hand the iPad to ${esc(first(staffId))} so they can type their own 4 digits.</div>
+    <label class="f">New PIN</label><input class="inp pin" id="p1" inputmode="numeric" maxlength="4" autocomplete="off" type="password">
+    <label class="f">Type it again</label><input class="inp pin" id="p2" inputmode="numeric" maxlength="4" autocomplete="off" type="password">
+    <div class="err" id="merr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="doPin('${staffId}', this)">Save PIN</button></div>`);
+}
+async function doPin(id, b){
+  const a = document.getElementById('p1').value, c = document.getElementById('p2').value;
+  if (!/^\d{4}$/.test(a)) return showErr('Use 4 digits.');
+  if (a !== c) return showErr("The PINs don't match.");
+  b.disabled = true;
+  try { await rpc('training_set_pin', { p_staff: id, p_pin: a }); closeModal(); toast('PIN saved'); S.trainers = await rpc('training_trainers', { p_location: S.loc.id }) || []; S.track ? renderTrack() : renderBoard(); }
+  catch(e){ showErr(errMsg(e)); b.disabled = false; }
+}
+
+/* ---------------- one trainee ---------------- */
+async function loadTrack(id){
+  const [t, d, m, c, e] = await Promise.all([
+    sb.from('training_tracks').select('*').eq('id', id).single(),
+    sb.from('training_days').select('*').eq('track_id', id),
+    sb.from('training_marks').select('*').eq('track_id', id),
+    S.selfView ? { data: [] } : sb.from('training_checkins').select('*').eq('track_id', id).order('created_at', { ascending:false }),
+    S.selfView ? { data: [] } : sb.from('training_events').select('*').eq('track_id', id).order('at', { ascending:false }).limit(60),
+  ]);
+  S.track = t.data; S.marks = m.data || []; S.checkins = c.data || []; S.events = e.data || [];
+  S.days = S.days.filter(x => x.track_id !== id).concat(d.data || []);
+}
+async function openTrack(id, stage){
+  await loadTrack(id);
+  const cur = currentStage(id);
+  S.stage = stage || (cur ? cur.stage : 'd1');
+  renderTrack();
+  window.scrollTo(0, 0);
+}
+function pickStage(k){ S.stage = k; renderTrack(); }
+
+function renderTrack(){
+  const t = S.track; if (!t) return renderBoard();
+  if (!S.selfView) history.replaceState(null, '', `training.html?t=${t.id}&s=${S.stage}`);
+  shell();
+  const ds = trackDays(t.id);
+  const d = ds.find(x => x.stage === S.stage) || { track_id:t.id, stage:S.stage };
+  const st = stageOf(S.stage);
+  const state = dayState(d);
+  const items = S.items.filter(i => i.stage === S.stage);
+  const mk = Object.fromEntries(S.marks.map(m => [m.key, m]));
+  const canEdit = !S.selfView && state !== 'verified';
+  const prevIdx = S.stages.findIndex(s => s.key === S.stage) - 1;
+  const prevDay = prevIdx >= 0 ? ds.find(x => x.stage === S.stages[prevIdx].key) : null;
+  const carry = S.marks.filter(m => m.status === 'needs_practice' && !items.some(i => i.id === m.key));
+  const minutes = items.reduce((a, i) => a + (i.minutes || 0), 0);
+
+  document.getElementById('main').innerHTML = `
+  <div class="page-head">
+    <div class="eyebrow">Barista Beginner · ${esc(S.locs.find(l => l.id === t.location_id)?.name || '')}</div>
+    <h1>${esc(nm(t.staff_id))}</h1>
+    <div class="sub">Started ${fmtD(t.start_date)} · Day 30 ${fmtD(addDays(t.start_date, 30))} · Day 60 ${fmtD(addDays(t.start_date, 60))} · Day 90 ${fmtD(addDays(t.start_date, 90))}${t.status !== 'active' ? ` · <b>${esc(t.status)}</b>` : ''}</div>
+  </div>
+  <div class="stagetabs">${ds.map(x => { const s = stageOf(x.stage), ss = dayState(x);
+    const ic = ss === 'verified' ? '✓ ' : ss === 'owned' ? '● ' : ss === 'released' ? '◐ ' : '';
+    return `<button class="${x.stage === S.stage ? 'active' : ''}" onclick="pickStage('${x.stage}')">${ic}${esc(s.label)}<small>${x.verified_at ? 'Verified' : ss === 'owned' ? first(x.owner_id) + ' has it' : ss === 'released' ? 'To verify' : x.scheduled_on ? fmtD(x.scheduled_on) : '—'}</small></button>`; }).join('')}</div>
+
+  ${ownBar(d, st)}
+
+  ${!S.selfView ? `<div class="card" style="padding:12px 16px">
+    <div class="row" style="justify-content:space-between">
+      <div><b>${esc(st.label)}: ${esc(st.title)}</b> <span class="muted small">· ${esc(st.location_note || '')} · ${esc(st.hours || '')}${minutes ? ` (${minutes} min planned)` : ''}</span></div>
+      <div class="row">
+        <input type="date" class="inp" style="width:auto;padding:6px 8px" id="sch-date" value="${d.scheduled_on || ''}" ${state === 'verified' ? 'disabled' : ''}>
+        <select class="inp" style="width:auto;padding:6px 8px" id="sch-tr" ${state === 'verified' ? 'disabled' : ''}><option value="">Trainer…</option>${S.trainers.map(x => `<option value="${x.id}" ${x.id === d.scheduled_trainer ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+        <button class="btn ghost sm" onclick="saveSchedule(this)" ${state === 'verified' ? 'disabled' : ''}>Save</button>
+      </div>
+    </div></div>` : ''}
+
+  ${(prevDay && prevDay.handoff_note) || carry.length ? `<div class="carry">
+    ${prevDay && prevDay.handoff_note ? `<h3>Handoff from ${esc(first(prevDay.released_by))} (${esc(stageOf(prevDay.stage).label)})</h3><div style="margin-bottom:6px">“${esc(prevDay.handoff_note)}”</div>` : ''}
+    ${carry.length ? `<h3>Still needs practice</h3><ul>${carry.map(m => { const it = S.items.find(i => i.id === m.key); return `<li><b>${esc(it ? it.title : m.key)}</b> <span class="small muted">(${esc(it ? stageOf(it.stage).label : '')})</span>${m.note ? ` · ${esc(m.note)}` : ''}</li>`; }).join('')}</ul>` : ''}
+  </div>` : ''}
+
+  ${!S.selfView && state === 'open' ? `<div class="alert amber">Claim the day first so every check is credited to the trainer who did the training.</div>` : ''}
+
+  ${items.map(i => blockHtml(i, mk, canEdit)).join('')}
+
+  ${(st.materials || []).length ? `<details class="card"><summary style="cursor:pointer;font-weight:700;color:var(--lead-700)">Materials for ${esc(st.label)}</summary><ul class="mats" style="margin-top:8px">${st.materials.map(m => `<li>${esc(m)}</li>`).join('')}</ul></details>` : ''}
+
+  ${!S.selfView ? `<div class="card">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Trainee check-ins</h2><button class="btn navy sm" onclick="checkinModal()">Hand to ${esc(first(t.staff_id))}: end-of-day check-in</button></div>
+    <div style="margin-top:10px">${S.checkins.length ? S.checkins.map(c => `<div class="checkin"><b>${esc(stageOf(c.stage).label)}</b> · ${fmtT(c.created_at)} · confidence <b>${c.confidence ?? '—'}/5</b>${c.trainer_rating ? ` · rated ${esc(first(c.trainer_id))} <b>${c.trainer_rating}/5</b>` : ''}
+      ${c.clicked ? `<div>Clicked: ${esc(c.clicked)}</div>` : ''}${c.fuzzy ? `<div>Still fuzzy: ${esc(c.fuzzy)}</div>` : ''}</div>`).join('') : '<div class="muted small">No check-ins yet. Hand the iPad over at the end of each day: 3 quick questions.</div>'}</div>
+  </div>
+  <details class="card"><summary style="cursor:pointer;font-weight:700;color:var(--lead-700)">History &amp; settings</summary>
+    <ul class="hist" style="margin-top:8px">${S.events.map(e => `<li>${fmtT(e.at)} · ${esc(evText(e))}</li>`).join('') || '<li>Nothing yet.</li>'}</ul>
+    <div class="row" style="margin-top:12px">
+      ${t.status === 'active' ? `<button class="btn ghost sm" onclick="setStatus('paused')">Pause training</button>` : ''}
+      ${t.status === 'paused' ? `<button class="btn ghost sm" onclick="setStatus('active')">Resume training</button>` : ''}
+      ${['active','paused'].includes(t.status) ? `<button class="btn ghost sm" onclick="if(confirm('Stop training for ${esc(nm(t.staff_id)).replace(/'/g, '')}? Use this if they left.'))setStatus('stopped')">Stop (they left)</button>` : ''}
+      <button class="btn ghost sm" onclick="window.print()">Print this day</button>
+    </div>
+  </details>` : ''}`;
+}
+
+function evText(e){
+  const st = e.stage ? stageOf(e.stage).label + ': ' : '';
+  return st + ({ start:`training started for ${nm(e.staff_id)}`, claim:`${nm(e.staff_id)} claimed the day`, release:`${nm(e.staff_id)} released the day${e.note ? ` (“${e.note}”)` : ''}`,
+    take_back:`${nm(e.actor)} took the day back from ${nm(e.staff_id)}${e.note ? ` (${e.note})` : ''}`, verify:`verified by ${nm(e.actor)}${e.note ? ` (“${e.note}”)` : ''}`, unverify:`un-verified by ${nm(e.actor)}`,
+    schedule:`scheduled ${e.note ? fmtD(e.note) : '(no date)'}${e.staff_id ? ` with ${nm(e.staff_id)}` : ''}`, status:`status set to ${e.note} by ${nm(e.actor)}` }[e.event] || e.event);
+}
+
+function ownBar(d, st){
+  const s = dayState(d);
+  if (S.selfView){
+    return `<div class="own ${s}"><div class="big">${s === 'verified' ? `✓ Verified ${fmtT(d.verified_at)}` : s === 'owned' ? `Training with ${esc(first(d.owner_id))}` : s === 'released' ? 'Waiting for your manager to verify' : d.scheduled_on ? `Scheduled ${fmtD(d.scheduled_on)}` : 'Not scheduled yet'}</div></div>`;
+  }
+  if (s === 'owned') return `<div class="own owned"><div><div class="big">● ${esc(nm(d.owner_id))} owns ${esc(st.label)}</div><div class="small muted">Since ${fmtT(d.owned_at)}. Checks are credited to ${esc(first(d.owner_id))}.</div></div>
+    <div class="row"><button class="btn ghost sm" onclick="takeBackModal()">Manager: take back</button><button class="btn navy" onclick="releaseModal()">Give the day back</button></div></div>`;
+  if (s === 'released') return `<div class="own released"><div><div class="big">◐ Released by ${esc(nm(d.released_by))} · ${fmtT(d.released_at)}</div>${d.handoff_note ? `<div class="small">“${esc(d.handoff_note)}”</div>` : ''}<div class="small muted">Waiting for a manager to verify.</div></div>
+    <div class="row"><button class="btn ghost sm" onclick="claimModal()">Re-open (claim)</button><button class="btn green" onclick="verifyModal()">Verify ${esc(st.label)}</button></div></div>`;
+  if (s === 'verified') return `<div class="own verified"><div><div class="big">✓ Verified by ${esc(nm(d.verified_by))} · ${fmtT(d.verified_at)}</div>
+    ${d.score != null ? `<div class="small">Score: <b>${esc(d.score)}</b></div>` : ''}${d.verify_note ? `<div class="small">“${esc(d.verify_note)}”</div>` : ''}${d.released_by ? `<div class="small muted">Trained by ${esc(nm(d.released_by))}</div>` : ''}</div>
+    <button class="btn ghost sm" onclick="unverify()">Un-verify</button></div>`;
+  return `<div class="own"><div><div class="big">Nobody has ${esc(st.label)} yet</div><div class="small muted">${d.scheduled_trainer ? `Scheduled trainer: ${esc(nm(d.scheduled_trainer))}` : 'The trainer claims it with their PIN before starting.'}</div></div>
+    <div class="row">${d.stage === 'a30' || d.stage === 'q60' || d.stage === 'q90' ? `<button class="btn ghost sm" onclick="verifyModal()">Verify without a trainer</button>` : ''}<button class="btn" onclick="claimModal()">Claim this day</button></div></div>`;
+}
+
+function blockHtml(i, mk, canEdit){
+  const m = mk[i.id];
+  const say = i.say || [];
+  const dd = S.days.find(x => x.track_id === S.track.id && x.stage === i.stage);
+  const openSay = dd && dd.owner_id;
+  return `<div class="block ${m ? m.status : ''}">
+    <div class="bhead">
+      <div class="time">${i.start_at ? esc(i.start_at) : '•'}${i.minutes ? `<small>${i.minutes} min</small>` : ''}</div>
+      <div><div class="t"><span class="cdot c-${esc(i.competency)}" title="${esc(COMP[i.competency] || '')}"></span>${esc(i.title)}</div><div class="w">${esc(i.what || '')}</div></div>
+      <div class="rate">${RATES.map(([k, l]) => `<button class="${m && m.status === k ? 'on ' + k : ''}" ${canEdit ? '' : 'disabled'} onclick="rate('${i.id}','${k}')">${l}</button>`).join('')}</div>
+    </div>
+    <div class="bbody">
+      ${say.length && !S.selfView ? `<details class="say" ${openSay ? 'open' : ''}><summary>What to say &amp; do</summary><ul>${say.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>` : ''}
+      ${i.look_for ? `<div class="look"><b>Looks like:</b> ${esc(i.look_for)}</div>` : ''}
+      ${(i.signoffs || []).map(so => { const sm = mk[so.id];
+        return `<label class="so"><input type="checkbox" ${sm ? 'checked' : ''} ${canEdit ? '' : 'disabled'} onchange="signoff('${so.id}', this.checked)"><span>${esc(so.text)}${sm ? `<div class="by">✓ ${esc(first(sm.by_staff))} · ${fmtT(sm.at)}</div>` : ''}</span></label>`; }).join('')}
+      ${m && m.note && !(canEdit && m.status !== 'got_it') ? `<div class="bnote">Note: ${esc(m.note)}${m.by_staff ? ` (${esc(first(m.by_staff))})` : ''}</div>` : ''}
+      ${canEdit && m && m.status !== 'got_it' ? `<input class="note" placeholder="Add a note for the next trainer…" value="${esc(m.note || '')}" onchange="rate('${i.id}','${m.status}', this.value)">` : ''}
+    </div>
+  </div>`;
+}
+
+/* ---------------- actions ---------------- */
+async function rate(key, status, note){
+  const cur = S.marks.find(m => m.key === key);
+  let next = status, n = note;
+  if (note === undefined){ if (cur && cur.status === status) next = 'clear'; n = cur ? cur.note : null; }
+  try { await rpc('training_mark', { p_track: S.track.id, p_stage: S.stage, p_key: key, p_kind: 'block', p_status: next, p_note: n || null }); await loadTrack(S.track.id); renderTrack(); }
+  catch(e){ toast(errMsg(e)); }
+}
+async function signoff(key, on){
+  try { await rpc('training_mark', { p_track: S.track.id, p_stage: S.stage, p_key: key, p_kind: 'signoff', p_status: on ? 'done' : 'clear', p_note: null }); await loadTrack(S.track.id); renderTrack(); }
+  catch(e){ toast(errMsg(e)); await loadTrack(S.track.id); renderTrack(); }
+}
+async function saveSchedule(b){
+  b.disabled = true;
+  try { await rpc('training_schedule', { p_track: S.track.id, p_stage: S.stage, p_date: document.getElementById('sch-date').value || null, p_trainer: document.getElementById('sch-tr').value || null }); await loadTrack(S.track.id); renderTrack(); toast('Schedule saved'); }
+  catch(e){ toast(errMsg(e)); b.disabled = false; }
+}
+function claimModal(){
+  const d = S.days.find(x => x.track_id === S.track.id && x.stage === S.stage) || {};
+  const list = S.trainers.filter(t => t.id !== S.track.staff_id);
+  openModal(`<h2>Claim ${esc(stageOf(S.stage).label)}</h2><div class="muted small">You own ${esc(first(S.track.staff_id))}'s training until you give it back.</div>
+    <label class="f">Trainer</label><select class="inp" id="cl-who">${list.map(t => `<option value="${t.id}" ${t.id === d.scheduled_trainer ? 'selected' : ''} ${t.has_pin ? '' : 'disabled'}>${esc(t.name)}${t.has_pin ? '' : ' (no PIN yet)'}</option>`).join('')}</select>
+    <label class="f">Your PIN</label><input class="inp pin" id="cl-pin" inputmode="numeric" maxlength="4" type="password" autocomplete="off" onkeydown="if(event.key==='Enter')doClaim(document.getElementById('cl-go'))">
+    <div class="err" id="merr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="cl-go" onclick="doClaim(this)">Claim</button></div>`);
+  setTimeout(() => document.getElementById('cl-pin').focus(), 60);
+}
+async function doClaim(b){
+  const who = document.getElementById('cl-who').value, pin = document.getElementById('cl-pin').value;
+  if (!who) return showErr('Pick your name.');
+  b.disabled = true;
+  try { const r = await rpc('training_claim', { p_track: S.track.id, p_stage: S.stage, p_trainer: who, p_pin: pin });
+    if (r){ showErr(r); b.disabled = false; document.getElementById('cl-pin').value = ''; return; }
+    closeModal(); await loadTrack(S.track.id); renderTrack(); toast(`${first(who)} has ${stageOf(S.stage).label}`); }
+  catch(e){ showErr(errMsg(e)); b.disabled = false; }
+}
+function releaseModal(){
+  const d = S.days.find(x => x.track_id === S.track.id && x.stage === S.stage);
+  const items = S.items.filter(i => i.stage === S.stage);
+  const unrated = items.filter(i => !S.marks.some(m => m.key === i.id)).length;
+  const sos = items.flatMap(i => (i.signoffs || []).map(s => s.id)); const soLeft = [...new Set(sos)].filter(k => !S.marks.some(m => m.key === k)).length;
+  openModal(`<h2>Give ${esc(stageOf(S.stage).label)} back</h2><div class="muted small">${esc(nm(d.owner_id))}, leave a note for the next trainer and your manager.</div>
+    ${unrated || soLeft ? `<div class="alert amber" style="margin-top:10px">${unrated ? `${unrated} block${unrated > 1 ? 's' : ''} not rated. ` : ''}${soLeft ? `${soLeft} sign-off${soLeft > 1 ? 's' : ''} not checked.` : ''}</div>` : ''}
+    <label class="f">Handoff note</label><textarea class="inp" id="rl-note" rows="3" placeholder="What went well, what to repeat tomorrow"></textarea>
+    <label class="f">${esc(first(d.owner_id))}'s PIN</label><input class="inp pin" id="rl-pin" inputmode="numeric" maxlength="4" type="password" autocomplete="off">
+    <div class="err" id="merr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn navy" onclick="doRelease(this)">Give it back</button></div>`);
+}
+async function doRelease(b){
+  b.disabled = true;
+  try { const r = await rpc('training_release', { p_track: S.track.id, p_stage: S.stage, p_pin: document.getElementById('rl-pin').value, p_note: document.getElementById('rl-note').value });
+    if (r){ showErr(r); b.disabled = false; document.getElementById('rl-pin').value = ''; return; }
+    closeModal(); await loadTrack(S.track.id); renderTrack(); toast('Day released'); setTimeout(checkinModal, 400); }
+  catch(e){ showErr(errMsg(e)); b.disabled = false; }
+}
+function takeBackModal(){
+  openModal(`<h2>Take the day back</h2><div class="muted small">Use this if the trainer left without releasing. It's logged.</div>
+    <label class="f">Reason</label><input class="inp" id="tb-note" placeholder="e.g. trainer went home sick">
+    <div class="err" id="merr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="doTakeBack(this)">Take back</button></div>`);
+}
+async function doTakeBack(b){
+  b.disabled = true;
+  try { await rpc('training_take_back', { p_track: S.track.id, p_stage: S.stage, p_note: document.getElementById('tb-note').value || null }); closeModal(); await loadTrack(S.track.id); renderTrack(); }
+  catch(e){ showErr(errMsg(e)); b.disabled = false; }
+}
+function verifyModal(){
+  const items = S.items.filter(i => i.stage === S.stage);
+  const np = items.filter(i => S.marks.some(m => m.key === i.id && m.status === 'needs_practice'));
+  const scored = ['q60','q90'].includes(S.stage);
+  openModal(`<h2>Verify ${esc(stageOf(S.stage).label)}</h2><div class="muted small">Locks the day. ${esc(first(S.track.staff_id))}'s record shows who trained and who verified.</div>
+    ${np.length ? `<div class="alert amber" style="margin-top:10px">Still marked “Needs practice”: ${np.map(i => esc(i.title)).join(', ')}. They'll carry forward to the next day.</div>` : ''}
+    ${scored ? `<label class="f">Quiz score (%)</label><input class="inp" id="vf-score" type="number" min="0" max="100">` : ''}
+    <label class="f">Note (optional)</label><input class="inp" id="vf-note">
+    <div class="err" id="merr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn green" onclick="doVerify(this)">Verify</button></div>`);
+}
+async function doVerify(b){
+  b.disabled = true;
+  const sc = document.getElementById('vf-score');
+  try { await rpc('training_verify', { p_track: S.track.id, p_stage: S.stage, p_note: document.getElementById('vf-note').value || null, p_score: sc && sc.value !== '' ? Number(sc.value) : null });
+    closeModal(); await loadTrack(S.track.id); const cur = currentStage(S.track.id); if (cur) S.stage = cur.stage; renderTrack(); toast('Verified'); }
+  catch(e){ showErr(errMsg(e)); b.disabled = false; }
+}
+async function unverify(){
+  if (!confirm('Un-verify this day so it can be changed?')) return;
+  try { await rpc('training_unverify', { p_track: S.track.id, p_stage: S.stage }); await loadTrack(S.track.id); renderTrack(); } catch(e){ toast(errMsg(e)); }
+}
+async function setStatus(s){
+  try { await rpc('training_set_status', { p_track: S.track.id, p_status: s }); await loadTrack(S.track.id); renderTrack(); } catch(e){ toast(errMsg(e)); }
+}
+let CI = {};
+function checkinModal(){
+  CI = { c:null, r:null };
+  const d = S.days.find(x => x.track_id === S.track.id && x.stage === S.stage) || {};
+  const tr = d.owner_id || d.released_by;
+  const scale = (k) => `<div class="scale">${[1,2,3,4,5].map(n => `<button type="button" onclick="CI.${k}=${n};this.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===this))">${n}</button>`).join('')}</div>`;
+  openModal(`<h2>${esc(first(S.track.staff_id))}, how did ${esc(stageOf(S.stage).label)} go?</h2><div class="muted small">Your manager reads this. Your trainer doesn't see your rating.</div>
+    <label class="f">How confident do you feel? (1 = lost, 5 = I've got this)</label>${scale('c')}
+    <label class="f">What clicked today?</label><textarea class="inp" id="ci-a" rows="2"></textarea>
+    <label class="f">What's still fuzzy?</label><textarea class="inp" id="ci-b" rows="2"></textarea>
+    ${tr ? `<label class="f">How helpful was ${esc(first(tr))} as your trainer?</label>${scale('r')}` : ''}
+    <div class="err" id="merr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" onclick="closeModal()">Skip</button><button class="btn navy" onclick="doCheckin(this)">Send</button></div>`);
+}
+async function doCheckin(b){
+  if (!CI.c) return showErr('Pick a confidence number.');
+  b.disabled = true;
+  try { await rpc('training_checkin', { p_track: S.track.id, p_stage: S.stage, p_confidence: CI.c, p_clicked: document.getElementById('ci-a').value, p_fuzzy: document.getElementById('ci-b').value, p_trainer_rating: CI.r });
+    closeModal(); await loadTrack(S.track.id); renderTrack(); toast('Thanks!'); }
+  catch(e){ showErr(errMsg(e)); b.disabled = false; }
+}
+
+/* ---------------- trainee's own read-only view ---------------- */
+async function openSelf(){
+  const { data } = await sb.from('training_tracks').select('*').eq('staff_id', S.me.id).order('created_at', { ascending:false }).limit(1);
+  S.locs = (await sb.from('locations').select('id,name')).data || [];
+  if (!data || !data.length){ shell(); document.getElementById('main').innerHTML = `<div class="card">You don't have a training plan yet. Your manager starts it on your first day.</div>`; return; }
+  S.days = [];
+  await openTrack(data[0].id);
+}
+
+window.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+if (!window.__TEST__) init().catch(e => { document.getElementById('app').innerHTML = `<div class="card" style="max-width:600px;margin:60px auto">Something went wrong: ${esc(errMsg(e))}</div>`; });
+</script>
+</body>
+</html>

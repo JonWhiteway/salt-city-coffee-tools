@@ -551,9 +551,13 @@ async function renderEmployeeView(){
     : { data: [] };
   const { data: managers } = await sb.from('staff').select('id,name');
   // GM 360 scorecard (4 completion points) — GMs only.
+  // Barista Beginner: the new-hire training plan (training.html), if this person has one.
+  const { data: trTracks } = await sb.from('training_tracks').select('id,start_date,status').eq('staff_id', me).order('created_at', { ascending:false }).limit(1);
+  const trTrack = trTracks && trTracks[0];
+  const trDays = trTrack ? ((await sb.from('training_days').select('stage,verified_at,scheduled_on').eq('track_id', trTrack.id)).data || []) : [];
   const gm360Score = currentProfile.role === 'gm'
     ? (await sb.rpc('gm360_scorecard', { p_staff: me })).data : null;
-  empData = { gm360Score, l360s:l360s || [], status:status || [], coaching:coaching || [], hoursLog:hoursLog || [], points:points || [], pips:pips || [], checkins:checkins || [], content:content || [],
+  empData = { training: trTrack ? { track: trTrack, days: trDays } : null, gm360Score, l360s:l360s || [], status:status || [], coaching:coaching || [], hoursLog:hoursLog || [], points:points || [], pips:pips || [], checkins:checkins || [], content:content || [],
               names:Object.fromEntries((managers || []).map(m => [m.id, m.name])) };
 
   el.innerHTML = `
@@ -694,6 +698,7 @@ function empGrowth(){
   const incomplete = empData.content.filter(c => !(mine(c) && mine(c).completed_at));
   const next = incomplete.find(c => c.competency === behind) || incomplete[0];
   return `
+    ${beginnerCard()}
     <div class="grid2">
       <div class="card">
         <h2>Where Am I?</h2>
@@ -719,6 +724,23 @@ function empGrowth(){
         </div>`;
       }).join('') || '<div class="emp-empty">No content assigned to your role yet.</div>'}
     </div>`;
+}
+
+/* ---------------- Barista Beginner: first 90 days ---------------- */
+const BEGINNER_STAGES = [['d1','Day 1'],['d2','Day 2'],['d3','Day 3'],['d4','Day 4'],['d5','Day 5'],['w2','Wk 2\u20134'],['a30','Day 30'],['q60','Day 60'],['q90','Day 90']];
+function beginnerCard(){
+  const tr = empData.training;
+  if (!tr) return '';
+  const done = BEGINNER_STAGES.filter(([k]) => tr.days.some(d => d.stage === k && d.verified_at)).length;
+  const next = BEGINNER_STAGES.find(([k]) => !tr.days.some(d => d.stage === k && d.verified_at));
+  const nextDay = next && tr.days.find(d => d.stage === next[0]);
+  return `<a class="card" href="training.html" style="display:block; text-decoration:none; color:inherit; border-left:4px solid var(--craft-700);">
+    <div style="font-size:11px; letter-spacing:2px; color:var(--care-700); font-weight:700; text-transform:uppercase;">Barista Beginner</div>
+    <h2 style="margin:4px 0 6px;">Your first 90 days ${tr.track.status === 'complete' ? '\u2713' : ''}</h2>
+    <div style="font-size:13px; color:var(--muted);">${done} of ${BEGINNER_STAGES.length} verified${next ? ` \u00b7 Next: <strong style="color:var(--ink);">${next[1]}</strong>${nextDay && nextDay.scheduled_on ? ` on ${eFmt(nextDay.scheduled_on)}` : ''}` : ' \u00b7 Complete'}</div>
+    <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:10px;">${BEGINNER_STAGES.map(([k, l]) => { const v = tr.days.some(d => d.stage === k && d.verified_at);
+      return `<span style="font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; background:${v ? 'var(--green-tint)' : '#EEE'}; color:${v ? 'var(--green)' : '#777'};">${v ? '\u2713 ' : ''}${l}</span>`; }).join('')}</div>
+  </a>`;
 }
 
 /* ---------------- Coaching ---------------- */
@@ -1699,6 +1721,10 @@ async function renderManagerView(){
         <div class="ttitle">360 Review</div>
         <div class="tsub">LM+ formal review cycle</div>
       </div>`}
+      <a class="tool-card tool-style" href="training.html" style="text-decoration:none; color:inherit;">
+        <div class="ttitle">Barista Training</div>
+        <div class="tsub">Barista Beginner &middot; schedules, trainer notes, claim &amp; sign-offs</div>
+      </a>
       <a class="tool-card tool-style" href="safety.html" style="text-decoration:none; color:inherit;">
         <div class="ttitle">Safety &amp; Health</div>
         <div class="tsub">Report an injury &middot; log a health inspection &middot; track fixes</div>
