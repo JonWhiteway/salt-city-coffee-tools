@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Events · Salt City</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;600;700&display=swap');
+:root{
+  --navy:#0D1B2A; --blue:#1B365D; --blue-100:#EEF2F8; --olive:#2E3323; --olive-mid:#6D745A; --gold:#B28C4E; --gold-100:#F6F2E8;
+  --rust:#8C3E2A; --rust-mid:#C75D3D; --rust-100:#FFF6EE;
+  --ink:#17212B; --ink-2:#53606B; --ink-3:#7C817C; --paper:#FCFBF7; --bg:#F4F0E7; --line:#D7D0C1; --line-soft:#E8E2D7;
+  --good:#3F7A45; --good-100:#E3F0E3; --warn:#9A6B12; --warn-100:#F6EBCF; --bad:#B23B2E; --bad-100:#F7DEDA;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;min-height:100vh}
+h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.3px}
+button,input,select,textarea{font-family:inherit;font-size:14px;color:inherit}
+.topbar{background:linear-gradient(120deg,var(--navy),#0a1420);color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}.brand .dot{width:10px;height:10px;border-radius:50%;background:#E48D5B;box-shadow:0 0 10px #E48D5B}
+.brand-name{font-family:'Oswald';font-weight:700;font-size:18px;letter-spacing:1px}.brand-sub{font-size:10px;color:#9FB3C8;letter-spacing:2px;text-transform:uppercase}
+.site-btn{color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;text-decoration:none}
+main{max-width:1100px;margin:0 auto;padding:24px 20px 80px}
+.eyebrow{font-size:11px;letter-spacing:2.5px;color:var(--rust-mid);font-weight:700;text-transform:uppercase}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.head h1{font-size:28px;color:var(--blue);margin-top:4px}.head .sub{color:var(--ink-3);margin-top:4px;max-width:620px}
+.btn{background:var(--rust-mid);color:#fff;border:none;border-radius:9px;padding:9px 14px;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--rust)} .btn.ghost{background:none;color:var(--blue);border:1px solid var(--line)} .btn.ghost:hover{background:var(--blue-100)}
+.btn.sm{padding:6px 10px;font-size:12.5px} .btn:disabled{opacity:.5;cursor:default} .btn.danger{background:none;color:var(--bad);border:1px solid var(--line)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:7px 13px;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
+.tabs button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(13,27,42,.05)}
+.ev{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:start}
+.dbox{text-align:center;background:var(--navy);color:#fff;border-radius:9px;padding:7px 4px}
+.dbox .d{font-family:'Oswald';font-size:22px;line-height:1}.dbox .m{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#C9D5E6}
+.ev h3{font-size:17px;color:var(--blue);text-transform:none;font-family:'Oswald'}
+.meta{color:var(--ink-3);font-size:12.5px;margin-top:2px}
+.kind{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:2px}
+.kind.hosted{background:#E3EAF5;color:#1B365D}.kind.buyout{background:#F4D9CC;color:#8C3E2A}.kind.catering{background:#EDE0C6;color:#6B5221}.kind.room_rental{background:#E4E7DC;color:#2E3323}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.chip.good{background:var(--good-100);color:var(--good)}.chip.warn{background:var(--warn-100);color:var(--warn)}.chip.bad{background:var(--bad-100);color:var(--bad)}.chip.neutral{background:#EEE;color:#666}
+.stores{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.store{border:1px solid var(--line-soft);background:#fff;border-radius:9px;padding:6px 9px;font-size:12px}
+.store b{display:block;font-size:12.5px}
+.roll{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.roll th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);padding:6px;border-bottom:1px solid var(--line)}
+.roll td{padding:8px 6px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.empty{color:var(--ink-3);font-style:italic;padding:16px 4px}
+.overlay{position:fixed;inset:0;background:rgba(13,27,42,.55);display:none;align-items:flex-start;justify-content:center;padding:30px 14px;z-index:50;overflow:auto}
+.overlay.show{display:flex}
+.modal{background:var(--paper);border-radius:14px;max-width:720px;width:100%;padding:22px;position:relative}
+.modal h2{font-size:20px;color:var(--blue)} .modal .x{position:absolute;right:12px;top:8px;border:none;background:none;font-size:26px;cursor:pointer;color:var(--ink-3)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.form .wide{grid-column:1/-1}
+.form label.l{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px}
+.form input:not([type=checkbox]),.form select,.form textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff}
+.form textarea{min-height:70px;resize:vertical}
+.sec{grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--rust-mid);border-top:1px solid var(--line-soft);padding-top:12px;margin-top:4px}
+.locs{display:flex;flex-wrap:wrap;gap:6px}
+.locs label{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer;font-weight:600;font-size:13px}
+.locs label.on{background:var(--blue-100);border-color:#A8B9D6}
+.locs input{width:16px;height:16px;accent-color:var(--blue)}
+.task{display:grid;grid-template-columns:1fr 170px 28px;gap:8px;margin-bottom:6px}
+.task .del{border:none;background:none;font-size:18px;color:var(--ink-3);cursor:pointer}
+.err{color:var(--bad);font-size:13px;margin-right:auto}
+.actions{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:16px;flex-wrap:wrap}
+.note{background:var(--gold-100);border-radius:8px;padding:9px 11px;font-size:12.5px;color:var(--ink-2)}
+.loading{padding:60px;text-align:center;color:var(--ink-3)}
+details.more summary{cursor:pointer;font-weight:700;color:var(--blue);font-size:12.5px;margin-top:10px}
+@media (max-width:640px){
+  .ev{grid-template-columns:52px 1fr}.ev .right{grid-column:1/-1}
+  .form{grid-template-columns:1fr} .task{grid-template-columns:1fr 28px} .task select{grid-column:1/2}
+  .roll .hide-sm{display:none}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><div class="dot"></div><div><div class="brand-name">Company Events</div><div class="brand-sub">Salt City · sends to every café's Events tab</div></div></div>
+  <div style="display:flex;gap:8px"><a class="site-btn" href="/">Command Deck</a><a class="site-btn" href="academy.html">Academy</a></div>
+</div>
+<main id="main"><div class="loading">Loading…</div></main>
+<div class="overlay" id="ov" onclick="if(event.target===this)closeModal()"><div class="modal"><button class="x" onclick="closeModal()">&times;</button><div id="mc"></div></div></div>
+<script>
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eXN2Y3ByenZtaHhycm5vZ3FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODMxMTAsImV4cCI6MjEwMDc1OTExMH0.KZXVYcdDa9lKo3YNXbUYnYGOWjS-ZFtlV4YeyzTs_h0';
+const sb = window.sb || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const FULL = ['production_manager','coo','ceo','cbo'];
+const KIND = { hosted:"In-café event", buyout:"Buyout", catering:"Catering", room_rental:"Room rental" };
+const TRAFFIC = { normal:"Normal day", busy:"Busy", slammed:"Slammed" };
+const STORE_STATUS = { idea:["Idea","neutral"], planned:["Planned","warn"], confirmed:["Confirmed","good"], done:["Done","good"], cancelled:["Cancelled","neutral"] };
+const WHEN = [[-28,"4 weeks before"],[-21,"3 weeks before"],[-14,"2 weeks before"],[-10,"10 days before"],[-7,"1 week before"],[-5,"5 days before"],[-3,"3 days before"],[-2,"2 days before"],[-1,"Day before"],[0,"Day of"],[1,"Day after"],[2,"2 days after"],[7,"1 week after"]];
+const TEMPLATES = {
+  hosted:[["Lock the plan, time and who runs it",-21],["Post on social and put signage up in the café",-14],["Schedule extra staff",-10],["Order product and supplies",-7],["Brief the team at huddle",-1],["Set up the space",0],["Debrief: attendance and keep / change",1]],
+  buyout:[["Confirm date, time, headcount and menu with the contact",-21],["Collect the deposit",-14],["Schedule staff",-10],["Post notice that we're closed to the public",-7],["Order product from production",-5],["Set up",0],["Invoice and collect the balance",1],["Debrief",1]],
+  catering:[["Confirm the order and pickup or delivery time",-7],["Order product from production",-4],["Schedule prep time",-3],["Prep, pack and label",0],["Invoice and collect payment",1]],
+  room_rental:[["Confirm date, time, setup and headcount",-14],["Collect payment",-7],["Clean and set the room",0],["Reset the room after",0]],
+};
+const S = { me:null, locs:[], events:[], stores:[], tasks:[], tab:'upcoming' };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+const tm = t => { if(!t) return ''; const [h,m] = t.split(':').map(Number); return `${((h+11)%12)+1}${m ? ':' + String(m).padStart(2,'0') : ''}${h < 12 ? 'am' : 'pm'}`; };
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
+function closeModal(){ document.getElementById('ov').classList.remove('show'); }
+function openModal(h){ document.getElementById('mc').innerHTML = h; document.getElementById('ov').classList.add('show'); }
+
+async function init(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ location.replace('/?next=events.html'); return; }
+  const { data: me } = await sb.from('staff').select('*').eq('auth_user_id', user.id).single();
+  if(!me){ location.replace('/'); return; }
+  S.me = me;
+  if(!(FULL.includes(me.role) || me.role === 'gm')){
+    document.getElementById('main').innerHTML = `<div class="card">Company events are set up by GMs and the exec team. Your store's events are on your Command Deck under <b>Events</b>.</div>`; return;
+  }
+  if(FULL.includes(me.role)) S.locs = (await sb.from('locations').select('id,name,type').eq('type','cafe').order('name')).data || [];
+  else {
+    const ids = ((await sb.from('staff_locations').select('location_id').eq('staff_id', me.id)).data || []).map(r => r.location_id);
+    S.locs = ids.length ? ((await sb.from('locations').select('id,name,type').in('id', ids).eq('type','cafe').order('name')).data || []) : [];
+  }
+  await load(); render();
+}
+
+async function load(){
+  const { data: ev, error } = await sb.from('company_events').select('*').order('event_date');
+  if(error){ document.getElementById('main').innerHTML = `<div class="card">Couldn't load company events: ${esc(error.message)}. If this is the first time, the company_events SQL may not have been run yet.</div>`; throw error; }
+  S.events = ev || [];
+  const ids = S.events.map(e => e.id);
+  S.stores = ids.length ? ((await sb.from('store_events').select('*').in('company_event_id', ids)).data || []) : [];
+  const sids = S.stores.map(s => s.id);
+  S.tasks = sids.length ? ((await sb.from('store_event_tasks').select('event_id,done_at,due_on,template_key').in('event_id', sids)).data || []) : [];
+}
+
+function storeStats(se){
+  const ts = S.tasks.filter(t => t.event_id === se.id), open = ts.filter(t => !t.done_at);
+  return { total: ts.length, done: ts.length - open.length, late: open.filter(t => t.due_on && t.due_on < today()).length };
+}
+const locName = id => (S.locs.find(l => l.id === id) || {}).name || 'Café';
+
+function render(){
+  const t = today();
+  const list = S.events.filter(e => S.tab === 'cancelled' ? e.status === 'cancelled' : e.status !== 'cancelled' && (S.tab === 'upcoming' ? e.event_date >= t : e.event_date < t));
+  if(S.tab !== 'upcoming') list.reverse();
+  document.getElementById('main').innerHTML = `
+    <div class="head"><div><div class="eyebrow">Planning</div><h1>Company events</h1>
+      <div class="sub">Set an event up once and it shows up in each café's Events tab with its prep checklist. Changes you make here update every café. LMs fill in staffing, task owners and the debrief.</div></div>
+      <button class="btn" onclick="editor()">+ New company event</button></div>
+    <div class="tabs">${[['upcoming','Upcoming'],['past','Past'],['cancelled','Cancelled']].map(([k,l]) => `<button class="${S.tab===k?'on':''}" onclick="S.tab='${k}';render()">${l}</button>`).join('')}</div>
+    ${list.map(card).join('') || `<div class="card empty">${S.tab === 'upcoming' ? 'No company events coming up. Tap “+ New company event” to send one to your cafés.' : 'Nothing here.'}</div>`}`;
+}
+
+function card(e){
+  const d = new Date(e.event_date + 'T12:00:00Z');
+  const stores = S.stores.filter(s => s.company_event_id === e.id).sort((a,b) => locName(a.location_id).localeCompare(locName(b.location_id)));
+  const live = stores.filter(s => s.status !== 'cancelled');
+  const past = e.event_date < today();
+  const lateStores = live.filter(s => storeStats(s).late).length;
+  const deb = live.filter(s => s.debriefed_at).length;
+  const summary = e.status === 'cancelled' ? `<span class="chip neutral">Cancelled</span>`
+    : past ? `<span class="chip ${deb === live.length ? 'good' : 'warn'}">${deb}/${live.length} debriefed</span>`
+    : `<span class="chip ${lateStores ? 'bad' : 'good'}">${lateStores ? `${lateStores} café${lateStores > 1 ? 's' : ''} behind on prep` : 'Prep on track'}</span>`;
+  return `<div class="card"><div class="ev">
+    <div class="dbox"><div class="d">${d.getUTCDate()}</div><div class="m">${d.toLocaleDateString('en-US',{month:'short',timeZone:'UTC'})}</div></div>
+    <div><h3>${esc(e.title)}<span class="kind ${e.kind}">${KIND[e.kind]}</span></h3>
+      <div class="meta">${d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',timeZone:'UTC'})}${e.start_time ? ' · ' + [tm(e.start_time), tm(e.end_time)].filter(Boolean).join('–') : ''}${e.expected_traffic && e.expected_traffic !== 'normal' ? ' · ' + TRAFFIC[e.expected_traffic] : ''} · ${live.length} café${live.length === 1 ? '' : 's'}</div>
+      ${e.details ? `<div class="meta" style="color:var(--ink-2);margin-top:6px">${esc(e.details)}</div>` : ''}
+      <div class="stores">${live.map(s => { const st = storeStats(s), ss = STORE_STATUS[s.status] || ['', 'neutral'];
+        return `<div class="store"><b>${esc(locName(s.location_id))}</b><span class="chip ${ss[1]}">${ss[0]}</span> <span class="chip ${st.late ? 'bad' : st.done === st.total ? 'good' : 'warn'}">${st.done}/${st.total} prep${st.late ? ' · ' + st.late + ' late' : ''}</span></div>`; }).join('')}</div>
+      ${live.length ? `<details class="more"><summary>Store-by-store detail</summary>${rollup(live)}</details>` : ''}
+    </div>
+    <div class="right" style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">${summary}
+      ${e.status !== 'cancelled' ? `<button class="btn ghost sm" onclick="editor('${e.id}')">Edit</button>` : `<button class="btn ghost sm" onclick="editor('${e.id}')">Restore…</button>`}</div>
+  </div></div>`;
+}
+
+function rollup(stores){
+  return `<table class="roll"><tr><th>Café</th><th>Status</th><th>Prep</th><th class="hide-sm">Staffing</th><th class="hide-sm">Results</th></tr>${stores.map(s => { const st = storeStats(s);
+    return `<tr><td><b>${esc(locName(s.location_id))}</b></td><td>${(STORE_STATUS[s.status] || [''])[0]}</td><td>${st.done}/${st.total}${st.late ? ` <span style="color:var(--bad)">(${st.late} late)</span>` : ''}</td>
+      <td class="hide-sm">${(s.staff_ids || []).length ? `${s.staff_ids.length} scheduled` : '—'}${s.staffing_note ? `<div class="meta">${esc(s.staffing_note)}</div>` : ''}</td>
+      <td class="hide-sm">${s.debriefed_at ? `${s.attendance != null ? `${s.attendance} guests` : ''}${s.debrief_keep ? `<div class="meta">Keep: ${esc(s.debrief_keep)}</div>` : ''}${s.debrief_change ? `<div class="meta">Change: ${esc(s.debrief_change)}</div>` : ''}` : '—'}</td></tr>`; }).join('')}</table>`;
+}
+
+function taskRow(t){
+  return `<div class="task" data-key="${esc(t.key || uid())}"><input class="t-text" value="${esc(t.text || '')}" placeholder="Prep task">
+    <select class="t-when">${WHEN.map(([o,l]) => `<option value="${o}" ${Number(t.offset ?? -7) === o ? 'selected' : ''}>${l}</option>`).join('')}${WHEN.some(w => w[0] === Number(t.offset)) || t.offset == null ? '' : `<option value="${t.offset}" selected>${t.offset < 0 ? -t.offset + ' days before' : t.offset + ' days after'}</option>`}</select>
+    <button type="button" class="del" onclick="this.parentNode.remove()" aria-label="Remove">×</button></div>`;
+}
+
+function editor(id){
+  const e = id ? S.events.find(x => x.id === id) : null;
+  const on = new Set(e ? S.stores.filter(s => s.company_event_id === e.id && s.status !== 'cancelled').map(s => s.location_id) : S.locs.map(l => l.id));
+  const tasks = e ? e.tasks : TEMPLATES.hosted.map(([text, offset]) => ({ key: uid(), text, offset }));
+  openModal(`<h2>${e ? 'Edit company event' : 'New company event'}</h2>
+    <div class="meta">${e ? 'Saving updates every café\'s copy. Checked-off tasks and tasks a café added itself are never changed.' : 'Each café you pick gets this event in its Events tab, with the checklist below.'}</div>
+    <form class="form" id="f">
+      <div class="wide"><label class="l">Event name</label><input id="f-title" required value="${esc(e?.title)}" placeholder="e.g. Holiday open house, Latte art throwdown"></div>
+      <div><label class="l">Type</label><select id="f-kind">${Object.entries(KIND).map(([k,l]) => `<option value="${k}" ${(e?.kind || 'hosted') === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div><label class="l">Expected traffic</label><select id="f-traffic">${Object.entries(TRAFFIC).map(([k,l]) => `<option value="${k}" ${(e?.expected_traffic || 'normal') === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div><label class="l">Date</label><input type="date" id="f-date" required value="${esc(e?.event_date)}"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label class="l">Start</label><input type="time" id="f-start" value="${e?.start_time ? e.start_time.slice(0,5) : ''}"></div><div><label class="l">End</label><input type="time" id="f-end" value="${e?.end_time ? e.end_time.slice(0,5) : ''}"></div></div>
+      <div class="wide"><label class="l">Details for the cafés</label><textarea id="f-details" placeholder="What it is, what's being sold or sampled, signage coming from marketing, anything LMs need to know">${esc(e?.details)}</textarea></div>
+      <div class="sec">Cafés</div>
+      <div class="wide"><div class="locs" id="f-locs">${S.locs.map(l => `<label class="${on.has(l.id) ? 'on' : ''}"><input type="checkbox" value="${l.id}" ${on.has(l.id) ? 'checked' : ''} onchange="this.parentNode.classList.toggle('on',this.checked)">${esc(l.name)}</label>`).join('')}</div>
+        <div style="margin-top:6px"><button type="button" class="btn ghost sm" onclick="document.querySelectorAll('#f-locs input').forEach(i=>{i.checked=true;i.parentNode.classList.add('on')})">All my cafés</button></div></div>
+      <div class="sec">Prep checklist</div>
+      <div class="wide"><div id="f-tasks">${tasks.map(taskRow).join('')}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button type="button" class="btn ghost sm" onclick="document.getElementById('f-tasks').insertAdjacentHTML('beforeend', taskRow({}))">+ Add task</button>
+        <button type="button" class="btn ghost sm" onclick="loadTemplate()">Use the standard checklist for this type</button></div>
+        <div class="note" style="margin-top:10px">Due dates count from the event date, so moving the date moves every café's open tasks with it. Each LM assigns owners and checks tasks off.</div></div>
+    </form>
+    <div class="actions"><span class="err" id="f-err"></span>${e && e.status !== 'cancelled' ? `<button class="btn danger sm" onclick="cancelEvent('${e.id}')">Cancel event</button>` : ''}<button class="btn ghost" onclick="closeModal()">Close</button><button class="btn" id="f-save" onclick="save(${e ? `'${e.id}'` : 'null'})">${e ? (e.status === 'cancelled' ? 'Restore & save' : 'Save & update cafés') : 'Send to cafés'}</button></div>`);
+}
+
+function loadTemplate(){
+  const k = document.getElementById('f-kind').value;
+  if(document.querySelectorAll('#f-tasks .task').length && !confirm('Replace the checklist with the standard one for this type?')) return;
+  document.getElementById('f-tasks').innerHTML = TEMPLATES[k].map(([text, offset]) => taskRow({ key: uid(), text, offset })).join('');
+}
+
+async function save(id){
+  const err = document.getElementById('f-err'); err.textContent = '';
+  const title = document.getElementById('f-title').value.trim(), date = document.getElementById('f-date').value;
+  const locs = [...document.querySelectorAll('#f-locs input:checked')].map(i => i.value);
+  if(!title || !date) return err.textContent = 'Add a name and a date.';
+  if(!locs.length) return err.textContent = 'Pick at least one café.';
+  const tasks = [...document.querySelectorAll('#f-tasks .task')].map((r, i) => ({ key: r.dataset.key, text: r.querySelector('.t-text').value.trim(), offset: Number(r.querySelector('.t-when').value), sort: i })).filter(t => t.text);
+  const data = { title, kind: document.getElementById('f-kind').value, event_date: date, start_time: document.getElementById('f-start').value, end_time: document.getElementById('f-end').value,
+    details: document.getElementById('f-details').value.trim(), expected_traffic: document.getElementById('f-traffic').value, tasks };
+  const b = document.getElementById('f-save'); b.disabled = true;
+  const { error } = await sb.rpc('company_event_save', { p_id: id, p_data: data, p_locations: locs });
+  b.disabled = false;
+  if(error) return err.textContent = error.message;
+  closeModal(); await load(); S.tab = date >= today() ? 'upcoming' : 'past'; render();
+}
+
+async function cancelEvent(id){
+  if(!confirm("Cancel this event at every café? Their copies stay on record as Cancelled.")) return;
+  const { error } = await sb.rpc('company_event_cancel', { p_id: id });
+  if(error) return document.getElementById('f-err').textContent = error.message;
+  closeModal(); await load(); render();
+}
+
+window.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+if(!window.__TEST__) init().catch(e => console.error(e));
+</script>
+</body>
+</html>

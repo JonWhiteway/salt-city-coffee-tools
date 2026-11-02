@@ -423,6 +423,28 @@ tr:last-child td{border-bottom:none;}
 #sec-lmgm .td-top{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;}
 @media (max-width:1100px){ #sec-lmgm .td-top{grid-template-columns:minmax(0,1fr);} }
 #sec-lmgm .td-actions{display:flex; gap:8px; flex-wrap:wrap;}
+.ev-link{background:none; border:none; padding:0; font:inherit; font-size:12px; font-weight:700; color:var(--accent); cursor:pointer;}
+.ev-filters{display:flex; gap:6px; flex-wrap:wrap;}
+.ev-row{display:grid; grid-template-columns:64px 1fr auto; gap:14px; align-items:center; padding:11px 4px; border:none; border-bottom:1px solid var(--border-soft); cursor:pointer; width:100%; text-align:left; background:none; font:inherit; color:var(--ink);}
+.ev-row:last-child{border-bottom:none;} .ev-row:hover{background:var(--surface-alt);}
+.ev-row.cancelled{opacity:.55;} .ev-row.cancelled .event-title{text-decoration:line-through;}
+.ev-chips{display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end;}
+.ev-kind{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:5px; margin-left:6px; vertical-align:1px;}
+.ev-kind.hosted{background:#E3EAF5; color:#1B365D;} .ev-kind.buyout{background:#F4D9CC; color:#8C3E2A;} .ev-kind.catering{background:#EDE0C6; color:#6B5221;} .ev-kind.room_rental{background:#E4E7DC; color:#2E3323;}
+.ev-month{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); padding:14px 4px 4px;}
+.ev-tasks{display:flex; flex-direction:column; gap:6px;}
+.ev-task{display:grid; grid-template-columns:22px 1fr 150px 130px 26px; gap:8px; align-items:center;}
+.ev-task input[type=checkbox]{width:18px; height:18px; accent-color:var(--good);}
+.ev-task.done .ev-t-text{text-decoration:line-through; color:var(--ink-3);}
+.ev-task .ev-del{background:none; border:none; color:var(--ink-3); font-size:18px; cursor:pointer;}
+.ev-staff{display:flex; flex-wrap:wrap; gap:6px; max-height:140px; overflow:auto; padding:6px; border:1px solid var(--border); border-radius:8px;}
+.lm-form .ev-staff label{display:flex; align-items:center; gap:5px; font-size:12.5px; font-weight:500; background:var(--surface-alt); padding:4px 8px; border-radius:6px; margin:0; cursor:pointer;}
+.lm-form .ev-staff input, .lm-form .ev-task input[type=checkbox]{width:18px; padding:0;}
+.ev-result{background:var(--surface-alt); border-radius:8px; padding:10px 12px; font-size:13px;}
+.ev-sec{grid-column:1/-1; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); margin-top:6px; border-top:1px solid var(--border-soft); padding-top:12px;}
+@media (max-width:640px){ .ev-task{grid-template-columns:22px 1fr 26px;} .ev-task .ev-t-owner, .ev-task .ev-t-due{grid-column:2/3;} .ev-row{grid-template-columns:56px 1fr;} .ev-chips{grid-column:2/3; justify-content:flex-start;} }
+.ev-kind.ev-hq{background:#0D1B2A; color:#F7F5F2;}
+.ev-hq-dot{font-size:10px; font-weight:700; color:var(--ink-3); text-align:center;}
 #sec-lmgm .td-tools{display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:16px; margin:0 0 22px;}
 #sec-lmgm .td-tool{border:none; border-radius:16px; padding:22px 20px; cursor:pointer; color:#fff; position:relative; overflow:hidden; text-align:left; text-decoration:none;
   box-shadow:0 4px 16px rgba(13,27,42,.10); transition:transform .18s, box-shadow .18s; min-height:140px; display:flex; flex-direction:column; justify-content:flex-end; font-family:var(--font-body);}
@@ -1122,6 +1144,10 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
         <li><button class="nav-item lm-nav" data-lmview="teamdev"><span class="nav-dot"></span>Team Development</button></li>
         <li><button class="nav-item lm-nav" data-lmview="scheduling"><span class="nav-dot"></span>Scheduling</button></li>
       </ul>
+      <div class="nav-group-label">Events</div>
+      <ul class="nav-list">
+        <li><button class="nav-item lm-nav" data-lmview="events"><span class="nav-dot"></span>Store Events</button></li>
+      </ul>
     </div>
     <div class="coo-nav-group">
     <div class="nav-group-label">Company</div>
@@ -1448,6 +1474,10 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
           <div class="arrow">↗</div>
         </a>
 
+        <div id="ev-co-wrap" hidden>
+          <div class="section-head" style="margin-top:18px;"><h2>Store events: hosted, buyouts, catering &amp; rentals</h2><span class="hint" id="ev-co-hint">Next 60 days · every café you oversee · <a href="events.html">Set up company events →</a></span></div>
+          <div class="card"><div class="event-list" id="ev-co-list"></div></div>
+        </div>
         <div class="section-head" style="margin-top:18px;"><h2>Upcoming events</h2><span class="hint" id="calendar-events-hint">Loading…</span></div>
         <div class="card">
           <div class="event-list" id="calendar-events"><!-- injected --></div>
@@ -1697,6 +1727,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
     <button type="button" class="lm-tab" data-lmtab="performance">Performance</button>
     <button type="button" class="lm-tab" data-lmtab="teamdev">Team Development</button>
     <button type="button" class="lm-tab" data-lmtab="scheduling">Scheduling</button>
+    <button type="button" class="lm-tab" data-lmtab="events">Events</button>
   </div>
   <div class="content">
 
@@ -1737,6 +1768,10 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
               <button type="button" class="lm-stat" data-go="ordering" data-anchor="lm-anchor-stillneeds"><div class="n" id="lm-snap-needs">—</div><div class="l">Items still needed</div></button>
             </div>
             <div class="empty-note" id="lm-snap-note" style="padding-bottom:0;"></div>
+          </div>
+          <div class="card lm-pad">
+            <div class="lm-card-title"><h3>Upcoming store events</h3><span class="hint"><button type="button" class="ev-link" data-ev-new>+ Add</button> · <button type="button" class="ev-link" data-go="events">All events →</button></span></div>
+            <div class="event-list" id="ev-dash-list"><div class="lm-loading">Loading…</div></div>
           </div>
           <div class="card lm-pad">
             <div class="lm-card-title"><h3>Current promotions &amp; marketing</h3><span class="hint" id="lm-promo-hint">Next 3 weeks</span></div>
@@ -1857,6 +1892,26 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
         <div class="lm-table-wrap"><table class="lm-table"><thead><tr><th>Date</th><th>Item</th><th class="num">Qty</th><th>Reason</th><th class="num">Est. $</th><th>Notes</th><th></th></tr></thead><tbody id="pf-w-recent"></tbody></table></div>
       </div>
 
+    </div>
+
+    <div class="lm-view" data-lmview="events" hidden>
+      <div class="section-head" style="margin-top:0;">
+        <h2>Store Events</h2>
+        <button type="button" class="btn primary small" data-ev-new>+ New event</button>
+      </div>
+      <div class="ev-filters" id="ev-filters">
+        <button type="button" class="lm-tab active" data-ev-filter="upcoming">Upcoming</button>
+        <button type="button" class="lm-tab" data-ev-filter="debrief">Needs debrief</button>
+        <button type="button" class="lm-tab" data-ev-filter="past">Past</button>
+        <button type="button" class="lm-tab" data-ev-filter="all">All</button>
+      </div>
+      <div class="grid kpi-row" style="margin:12px 0 4px;">
+        <div class="card kpi"><div class="label">Next 30 days</div><div class="value tabular" id="ev-k-next">—</div><div class="delta" id="ev-k-next-sub"></div></div>
+        <div class="card kpi"><div class="label">Open prep tasks</div><div class="value tabular" id="ev-k-tasks">—</div><div class="delta" id="ev-k-tasks-sub"></div></div>
+        <div class="card kpi"><div class="label">Booked, next 30 days</div><div class="value tabular" id="ev-k-rev">—</div><div class="delta">Buyouts, catering &amp; rentals</div></div>
+        <div class="card kpi"><div class="label">Waiting on a debrief</div><div class="value tabular" id="ev-k-deb">—</div><div class="delta">Past events with no results yet</div></div>
+      </div>
+      <div class="card lm-pad" style="margin-top:12px;"><div id="ev-list"><div class="lm-loading">Loading…</div></div></div>
     </div>
 
     <div class="lm-view" data-lmview="teamdev" hidden>
@@ -4572,6 +4627,7 @@ async function initApp(){
     renderDetail(myLocations[0].id);
   }
   loadLmCalendars();
+  evLoadCompany();
   window.__lmStoreIds = new Set(myLocations.map(l => l.id));
   // LMs land on their Store Dashboard. GMs and execs keep the company Overview and open a
   // store's LM page from Sales & Labor → that location.
@@ -4712,7 +4768,7 @@ function renderDetail(locId){
    (to-dos, sales trends, labor, orders snapshot, promotions, quarterly
    calendar) and Ordering → Still Needs.
    ===================================================================== */
-const LM_VIEW_TITLE = { dashboard:"Store Dashboard", ordering:"Ordering", performance:"Performance", teamdev:"Team Development", scheduling:"Scheduling" };
+const LM_VIEW_TITLE = { dashboard:"Store Dashboard", ordering:"Ordering", performance:"Performance", teamdev:"Team Development", scheduling:"Scheduling", events:"Store Events" };
 const STORE_SALES_URL = `${SUPABASE_URL}/functions/v1/store-sales`;
 const LM_TZ = "America/New_York";
 let lmOpenOrders = {};   // location_id -> open order rows
@@ -4794,6 +4850,7 @@ function lmShowView(view, anchor){
   if(view === "teamdev" && currentDetailLocId) loadTeamDev(currentDetailLocId);
   if(view === "performance" && currentDetailLocId) loadPerformance(currentDetailLocId);
   if(view === "scheduling" && currentDetailLocId) scRenderSummary(currentDetailLocId);
+  if(view === "events" && currentDetailLocId) evLoad(currentDetailLocId);
   if(anchor){
     const el = document.getElementById(anchor);
     if(el) setTimeout(() => el.scrollIntoView({ behavior:"smooth", block:"start" }), 30);
@@ -4821,6 +4878,7 @@ function lmOnStoreChange(locId){
   if(currentLmView === "performance") loadPerformance(locId);
   loadPipTodos(locId);
   loadWasteTodo(locId);
+  evLoad(locId);
   lmSetTitles();
 }
 
@@ -5770,6 +5828,228 @@ async function tdRefresh(){
   renderTeamDev(locId);
   renderTodos(locId);
 }
+
+
+/* =====================================================================
+   STORE EVENTS (Nov 2026): hosted events, buyouts, catering, room rentals.
+   Tables store_events + store_event_tasks; RLS = can_manage_location.
+   ===================================================================== */
+const EV_KIND = { hosted:"In-café event", buyout:"Buyout", catering:"Catering", room_rental:"Room rental" };
+const EV_STATUS = { idea:["Idea","neutral"], planned:["Planned","warn"], confirmed:["Confirmed","good"], done:["Done","good"], cancelled:["Cancelled","neutral"] };
+const EV_TRAFFIC = { normal:"Normal day", busy:"Busy", slammed:"Slammed" };
+const EV_TEMPLATES = {
+  hosted:[["Lock the plan, time and who runs it",-21],["Post on social and put signage up in the café",-14],["Schedule extra staff",-10],["Order product and supplies",-7],["Brief the team at huddle",-1],["Set up the space",0],["Debrief: attendance and keep / change",1]],
+  buyout:[["Confirm date, time, headcount and menu with the contact",-21],["Collect the deposit",-14],["Schedule staff",-10],["Post notice that we're closed to the public",-7],["Order product from production",-5],["Set up",0],["Invoice and collect the balance",1],["Debrief",1]],
+  catering:[["Confirm the order and pickup or delivery time",-7],["Order product from production",-4],["Schedule prep time",-3],["Prep, pack and label",0],["Invoice and collect payment",1]],
+  room_rental:[["Confirm date, time, setup and headcount",-14],["Collect payment",-7],["Clean and set the room",0],["Reset the room after",0]],
+};
+let evState = { locId:null, events:[], tasks:[], filter:"upcoming" };
+const evMoney = n => n == null || n === "" ? "—" : "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits:0 });
+const evTime = t => { if(!t) return ""; const [h,m] = t.split(":").map(Number); return `${((h+11)%12)+1}${m ? ":" + String(m).padStart(2,"0") : ""}${h < 12 ? "am" : "pm"}`; };
+const evDateBox = iso => { const d = new Date(iso + "T12:00:00Z"); return `<div class="event-date"><div class="d">${d.getUTCDate()}</div><div class="m">${d.toLocaleDateString("en-US",{month:"short", timeZone:"UTC"})}</div></div>`; };
+const evNeedsDebrief = e => e.event_date < lmToday() && e.status !== "cancelled" && !e.debriefed_at;
+
+async function evLoad(locId){
+  if(!locId) return;
+  const from = lmAddDays(lmToday(), -365);
+  const { data: evs, error } = await sb.from("store_events").select("*").eq("location_id", locId).gte("event_date", from).order("event_date").order("start_time");
+  if(error){ const m = `<div class="empty-note lm-error">Couldn't load events (${lmEsc(error.message)}).</div>`; $("#ev-dash-list").innerHTML = m; $("#ev-list").innerHTML = m; return; }
+  const ids = (evs||[]).map(e => e.id);
+  const { data: tasks } = ids.length ? await sb.from("store_event_tasks").select("*").in("event_id", ids).order("sort") : { data: [] };
+  evState = { ...evState, locId, events: evs||[], tasks: tasks||[] };
+  if(locId === currentDetailLocId){ evRenderDash(); evRenderList(); }
+}
+
+function evTaskStats(id){
+  const ts = evState.tasks.filter(t => t.event_id === id), open = ts.filter(t => !t.done_at);
+  return { total: ts.length, open: open.length, late: open.filter(t => t.due_on && t.due_on < lmToday()).length };
+}
+
+function evRow(e, compact, locName, attrs){
+  const st = EV_STATUS[e.status] || ["", "neutral"], ts = evTaskStats(e.id);
+  const time = [evTime(e.start_time), evTime(e.end_time)].filter(Boolean).join("–");
+  const meta = [locName, time, e.expected_guests ? `${e.expected_guests} guests` : "", e.expected_traffic && e.expected_traffic !== "normal" ? EV_TRAFFIC[e.expected_traffic] : "", e.price ? evMoney(e.price) : ""].filter(Boolean).join(" · ");
+  const chips = [`<span class="chip ${st[1]}">${st[0]}</span>`];
+  if(ts.total && e.status !== "cancelled" && e.status !== "done") chips.push(`<span class="chip ${ts.late ? "serious" : ts.open ? "warn" : "good"}">${ts.total - ts.open}/${ts.total} prep${ts.late ? ` · ${ts.late} late` : ""}</span>`);
+  if(evNeedsDebrief(e)) chips.push(`<span class="chip serious">Needs debrief</span>`);
+  return `<button type="button" class="ev-row ${e.status === "cancelled" ? "cancelled" : ""}" ${attrs || `data-ev-open="${e.id}"`}>${evDateBox(e.event_date)}
+    <div><div class="event-title">${lmEsc(e.title)}<span class="ev-kind ${e.kind}">${EV_KIND[e.kind]}</span>${e.company_event_id ? '<span class="ev-kind ev-hq">Company</span>' : ""}</div><div class="event-meta">${lmEsc(meta)}</div></div>
+    <div class="ev-chips">${compact ? chips.slice(0, 2).join("") : chips.join("")}</div></button>`;
+}
+
+function evRenderDash(){
+  const t = lmToday(), until = lmAddDays(t, 21);
+  const up = evState.events.filter(e => e.event_date >= t && e.event_date <= until && e.status !== "cancelled");
+  const deb = evState.events.filter(evNeedsDebrief);
+  const html = up.map(e => evRow(e, true)).join("")
+    + (deb.length ? `<div class="empty-note" style="padding-bottom:0;"><button type="button" class="ev-link" data-go="events">${deb.length} past event${deb.length > 1 ? "s" : ""} waiting on a debrief →</button></div>` : "");
+  $("#ev-dash-list").innerHTML = html || `<div class="empty-note">No store events in the next 3 weeks. <button type="button" class="ev-link" data-ev-new>Add one</button></div>`;
+}
+
+function evRenderList(){
+  const t = lmToday(), in30 = lmAddDays(t, 30);
+  const evs = evState.events;
+  const next = evs.filter(e => e.event_date >= t && e.event_date <= in30 && e.status !== "cancelled");
+  const openTasks = evState.tasks.filter(x => !x.done_at && evs.some(e => e.id === x.event_id && e.status !== "cancelled" && e.status !== "done"));
+  const late = openTasks.filter(x => x.due_on && x.due_on < t).length;
+  const unconf = next.filter(e => e.status !== "confirmed").length;
+  $("#ev-k-next").textContent = next.length;
+  $("#ev-k-next-sub").textContent = unconf ? `${unconf} not confirmed yet` : (next.length ? "All confirmed" : "");
+  $("#ev-k-tasks").textContent = openTasks.length;
+  $("#ev-k-tasks-sub").textContent = late ? `${late} past due` : ""; $("#ev-k-tasks-sub").className = "delta" + (late ? " down" : "");
+  $("#ev-k-rev").textContent = evMoney(next.filter(e => e.kind !== "hosted").reduce((a, e) => a + (Number(e.price) || 0), 0));
+  $("#ev-k-deb").textContent = evs.filter(evNeedsDebrief).length;
+  $$("#ev-filters [data-ev-filter]").forEach(b => b.classList.toggle("active", b.dataset.evFilter === evState.filter));
+  const f = evState.filter;
+  const list = f === "upcoming" ? evs.filter(e => e.event_date >= t) : f === "past" ? evs.filter(e => e.event_date < t).reverse() : f === "debrief" ? evs.filter(evNeedsDebrief).reverse() : evs.slice().reverse();
+  let html = "", last = "";
+  list.forEach(e => { const mon = new Date(e.event_date + "T12:00:00Z").toLocaleDateString("en-US", { month:"long", year:"numeric", timeZone:"UTC" });
+    if(mon !== last){ html += `<div class="ev-month">${mon}</div>`; last = mon; } html += evRow(e, false); });
+  $("#ev-list").innerHTML = html || `<div class="empty-note">${f === "upcoming" ? "Nothing on the books yet. Tap “+ New event” to add an in-café event, buyout, catering order or room rental." : "Nothing here."}</div>`;
+}
+
+function evTaskRow(t, opt){
+  const hq = !!t.template_key;   // from a company event: text and due date are set in Company Events
+  return `<div class="ev-task ${t.done_at ? "done" : ""}" data-id="${t.id || ""}" data-done-at="${t.done_at || ""}" data-done-by="${t.done_by || ""}">
+    <input type="checkbox" ${t.done_at ? "checked" : ""} onchange="this.closest('.ev-task').classList.toggle('done', this.checked)" aria-label="Done">
+    <input class="ev-t-text" value="${lmEsc(t.text)}" placeholder="Task" ${hq ? 'readonly title="Set in Company Events"' : ""}>
+    <select class="ev-t-owner" aria-label="Owner">${opt(t.owner_id)}</select>
+    <input type="date" class="ev-t-due" value="${t.due_on || ""}" aria-label="Due" ${hq ? "readonly" : ""}>
+    ${hq ? '<span class="ev-hq-dot" title="Company checklist">HQ</span>' : '<button type="button" class="ev-del" aria-label="Remove">×</button>'}</div>`;
+}
+
+async function evOpen(id){
+  if(!currentDetailLocId) return;
+  await tdEnsureTeam();
+  const e = id ? evState.events.find(x => x.id === id) : null;
+  const tasks = e ? evState.tasks.filter(t => t.event_id === e.id) : [];
+  const people = (tdTeam[currentDetailLocId]?.members || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+  const opt = sel => `<option value="">Owner…</option>` + people.map(m => `<option value="${m.staff_id}" ${m.staff_id === sel ? "selected" : ""}>${lmEsc(m.name)}</option>`).join("");
+  const v = (k, d = "") => lmEsc(e && e[k] != null ? e[k] : d);
+  const past = e && e.event_date <= lmToday();
+  const chk = (idn, on, label) => `<label style="display:flex; gap:6px; align-items:center; margin:0;"><input type="checkbox" id="${idn}" style="width:auto;" ${on ? "checked" : ""}>${label}</label>`;
+  lmModal(`<h3>${e ? "Edit event" : "New store event"}</h3><div class="sub">${lmEsc(myLocations.find(l => l.id === currentDetailLocId)?.name || "")}${e && e.updated_at ? ` · last updated ${lmFmtDate(e.updated_at.slice(0,10))}` : ""}</div>
+    <form class="lm-form" id="ev-form">
+      ${e && e.company_event_id ? `<div class="wide ev-result"><b>Company event.</b> Name, type, date, time and the HQ checklist are set in Company Events and update automatically. You own staffing, task owners, checkmarks, your own extra tasks and the debrief.${e.company_note ? `<div style="margin-top:6px;">${lmEsc(e.company_note)}</div>` : ""}</div>` : ""}
+      <div class="wide"><label>Event name</label><input id="ev-title" required value="${v("title")}" placeholder="e.g. Latte art throwdown, Smith wedding buyout"></div>
+      <div><label>Type</label><select id="ev-kind">${Object.entries(EV_KIND).map(([k, l]) => `<option value="${k}" ${e && e.kind === k ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+      <div><label>Status</label><select id="ev-status">${Object.entries(EV_STATUS).map(([k, l]) => `<option value="${k}" ${(e ? e.status : "planned") === k ? "selected" : ""}>${l[0]}</option>`).join("")}</select></div>
+      <div><label>Date</label><input type="date" id="ev-date" required value="${v("event_date")}"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"><div><label>Start</label><input type="time" id="ev-start" value="${e && e.start_time ? e.start_time.slice(0,5) : ""}"></div><div><label>End</label><input type="time" id="ev-end" value="${e && e.end_time ? e.end_time.slice(0,5) : ""}"></div></div>
+
+      <div class="ev-sec">Staffing &amp; traffic</div>
+      <div><label>Expected traffic</label><select id="ev-traffic">${Object.entries(EV_TRAFFIC).map(([k, l]) => `<option value="${k}" ${(e && e.expected_traffic || "normal") === k ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+      <div><label>Expected guests</label><input type="number" min="0" id="ev-guests" value="${v("expected_guests")}"></div>
+      <div class="wide"><label>Working it</label><div class="ev-staff">${people.map(m => `<label><input type="checkbox" value="${m.staff_id}" ${e && (e.staff_ids || []).includes(m.staff_id) ? "checked" : ""}>${lmEsc(m.name)}</label>`).join("") || '<span class="empty-note">No team loaded.</span>'}</div></div>
+      <div class="wide"><label>Staffing notes</label><input id="ev-staffnote" value="${v("staffing_note")}" placeholder="e.g. extra barista 7–11, LM on site"></div>
+
+      <div class="ev-sec ev-book">Booking</div>
+      <div class="ev-book"><label>Contact name</label><input id="ev-cname" value="${v("contact_name")}"></div>
+      <div class="ev-book"><label>Phone or email</label><input id="ev-cinfo" value="${v("contact_info")}"></div>
+      <div class="ev-book"><label>Price / quote ($)</label><input type="number" min="0" step="0.01" id="ev-price" value="${v("price")}"></div>
+      <div class="ev-book" style="display:flex; gap:14px; align-items:flex-end; padding-bottom:8px;">${chk("ev-dep", e && e.deposit_paid, "Deposit paid")}${chk("ev-bal", e && e.balance_paid, "Paid in full")}</div>
+      <div class="wide"><label>Notes</label><textarea id="ev-notes">${v("notes")}</textarea></div>
+
+      <div class="ev-sec">Prep checklist</div>
+      <div class="wide"><div class="ev-tasks" id="ev-tasks">${tasks.map(t => evTaskRow(t, opt)).join("")}</div>
+        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; align-items:center;"><button type="button" class="btn small" id="ev-add-task">+ Add task</button>${e ? "" : `<span class="empty-note" style="padding:0;">The standard checklist for this type is added when you save, with due dates counted back from the event.</span>`}</div></div>
+
+      ${past || (e && e.debriefed_at) ? `<div class="ev-sec">Results &amp; debrief</div>
+      <div class="wide ev-result" id="ev-sales">Checking Square sales for that day…</div>
+      <div><label>Attendance / guests served</label><input type="number" min="0" id="ev-att" value="${v("attendance")}"></div><div></div>
+      <div class="wide"><label>Keep: what worked</label><textarea id="ev-keep">${v("debrief_keep")}</textarea></div>
+      <div class="wide"><label>Change: what to do differently</label><textarea id="ev-change">${v("debrief_change")}</textarea></div>` : ""}
+
+      <div class="lm-form-actions"><span class="err"></span>${e && !e.company_event_id ? `<button type="button" class="btn small" id="ev-delete" style="margin-right:auto; color:var(--critical);">Delete</button>` : ""}<button type="button" class="btn small" data-modal-cancel>Cancel</button><button type="submit" class="btn primary small">${e ? "Save" : "Add event"}</button></div>
+    </form>`);
+  $("#lm-modal-card").classList.add("wide");
+  if(e && e.company_event_id) ["#ev-title","#ev-kind","#ev-date","#ev-start","#ev-end"].forEach(sel => { $(sel).disabled = true; });
+  const syncBooking = () => { const hosted = $("#ev-kind").value === "hosted"; $$("#ev-form .ev-book").forEach(x => x.style.display = hosted ? "none" : ""); };
+  $("#ev-kind").addEventListener("change", syncBooking); syncBooking();
+  $("#ev-add-task").addEventListener("click", () => { $("#ev-tasks").insertAdjacentHTML("beforeend", evTaskRow({ id:"", text:"", owner_id:null, due_on:null, done_at:null }, opt)); $("#ev-tasks .ev-task:last-child .ev-t-text").focus(); });
+  $("#ev-tasks").addEventListener("click", x => { const d = x.target.closest(".ev-del"); if(!d) return; const r = d.closest(".ev-task"); if(r.dataset.id){ r.dataset.deleted = "1"; r.style.display = "none"; } else r.remove(); });
+  if(e && past) evSales(e);
+  if(e && !e.company_event_id) $("#ev-delete").addEventListener("click", async () => {
+    if(!confirm(`Delete “${e.title}” and its checklist? To keep the record, set the status to Cancelled instead.`)) return;
+    const { error } = await sb.from("store_events").delete().eq("id", e.id);
+    if(error) return tdErr(error.message);
+    lmModalClose(); evLoad(currentDetailLocId);
+  });
+  $("#ev-form").addEventListener("submit", async x => {
+    x.preventDefault();
+    const btn = x.submitter; btn.disabled = true;
+    const num = sel => $(sel) && $(sel).value !== "" ? Number($(sel).value) : null;
+    const kind = $("#ev-kind").value, hosted = kind === "hosted";
+    const row = { location_id: currentDetailLocId, kind, title: $("#ev-title").value.trim(), status: $("#ev-status").value, event_date: $("#ev-date").value,
+      start_time: $("#ev-start").value || null, end_time: $("#ev-end").value || null, expected_traffic: $("#ev-traffic").value, expected_guests: num("#ev-guests"),
+      staff_ids: $$("#lm-modal-card .ev-staff input:checked").map(c => c.value), staffing_note: $("#ev-staffnote").value.trim() || null,
+      contact_name: hosted ? null : ($("#ev-cname").value.trim() || null), contact_info: hosted ? null : ($("#ev-cinfo").value.trim() || null),
+      price: hosted ? null : num("#ev-price"), deposit_paid: !hosted && $("#ev-dep").checked, balance_paid: !hosted && $("#ev-bal").checked, notes: $("#ev-notes").value.trim() || null };
+    if($("#ev-att")){
+      row.attendance = num("#ev-att"); row.debrief_keep = $("#ev-keep").value.trim() || null; row.debrief_change = $("#ev-change").value.trim() || null;
+      row.debriefed_at = (row.attendance != null || row.debrief_keep || row.debrief_change) ? (e && e.debriefed_at || new Date().toISOString()) : null;
+      if(row.debriefed_at && row.status !== "cancelled") row.status = "done";
+    }
+    let eventId = e && e.id, error;
+    if(e) ({ error } = await sb.from("store_events").update(row).eq("id", e.id));
+    else { row.created_by = myStaff.id; const r = await sb.from("store_events").insert(row).select("id").single(); error = r.error; eventId = r.data && r.data.id; }
+    if(error){ btn.disabled = false; return tdErr(`Couldn't save: ${error.message}`); }
+    const rows = $$("#ev-tasks .ev-task"), ups = [], dels = [];
+    rows.forEach((r, i) => {
+      const text = r.querySelector(".ev-t-text").value.trim();
+      if(r.dataset.deleted || !text){ if(r.dataset.id) dels.push(r.dataset.id); return; }
+      const done = r.querySelector("input[type=checkbox]").checked;
+      const t = { event_id: eventId, sort: i, text, owner_id: r.querySelector(".ev-t-owner").value || null, due_on: r.querySelector(".ev-t-due").value || null,
+        done_at: done ? (r.dataset.doneAt || new Date().toISOString()) : null, done_by: done ? (r.dataset.doneBy || myStaff.id) : null };
+      if(r.dataset.id) t.id = r.dataset.id;
+      ups.push(t);
+    });
+    if(!e) (EV_TEMPLATES[kind] || []).forEach(([text, off], i) => ups.push({ event_id: eventId, sort: rows.length + i, text, due_on: lmAddDays(row.event_date, off), owner_id: null, done_at: null, done_by: null }));
+    const errs = [];
+    if(dels.length){ const r = await sb.from("store_event_tasks").delete().in("id", dels); if(r.error) errs.push(r.error.message); }
+    for(const t of ups.filter(t => t.id)){ const { id, ...rest } = t; const r = await sb.from("store_event_tasks").update(rest).eq("id", id); if(r.error) errs.push(r.error.message); }
+    const ins = ups.filter(t => !t.id);
+    if(ins.length){ const r = await sb.from("store_event_tasks").insert(ins); if(r.error) errs.push(r.error.message); }
+    btn.disabled = false;
+    if(errs.length) return tdErr(`Event saved, but the checklist didn't fully save: ${errs[0]}`);
+    lmModalClose(); evLoad(currentDetailLocId);
+  });
+}
+
+async function evSales(e){
+  const dates = [e.event_date, ...[1,2,3,4].map(n => lmAddDays(e.event_date, -7 * n))];
+  const { data, error } = await sb.from("square_daily_rollups").select("business_date,revenue,transaction_count").eq("location_id", e.location_id).in("business_date", dates);
+  const el = $("#ev-sales"); if(!el) return;
+  if(error || !data){ el.textContent = "Couldn't load Square sales for this day."; return; }
+  const day = data.find(r => r.business_date === e.event_date), base = data.filter(r => r.business_date !== e.event_date);
+  if(!day){ el.textContent = "No Square sales synced for that day yet."; return; }
+  const avg = base.length ? base.reduce((a, r) => a + Number(r.revenue || 0), 0) / base.length : null;
+  const diff = avg ? (Number(day.revenue) - avg) / avg * 100 : null;
+  el.innerHTML = `<b>Square that day:</b> ${evMoney(day.revenue)} · ${day.transaction_count ?? "—"} transactions`
+    + (avg ? ` · <b style="color:${diff >= 0 ? "var(--good)" : "var(--critical)"}">${diff >= 0 ? "+" : ""}${diff.toFixed(0)}%</b> vs. the same weekday's average over the previous ${base.length} week${base.length > 1 ? "s" : ""} (${evMoney(avg)})` : "")
+    + (e.kind !== "hosted" && e.price ? `<div class="hint" style="margin-top:4px;">Booked at ${evMoney(e.price)}${e.balance_paid ? ", paid in full" : e.deposit_paid ? ", deposit paid" : ", not paid yet"}. Buyouts and catering may be rung up on a different day.</div>` : "");
+}
+
+/* Overview → Calendar & Events: every café this person oversees (GMs and execs) */
+async function evLoadCompany(){
+  const wrap = document.getElementById("ev-co-wrap");
+  if(!wrap || !myStaff || myStaff.role === "location_manager" || !myLocations.length) return;
+  const t = lmToday();
+  const { data, error } = await sb.from("store_events").select("*").in("location_id", myLocations.map(l => l.id)).gte("event_date", t).lte("event_date", lmAddDays(t, 60)).neq("status", "cancelled").order("event_date");
+  if(error) return;
+  wrap.hidden = false;
+  const names = Object.fromEntries(myLocations.map(l => [l.id, l.name]));
+  $("#ev-co-list").innerHTML = (data || []).map(e => evRow(e, true, names[e.location_id], `data-ev-store="${e.location_id}"`)).join("")
+    || `<div class="empty-note">No store events in the next 60 days.</div>`;
+}
+
+document.addEventListener("click", x => {
+  const n = x.target.closest("[data-ev-new]"); if(n && n.closest("#sec-lmgm")) return evOpen(null);
+  const o = x.target.closest("[data-ev-open]"); if(o && o.closest("#sec-lmgm")) return evOpen(o.dataset.evOpen);
+  const f = x.target.closest("[data-ev-filter]"); if(f){ evState.filter = f.dataset.evFilter; return evRenderList(); }
+  const s = x.target.closest("[data-ev-store]");
+  if(s){ window.dispatchEvent(new CustomEvent("lm:openStore", { detail: { locId: s.dataset.evStore } })); setTimeout(() => window.__commandDeckGate.openLmView("events"), 50); }
+});
 
 /* Barista training (training.html): who's in the Barista Beginner plan at this store */
 function tdRenderTraining(locId){
