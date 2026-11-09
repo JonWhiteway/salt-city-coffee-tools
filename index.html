@@ -2808,16 +2808,25 @@ function drawTrendSvg(svgEl, series, w, h){
 
 async function loadLiveSquareData(){
   try{
-    const url = `${SUPABASE_URL}/rest/v1/square_location_kpis_public?select=*&order=business_date.asc`;
+    // Supabase returns at most 1,000 rows per request, so read the history in pages.
+    // (Before Nov 9 this was a single request, which silently stopped at the first
+    // 1,000 rows once 7 cafes x every day since Jun 1 passed that, around Nov 4.)
+    const PAGE = 1000, rows = [];
     const ctrl = new AbortController();
-    const timeout = setTimeout(() => ctrl.abort(), 8000);
-    const resp = await fetch(url, {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY },
-      signal: ctrl.signal
-    });
+    const timeout = setTimeout(() => ctrl.abort(), 15000);
+    for(let from = 0; ; from += PAGE){
+      const url = `${SUPABASE_URL}/rest/v1/square_location_kpis_public?select=*&order=business_date.asc,location_id.asc&offset=${from}&limit=${PAGE}`;
+      const resp = await fetch(url, {
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY },
+        signal: ctrl.signal
+      });
+      if(!resp.ok){ clearTimeout(timeout); throw new Error("Supabase responded " + resp.status); }
+      const page = await resp.json();
+      if(!Array.isArray(page)) break;
+      rows.push(...page);
+      if(page.length < PAGE || from > 50000) break;
+    }
     clearTimeout(timeout);
-    if(!resp.ok) throw new Error("Supabase responded " + resp.status);
-    const rows = await resp.json();
     if(!Array.isArray(rows) || rows.length === 0) return { ok:false, reason:"empty" };
 
     squareRowsByLoc = new Map();
@@ -4608,12 +4617,20 @@ async function initApp(){
   }
 
   const locIds = myLocations.map(l => l.id);
-  const { data: rollups } = await sb.from("square_daily_rollups")
-    .select("location_id,business_date,revenue,transaction_count,labor_cost,labor_hours")
-    .in("location_id", locIds)
-    .order("business_date", { ascending: true });
+  // Read every row in 1,000-row pages (Supabase caps each request at 1,000).
+  const rollups = [];
+  for(let from = 0; ; from += 1000){
+    const { data: page, error: rErr } = await sb.from("square_daily_rollups")
+      .select("location_id,business_date,revenue,transaction_count,labor_cost,labor_hours")
+      .in("location_id", locIds)
+      .order("business_date", { ascending: true }).order("location_id", { ascending: true })
+      .range(from, from + 999);
+    if(rErr || !page) break;
+    rollups.push(...page);
+    if(page.length < 1000 || from > 50000) break;
+  }
 
-  aggregate(rollups || []);
+  aggregate(rollups);
   await Promise.all([loadTcPendingCounts(), loadAvailPendingCounts()]);
 
   setupStoreSelect();
