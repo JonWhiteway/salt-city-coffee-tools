@@ -6072,6 +6072,8 @@ const TAB_FORM_URL = "https://salt-city-coffee-tabs.netlify.app/";
 const TAB_FN_URL = `${SUPABASE_URL}/functions/v1/tab-signup`;
 let tabState = { locId:null, tabs:[] };
 const tabMoney = n => n == null ? "—" : "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 });
+const TAB_GRATUITY = 0.20; // automatic gratuity on the final total INCLUDING tax (Nov 10 2026); must match tab-signup
+const tabGrat = total => Math.round(Number(total) * TAB_GRATUITY * 100) / 100;
 const TAB_HOLD = { authorized:["Hold active","good"], captured:["Charged","good"], released:["Hold released","neutral"], expired:["Hold expired","warn"], none:["No hold","neutral"] };
 const tabDates = t => t.starts_on === t.ends_on ? lmFmtDate(t.starts_on) : `${lmFmtDate(t.starts_on)} – ${lmFmtDate(t.ends_on)}`;
 const tabHoldExpired = t => t.hold_status === "authorized" && t.hold_expires_at && new Date(t.hold_expires_at) < new Date();
@@ -6123,7 +6125,8 @@ function tabOpen(id){
     ["Contact", `${x.contact_first_name} ${x.contact_last_name}${x.organization ? ` (${x.organization})` : ""}`],
     ["Email / phone", `${x.contact_email} · ${x.contact_phone}`],
     ["Expected guests", x.expected_guests ?? "—"],
-    ["Tab limit", tabMoney(x.tab_limit)],
+    ["Tab limit", `${tabMoney(x.tab_limit)} in orders, tax included`],
+    ["Gratuity", `${Math.round(TAB_GRATUITY * 100)}% added automatically to the final total (tax included)`],
     ["Who can order", x.authorized_names || "Not specified"],
     ["What's covered", x.allowed_items || "Not specified"],
     ["Notes", x.notes || "—"],
@@ -6134,9 +6137,9 @@ function tabOpen(id){
   if(!isOpen) kv.push([x.status === "cancelled" ? "Cancelled" : "Closed", `${x.closed_at ? lmFmtDate(x.closed_at.slice(0,10)) + " · " : ""}${x.close_note || ""}`]);
   lmModal(`<h3>${lmEsc(x.event_name)}</h3><div class="sub">Tab · ${lmEsc(myLocations.find(l => l.id === x.location_id)?.name || "")} · ref ${lmEsc(x.id.slice(0,8).toUpperCase())}</div>
     <dl class="tab-kv">${kv.map(([k,v]) => `<dt>${lmEsc(k)}</dt><dd>${lmEsc(v)}</dd>`).join("")}</dl>
-    ${isOpen ? `<div class="hint" style="margin:6px 0 2px;">To settle: ring the final total up in Square POS against this customer's card on file, then <b>Close tab</b> (releases the hold). Or enter the total here and <b>Charge &amp; close</b>${holdLive ? " (captures from the hold, so they only see one charge)" : ""}.</div>
+    ${isOpen ? `<div class="hint" style="margin:6px 0 2px;">To settle: enter the final total <b>with tax</b> and <b>Charge &amp; close</b>. The ${Math.round(TAB_GRATUITY * 100)}% gratuity is added for you${holdLive ? " and it captures from the hold, so they only see one charge" : ""}. If you ring it up in Square POS instead, add the ${Math.round(TAB_GRATUITY * 100)}% gratuity on the total with tax, then <b>Close tab</b> (releases the hold).</div>
     <div class="tab-acts">
-      <div><label class="hint" for="tab-amt" style="display:block;">Final total ($)</label><input type="number" id="tab-amt" min="0.01" step="0.01" max="${Number(x.tab_limit) * 1.25}" inputmode="decimal"></div>
+      <div><label class="hint" for="tab-amt" style="display:block;">Final total with tax ($)</label><input type="number" id="tab-amt" min="0.01" step="0.01" max="${Number(x.tab_limit) * 1.25}" inputmode="decimal"><div class="hint" id="tab-grat" style="margin-top:4px;">+ ${Math.round(TAB_GRATUITY * 100)}% gratuity</div></div>
       <button type="button" class="btn small primary" data-tab-act="charge">Charge &amp; close</button>
       <button type="button" class="btn small" data-tab-act="close">Close tab</button>
       ${holdLive ? `<button type="button" class="btn small" data-tab-act="release">Release hold</button>` : ""}
@@ -6145,15 +6148,20 @@ function tabOpen(id){
     </div>` : ""}
     <div class="lm-form-actions"><span class="err" id="tab-err"></span><button type="button" class="btn small" data-modal-cancel>Done</button></div>`);
   $("#lm-modal-card").classList.add("wide");
+  const amtIn = $("#tab-amt");
+  if(amtIn) amtIn.addEventListener("input", () => {
+    const a = Number(amtIn.value);
+    $("#tab-grat").textContent = a > 0 ? `+ ${tabMoney(tabGrat(a))} gratuity = ${tabMoney(a + tabGrat(a))} charged` : `+ ${Math.round(TAB_GRATUITY * 100)}% gratuity`;
+  });
   $("#lm-modal-card").querySelectorAll("[data-tab-act]").forEach(b => b.addEventListener("click", async () => {
     const act = b.dataset.tabAct, body = { action: act, tab_id: x.id };
     if(act === "charge"){
       const amt = Number($("#tab-amt").value);
-      if(!(amt > 0)){ $("#tab-err").textContent = "Enter the final total first."; return $("#tab-amt").focus(); }
-      if(!confirm(`Charge ${tabMoney(amt)} to ${x.contact_first_name}'s ${(x.card_brand||"card").replace(/_/g," ")} ending ${x.card_last4} and close the tab?`)) return;
+      if(!(amt > 0)){ $("#tab-err").textContent = "Enter the final total with tax first."; return $("#tab-amt").focus(); }
+      if(!confirm(`Charge ${tabMoney(amt + tabGrat(amt))} (${tabMoney(amt)} tab + ${tabMoney(tabGrat(amt))} ${Math.round(TAB_GRATUITY * 100)}% gratuity) to ${x.contact_first_name}'s ${(x.card_brand||"card").replace(/_/g," ")} ending ${x.card_last4} and close the tab?`)) return;
       body.amount = amt;
     }
-    if(act === "close" && !confirm("Close this tab? Do this after the final total has been charged in Square POS. The hold will be released.")) return;
+    if(act === "close" && !confirm(`Close this tab? Do this after the final total plus the ${Math.round(TAB_GRATUITY * 100)}% gratuity has been charged in Square POS. The hold will be released.`)) return;
     if(act === "cancel"){ const why = prompt("Cancel this tab and release the hold? Reason (optional):"); if(why === null) return; body.note = why; }
     if(act === "release" && !confirm("Release the hold now? The card stays on file, so you can still charge it at close.")) return;
     $("#lm-modal-card").querySelectorAll("[data-tab-act]").forEach(y => y.disabled = true); $("#tab-err").textContent = "Working…";
