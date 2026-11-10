@@ -6098,6 +6098,7 @@ function tabRenderDash(){
     chips.push(`<span class="chip ${over ? "serious" : live ? "good" : "neutral"}">${over ? "Needs closing" : live ? "Open now" : "Upcoming"}</span>`);
     const h = tabHoldExpired(x) ? TAB_HOLD.expired : (TAB_HOLD[x.hold_status] || TAB_HOLD.none);
     chips.push(`<span class="chip ${h[1]}">${h[0]}</span>`);
+    if(x.tax_exempt) chips.push(`<span class="chip ${x.exempt_cert_path ? "neutral" : "warn"}">Tax exempt${x.exempt_cert_path ? "" : " · no certificate"}</span>`);
     return `<button type="button" class="tab-row" data-tab-open="${x.id}">
       <div><div class="event-title">${lmEsc(x.event_name)}<span class="ev-kind tab">Tab</span></div>
         <div class="event-meta">${lmEsc(tabDates(x))} · ${lmEsc(x.contact_first_name + " " + x.contact_last_name)}${x.organization ? " · " + lmEsc(x.organization) : ""}</div>
@@ -6125,8 +6126,9 @@ function tabOpen(id){
     ["Contact", `${x.contact_first_name} ${x.contact_last_name}${x.organization ? ` (${x.organization})` : ""}`],
     ["Email / phone", `${x.contact_email} · ${x.contact_phone}`],
     ["Expected guests", x.expected_guests ?? "—"],
-    ["Tab limit", `${tabMoney(x.tab_limit)} in orders, tax included`],
-    ["Gratuity", `${Math.round(TAB_GRATUITY * 100)}% added automatically to the final total (tax included)`],
+    ["Tab limit", `${tabMoney(x.tab_limit)} in orders, ${x.tax_exempt ? "no sales tax" : "tax included"}`],
+    ["Sales tax", x.tax_exempt ? `TAX EXEMPT: ${x.exempt_org_name || x.organization || ""}${x.exempt_number ? ` (exemption #${x.exempt_number})` : ""}. Ring every order with tax removed. Certificate ${x.exempt_cert_path ? "on file" : "MISSING: get Form ST-119.1"}.` : "Charged as usual"],
+    ["Gratuity", `${Math.round(TAB_GRATUITY * 100)}% added automatically to the final total (${x.tax_exempt ? "no tax" : "tax included"})`],
     ["Who can order", x.authorized_names || "Not specified"],
     ["What's covered", x.allowed_items || "Not specified"],
     ["Notes", x.notes || "—"],
@@ -6137,17 +6139,30 @@ function tabOpen(id){
   if(!isOpen) kv.push([x.status === "cancelled" ? "Cancelled" : "Closed", `${x.closed_at ? lmFmtDate(x.closed_at.slice(0,10)) + " · " : ""}${x.close_note || ""}`]);
   lmModal(`<h3>${lmEsc(x.event_name)}</h3><div class="sub">Tab · ${lmEsc(myLocations.find(l => l.id === x.location_id)?.name || "")} · ref ${lmEsc(x.id.slice(0,8).toUpperCase())}</div>
     <dl class="tab-kv">${kv.map(([k,v]) => `<dt>${lmEsc(k)}</dt><dd>${lmEsc(v)}</dd>`).join("")}</dl>
-    ${isOpen ? `<div class="hint" style="margin:6px 0 2px;">To settle: enter the final total <b>with tax</b> and <b>Charge &amp; close</b>. The ${Math.round(TAB_GRATUITY * 100)}% gratuity is added for you${holdLive ? " and it captures from the hold, so they only see one charge" : ""}. If you ring it up in Square POS instead, add the ${Math.round(TAB_GRATUITY * 100)}% gratuity on the total with tax, then <b>Close tab</b> (releases the hold).</div>
+    ${isOpen ? `<div class="hint" style="margin:6px 0 2px;">To settle: enter the final total <b>${x.tax_exempt ? "(no tax: this tab is tax exempt)" : "with tax"}</b> and <b>Charge &amp; close</b>. The ${Math.round(TAB_GRATUITY * 100)}% gratuity is added for you${holdLive ? " and it captures from the hold, so they only see one charge" : ""}. If you ring it up in Square POS instead, ${x.tax_exempt ? "remove the sales tax and " : ""}add the ${Math.round(TAB_GRATUITY * 100)}% gratuity on the total${x.tax_exempt ? "" : " with tax"}, then <b>Close tab</b> (releases the hold).</div>
     <div class="tab-acts">
-      <div><label class="hint" for="tab-amt" style="display:block;">Final total with tax ($)</label><input type="number" id="tab-amt" min="0.01" step="0.01" max="${Number(x.tab_limit) * 1.25}" inputmode="decimal"><div class="hint" id="tab-grat" style="margin-top:4px;">+ ${Math.round(TAB_GRATUITY * 100)}% gratuity</div></div>
+      <div><label class="hint" for="tab-amt" style="display:block;">${x.tax_exempt ? "Final total, no tax ($)" : "Final total with tax ($)"}</label><input type="number" id="tab-amt" min="0.01" step="0.01" max="${Number(x.tab_limit) * 1.25}" inputmode="decimal"><div class="hint" id="tab-grat" style="margin-top:4px;">+ ${Math.round(TAB_GRATUITY * 100)}% gratuity</div></div>
       <button type="button" class="btn small primary" data-tab-act="charge">Charge &amp; close</button>
       <button type="button" class="btn small" data-tab-act="close">Close tab</button>
       ${holdLive ? `<button type="button" class="btn small" data-tab-act="release">Release hold</button>` : ""}
       <button type="button" class="btn small" data-tab-act="resend">Resend emails</button>
+      ${x.exempt_cert_path ? `<button type="button" class="btn small" data-tab-cert>View exempt certificate</button>` : ""}
       <button type="button" class="btn small" data-tab-act="cancel" style="margin-left:auto; color:var(--critical);">Cancel tab</button>
     </div>` : ""}
     <div class="lm-form-actions"><span class="err" id="tab-err"></span><button type="button" class="btn small" data-modal-cancel>Done</button></div>`);
   $("#lm-modal-card").classList.add("wide");
+  const certBtn = $("#lm-modal-card [data-tab-cert]");
+  if(certBtn) certBtn.addEventListener("click", async () => {
+    certBtn.disabled = true; $("#tab-err").textContent = "Opening certificate…";
+    try{
+      const { data: { session } } = await sb.auth.getSession();
+      const r = await fetch(TAB_FN_URL, { method:"POST", headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${session?.access_token||""}`, "apikey":SUPABASE_ANON_KEY }, body: JSON.stringify({ action:"cert_url", tab_id: x.id }) });
+      const d = await r.json().catch(() => ({}));
+      if(!r.ok || !d.url) throw new Error(d.error || "Couldn't open the certificate.");
+      window.open(d.url, "_blank", "noopener"); $("#tab-err").textContent = "";
+    }catch(err){ $("#tab-err").textContent = err.message; }
+    certBtn.disabled = false;
+  });
   const amtIn = $("#tab-amt");
   if(amtIn) amtIn.addEventListener("input", () => {
     const a = Number(amtIn.value);
@@ -6157,7 +6172,7 @@ function tabOpen(id){
     const act = b.dataset.tabAct, body = { action: act, tab_id: x.id };
     if(act === "charge"){
       const amt = Number($("#tab-amt").value);
-      if(!(amt > 0)){ $("#tab-err").textContent = "Enter the final total with tax first."; return $("#tab-amt").focus(); }
+      if(!(amt > 0)){ $("#tab-err").textContent = x.tax_exempt ? "Enter the final total (no tax) first." : "Enter the final total with tax first."; return $("#tab-amt").focus(); }
       if(!confirm(`Charge ${tabMoney(amt + tabGrat(amt))} (${tabMoney(amt)} tab + ${tabMoney(tabGrat(amt))} ${Math.round(TAB_GRATUITY * 100)}% gratuity) to ${x.contact_first_name}'s ${(x.card_brand||"card").replace(/_/g," ")} ending ${x.card_last4} and close the tab?`)) return;
       body.amount = amt;
     }
