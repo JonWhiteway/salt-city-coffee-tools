@@ -430,7 +430,13 @@ tr:last-child td{border-bottom:none;}
 .ev-row.cancelled{opacity:.55;} .ev-row.cancelled .event-title{text-decoration:line-through;}
 .ev-chips{display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end;}
 .ev-kind{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:5px; margin-left:6px; vertical-align:1px;}
-.ev-kind.hosted{background:#E3EAF5; color:#1B365D;} .ev-kind.buyout{background:#F4D9CC; color:#8C3E2A;} .ev-kind.catering{background:#EDE0C6; color:#6B5221;} .ev-kind.room_rental{background:#E4E7DC; color:#2E3323;}
+.ev-kind.hosted{background:#E3EAF5; color:#1B365D;} .ev-kind.buyout{background:#F4D9CC; color:#8C3E2A;} .ev-kind.catering{background:#EDE0C6; color:#6B5221;} .ev-kind.room_rental{background:#E4E7DC; color:#2E3323;} .ev-kind.tab{background:#E2EEDF; color:#22512A;}
+.tab-row{display:grid; grid-template-columns:1fr auto; gap:4px 12px; align-items:center; width:100%; text-align:left; font:inherit; color:inherit; background:none; border:0; border-top:1px solid var(--border-soft); padding:10px 2px; cursor:pointer;}
+.tab-row:first-child{border-top:0;} .tab-row:hover .event-title{color:var(--accent);}
+.tab-row .tab-amt{font-family:var(--font-mono); font-size:13px; text-align:right;}
+.tab-kv{display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:13.5px; margin:4px 0 6px;} .tab-kv dt{color:var(--ink-3);} .tab-kv dd{margin:0;}
+.tab-acts{display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; border-top:1px solid var(--border-soft); padding-top:12px; margin-top:6px;}
+.tab-acts input{width:130px; font:inherit; font-size:13.5px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--ink);}
 .ev-month{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); padding:14px 4px 4px;}
 .ev-tasks{display:flex; flex-direction:column; gap:6px;}
 .ev-task{display:grid; grid-template-columns:22px 1fr 150px 130px 26px; gap:8px; align-items:center;}
@@ -1772,6 +1778,10 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
           <div class="card lm-pad">
             <div class="lm-card-title"><h3>Upcoming store events</h3><span class="hint"><button type="button" class="ev-link" data-ev-new>+ Add</button> · <button type="button" class="ev-link" data-go="events">All events →</button></span></div>
             <div class="event-list" id="ev-dash-list"><div class="lm-loading">Loading…</div></div>
+          </div>
+          <div class="card lm-pad">
+            <div class="lm-card-title"><h3>Open tabs</h3><span class="hint"><button type="button" class="ev-link" id="tab-copy-link">Copy sign-up link</button></span></div>
+            <div id="tab-dash-list"><div class="lm-loading">Loading…</div></div>
           </div>
           <div class="card lm-pad">
             <div class="lm-card-title"><h3>Current promotions &amp; marketing</h3><span class="hint" id="lm-promo-hint">Next 3 weeks</span></div>
@@ -4896,6 +4906,7 @@ function lmOnStoreChange(locId){
   loadPipTodos(locId);
   loadWasteTodo(locId);
   evLoad(locId);
+  tabLoad(locId);
   lmSetTitles();
 }
 
@@ -5851,13 +5862,14 @@ async function tdRefresh(){
    STORE EVENTS (Nov 2026): hosted events, buyouts, catering, room rentals.
    Tables store_events + store_event_tasks; RLS = can_manage_location.
    ===================================================================== */
-const EV_KIND = { hosted:"In-café event", buyout:"Buyout", catering:"Catering", room_rental:"Room rental" };
+const EV_KIND = { hosted:"In-café event", buyout:"Buyout", catering:"Catering", room_rental:"Room rental", tab:"Tab" };
 const EV_STATUS = { idea:["Idea","neutral"], planned:["Planned","warn"], confirmed:["Confirmed","good"], done:["Done","good"], cancelled:["Cancelled","neutral"] };
 const EV_TRAFFIC = { normal:"Normal day", busy:"Busy", slammed:"Slammed" };
 const EV_TEMPLATES = {
   hosted:[["Lock the plan, time and who runs it",-21],["Post on social and put signage up in the café",-14],["Schedule extra staff",-10],["Order product and supplies",-7],["Brief the team at huddle",-1],["Set up the space",0],["Debrief: attendance and keep / change",1]],
   buyout:[["Confirm date, time, headcount and menu with the contact",-21],["Collect the deposit",-14],["Schedule staff",-10],["Post notice that we're closed to the public",-7],["Order product from production",-5],["Set up",0],["Invoice and collect the balance",1],["Debrief",1]],
   catering:[["Confirm the order and pickup or delivery time",-7],["Order product from production",-4],["Schedule prep time",-3],["Prep, pack and label",0],["Invoice and collect payment",1]],
+  tab:[["Brief the team: who can order and what is covered",-1],["Close out the tab in the Command Deck",1]],
   room_rental:[["Confirm date, time, setup and headcount",-14],["Collect payment",-7],["Clean and set the room",0],["Reset the room after",0]],
 };
 let evState = { locId:null, events:[], tasks:[], filter:"upcoming" };
@@ -5937,6 +5949,7 @@ function evTaskRow(t, opt){
 
 async function evOpen(id){
   if(!currentDetailLocId) return;
+  { const tb = id && tabState.tabs.find(t => t.store_event_id === id); if(tb) return tabOpen(tb.id); }
   await tdEnsureTeam();
   const e = id ? evState.events.find(x => x.id === id) : null;
   const tasks = e ? evState.tasks.filter(t => t.event_id === e.id) : [];
@@ -6046,6 +6059,123 @@ async function evSales(e){
     + (avg ? ` · <b style="color:${diff >= 0 ? "var(--good)" : "var(--critical)"}">${diff >= 0 ? "+" : ""}${diff.toFixed(0)}%</b> vs. the same weekday's average over the previous ${base.length} week${base.length > 1 ? "s" : ""} (${evMoney(avg)})` : "")
     + (e.kind !== "hosted" && e.price ? `<div class="hint" style="margin-top:4px;">Booked at ${evMoney(e.price)}${e.balance_paid ? ", paid in full" : e.deposit_paid ? ", deposit paid" : ", not paid yet"}. Buyouts and catering may be rung up on a different day.</div>` : "");
 }
+
+
+/* =====================================================================
+   OPEN TABS (Nov 2026): limited-time customer tabs from the public
+   sign-up form (salt-city-coffee-tabs.netlify.app). Table store_tabs,
+   RLS = can_manage_location (read/update). Anything that touches Square
+   (release / charge / close / cancel) goes through the tab-signup
+   Edge Function, never a direct client write.
+   ===================================================================== */
+const TAB_FORM_URL = "https://salt-city-coffee-tabs.netlify.app/";
+const TAB_FN_URL = `${SUPABASE_URL}/functions/v1/tab-signup`;
+let tabState = { locId:null, tabs:[] };
+const tabMoney = n => n == null ? "—" : "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 });
+const TAB_HOLD = { authorized:["Hold active","good"], captured:["Charged","good"], released:["Hold released","neutral"], expired:["Hold expired","warn"], none:["No hold","neutral"] };
+const tabDates = t => t.starts_on === t.ends_on ? lmFmtDate(t.starts_on) : `${lmFmtDate(t.starts_on)} – ${lmFmtDate(t.ends_on)}`;
+const tabHoldExpired = t => t.hold_status === "authorized" && t.hold_expires_at && new Date(t.hold_expires_at) < new Date();
+
+async function tabLoad(locId){
+  if(!locId) return;
+  const from = lmAddDays(lmToday(), -30);
+  const { data, error } = await sb.from("store_tabs").select("*").eq("location_id", locId)
+    .or(`status.eq.open,ends_on.gte.${from}`).order("starts_on");
+  if(locId !== currentDetailLocId) return;
+  if(error){ $("#tab-dash-list").innerHTML = `<div class="empty-note lm-error">Couldn't load tabs (${lmEsc(error.message)}).</div>`; return; }
+  tabState = { locId, tabs: data || [] };
+  tabRenderDash();
+}
+
+function tabRenderDash(){
+  const t = lmToday();
+  const open = tabState.tabs.filter(x => x.status === "open");
+  $("#tab-dash-list").innerHTML = open.map(x => {
+    const chips = [];
+    const live = x.starts_on <= t && x.ends_on >= t, over = x.ends_on < t;
+    chips.push(`<span class="chip ${over ? "serious" : live ? "good" : "neutral"}">${over ? "Needs closing" : live ? "Open now" : "Upcoming"}</span>`);
+    const h = tabHoldExpired(x) ? TAB_HOLD.expired : (TAB_HOLD[x.hold_status] || TAB_HOLD.none);
+    chips.push(`<span class="chip ${h[1]}">${h[0]}</span>`);
+    return `<button type="button" class="tab-row" data-tab-open="${x.id}">
+      <div><div class="event-title">${lmEsc(x.event_name)}<span class="ev-kind tab">Tab</span></div>
+        <div class="event-meta">${lmEsc(tabDates(x))} · ${lmEsc(x.contact_first_name + " " + x.contact_last_name)}${x.organization ? " · " + lmEsc(x.organization) : ""}</div>
+        <div class="ev-chips" style="margin-top:4px;">${chips.join("")}</div></div>
+      <div class="tab-amt">${tabMoney(x.tab_limit)}<div class="hint">${lmEsc((x.card_brand || "Card").replace(/_/g," "))} ••${lmEsc(x.card_last4 || "")}</div></div></button>`;
+  }).join("") || `<div class="empty-note">No open tabs. Customers can start one with the <button type="button" class="ev-link" data-tab-copy>sign-up link</button>.</div>`;
+}
+
+async function tabCall(body){
+  const { data: { session } } = await sb.auth.getSession();
+  const r = await fetch(TAB_FN_URL, { method:"POST",
+    headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${session?.access_token||""}`, "apikey":SUPABASE_ANON_KEY },
+    body: JSON.stringify(body) });
+  const d = await r.json().catch(() => ({}));
+  if(!r.ok) throw new Error(d.error || `Request failed (${r.status})`);
+  return d.tab;
+}
+
+function tabOpen(id){
+  const x = tabState.tabs.find(t => t.id === id); if(!x) return;
+  const isOpen = x.status === "open", holdLive = x.hold_status === "authorized" && !tabHoldExpired(x);
+  const h = tabHoldExpired(x) ? TAB_HOLD.expired : (TAB_HOLD[x.hold_status] || TAB_HOLD.none);
+  const kv = [
+    ["Dates", tabDates(x) + ([x.start_time, x.end_time].some(Boolean) ? ` · ${[evTime(x.start_time), evTime(x.end_time)].filter(Boolean).join("–")}` : "")],
+    ["Contact", `${x.contact_first_name} ${x.contact_last_name}${x.organization ? ` (${x.organization})` : ""}`],
+    ["Email / phone", `${x.contact_email} · ${x.contact_phone}`],
+    ["Expected guests", x.expected_guests ?? "—"],
+    ["Tab limit", tabMoney(x.tab_limit)],
+    ["Who can order", x.authorized_names || "Not specified"],
+    ["What's covered", x.allowed_items || "Not specified"],
+    ["Notes", x.notes || "—"],
+    ["Card on file", `${(x.card_brand || "Card").replace(/_/g," ")} ending ${x.card_last4 || "?"}${x.card_exp ? `, exp ${x.card_exp}` : ""} · saved to their Square customer profile`],
+    ["Hold", `${h[0]}${x.hold_amount ? ` · ${tabMoney(x.hold_amount)}` : ""}${holdLive && x.hold_expires_at ? ` · drops off ${new Date(x.hold_expires_at).toLocaleString("en-US",{ month:"short", day:"numeric", hour:"numeric", minute:"2-digit" })}` : ""}`],
+    ["Emails sent to", (x.emails_sent_to || []).join(", ") || (x.email_error ? `Not sent: ${x.email_error}` : "—")],
+  ];
+  if(!isOpen) kv.push([x.status === "cancelled" ? "Cancelled" : "Closed", `${x.closed_at ? lmFmtDate(x.closed_at.slice(0,10)) + " · " : ""}${x.close_note || ""}`]);
+  lmModal(`<h3>${lmEsc(x.event_name)}</h3><div class="sub">Tab · ${lmEsc(myLocations.find(l => l.id === x.location_id)?.name || "")} · ref ${lmEsc(x.id.slice(0,8).toUpperCase())}</div>
+    <dl class="tab-kv">${kv.map(([k,v]) => `<dt>${lmEsc(k)}</dt><dd>${lmEsc(v)}</dd>`).join("")}</dl>
+    ${isOpen ? `<div class="hint" style="margin:6px 0 2px;">To settle: ring the final total up in Square POS against this customer's card on file, then <b>Close tab</b> (releases the hold). Or enter the total here and <b>Charge &amp; close</b>${holdLive ? " (captures from the hold, so they only see one charge)" : ""}.</div>
+    <div class="tab-acts">
+      <div><label class="hint" for="tab-amt" style="display:block;">Final total ($)</label><input type="number" id="tab-amt" min="0.01" step="0.01" max="${Number(x.tab_limit) * 1.25}" inputmode="decimal"></div>
+      <button type="button" class="btn small primary" data-tab-act="charge">Charge &amp; close</button>
+      <button type="button" class="btn small" data-tab-act="close">Close tab</button>
+      ${holdLive ? `<button type="button" class="btn small" data-tab-act="release">Release hold</button>` : ""}
+      <button type="button" class="btn small" data-tab-act="resend">Resend emails</button>
+      <button type="button" class="btn small" data-tab-act="cancel" style="margin-left:auto; color:var(--critical);">Cancel tab</button>
+    </div>` : ""}
+    <div class="lm-form-actions"><span class="err" id="tab-err"></span><button type="button" class="btn small" data-modal-cancel>Done</button></div>`);
+  $("#lm-modal-card").classList.add("wide");
+  $("#lm-modal-card").querySelectorAll("[data-tab-act]").forEach(b => b.addEventListener("click", async () => {
+    const act = b.dataset.tabAct, body = { action: act, tab_id: x.id };
+    if(act === "charge"){
+      const amt = Number($("#tab-amt").value);
+      if(!(amt > 0)){ $("#tab-err").textContent = "Enter the final total first."; return $("#tab-amt").focus(); }
+      if(!confirm(`Charge ${tabMoney(amt)} to ${x.contact_first_name}'s ${(x.card_brand||"card").replace(/_/g," ")} ending ${x.card_last4} and close the tab?`)) return;
+      body.amount = amt;
+    }
+    if(act === "close" && !confirm("Close this tab? Do this after the final total has been charged in Square POS. The hold will be released.")) return;
+    if(act === "cancel"){ const why = prompt("Cancel this tab and release the hold? Reason (optional):"); if(why === null) return; body.note = why; }
+    if(act === "release" && !confirm("Release the hold now? The card stays on file, so you can still charge it at close.")) return;
+    $("#lm-modal-card").querySelectorAll("[data-tab-act]").forEach(y => y.disabled = true); $("#tab-err").textContent = "Working…";
+    try{
+      const t = await tabCall(body);
+      if(t){ tabState.tabs = tabState.tabs.map(y => y.id === t.id ? t : y); }
+      tabRenderDash(); if(["charge","close","cancel"].includes(act)) evLoad(currentDetailLocId);
+      tabOpen(x.id);
+      if(act === "resend") $("#tab-err").textContent = t && t.email_error ? t.email_error : "Emails re-sent.";
+    }catch(err){ $("#tab-err").textContent = err.message; $("#lm-modal-card").querySelectorAll("[data-tab-act]").forEach(y => y.disabled = false); }
+  }));
+}
+
+async function tabCopyLink(){
+  const url = TAB_FORM_URL + (currentDetailLocId ? `?loc=${currentDetailLocId}` : "");
+  try{ await navigator.clipboard.writeText(url); const b = $("#tab-copy-link"); if(b){ b.textContent = "Link copied ✓"; setTimeout(() => { b.textContent = "Copy sign-up link"; }, 2000); } }
+  catch{ prompt("Copy this link for the customer:", url); }
+}
+document.addEventListener("click", x => {
+  const o = x.target.closest("[data-tab-open]"); if(o) return tabOpen(o.dataset.tabOpen);
+  if(x.target.closest("#tab-copy-link, [data-tab-copy]")) return tabCopyLink();
+});
 
 /* Overview → Calendar & Events: every café this person oversees (GMs and execs) */
 async function evLoadCompany(){
