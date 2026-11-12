@@ -237,24 +237,6 @@ body{margin:0}
     <div id="pillars" class="stack"></div>
 
     <div class="card stack">
-      <div>
-        <h2>End-of-2026 checks</h2>
-        <p class="muted" style="margin:4px 0 0;font-size:14px">Turn on what this person has already passed.</p>
-      </div>
-      <div class="checks" id="checks"></div>
-    </div>
-
-    <div class="card stack" id="cl-card">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
-        <h2>Barista refresh</h2>
-        <span class="lbl" id="cl-count"></span>
-      </div>
-      <p class="muted" style="margin:0;font-size:14px">Complete = Barista 1. Each tap saves right away with your name and the date. Sign-offs from barista training count automatically.</p>
-      <div class="cl-bar"><i id="cl-fill" style="width:0"></i></div>
-      <div id="cl"></div>
-    </div>
-
-    <div class="card stack">
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
         <h2 id="mylist-title">Your café so far</h2>
         <span class="lbl" id="mylist-count"></span>
@@ -398,10 +380,10 @@ function buildForm(){
       </div>`).join("")}
       <div class="notefield field"><label class="lbl" for="note-${p.key}">${p.name} notes (optional)</label><textarea id="note-${p.key}" placeholder="What did you see? What should they work on?"></textarea></div>
     </section>`).join("");
-  $("checks").innerHTML=CHECKS.map(c=>`<div class="check"><label for="ck-${c.k}"><b style="font-weight:600">${c.t}</b><br><span class="muted" style="font-size:13px">${c.d}</span></label><span class="switch"><input type="checkbox" id="ck-${c.k}" data-ck="${c.k}"><span></span></span></div>`).join("");
+  /* end-of-2026 checks + Barista refresh live on the Command Deck only (Jon, Nov 12); saves carry the last checks forward */
+  if(false)$("checks").innerHTML=CHECKS.map(c=>`<div class="check"><label for="ck-${c.k}"><b style="font-weight:600">${c.t}</b><br><span class="muted" style="font-size:13px">${c.d}</span></label><span class="switch"><input type="checkbox" id="ck-${c.k}" data-ck="${c.k}"><span></span></span></div>`).join("");
   $("pillars").addEventListener("click",e=>{const b=e.target.closest("button[data-k]");if(!b)return;if(!me){toast("Choose your name first.");$("assessor").focus();return}if(!form.staffId){toast("Choose a team member first.");$("person").focus();return}form.ratings[b.dataset.k]=+b.dataset.v;$("beh-"+b.dataset.k).classList.remove("missing");paintForm()});
   PILLARS.forEach(p=>$("note-"+p.key).addEventListener("input",e=>{form.notes[p.key]=e.target.value}));
-  $("checks").addEventListener("change",e=>{const i=e.target.closest("input[data-ck]");if(i)form.checks[i.dataset.ck]=i.checked});
   $("cafe").addEventListener("change",e=>{store.set("sca-cafe-id",e.target.value);selectCafe(e.target.value)});
   $("person").addEventListener("change",e=>selectPerson(e.target.value));
   $("assessor").addEventListener("change",e=>{
@@ -413,17 +395,14 @@ function buildForm(){
   });
   $("save").addEventListener("click",save);
   $("mylist").addEventListener("click",e=>{const b=e.target.closest("[data-pick]");if(b&&!me){toast("Choose your name first.");$("assessor").focus();return}if(b){$("person").value=b.dataset.pick;selectPerson(b.dataset.pick);window.scrollTo({top:0,behavior:"smooth"})}});
-  $("cl").addEventListener("change",toggleItem);
 }
 function paintForm(){
   document.querySelectorAll("#pillars button[data-k]").forEach(b=>b.setAttribute("aria-pressed",String(form.ratings[b.dataset.k]===+b.dataset.v)));
   PILLARS.forEach(p=>{const t=$("note-"+p.key);if(t.value!==(form.notes[p.key]||""))t.value=form.notes[p.key]||""});
-  CHECKS.forEach(c=>$("ck-"+c.k).checked=!!form.checks[c.k]);
   $("progress").textContent=`${ALLK.filter(k=>form.ratings[k]).length} of 9 rated`;
   const p=roster.find(r=>r.staff_id===form.staffId), last=form.staffId?(assess[form.staffId]||[])[0]:null;
   $("save").textContent=last?"Save update":"Save assessment"; $("save").disabled=saving||!form.staffId;
   $("prev").innerHTML=!p?"":last?`<span class="pill ${STATUS_CLS[status(p.staff_id)]}">${STATUS_LBL[status(p.staff_id)]}</span> Last saved ${when(last.assessed_at)} by ${esc(names[last.assessed_by]||"—")}. Their answers are filled in; change what's different and save. Each save is kept as history.`:`${esc(p.job)} · not assessed yet.`;
-  renderChecklist();
 }
 
 /* ---------- café + person ----------
@@ -542,7 +521,7 @@ function renderMyList(loading){
   if(!roster.length){$("mylist").innerHTML='<div class="empty">No team members with a Square shift here in the last 60 days.</div>';return}
   $("mylist").innerHTML=roster.map(r=>{const a=(assess[r.staff_id]||[])[0],s=status(r.staff_id),cl=clState(r.staff_id);
     return `<button class="myrow" type="button" data-pick="${r.staff_id}" ${r.staff_id===form.staffId?'aria-current="true"':""}>
-      <span><span class="pname">${esc(r.name)}</span> <span class="pill ${STATUS_CLS[s]}">${STATUS_LBL[s]}</span><br><span class="pmeta">${esc(r.job)}${r.hire?` · ${tenure(r.hire)}`:""} · ${a?`${a.checks?CHECKS.filter(c=>a.checks[c.k]).length:0}/4 checks · `:""}refresh ${cl.done}/${cl.total} · tap to ${a?"update":"assess"}</span></span>
+      <span><span class="pname">${esc(r.name)}</span> <span class="pill ${STATUS_CLS[s]}">${STATUS_LBL[s]}</span><br><span class="pmeta">${esc(r.job)}${r.hire?` · ${tenure(r.hire)}`:""} · tap to ${a?"update":"assess"}</span></span>
       <span class="pscores">${a?PILLARS.map(p=>{const v=pillarAvg(a,p);return `<span class="sc b${band(v)}" title="${p.name}">${p.short} ${fmt(v)}</span>`}).join(""):""}</span></button>`}).join("");
 }
 
