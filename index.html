@@ -1066,6 +1066,107 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 #gate-wrap .tm-email-msg.ok{color:var(--good);} #gate-wrap .tm-email-msg.err{color:var(--critical);}
 #gate-wrap .login-divider{display:flex; align-items:center; gap:10px; margin:24px 0 10px; color:var(--ink-3); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
 #gate-wrap .login-divider::before, #gate-wrap .login-divider::after{content:""; flex:1; height:1px; background:var(--border);}
+
+/* ===== Team Assessment + Barista Refresh (Training Night, Nov 12 2026) ===== */
+:root{ --ta-l1:#C9452F; --ta-l2:#C88A1E; --ta-l3:#3F7FC1; --ta-l4:#1F4E8C; --ta-l1-fg:#fff; --ta-l2-fg:#241F18; --ta-l3-fg:#fff; --ta-l4-fg:#fff; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --ta-l1:#E66B55; --ta-l2:#E0B23B; --ta-l3:#6FA6DD; --ta-l4:#B9D6F5; --ta-l1-fg:#1D1811; --ta-l2-fg:#1D1811; --ta-l3-fg:#0F1A26; --ta-l4-fg:#0F1A26; } }
+:root[data-theme="dark"]{ --ta-l1:#E66B55; --ta-l2:#E0B23B; --ta-l3:#6FA6DD; --ta-l4:#B9D6F5; --ta-l1-fg:#1D1811; --ta-l2-fg:#1D1811; --ta-l3-fg:#0F1A26; --ta-l4-fg:#0F1A26; }
+.ta-sc{display:inline-flex; align-items:center; justify-content:center; min-width:40px; padding:3px 6px; border-radius:6px; font-family:var(--font-mono); font-weight:600; font-size:12.5px; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.ta-sc.b0{background:var(--surface-alt); color:var(--ink-3);}
+.ta-sc.b1{background:var(--ta-l1); color:var(--ta-l1-fg);} .ta-sc.b2{background:var(--ta-l2); color:var(--ta-l2-fg);}
+.ta-sc.b3{background:var(--ta-l3); color:var(--ta-l3-fg);} .ta-sc.b4{background:var(--ta-l4); color:var(--ta-l4-fg);}
+.ta-sw{display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px;}
+.ta-prof{background:var(--surface-alt); border-radius:10px; padding:12px 14px; margin:0 0 12px; display:flex; flex-direction:column; gap:8px;}
+.ta-prof-top{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;}
+.ta-prof-top b{font-size:13px;}
+.ta-prof .row{display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-size:12.5px; color:var(--ink-2);}
+.ta-prof .acts{display:flex; gap:8px; flex-wrap:wrap;}
+.ta-hist{font-size:12.5px;} .ta-hist summary{cursor:pointer; color:var(--ink-2);}
+.ta-hist table{width:100%; border-collapse:collapse; margin-top:6px;} .ta-hist td{padding:5px 4px; border-top:1px solid var(--border-soft);}
+/* assessment form (phone first) */
+.lm-modal-card.ta-modal{max-width:720px; padding:18px 16px 0;}
+@media (max-width:560px){ .lm-modal-card.ta-modal{padding:16px 12px 0; border-radius:10px;} }
+.ta-key{display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; font-size:12px; color:var(--ink-2); margin:4px 0 12px;}
+.ta-pillar{border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:12px;}
+.ta-pillar-head{background:var(--surface-alt); padding:10px 14px;}
+.ta-pillar-head h4{font-family:var(--font-display); text-transform:uppercase; letter-spacing:.03em; font-size:15px; margin:0;}
+.ta-pillar-head p{margin:2px 0 0; font-size:12.5px; font-style:italic; color:var(--ink-2);}
+.ta-beh{padding:12px 14px; border-top:1px solid var(--border-soft);}
+.ta-beh:first-of-type{border-top:0;}
+.ta-beh .t{font-weight:600; font-size:14px;} .ta-beh .d{font-size:12.5px; color:var(--ink-2); margin:2px 0 8px;}
+.ta-beh.missing .t::after{content:" · needs a rating"; color:var(--critical); font-weight:500; font-size:12px;}
+.ta-levels{display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
+.ta-levels button{font:inherit; font-size:12px; font-weight:600; line-height:1.15; min-height:50px; padding:8px 3px; border-radius:9px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; touch-action:manipulation;}
+.ta-levels button .n{font-family:var(--font-mono); font-size:15px;}
+.ta-levels button[aria-pressed="true"][data-v="1"]{background:var(--ta-l1); border-color:var(--ta-l1); color:var(--ta-l1-fg);}
+.ta-levels button[aria-pressed="true"][data-v="2"]{background:var(--ta-l2); border-color:var(--ta-l2); color:var(--ta-l2-fg);}
+.ta-levels button[aria-pressed="true"][data-v="3"]{background:var(--ta-l3); border-color:var(--ta-l3); color:var(--ta-l3-fg);}
+.ta-levels button[aria-pressed="true"][data-v="4"]{background:var(--ta-l4); border-color:var(--ta-l4); color:var(--ta-l4-fg);}
+.ta-note{padding:0 14px 12px;} .ta-note textarea{width:100%; min-height:54px; font:inherit; font-size:14px; padding:9px 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--ink); resize:vertical;}
+.ta-note label{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); font-weight:600; display:block; margin-bottom:4px;}
+.ta-checks{border:1px solid var(--border); border-radius:12px; padding:4px 14px; margin-bottom:12px;}
+.ta-check{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:11px 0; border-top:1px solid var(--border-soft); font-size:14px;}
+.ta-check:first-child{border-top:0;} .ta-check small{display:block; color:var(--ink-3); font-size:12px;}
+.ta-switch{position:relative; width:50px; height:30px; flex:none;}
+.ta-switch input{position:absolute; inset:0; opacity:0; margin:0; cursor:pointer;}
+.ta-switch span{position:absolute; inset:0; border-radius:999px; background:var(--border); transition:background .15s;}
+.ta-switch span::after{content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:transform .15s; box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.ta-switch input:checked + span{background:var(--good);} .ta-switch input:checked + span::after{transform:translateX(20px);}
+.ta-switch input:focus-visible + span{outline:2px solid var(--accent); outline-offset:2px;}
+.ta-savebar{position:sticky; bottom:0; background:var(--surface); border-top:1px solid var(--border); margin:0 -16px; padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px)); display:flex; gap:10px; align-items:center; z-index:2;}
+@media (max-width:560px){ .ta-savebar{margin:0 -12px; padding-left:12px; padding-right:12px;} }
+.ta-savebar .btn{flex:1; justify-content:center; padding:12px; font-size:15px;}
+.ta-savebar .prog{font-size:12.5px; color:var(--ink-3); white-space:nowrap;}
+.ta-savebar .err{color:var(--critical); font-size:12.5px;}
+/* checklist */
+.ta-cl-group{margin-bottom:10px;}
+.ta-cl-group h4{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); margin:12px 0 4px; display:flex; justify-content:space-between;}
+.ta-cl-item{display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-top:1px solid var(--border-soft); font-size:14px;}
+.ta-cl-item input{width:22px; height:22px; flex:none; margin-top:1px; accent-color:var(--good);}
+.ta-cl-item .by{display:block; font-size:12px; color:var(--ink-3); margin-top:2px;}
+.ta-cl-item.done .txt{color:var(--ink-2);}
+/* dashboard */
+.ta-filters{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:14px;}
+.ta-filters button{flex:none; font:inherit; font-size:13px; font-weight:600; padding:7px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer;}
+.ta-filters button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--surface);}
+.ta-kpis{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:14px;}
+@media (max-width:820px){ .ta-kpis{grid-template-columns:repeat(2,minmax(0,1fr));} }
+.ta-kpis .kpi .value.good{color:var(--good);} .ta-kpis .kpi .value.bad{color:var(--critical);}
+.ta-grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+@media (max-width:820px){ .ta-grid2{grid-template-columns:1fr;} }
+.ta-bars{display:flex; flex-direction:column; gap:12px;}
+.ta-bar .top{display:flex; justify-content:space-between; gap:10px; font-size:13.5px; margin-bottom:5px;}
+.ta-bar .top span{color:var(--ink-3); font-variant-numeric:tabular-nums;}
+.ta-track{height:12px; border-radius:6px; background:var(--surface-alt); overflow:hidden; display:flex;}
+.ta-track i{display:block; height:100%;}
+.ta-legend{display:flex; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--ink-3); margin-top:10px;}
+.ta-table{width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums;}
+.ta-table th,.ta-table td{padding:8px 7px; text-align:center; border-top:1px solid var(--border-soft); white-space:nowrap;}
+.ta-table th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); border-top:0; font-weight:600;}
+.ta-table th:first-child,.ta-table td:first-child{text-align:left; position:sticky; left:0; background:var(--surface);}
+.ta-table td.grp{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); font-weight:600; padding-top:12px;}
+.ta-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+.ta-tools{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px;}
+.ta-tools input,.ta-tools select{flex:1 1 160px; font:inherit; font-size:14px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--ink);}
+.ta-person{border-top:1px solid var(--border-soft);} .ta-person:first-child{border-top:0;}
+.ta-person > button{all:unset; box-sizing:border-box; width:100%; display:grid; grid-template-columns:auto 1fr auto; gap:4px 10px; align-items:center; padding:10px 0; cursor:pointer;}
+.ta-person > button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.ta-av{width:34px; height:34px; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12.5px; grid-row:span 2;}
+.ta-pname{font-weight:600; font-size:14px;} .ta-pmeta{font-size:12px; color:var(--ink-3);}
+.ta-pscores{display:flex; gap:5px; flex-wrap:wrap; align-items:center; grid-column:2 / -1;}
+.ta-detail{padding:2px 0 14px 44px; display:flex; flex-direction:column; gap:10px; font-size:13px;}
+@media (max-width:560px){ .ta-detail{padding-left:0;} }
+.ta-detail .g3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
+@media (max-width:700px){ .ta-detail .g3{grid-template-columns:1fr;} }
+.ta-blk{background:var(--surface-alt); border-radius:9px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; min-width:0;}
+.ta-blk .lbl{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); font-weight:600;}
+.ta-li{display:flex; justify-content:space-between; gap:8px; align-items:center;}
+.ta-blk .note{font-style:italic; color:var(--ink-2); overflow-wrap:anywhere;}
+#sec-teamassess .lm-card-title{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap;}
+#sec-teamassess .lm-card-title h3{font-family:var(--font-display); text-transform:uppercase; letter-spacing:.03em; font-size:15px; margin:0;}
+#sec-teamassess .lm-card-title .hint{font-size:12px; color:var(--ink-3);}
+#sec-teamassess .lm-pad{padding:16px;}
+.ta-table thead th, .ta-table th{background:transparent !important; color:var(--ink-3) !important;}
 </style>
 
 <div id="gate-wrap">
@@ -1187,6 +1288,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
     <div class="nav-group-label">Performance</div>
     <ul class="nav-list">
       <li class="exec-only"><button class="nav-item" data-section="performance"><span class="nav-dot"></span>Performance Roundup</button></li>
+      <li><button class="nav-item" data-section="teamassess"><span class="nav-dot"></span>Team Assessment</button></li>
       <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
       <li class="exec-only"><button class="nav-item" data-section="lmgm" data-audits="walkthrough"><span class="nav-dot"></span>Walk-Through Audits</button></li>
       <li class="gm-only"><a class="nav-item nav-link" href="walkthrough.html" target="_blank" rel="noopener" title="Score a cafe walk-through (opens the walk-through page)"><span class="nav-dot"></span>Walk-Through Audit<span class="nav-ext" aria-hidden="true">↗</span></a></li>
@@ -1433,6 +1535,25 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <section class="panel" id="sec-performance">
         <div class="section-head"><h2>At a glance</h2><span class="hint" id="perf-hint">Loading…</span></div>
         <div id="perf-body"><div class="empty-note">Loading…</div></div>
+      </section>
+
+      <!-- ============ TEAM ASSESSMENT (GMs + C-suite) ============ -->
+      <section class="panel" id="sec-teamassess">
+        <div class="section-head" style="margin-top:0;"><h2>Barista standard · end of 2026</h2>
+          <div class="pf-toolbar"><span class="hint" id="ta-dash-hint">Loading…</span><button type="button" class="btn small" id="ta-refresh">Refresh</button></div></div>
+        <div class="empty-note" id="ta-dash-status" style="padding-top:0;">Loading…</div>
+        <div class="ta-filters" id="ta-filters" role="group" aria-label="Filter by cafe"></div>
+        <div class="ta-kpis" id="ta-kpis"></div>
+        <div class="ta-grid2">
+          <div class="card lm-pad"><div class="lm-card-title"><h3>Meets standard</h3><span class="hint">All 3 behaviors in the pillar at 3+</span></div><div class="ta-bars" id="ta-pillarbars"></div><div class="ta-legend" id="ta-legend"></div></div>
+          <div class="card lm-pad"><div class="lm-card-title"><h3>Deadline checks</h3><span class="hint">Passed so far</span></div><div class="ta-bars" id="ta-checkbars"></div></div>
+        </div>
+        <div class="card lm-pad" style="margin-bottom:14px;"><div class="lm-card-title"><h3>By behavior</h3><span class="hint">Average level. The lowest cells are where to coach first.</span></div><div class="ta-scroll"><table class="ta-table" id="ta-heat"></table></div></div>
+        <div class="card lm-pad" style="margin-bottom:14px;"><div class="lm-card-title"><h3>By cafe</h3></div><div class="ta-scroll"><table class="ta-table" id="ta-cafetable"></table></div></div>
+        <div class="card lm-pad"><div class="lm-card-title"><h3>People</h3><span class="hint" id="ta-people-count"></span></div>
+          <div class="ta-tools"><input type="search" id="ta-search" placeholder="Search names" aria-label="Search names">
+            <select id="ta-statusf" aria-label="Filter by status"><option value="">All statuses</option><option value="flagged">Flagged</option><option value="progress">In progress</option><option value="none">Not assessed</option><option value="verified">Verified</option></select></div>
+          <div id="ta-people"></div></div>
       </section>
 
       <!-- ============ ACADEMY ENGAGEMENT ============ -->
@@ -3798,6 +3919,7 @@ const SECTION_META = {
   crm:        { title:"Customer Journey & Marketing", sub:"CRM in progress — journey stages, marketing calendar, campaigns" },
   performance:{ title:"Performance Roundup", sub:"COO / CEO / CBO · GM and LM measurables, people, audits and 360s across every cafe" },
   academy:    { title:"Academy Engagement", sub:"Leadership · Craft · Customer Care completion and cadence" },
+  teamassess: { title:"Team Assessment", sub:"GMs + C-suite · every barista Verified or Flagged by Dec 31 · assess from any team member's profile" },
   l360:       { title:"Leadership 360s", sub:"Six leadership styles · start a 360, share the rater link, release the report" },
   calendar:   { title:"Calendar & Events", sub:"Quarterly events linked to the master company calendar" },
   goals:      { title:"Goals & Projections", sub:"Quarterly and annual goals against current reality" },
@@ -3822,7 +3944,7 @@ function updateSectionPill(id){
   if((id === "overview" || id === "sales") && squareLive){
     pill.classList.add("is-live"); iconGood.style.display = "block";
     text.textContent = "Live — Square";
-  } else if(id === "l360" || id === "performance"){
+  } else if(id === "l360" || id === "performance" || id === "teamassess"){
     pill.classList.add("is-live"); iconGood.style.display = "block";
     text.textContent = "Live — Supabase";
   } else if(id === "productdev" && bakeryLive){
@@ -5382,6 +5504,7 @@ async function tdLoadDb(locId){
     errors: [st, old, coach, pts, pips, hr, ck].map(r => r.error?.message).filter(Boolean)
   };
   tdBuildPipTodos(locId);
+  try{ await taLoadFor(ids); }catch(e){ /* assessment chips just don't show */ }
 }
 
 /* PIP to-dos on the Store Dashboard work even before Team Development is opened */
@@ -5581,6 +5704,7 @@ function renderTeamDev(locId){
   tdRenderTraining(locId);
   $("#td-roster-body").innerHTML = team.length ? team.map(m => {
     const flags = [];
+    if(m.role === "team_member" && taLoaded.has(m.staff_id)){ const ts = taState(m.staff_id).status; flags.push(`<span class="chip ${TA_STATUS[ts][1]}" title="Team assessment">${TA_STATUS[ts][0]}</span>`); }
     if(pipBy.has(m.staff_id)) flags.push(`<span class="chip warn">PIP</span>`);
     if(ptsBy[m.staff_id]) flags.push(`<span class="chip ${ptsBy[m.staff_id]>=5?"serious":"neutral"}">${ptsBy[m.staff_id]} pts</span>`);
     const prob = m.hire_date && lmAddDays(m.hire_date, (d.hr||{})[m.staff_id]?.probation_days ?? 90) >= t;
@@ -5627,7 +5751,14 @@ function tdPipCard(locId, p){
 }
 
 /* ---------------- modal plumbing ---------------- */
-function lmModal(html){ $("#lm-modal-card").classList.remove("wide"); $("#lm-modal-card").innerHTML = `<button type="button" class="lm-modal-x" aria-label="Close">×</button>` + html; $("#lm-modal").hidden = false; const f = $("#lm-modal-card input, #lm-modal-card select, #lm-modal-card textarea"); if(f) f.focus(); }
+let lmModalHome = null;
+function lmModalHost(){
+  const m = $("#lm-modal"); if(!lmModalHome) lmModalHome = { p: m.parentNode, n: m.nextSibling };
+  const inLm = $("#sec-lmgm").classList.contains("active");
+  if(inLm && m.parentNode !== lmModalHome.p) lmModalHome.p.insertBefore(m, lmModalHome.n);
+  if(!inLm && m.parentNode !== document.body) document.body.appendChild(m);
+}
+function lmModal(html){ lmModalHost(); $("#lm-modal-card").classList.remove("wide"); $("#lm-modal-card").innerHTML = `<button type="button" class="lm-modal-x" aria-label="Close">×</button>` + html; $("#lm-modal").hidden = false; const f = $("#lm-modal-card input, #lm-modal-card select, #lm-modal-card textarea"); if(f) f.focus(); }
 function lmModalClose(){ $("#lm-modal").hidden = true; $("#lm-modal-card").innerHTML = ""; }
 $("#lm-modal").addEventListener("click", e => { if(e.target.id === "lm-modal" || e.target.closest(".lm-modal-x") || e.target.closest("[data-modal-cancel]")) lmModalClose(); });
 document.addEventListener("keydown", e => { if(e.key === "Escape" && !$("#lm-modal").hidden) lmModalClose(); });
@@ -5850,6 +5981,7 @@ function tdOpenProfile(staffId){
       <button type="button" class="btn small" data-td-open="points" data-for="${staffId}">Log attendance</button>
       <button type="button" class="btn small" data-td-open="pip" data-for="${staffId}">New PIP</button>
     </div>
+    <div id="ta-prof"><div class="ta-prof"><div class="row">Loading team assessment…</div></div></div>
     <dl class="lm-dl">
       <dt>Hired</dt><dd>${m.hire_date ? `${lmFmtDate(m.hire_date)}, ${new Date(m.hire_date+"T12:00:00Z").getUTCFullYear()} · ${tdTenure(m.hire_date)}` : "Not on file"}</dd>
       <dt>Probation</dt><dd>${probEnd ? (probEnd >= t ? `Ends ${lmFmtDate(probEnd)} (in ${tdDays(t, probEnd)} days)` : `Completed ${lmFmtDate(probEnd)}`) : "—"}</dd>
@@ -5873,6 +6005,7 @@ function tdOpenProfile(staffId){
     ${pips.length ? pips.map(p => `<div style="display:flex; justify-content:space-between; gap:8px; padding:4px 0; font-size:13px;"><span>${BUCKET[p.bucket]} · ${lmFmtDate(p.start_date)} – ${lmFmtDate(p.extended_to||p.end_date)}</span><span><span class="chip ${(PIP_STATUS[p.status]||[])[1]||"neutral"}">${(PIP_STATUS[p.status]||[p.status])[0]}</span> <button type="button" class="btn ghost sm" data-pip="${p.id}">Open</button></span></div>`).join("") : `<div class="empty-note">None.</div>`}
     <div class="lm-modal-section">Recent coaching</div>
     ${coach.length ? coach.map(c => `<details class="td-1on1"><summary><span>${c.conversation_type === "1-1" ? "1-1" : lmEsc(c.conversation_type)}</span><span class="when">${tdAgo(c.occurred_at)}</span></summary>${c.template_notes ? `<div class="td-notes">${tdNotesHtml(c.template_notes)}</div>` : ""}</details>`).join("") : `<div class="empty-note">No coaching conversations logged yet.</div>`}`);
+  taFillProfile(staffId, locId, m.name);
   $("#td-hr-form").addEventListener("submit", async e => {
     e.preventDefault();
     const btn = e.submitter; btn.disabled = true;
@@ -8472,5 +8605,384 @@ function renderBookkeeperList(rows){
     loadDirectory();
   }
 })();
+
+/* =====================================================================
+   TEAM ASSESSMENT + BARISTA REFRESH (Training Night, Nov 12 2026)
+   Goal: by Dec 31 2026 every current barista is Verified or Flagged.
+   - team_assessments: one row per save (history kept); latest non-voided = current
+   - barista_refresh_signoffs: one row per signed-off Barista 1 item
+   - Barista 1 items = every sign-off in the Barista Beginner training plan
+     (training_plan_items.signoffs). Sign-offs already done in a training track
+     (training_marks, via ta_training_signoffs) count automatically.
+   Status: Flagged = any behavior at 1; Verified = all 9 at 3+, all 4 checks,
+   refresh checklist complete; In progress = everyone else assessed.
+   RLS: every Command Deck role reads; LMs write their own cafe; GMs + full access write any cafe.
+   ===================================================================== */
+const TA_LEVELS = [
+  { v:1, name:"Not yet", desc:"Rarely seen; needs training" },
+  { v:2, name:"Developing", desc:"Sometimes, or with reminders" },
+  { v:3, name:"Meets standard", desc:"Consistently, no reminders" },
+  { v:4, name:"Exceptional", desc:"Models it and helps others do it" },
+];
+const TA_PILLARS = [
+  { key:"lead", name:"Leadership", short:"L", q:"Can I inspire exceptional performance?", items:[
+    { k:"L1", t:"Owns the shift", d:"Jumps in where needed (restock, clean, support) without being asked" },
+    { k:"L2", t:"Lifts the team", d:"Stays positive and calm in a rush; helps and teaches teammates" },
+    { k:"L3", t:"Reliable & coachable", d:"On time, follows through, takes feedback and applies it" } ] },
+  { key:"craft", name:"Craft", short:"C", q:"Can I create an exceptional product?", items:[
+    { k:"C1", t:"Espresso", d:"Pulls shots to recipe (dose, yield, time) and tastes/adjusts" },
+    { k:"C2", t:"Milk", d:"Right texture and temp; clean, consistent presentation" },
+    { k:"C3", t:"Standards", d:"Every drink built to recipe; keeps a clean, organized bar" } ] },
+  { key:"care", name:"Customer Care", short:"CC", q:"Can I create an exceptional customer experience?", items:[
+    { k:"K1", t:"Welcome", d:"Greets every guest quickly and warmly" },
+    { k:"K2", t:"Connection", d:"Learns names and orders, recommends, has real conversations" },
+    { k:"K3", t:"Recovery", d:"Spots and fixes problems (remakes, long waits) without being asked" } ] },
+];
+const TA_KEYS = TA_PILLARS.flatMap(p => p.items.map(i => i.k));
+const TA_CHECKS = [
+  { k:"espresso", t:"Espresso & Milk approval", d:"Passed the approval" },
+  { k:"q30", t:"30-day quiz", d:"Passed" },
+  { k:"q60", t:"60-day quiz", d:"Passed" },
+  { k:"q90", t:"90-day quiz", d:"Passed" },
+];
+const TA_STATUS = { verified:["Verified","good"], progress:["In progress","warn"], flagged:["Flagged","critical"], none:["Not assessed","neutral"] };
+const TA_ORDER = { flagged:0, progress:1, none:2, verified:3 };
+let taItems = null;                       // [{ key, text, stage, label, title }]
+const taAssess = {};                      // staff_id -> [rows newest first]
+const taSigned = {};                      // staff_id -> { key: { by, at, src } }
+const taNames = {};                       // staff_id -> name (signers / assessors)
+const taLoaded = new Set();               // staff ids already fetched
+
+const taFull = () => ["coo","ceo","cbo","production_manager"].includes(myStaff?.role);
+const taCanEdit = locId => taFull() || myStaff?.role === "gm" || (myStaff?.role === "location_manager" && myLocations.some(l => l.id === locId));
+const taBand = v => v == null ? 0 : v < 1.75 ? 1 : v < 2.75 ? 2 : v < 3.5 ? 3 : 4;
+const taFmt = v => v == null ? "–" : v.toFixed(1);
+const taAvg = a => a.length ? a.reduce((x,y) => x+y, 0) / a.length : null;
+const taDay = ts => ts ? new Date(ts).toLocaleDateString("en-CA", { timeZone:"America/New_York" }) : null;
+const taWhen = ts => { const d = taDay(ts); return d ? `${lmFmtDate(d)}, ${d.slice(0,4)}` : "—"; };
+const taInitials = n => String(n||"?").split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join("");
+
+async function taLoadItems(){
+  if(taItems) return taItems;
+  const [{ data: items }, { data: stages }] = await Promise.all([
+    sb.from("training_plan_items").select("id,stage,sort,signoffs").order("sort"),
+    sb.from("training_stages").select("key,label,title,sort").order("sort"),
+  ]);
+  const st = Object.fromEntries((stages||[]).map(s => [s.key, s]));
+  const seen = new Set(), out = [];
+  (items||[]).slice().sort((a,b) => ((st[a.stage]?.sort ?? 99) - (st[b.stage]?.sort ?? 99)) || a.sort - b.sort).forEach(it => {
+    (it.signoffs||[]).forEach(so => {
+      if(!so?.id || seen.has(so.id)) return;
+      seen.add(so.id);
+      out.push({ key: so.id, text: so.text, stage: it.stage, label: st[it.stage]?.label || it.stage, title: st[it.stage]?.title || "" });
+    });
+  });
+  taItems = out;
+  return out;
+}
+
+async function taLoadFor(ids, force){
+  const need = [...new Set(ids)].filter(id => id && (force || !taLoaded.has(id)));
+  if(!need.length) return;
+  await taLoadItems();
+  const chunks = []; for(let i = 0; i < need.length; i += 150) chunks.push(need.slice(i, i+150));
+  for(const ch of chunks){
+    const [a, s, t] = await Promise.all([
+      sb.from("team_assessments").select("*").in("staff_id", ch).eq("voided", false).order("assessed_at", { ascending:false }),
+      sb.from("barista_refresh_signoffs").select("*").in("staff_id", ch),
+      sb.rpc("ta_training_signoffs", { p_staff: ch }),
+    ]);
+    ch.forEach(id => { taAssess[id] = []; taSigned[id] = {}; taLoaded.add(id); });
+    (a.data||[]).forEach(r => taAssess[r.staff_id].push(r));
+    (t.data||[]).forEach(r => { taSigned[r.staff_id][r.item_key] = { by: r.signed_by, at: r.signed_at, src:"training" }; });
+    (s.data||[]).forEach(r => { taSigned[r.staff_id][r.item_key] = { by: r.signed_by, at: r.signed_at, src:"refresh", loc: r.location_id }; });
+  }
+  const who = new Set();
+  need.forEach(id => { (taAssess[id]||[]).forEach(r => r.assessed_by && who.add(r.assessed_by)); Object.values(taSigned[id]||{}).forEach(x => x.by && who.add(x.by)); });
+  const missing = [...who].filter(id => !taNames[id]);
+  if(missing.length){ const { data } = await sb.from("staff").select("id,name").in("id", missing); (data||[]).forEach(r => taNames[r.id] = r.name); }
+}
+
+function taChecklist(staffId){
+  const items = taItems || [], s = taSigned[staffId] || {};
+  const done = items.filter(i => s[i.key]).length;
+  return { done, total: items.length, complete: items.length > 0 && done === items.length };
+}
+function taPillarAvg(a, p){ return a ? taAvg(p.items.map(i => Number(a.ratings?.[i.k])).filter(Number.isFinite)) : null; }
+function taState(staffId){
+  const a = (taAssess[staffId] || [])[0] || null, cl = taChecklist(staffId);
+  if(!a) return { status:"none", a:null, cl, checks:0 };
+  const vals = TA_KEYS.map(k => Number(a.ratings?.[k]));
+  const checks = TA_CHECKS.filter(c => a.checks?.[c.k]).length;
+  let status = "progress";
+  if(vals.some(v => v === 1)) status = "flagged";
+  else if(vals.every(v => v >= 3) && checks === TA_CHECKS.length && cl.complete) status = "verified";
+  return { status, a, cl, checks };
+}
+const taChip = st => `<span class="chip ${TA_STATUS[st][1]}">${TA_STATUS[st][0]}</span>`;
+const taScores = a => TA_PILLARS.map(p => { const v = taPillarAvg(a, p); return `<span class="ta-sc b${taBand(v)}" title="${p.name}">${p.short} ${taFmt(v)}</span>`; }).join("");
+
+/* ---------- profile block (Team Development → profile) ---------- */
+async function taFillProfile(staffId, locId, name){
+  const el = $("#ta-prof"); if(!el) return;
+  try{ await taLoadFor([staffId]); }catch(e){ el.innerHTML = `<div class="empty-note lm-error">Couldn't load the assessment (${lmEsc(e.message)}).</div>`; return; }
+  if(!$("#ta-prof")) return;
+  el.innerHTML = taProfileHtml(staffId, locId, name);
+}
+function taProfileHtml(staffId, locId, name){
+  const s = taState(staffId), edit = taCanEdit(locId), hist = taAssess[staffId] || [];
+  const why = s.status === "progress" ? taWhyNot(s) : "";
+  return `<div class="ta-prof">
+    <div class="ta-prof-top"><b>Team assessment</b>${taChip(s.status)}</div>
+    ${s.a ? `<div class="row">${taScores(s.a)}<span>· ${s.checks}/4 checks · refresh ${s.cl.done}/${s.cl.total}</span></div>
+      <div class="row">Last assessed ${taWhen(s.a.assessed_at)} by ${lmEsc(taNames[s.a.assessed_by] || "—")}${why ? ` · ${lmEsc(why)}` : ""}</div>`
+      : `<div class="row">Not assessed yet · refresh checklist ${s.cl.done}/${s.cl.total}</div>`}
+    <div class="acts">
+      ${edit ? `<button type="button" class="btn small primary" data-ta-assess="${staffId}" data-loc="${locId}" data-name="${lmEsc(name)}" data-back="profile">${s.a ? "Update assessment" : "Assess"}</button>` : ""}
+      <button type="button" class="btn small" data-ta-check="${staffId}" data-loc="${locId}" data-name="${lmEsc(name)}" data-back="profile">Barista refresh checklist</button>
+    </div>
+    ${hist.length > 1 ? `<details class="ta-hist"><summary>History · ${hist.length} assessments</summary><table>${hist.map(h => `<tr><td>${taWhen(h.assessed_at)}</td><td class="muted">${lmEsc(taNames[h.assessed_by]||"—")}</td><td style="text-align:right;">${taScores(h)}</td></tr>`).join("")}</table></details>` : ""}
+  </div>`;
+}
+function taWhyNot(s){
+  const out = [];
+  const below = TA_KEYS.filter(k => Number(s.a.ratings?.[k]) < 3).length;
+  if(below) out.push(`${below} behavior${below>1?"s":""} below Meets`);
+  if(s.checks < 4) out.push(`${4 - s.checks} check${4-s.checks>1?"s":""} to go`);
+  if(!s.cl.complete) out.push(`${s.cl.total - s.cl.done} refresh item${s.cl.total - s.cl.done>1?"s":""} left`);
+  return out.join(", ");
+}
+
+/* ---------- assessment form ---------- */
+let taForm = null;
+function taOpenAssess(staffId, locId, name, back){
+  if(!taCanEdit(locId)) return;
+  const last = (taAssess[staffId] || [])[0];
+  taForm = { staffId, locId, name, back, ratings: { ...(last?.ratings || {}) }, notes: { lead:"", craft:"", care:"", ...(last?.notes || {}) }, checks: { espresso:false, q30:false, q60:false, q90:false, ...(last?.checks || {}) } };
+  Object.keys(taForm.ratings).forEach(k => taForm.ratings[k] = Number(taForm.ratings[k]));
+  const loc = taLocName(locId);
+  lmModal(`<h3>${lmEsc(name)}</h3>
+    <div class="sub">Team assessment · ${lmEsc(loc)}${last ? ` · last saved ${taWhen(last.assessed_at)} by ${lmEsc(taNames[last.assessed_by]||"—")} (starting from those answers)` : ""}</div>
+    <details style="margin-bottom:10px;"><summary style="cursor:pointer; font-size:12.5px; color:var(--ink-2);">What the levels mean</summary>
+      <div class="ta-key">${TA_LEVELS.map(l => `<div><span class="ta-sw" style="background:var(--ta-l${l.v})"></span> <b>${l.v} · ${l.name}</b><br>${l.desc}</div>`).join("")}</div></details>
+    ${TA_PILLARS.map(p => `<section class="ta-pillar"><div class="ta-pillar-head"><h4>${p.name}</h4><p>${p.q}</p></div>
+      ${p.items.map(i => `<div class="ta-beh" id="ta-beh-${i.k}"><div class="t" id="ta-bt-${i.k}">${i.t}</div><div class="d">${i.d}</div>
+        <div class="ta-levels" role="group" aria-labelledby="ta-bt-${i.k}">${TA_LEVELS.map(l => `<button type="button" data-tak="${i.k}" data-v="${l.v}" aria-pressed="false"><span class="n">${l.v}</span>${l.name}</button>`).join("")}</div></div>`).join("")}
+      <div class="ta-note"><label for="ta-note-${p.key}">${p.name} note (optional)</label><textarea id="ta-note-${p.key}" placeholder="What did you see? What should they work on?">${lmEsc(taForm.notes[p.key]||"")}</textarea></div>
+    </section>`).join("")}
+    <div class="lm-modal-section" style="border-top:0; padding-top:0;">End-of-2026 checks</div>
+    <div class="ta-checks">${TA_CHECKS.map(c => `<div class="ta-check"><label for="ta-ck-${c.k}">${c.t}<small>${c.d}</small></label><span class="ta-switch"><input type="checkbox" id="ta-ck-${c.k}" data-tack="${c.k}" ${taForm.checks[c.k] ? "checked" : ""}><span></span></span></div>`).join("")}</div>
+    <div class="ta-savebar"><span class="prog" id="ta-prog"></span><span class="err" id="ta-err"></span><button type="button" class="btn primary" id="ta-save">Save assessment</button></div>`);
+  $("#lm-modal-card").classList.add("ta-modal");
+  document.activeElement?.blur?.();  // don't pop the phone keyboard on open
+  $("#lm-modal").scrollTop = 0;
+  taPaint();
+}
+function taPaint(){
+  if(!taForm) return;
+  $$("#lm-modal-card [data-tak]").forEach(b => b.setAttribute("aria-pressed", String(taForm.ratings[b.dataset.tak] === Number(b.dataset.v))));
+  const n = TA_KEYS.filter(k => taForm.ratings[k]).length;
+  const p = $("#ta-prog"); if(p) p.textContent = `${n} of 9 rated`;
+}
+async function taSave(){
+  const f = taForm; if(!f) return;
+  TA_PILLARS.forEach(p => f.notes[p.key] = ($("#ta-note-"+p.key)?.value || "").trim());
+  TA_CHECKS.forEach(c => f.checks[c.k] = !!$("#ta-ck-"+c.k)?.checked);
+  const missing = TA_KEYS.filter(k => !f.ratings[k]);
+  if(missing.length){
+    missing.forEach(k => $("#ta-beh-"+k)?.classList.add("missing"));
+    $("#ta-beh-"+missing[0])?.scrollIntoView({ behavior:"smooth", block:"center" });
+    $("#ta-err").textContent = `Rate all 9 (${missing.length} left)`;
+    return;
+  }
+  const btn = $("#ta-save"); btn.disabled = true; btn.textContent = "Saving…"; $("#ta-err").textContent = "";
+  const { error } = await sb.from("team_assessments").insert({ staff_id: f.staffId, location_id: f.locId, ratings: f.ratings, notes: f.notes, checks: f.checks, assessed_by: myStaff.id });
+  if(error){ btn.disabled = false; btn.textContent = "Save assessment"; $("#ta-err").textContent = `Didn't save: ${error.message}`; return; }
+  await taLoadFor([f.staffId], true);
+  const st = taState(f.staffId).status;
+  taToast(`Saved ${f.name}: ${TA_STATUS[st][0]}${st === "flagged" ? " for coaching" : ""}.`);
+  taForm = null;
+  taAfterChange(f.staffId, f.locId, f.name, f.back);
+}
+function taAfterChange(staffId, locId, name, back){
+  if(back === "profile" && typeof tdOpenProfile === "function" && currentDetailLocId === locId && (tdTeam[locId]?.members||[]).some(m => m.staff_id === staffId)){ tdOpenProfile(staffId); }
+  else lmModalClose();
+  if(currentDetailLocId && tdTeam[currentDetailLocId]) { try{ renderTeamDev(currentDetailLocId); }catch(e){} }
+  if($("#sec-teamassess")?.classList.contains("active")) taRenderDash();
+}
+let taToastT;
+function taToast(msg){
+  let t = $("#ta-toast");
+  if(!t){ t = document.createElement("div"); t.id = "ta-toast"; t.setAttribute("role","status"); t.style.cssText = "position:fixed; left:50%; transform:translateX(-50%); bottom:calc(24px + env(safe-area-inset-bottom,0px)); z-index:80; background:var(--ink); color:var(--surface); padding:11px 16px; border-radius:10px; font-weight:600; font-size:14px; max-width:calc(100% - 32px); box-shadow:var(--shadow-2);"; document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false; clearTimeout(taToastT); taToastT = setTimeout(() => t.hidden = true, 3500);
+}
+
+/* ---------- Barista refresh checklist ---------- */
+async function taOpenChecklist(staffId, locId, name, back){
+  lmModal(`<h3>${lmEsc(name)}</h3><div class="sub">Barista refresh checklist · loading…</div>`);
+  try{ await taLoadFor([staffId]); }catch(e){ lmModal(`<h3>${lmEsc(name)}</h3><div class="empty-note lm-error">Couldn't load (${lmEsc(e.message)}).</div>`); return; }
+  taRenderChecklist(staffId, locId, name, back);
+}
+function taRenderChecklist(staffId, locId, name, back){
+  const items = taItems || [], s = taSigned[staffId] || {}, edit = taCanEdit(locId), cl = taChecklist(staffId);
+  const groups = [];
+  items.forEach(i => { let g = groups.find(x => x.stage === i.stage); if(!g) groups.push(g = { stage:i.stage, label:i.label, title:i.title, items:[] }); g.items.push(i); });
+  const scroll = $("#lm-modal").scrollTop;
+  lmModal(`<h3>${lmEsc(name)}</h3>
+    <div class="sub">Barista refresh checklist · ${cl.done} of ${cl.total} signed off${cl.complete ? " · meets Barista 1" : ""}. Complete = Barista 1 under the new training process. Items already signed off in barista training count automatically.</div>
+    ${!edit ? `<div class="empty-note" style="padding-top:0;">View only: you can sign off items for your own cafe.</div>` : ""}
+    ${groups.map(g => { const d = g.items.filter(i => s[i.key]).length; return `<div class="ta-cl-group"><h4><span>${lmEsc(g.label)} · ${lmEsc(g.title)}</span><span>${d}/${g.items.length}</span></h4>
+      ${g.items.map(i => { const x = s[i.key], lock = !edit || x?.src === "training";
+        return `<label class="ta-cl-item ${x ? "done" : ""}"><input type="checkbox" data-ta-item="${i.key}" ${x ? "checked" : ""} ${lock ? "disabled" : ""}>
+          <span class="txt">${lmEsc(i.text)}${x ? `<span class="by">${x.src === "training" ? "Barista training" : "Signed off"} · ${lmEsc(taNames[x.by] || "—")} · ${taWhen(x.at)}</span>` : ""}</span></label>`; }).join("")}</div>`; }).join("")}
+    <div class="lm-form-actions" style="margin:6px 0 14px;"><span class="err" id="ta-cl-err"></span><button type="button" class="btn small" id="ta-cl-done">Done</button></div>`);
+  $("#lm-modal-card").classList.add("ta-modal");
+  document.activeElement?.blur?.();
+  $("#lm-modal").scrollTop = scroll;
+  $("#ta-cl-done").addEventListener("click", () => taAfterChange(staffId, locId, name, back));
+  $$("#lm-modal-card [data-ta-item]").forEach(cb => cb.addEventListener("change", async () => {
+    const key = cb.dataset.taItem; cb.disabled = true;
+    const r = cb.checked
+      ? await sb.from("barista_refresh_signoffs").insert({ staff_id: staffId, item_key: key, location_id: locId, signed_by: myStaff.id })
+      : await sb.from("barista_refresh_signoffs").delete().eq("staff_id", staffId).eq("item_key", key);
+    if(r.error){ cb.checked = !cb.checked; cb.disabled = false; $("#ta-cl-err").textContent = `Didn't save: ${r.error.message}`; return; }
+    if(cb.checked){ taSigned[staffId][key] = { by: myStaff.id, at: new Date().toISOString(), src:"refresh", loc: locId }; taNames[myStaff.id] = myStaff.name; }
+    else delete taSigned[staffId][key];
+    taRenderChecklist(staffId, locId, name, back);
+  }));
+}
+
+/* ---------- one delegated handler ---------- */
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-ta-assess]");
+  if(a){ e.preventDefault(); return taOpenAssess(a.dataset.taAssess, a.dataset.loc, a.dataset.name, a.dataset.back); }
+  const c = e.target.closest("[data-ta-check]");
+  if(c){ e.preventDefault(); return taOpenChecklist(c.dataset.taCheck, c.dataset.loc, c.dataset.name, c.dataset.back); }
+  const lv = e.target.closest("[data-tak]");
+  if(lv && taForm){ taForm.ratings[lv.dataset.tak] = Number(lv.dataset.v); $("#ta-beh-"+lv.dataset.tak)?.classList.remove("missing"); $("#ta-err").textContent = ""; return taPaint(); }
+  if(e.target.closest("#ta-save")) return taSave();
+});
+
+/* ---------- dashboard (Performance → Team Assessment) ---------- */
+let taCafes = [], taPeople = [], taDashCafe = "", taOpenPerson = null, taDashLoading = false, taDashErr = [];
+const taLocName = id => taCafes.find(c => c.id === id)?.name || myLocations.find(l => l.id === id)?.name || "";
+
+async function taLoadDash(force){
+  if(taDashLoading) return;
+  taDashLoading = true;
+  $("#ta-dash-status").hidden = false; $("#ta-dash-status").textContent = "Loading every cafe's team…";
+  try{
+    const { data: locs } = await sb.from("locations").select("id,name,type").eq("type","cafe").order("name");
+    const { data: lms } = await sb.from("staff_locations").select("location_id, staff(name,role)").in("location_id", (locs||[]).map(l => l.id));
+    taCafes = (locs||[]).map(l => ({ ...l, lm: (lms||[]).filter(x => x.location_id === l.id && x.staff?.role === "location_manager").map(x => x.staff.name.split(" ")[0]).join(", ") }));
+    taDashErr = [];
+    const teams = await Promise.all(taCafes.map(c => (tdTeam[c.id] && !force) ? Promise.resolve(tdTeam[c.id]) : lmFn("store-team", { location_id: c.id }).then(r => (tdTeam[c.id] = r)).catch(err => { taDashErr.push(`${c.name}: ${err.message}`); return null; })));
+    const byId = new Map();
+    teams.forEach((t, i) => (t?.members || []).filter(m => m.role === "team_member").forEach(m => {
+      const cur = byId.get(m.staff_id);
+      if(!cur || (m.hours_60d||0) > (cur.hours||0)) byId.set(m.staff_id, { staff_id: m.staff_id, name: m.name, job: m.job_title || "Team member", hire: m.hire_date, locId: taCafes[i].id, hours: m.hours_60d||0 });
+    }));
+    // anyone assessed but not on a current roster still counts
+    const { data: extra } = await sb.from("team_assessments").select("staff_id,location_id,assessed_at,staff(name,job_title,role,is_active)").eq("voided", false).order("assessed_at", { ascending:false });
+    (extra||[]).forEach(r => { if(!byId.has(r.staff_id) && r.staff?.is_active !== false && taCafes.some(c => c.id === r.location_id)) byId.set(r.staff_id, { staff_id: r.staff_id, name: r.staff?.name || "Team member", job: r.staff?.job_title || "Team member", locId: r.location_id, hours: 0, offRoster: true }); });
+    await taLoadFor([...byId.keys()], force);
+    // home cafe = where they were last assessed, else where they worked most
+    byId.forEach(p => { const a = (taAssess[p.staff_id]||[])[0]; if(a && taCafes.some(c => c.id === a.location_id)) p.locId = a.location_id; });
+    taPeople = [...byId.values()];
+    taRenderDash();
+  }catch(err){
+    $("#ta-dash-status").hidden = false; $("#ta-dash-status").innerHTML = `<span class="lm-error">Couldn't load (${lmEsc(err.message)}).</span>`;
+  }finally{ taDashLoading = false; }
+}
+
+function taRenderDash(){
+  const st = $("#ta-dash-status");
+  st.hidden = !taDashErr.length; st.innerHTML = taDashErr.length ? `<span class="lm-error">Some cafe teams didn't load: ${lmEsc(taDashErr.join("; "))}</span>` : "";
+  $("#ta-filters").innerHTML = [{ id:"", name:"All cafes" }, ...taCafes].map(c => `<button type="button" data-ta-cafe="${c.id}" aria-pressed="${c.id === taDashCafe}">${lmEsc(c.name)}</button>`).join("");
+  const ps = taPeople.filter(p => !taDashCafe || p.locId === taDashCafe).map(p => ({ ...p, s: taState(p.staff_id) }));
+  const n = ps.length, assessed = ps.filter(p => p.s.a), na = assessed.length;
+  const cnt = { verified:0, progress:0, flagged:0, none:0 }; ps.forEach(p => cnt[p.s.status]++);
+  const pct = (x, d) => d ? Math.round(100 * x / d) + "%" : "–";
+  const daysLeft = Math.max(0, tdDays(lmToday(), "2026-12-31"));
+  $("#ta-dash-hint").textContent = `${n} team member${n === 1 ? "" : "s"}${taDashCafe ? " at " + taLocName(taDashCafe) : " across " + taCafes.length + " cafes"} · ${daysLeft} days to Dec 31`;
+  $("#ta-kpis").innerHTML = [
+    ["Verified", cnt.verified, `${pct(cnt.verified, n)} of the team · Barista 1`, "good"],
+    ["In progress", cnt.progress, `${pct(cnt.progress, n)} · assessed, not done yet`, ""],
+    ["Flagged", cnt.flagged, `${pct(cnt.flagged, n)} · any "Not yet"`, "bad"],
+    ["Not assessed", cnt.none, `${pct(cnt.none, n)} · still to do`, ""],
+    ["Assessed", na, `${pct(na, n)} of ${n} team member${n === 1 ? "" : "s"}`, ""],
+  ].map(([l, v, s, c]) => `<div class="card kpi"><div class="label">${l}</div><div class="value tabular ${c}">${v}</div><div class="delta">${s}</div></div>`).join("");
+
+  // % at Meets standard per pillar = all three behaviors in that pillar at 3+
+  $("#ta-pillarbars").innerHTML = TA_PILLARS.map(p => {
+    const meets = assessed.filter(x => p.items.every(i => Number(x.s.a.ratings?.[i.k]) >= 3)).length;
+    const all = assessed.flatMap(x => p.items.map(i => Number(x.s.a.ratings?.[i.k])));
+    const dist = [1,2,3,4].map(v => all.filter(r => r === v).length);
+    return `<div class="ta-bar"><div class="top"><b>${p.name}</b><span>${pct(meets, na)} at Meets · avg ${taFmt(taAvg(all))}</span></div>
+      <div class="ta-track" role="img" aria-label="${p.name} ratings: ${dist.map((d,i) => d + " " + TA_LEVELS[i].name).join(", ")}">${all.length ? dist.map((d,i) => d ? `<i style="width:${100*d/all.length}%; background:var(--ta-l${i+1})"></i>` : "").join("") : ""}</div></div>`;
+  }).join("");
+  $("#ta-legend").innerHTML = TA_LEVELS.map(l => `<span><span class="ta-sw" style="background:var(--ta-l${l.v})"></span> ${l.name}</span>`).join("");
+  const refreshDone = ps.filter(p => p.s.cl.complete).length;
+  $("#ta-checkbars").innerHTML = TA_CHECKS.map(c => { const k = assessed.filter(x => x.s.a.checks?.[c.k]).length;
+      return `<div class="ta-bar"><div class="top"><b>${c.t}</b><span>${k} of ${na} assessed</span></div><div class="ta-track"><i style="width:${na ? 100*k/na : 0}%; background:var(--good)"></i></div></div>`; }).join("")
+    + `<div class="ta-bar"><div class="top"><b>Barista refresh checklist complete</b><span>${refreshDone} of ${n} team members</span></div><div class="ta-track"><i style="width:${n ? 100*refreshDone/n : 0}%; background:var(--good)"></i></div></div>`;
+
+  // behavior × cafe grid
+  const cols = taDashCafe ? taCafes.filter(c => c.id === taDashCafe) : taCafes;
+  const allA = taPeople.map(p => ({ ...p, s: taState(p.staff_id) })).filter(p => p.s.a);
+  const cell = (list, k) => { const a = taAvg(list.map(x => Number(x.s.a.ratings?.[k])).filter(Number.isFinite)); return `<td><span class="ta-sc b${taBand(a)}">${taFmt(a)}</span></td>`; };
+  $("#ta-heat").innerHTML = `<thead><tr><th>Behavior</th>${cols.map(c => `<th>${lmEsc(c.name)}</th>`).join("")}${taDashCafe ? "" : "<th>All</th>"}</tr></thead><tbody>`
+    + TA_PILLARS.map(p => `<tr><td class="grp" colspan="${cols.length + (taDashCafe ? 1 : 2)}">${p.name}</td></tr>`
+      + p.items.map(i => `<tr><td>${i.t}</td>${cols.map(c => cell(allA.filter(x => x.locId === c.id), i.k)).join("")}${taDashCafe ? "" : cell(allA, i.k)}</tr>`).join("")).join("") + "</tbody>";
+
+  // cafe table
+  $("#ta-cafetable").innerHTML = `<thead><tr><th>Cafe</th><th>LM</th><th>Team</th><th>Assessed</th>${TA_PILLARS.map(p => `<th>${p.name}</th>`).join("")}<th>Verified</th><th>Flagged</th></tr></thead><tbody>`
+    + cols.map(c => { const team = taPeople.filter(p => p.locId === c.id).map(p => ({ ...p, s: taState(p.staff_id) })), l = team.filter(x => x.s.a);
+      return `<tr><td><button type="button" class="btn ghost sm" data-ta-cafe="${c.id}" style="padding:2px 4px;">${lmEsc(c.name)}</button></td><td class="muted">${lmEsc(c.lm || "—")}</td><td>${team.length}</td><td>${l.length}</td>${TA_PILLARS.map(p => { const m = taAvg(l.map(x => taPillarAvg(x.s.a, p)).filter(v => v != null)); return `<td><span class="ta-sc b${taBand(m)}">${taFmt(m)}</span></td>`; }).join("")}<td>${team.filter(x => x.s.status === "verified").length}</td><td>${team.filter(x => x.s.status === "flagged").length}</td></tr>`; }).join("") + "</tbody>";
+  taRenderPeople();
+}
+
+function taRenderPeople(){
+  const q = ($("#ta-search").value || "").trim().toLowerCase(), sf = $("#ta-statusf").value;
+  const rs = taPeople.filter(p => !taDashCafe || p.locId === taDashCafe).map(p => ({ ...p, s: taState(p.staff_id) }))
+    .filter(p => (!q || p.name.toLowerCase().includes(q)) && (!sf || p.s.status === sf))
+    .sort((a,b) => TA_ORDER[a.s.status] - TA_ORDER[b.s.status] || a.name.localeCompare(b.name));
+  $("#ta-people-count").textContent = `${rs.length} shown`;
+  $("#ta-people").innerHTML = rs.length ? rs.map(p => { const open = taOpenPerson === p.staff_id;
+    return `<div class="ta-person"><button type="button" data-ta-person="${p.staff_id}" aria-expanded="${open}">
+      <span class="ta-av" aria-hidden="true">${lmEsc(taInitials(p.name))}</span>
+      <span style="min-width:0;"><span class="ta-pname">${lmEsc(p.name)}</span> <span class="ta-pmeta">· ${lmEsc(p.job)} · ${lmEsc(taLocName(p.locId))}</span></span>
+      ${taChip(p.s.status)}
+      <span class="ta-pscores">${p.s.a ? taScores(p.s.a) + `<span class="ta-pmeta">${p.s.checks}/4 checks · refresh ${p.s.cl.done}/${p.s.cl.total}</span>` : `<span class="ta-pmeta">Refresh ${p.s.cl.done}/${p.s.cl.total}</span>`}</span>
+    </button>${open ? taDetail(p) : ""}</div>`; }).join("")
+    : `<div class="empty-note">${taPeople.length ? "Nobody matches this filter." : "No team members found."}</div>`;
+}
+function taDetail(p){
+  const s = p.s, a = s.a, edit = taCanEdit(p.locId), hist = taAssess[p.staff_id] || [];
+  const items = taItems || [], sg = taSigned[p.staff_id] || {};
+  const left = items.filter(i => !sg[i.key]);
+  const byStage = {}; left.forEach(i => (byStage[i.label] ||= []).push(i));
+  return `<div class="ta-detail">
+    ${a ? `<div class="g3">${TA_PILLARS.map(pl => `<div class="ta-blk"><span class="lbl">${pl.name}</span>${pl.items.map(i => { const v = Number(a.ratings?.[i.k]); return `<div class="ta-li"><span>${i.t}</span><span class="ta-sc b${v||0}">${v ? TA_LEVELS[v-1].name : "–"}</span></div>`; }).join("")}${a.notes?.[pl.key] ? `<div class="note">“${lmEsc(a.notes[pl.key])}”</div>` : ""}</div>`).join("")}</div>
+      <div class="ta-blk"><span class="lbl">End-of-2026 checks</span><div style="display:flex; gap:6px; flex-wrap:wrap;">${TA_CHECKS.map(c => `<span class="chip ${a.checks?.[c.k] ? "good" : "neutral"}">${c.t}</span>`).join("")}</div></div>`
+      : `<div class="ta-blk"><span class="lbl">Assessment</span>Not assessed yet.</div>`}
+    <div class="ta-blk"><span class="lbl">Barista refresh checklist · ${s.cl.done} of ${s.cl.total}</span>${left.length ? `<div>Still to sign off: ${Object.entries(byStage).map(([k, v]) => `${lmEsc(k)} (${v.length})`).join(" · ")}</div>` : `<div>Complete: meets Barista 1.</div>`}</div>
+    <div class="ta-pmeta">${a ? `Assessed ${taWhen(a.assessed_at)} by ${lmEsc(taNames[a.assessed_by] || "—")}${hist.length > 1 ? ` · ${hist.length} assessments on file (first ${taWhen(hist[hist.length-1].assessed_at)})` : ""}` : ""}${p.offRoster ? " · no Square shift in 60 days" : ""}</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      ${edit ? `<button type="button" class="btn small primary" data-ta-assess="${p.staff_id}" data-loc="${p.locId}" data-name="${lmEsc(p.name)}" data-back="dash">${a ? "Update assessment" : "Assess"}</button>` : ""}
+      <button type="button" class="btn small" data-ta-check="${p.staff_id}" data-loc="${p.locId}" data-name="${lmEsc(p.name)}" data-back="dash">Refresh checklist</button>
+    </div></div>`;
+}
+document.addEventListener("click", e => {
+  const c = e.target.closest("[data-ta-cafe]");
+  if(c && c.closest("#sec-teamassess")){ taDashCafe = c.dataset.taCafe; taOpenPerson = null; return taRenderDash(); }
+  const p = e.target.closest("[data-ta-person]");
+  if(p){ taOpenPerson = taOpenPerson === p.dataset.taPerson ? null : p.dataset.taPerson; taRenderPeople(); }
+});
+$("#ta-search").addEventListener("input", taRenderPeople);
+$("#ta-statusf").addEventListener("change", taRenderPeople);
+$("#ta-refresh").addEventListener("click", () => taLoadDash(true));
+document.querySelectorAll('.nav-item[data-section="teamassess"]').forEach(btn => btn.addEventListener("click", () => { if(!taPeople.length) taLoadDash(); else taRenderDash(); }));
+
 })();
 </script>
