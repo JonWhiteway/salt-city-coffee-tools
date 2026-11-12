@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salt City Team Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Bevan&family=Work+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: phone-first single column; sticky brand header with two tabs (Assess / Dashboard); dashboard widens to a 2-col grid on desktop */
+:root{
+  --navy:#003865; --gold:#F2A900; --cream:#F0E7DA;
+  --bg:#F6F4EF; --surface:#FFFFFF; --surface2:#EFEDE6; --fg:#14273A; --muted:#55687C; --line:#DAD6CA;
+  --head-bg:#003865; --head-fg:#F0E7DA; --accent:#F2A900; --accent-fg:#14273A;
+  --l1:#C4531A; --l2:#E2A93B; --l3:#4D8AC7; --l4:#123F70;
+  --l1-fg:#fff; --l2-fg:#2A1E00; --l3-fg:#fff; --l4-fg:#fff;
+  --ok:#2E7D5B; --warn:#C4531A;
+  --display:'Bevan', Rockwell, Georgia, serif;
+  --label:'Archivo', 'Arial Narrow', Arial, sans-serif;
+  --body:'Work Sans', system-ui, -apple-system, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E1A26; --surface:#15283A; --surface2:#1C3247; --fg:#ECE6DA; --muted:#A3B2C2; --line:#2A425A;
+  --head-bg:#0A2236; --head-fg:#F0E7DA; --accent:#F2B526; --accent-fg:#14273A;
+  --l1:#E2703A; --l2:#E9B54E; --l3:#6FA6DD; --l4:#B9D6F5;
+  --l1-fg:#1A0A00; --l2-fg:#2A1E00; --l3-fg:#06192B; --l4-fg:#06192B;
+  --ok:#5DBB8E; --warn:#E2703A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E1A26; --surface:#15283A; --surface2:#1C3247; --fg:#ECE6DA; --muted:#A3B2C2; --line:#2A425A;
+  --head-bg:#0A2236; --head-fg:#F0E7DA; --accent:#F2B526; --accent-fg:#14273A;
+  --l1:#E2703A; --l2:#E9B54E; --l3:#6FA6DD; --l4:#B9D6F5;
+  --l1-fg:#1A0A00; --l2-fg:#2A1E00; --l3-fg:#06192B; --l4-fg:#06192B;
+  --ok:#5DBB8E; --warn:#E2703A; color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--head-bg)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--head-bg);color:var(--head-fg)}
+header .wrap{display:flex;flex-direction:column;gap:10px;padding-block:14px 0}
+.brand{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand h1{margin:0;font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:2px;text-transform:uppercase}
+.eyebrow{font-family:var(--label);font-weight:700;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent)}
+.tabs{display:flex;gap:4px}
+.tabs a{flex:1;text-align:center;padding:10px 8px 12px;font-family:var(--label);font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--head-fg);opacity:.7;text-decoration:none;border-bottom:4px solid transparent}
+.tabs a[aria-current="page"]{opacity:1;border-bottom-color:var(--accent)}
+.tabs a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+main{padding-block:20px 120px}
+h2{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:1.5px;text-transform:uppercase;margin:0;text-wrap:balance}
+h3{margin:0}
+.lbl{font-family:var(--label);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.notice{background:var(--surface2);border-radius:12px;padding:14px 16px;font-size:14px}
+.notice b{font-weight:600}
+
+/* form */
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.row2{grid-template-columns:1fr}}
+input[type=text],select,textarea{font:inherit;color:var(--fg);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px;width:100%;min-width:0}
+textarea{min-height:64px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{flex:1 1 auto;font:inherit;font-size:14px;font-weight:600;padding:9px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#F0E7DA}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+
+.pillar{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.pillar-head{background:var(--navy);color:#F0E7DA;padding:14px 18px;display:flex;flex-direction:column;gap:2px}
+.pillar-head h3{font-family:var(--display);font-weight:400;font-size:19px;letter-spacing:1.5px;text-transform:uppercase}
+.pillar-head p{margin:0;font-style:italic;font-size:14px;opacity:.85}
+.pillar-head .num{font-family:var(--label);font-weight:700;font-size:12px;letter-spacing:2px;color:var(--gold)}
+.beh{padding:16px 18px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.beh:first-of-type{border-top:none}
+.beh .t{font-weight:600}
+.beh .d{font-size:14px;color:var(--muted);margin-top:-6px}
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.levels button{font:inherit;font-size:12.5px;font-weight:600;line-height:1.15;padding:10px 4px;min-height:52px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.levels button .n{font-family:var(--label);font-size:15px}
+.levels button[aria-pressed="true"][data-v="1"]{background:var(--l1);border-color:var(--l1);color:var(--l1-fg)}
+.levels button[aria-pressed="true"][data-v="2"]{background:var(--l2);border-color:var(--l2);color:var(--l2-fg)}
+.levels button[aria-pressed="true"][data-v="3"]{background:var(--l3);border-color:var(--l3);color:var(--l3-fg)}
+.levels button[aria-pressed="true"][data-v="4"]{background:var(--l4);border-color:var(--l4);color:var(--l4-fg)}
+.beh.missing .t::after{content:" · needs a rating";color:var(--warn);font-weight:500;font-size:13px}
+.notefield{padding:0 18px 16px}
+.key{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 14px;font-size:13px}
+.key div{display:flex;gap:8px;align-items:flex-start}
+.sw{flex:none;width:14px;height:14px;border-radius:4px;margin-top:3px}
+.checks{display:flex;flex-direction:column}
+.check{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.check:first-child{border-top:none}
+.switch{position:relative;width:52px;height:30px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:background .15s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch input:checked + span{background:var(--ok)}
+.switch input:checked + span::after{transform:translateX(22px)}
+.switch input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
+.submitbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));padding-top:12px}
+.submitbar .wrap{display:flex;gap:10px;align-items:center;max-width:720px}
+.btn{font:inherit;font-family:var(--label);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:14px;border-radius:12px;padding:14px 18px;border:none;cursor:pointer}
+.btn.primary{flex:1;background:var(--accent);color:var(--accent-fg)}
+.btn.ghost{background:transparent;color:var(--fg);border:1.5px solid var(--line)}
+.btn.danger{background:transparent;color:var(--warn);border:1.5px solid var(--warn)}
+.btn:disabled{opacity:.55;cursor:default}
+.progress{font-size:13px;color:var(--muted);white-space:nowrap}
+.form-col{max-width:720px;margin:0 auto}
+.editing{background:var(--accent);color:var(--accent-fg);border-radius:10px;padding:10px 14px;font-weight:600;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.linkbtn{font:inherit;font-weight:600;background:none;border:none;color:inherit;text-decoration:underline;cursor:pointer;padding:0}
+.mylist{display:flex;flex-direction:column}
+.myrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line);cursor:pointer;background:none;border-left:none;border-right:none;border-bottom:none;font:inherit;color:inherit;text-align:left;width:100%}
+.myrow:first-child{border-top:none}
+
+/* chips & pills */
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--label);font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.pill.verified{background:var(--ok);color:#fff}
+.pill.flagged{background:var(--l1);color:var(--l1-fg)}
+.pill.progress-p{background:var(--surface2);color:var(--fg)}
+.sc{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:4px 6px;border-radius:8px;font-family:var(--label);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.sc.b1{background:var(--l1);color:var(--l1-fg)}.sc.b2{background:var(--l2);color:var(--l2-fg)}.sc.b3{background:var(--l3);color:var(--l3-fg)}.sc.b4{background:var(--l4);color:var(--l4-fg)}.sc.b0{background:var(--surface2);color:var(--muted)}
+
+/* dashboard */
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.filters button{flex:none;font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#F0E7DA}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi .v{font-family:var(--display);font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:13px;color:var(--muted)}
+.kpi.ok .v{color:var(--ok)} .kpi.bad .v{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar .top{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin-bottom:5px}
+.bar .top b{font-weight:600}
+.bar .top span{font-variant-numeric:tabular-nums;color:var(--muted)}
+.track{height:12px;border-radius:6px;background:var(--surface2);overflow:hidden;display:flex}
+.track i{display:block;height:100%}
+.dist{height:14px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 8px;text-align:center;border-top:1px solid var(--line);white-space:nowrap}
+th{font-family:var(--label);font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-top:none}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
+td.grp{font-family:var(--label);font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding-top:14px}
+.people{display:flex;flex-direction:column}
+.person{border-top:1px solid var(--line)}
+.person:first-child{border-top:none}
+.person > button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:12px 0;cursor:pointer}
+.person > button:focus-visible{outline:3px solid var(--accent)}
+.pname{font-weight:600}
+.pmeta{font-size:13px;color:var(--muted)}
+.pscores{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.pdetail{padding:4px 0 16px;display:flex;flex-direction:column;gap:12px;font-size:14px}
+.pdetail .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.pdetail .grid3{grid-template-columns:1fr}}
+.pdetail .blk{background:var(--surface2);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.pdetail .li{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.pdetail .note{font-style:italic;color:var(--muted);overflow-wrap:anywhere}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tools input,.tools select{width:auto;flex:1 1 160px;padding:9px 12px}
+.empty{text-align:center;padding:28px 12px;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:20;background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<style>
+body{margin:0}
+.switch input{z-index:1}
+.pill.none-p{background:var(--surface2);color:var(--muted)}
+.pill.progress-p{background:var(--l2);color:var(--l2-fg)}
+.hdr-links{display:flex;gap:14px;align-items:center;font-size:13px}
+.hdr-links a{color:var(--head-fg);opacity:.85}
+.gate{max-width:520px;margin:12vh auto 0;text-align:center}
+.cl-group{border-top:1px solid var(--line)}
+.cl-group:first-child{border-top:none}
+.cl-group summary{display:flex;justify-content:space-between;gap:10px;padding:12px 0;cursor:pointer;font-weight:600;list-style:none}
+.cl-group summary::-webkit-details-marker{display:none}
+.cl-group summary::after{content:"▾";color:var(--muted);margin-left:6px}
+.cl-group[open] summary::after{content:"▴"}
+.cl-item{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line);font-size:14px;cursor:pointer}
+.cl-item input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--ok)}
+.cl-item .by{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.cl-item.done .txt{color:var(--muted)}
+.cl-bar{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden}
+.cl-bar i{display:block;height:100%;background:var(--ok)}
+.prev{font-size:13px;color:var(--muted)}
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <h1>Team Assessment</h1>
+      <span class="hdr-links"><span class="eyebrow" id="who">Salt City Coffee · Training Night</span><a href="/" id="deck-link">Command Deck</a></span>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <a href="#assess" id="tab-assess" aria-current="page">Assess</a>
+      <a href="/?view=teamassess" id="tab-dashboard">Dashboard ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="gate" class="gate card stack" hidden></section>
+
+  <section id="view-assess" class="form-col stack" aria-label="Assess a team member" hidden>
+    <div class="card stack">
+      <div class="row2">
+        <div class="field">
+          <label class="lbl" for="cafe">Café</label>
+          <select id="cafe"></select>
+        </div>
+        <div class="field">
+          <label class="lbl" for="person">Team member</label>
+          <select id="person" disabled><option value="">Choose a café first</option></select>
+        </div>
+      </div>
+      <div class="prev" id="prev"></div>
+    </div>
+
+    <details class="card">
+      <summary class="lbl" style="cursor:pointer">What the levels mean</summary>
+      <div class="key" id="key" style="margin-top:12px"></div>
+    </details>
+
+    <div id="pillars" class="stack"></div>
+
+    <div class="card stack">
+      <div>
+        <h2>End-of-2026 checks</h2>
+        <p class="muted" style="margin:4px 0 0;font-size:14px">Turn on what this person has already passed.</p>
+      </div>
+      <div class="checks" id="checks"></div>
+    </div>
+
+    <div class="card stack" id="cl-card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+        <h2>Barista refresh</h2>
+        <span class="lbl" id="cl-count"></span>
+      </div>
+      <p class="muted" style="margin:0;font-size:14px">Complete = Barista 1. Each tap saves right away with your name and the date. Sign-offs from barista training count automatically.</p>
+      <div class="cl-bar"><i id="cl-fill" style="width:0"></i></div>
+      <div id="cl"></div>
+    </div>
+
+    <div class="card stack">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+        <h2 id="mylist-title">Your café so far</h2>
+        <span class="lbl" id="mylist-count"></span>
+      </div>
+      <div class="mylist" id="mylist"></div>
+    </div>
+  </section>
+</main>
+
+<div class="submitbar" id="submitbar" hidden>
+  <div class="wrap">
+    <span class="progress" id="progress">0 of 9 rated</span>
+    <button class="btn primary" id="save" type="button">Save assessment</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* Team Assessment, full-page form (Nov 2026). Same login as the Command Deck
+   (same site, same Supabase session). Saves to team_assessments and
+   barista_refresh_signoffs, which is what each barista's profile reads. */
+const SUPABASE_URL = "https://dwysvcprzvmhxrrnogqb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const CD_ROLES = ["gm","location_manager","production_manager","bookkeeper","coo","ceo","cbo"];
+const FULL = ["coo","ceo","cbo","production_manager"];
+const LEVELS=[
+  {v:1,name:"Not yet",desc:"Rarely seen; needs training"},
+  {v:2,name:"Developing",desc:"Sometimes, or with reminders"},
+  {v:3,name:"Meets standard",desc:"Consistently, no reminders"},
+  {v:4,name:"Exceptional",desc:"Models it and helps others do it"}
+];
+const PILLARS=[
+  {key:"lead",name:"Leadership",short:"L",q:"Can I inspire exceptional performance?",items:[
+    {k:"L1",t:"Owns the shift",d:"Jumps in where needed (restock, clean, support) without being asked"},
+    {k:"L2",t:"Lifts the team",d:"Stays positive and calm in a rush; helps and teaches teammates"},
+    {k:"L3",t:"Reliable & coachable",d:"On time, follows through, takes feedback and applies it"}]},
+  {key:"craft",name:"Craft",short:"C",q:"Can I create an exceptional product?",items:[
+    {k:"C1",t:"Espresso",d:"Pulls shots to recipe (dose, yield, time) and tastes/adjusts"},
+    {k:"C2",t:"Milk",d:"Right texture and temp; clean, consistent presentation"},
+    {k:"C3",t:"Standards",d:"Every drink built to recipe; keeps a clean, organized bar"}]},
+  {key:"care",name:"Customer Care",short:"CC",q:"Can I create an exceptional customer experience?",items:[
+    {k:"K1",t:"Welcome",d:"Greets every guest quickly and warmly"},
+    {k:"K2",t:"Connection",d:"Learns names and orders, recommends, has real conversations"},
+    {k:"K3",t:"Recovery",d:"Spots and fixes problems (remakes, long waits) without being asked"}]}
+];
+const ALLK=PILLARS.flatMap(p=>p.items.map(i=>i.k));
+const CHECKS=[
+  {k:"espresso",t:"Espresso & Milk",d:"Passed the approval"},
+  {k:"q30",t:"30-day quiz",d:"Passed"},
+  {k:"q60",t:"60-day quiz",d:"Passed"},
+  {k:"q90",t:"90-day quiz",d:"Passed"}
+];
+const STATUS_LBL={verified:"Verified",flagged:"Flagged",progress:"In progress",none:"Not assessed"};
+const STATUS_CLS={verified:"verified",flagged:"flagged",progress:"progress-p",none:"none-p"};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const band=v=>v==null?0:v<1.75?1:v<2.75?2:v<3.5?3:4;
+const fmt=v=>v==null?"–":v.toFixed(1);
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const when=ts=>ts?new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"America/New_York"}):"—";
+
+/* ---------- state ---------- */
+let me=null, cafes=[], roster=[], items=[], names={};
+const assess={}, signed={};
+let form=blankForm(), saving=false;
+function blankForm(){return {staffId:"",ratings:{},notes:{lead:"",craft:"",care:""},checks:{espresso:false,q30:false,q60:false,q90:false}}}
+
+/* ---------- data ---------- */
+async function fn(name,payload){
+  const {data:{session}}=await sb.auth.getSession();
+  const r=await fetch(`${SUPABASE_URL}/functions/v1/${name}`,{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${session?.access_token||""}`,"apikey":SUPABASE_ANON_KEY},body:JSON.stringify(payload)});
+  const b=await r.json().catch(()=>({})); if(!r.ok)throw new Error(b.error||`Request failed (${r.status})`); return b;
+}
+async function loadItems(){
+  const [{data:it},{data:st}]=await Promise.all([sb.from("training_plan_items").select("id,stage,sort,signoffs").order("sort"),sb.from("training_stages").select("key,label,title,sort").order("sort")]);
+  const S=Object.fromEntries((st||[]).map(s=>[s.key,s])), seen=new Set();
+  items=[];
+  (it||[]).slice().sort((a,b)=>((S[a.stage]?.sort??99)-(S[b.stage]?.sort??99))||a.sort-b.sort).forEach(x=>(x.signoffs||[]).forEach(so=>{
+    if(!so?.id||seen.has(so.id))return; seen.add(so.id);
+    items.push({key:so.id,text:so.text,stage:x.stage,label:S[x.stage]?.label||x.stage,title:S[x.stage]?.title||""});
+  }));
+}
+async function loadPeople(ids){
+  if(!ids.length)return;
+  const [a,s,t]=await Promise.all([
+    sb.from("team_assessments").select("*").in("staff_id",ids).eq("voided",false).order("assessed_at",{ascending:false}),
+    sb.from("barista_refresh_signoffs").select("*").in("staff_id",ids),
+    sb.rpc("ta_training_signoffs",{p_staff:ids})
+  ]);
+  ids.forEach(id=>{assess[id]=[];signed[id]={}});
+  (a.data||[]).forEach(r=>assess[r.staff_id].push(r));
+  (t.data||[]).forEach(r=>signed[r.staff_id][r.item_key]={by:r.signed_by,at:r.signed_at,src:"training"});
+  (s.data||[]).forEach(r=>signed[r.staff_id][r.item_key]={by:r.signed_by,at:r.signed_at,src:"refresh"});
+  const who=new Set(); ids.forEach(id=>{(assess[id]||[]).forEach(r=>r.assessed_by&&who.add(r.assessed_by));Object.values(signed[id]).forEach(x=>x.by&&who.add(x.by))});
+  const miss=[...who].filter(i=>!names[i]); if(miss.length){const {data}=await sb.from("staff").select("id,name").in("id",miss);(data||[]).forEach(r=>names[r.id]=r.name)}
+}
+
+/* ---------- status (same rules as the Command Deck) ---------- */
+function clState(id){const s=signed[id]||{},done=items.filter(i=>s[i.key]).length;return {done,total:items.length,complete:items.length>0&&done===items.length}}
+function pillarAvg(r,p){return r?avg(p.items.map(i=>Number(r.ratings?.[i.k])).filter(Number.isFinite)):null}
+function status(id){
+  const a=(assess[id]||[])[0]; if(!a)return "none";
+  const vals=ALLK.map(k=>Number(a.ratings?.[k]));
+  if(vals.some(v=>v===1))return "flagged";
+  return vals.every(v=>v>=3)&&CHECKS.every(c=>a.checks?.[c.k])&&clState(id).complete?"verified":"progress";
+}
+
+/* ---------- form ---------- */
+function buildForm(){
+  $("key").innerHTML=LEVELS.map(l=>`<div><span class="sw" style="background:var(--l${l.v})"></span><span><b>${l.v} · ${l.name}</b><br><span class="muted">${l.desc}</span></span></div>`).join("");
+  $("pillars").innerHTML=PILLARS.map((p,pi)=>`
+    <section class="pillar" aria-labelledby="ph-${p.key}">
+      <div class="pillar-head"><span class="num">Pillar ${pi+1} of 3</span><h3 id="ph-${p.key}">${p.name}</h3><p>${p.q}</p></div>
+      ${p.items.map(i=>`<div class="beh" id="beh-${i.k}">
+        <div class="t" id="bt-${i.k}">${i.t}</div><div class="d">${i.d}</div>
+        <div class="levels" role="group" aria-labelledby="bt-${i.k}">${LEVELS.map(l=>`<button type="button" data-k="${i.k}" data-v="${l.v}" aria-pressed="false"><span class="n">${l.v}</span>${l.name}</button>`).join("")}</div>
+      </div>`).join("")}
+      <div class="notefield field"><label class="lbl" for="note-${p.key}">${p.name} notes (optional)</label><textarea id="note-${p.key}" placeholder="What did you see? What should they work on?"></textarea></div>
+    </section>`).join("");
+  $("checks").innerHTML=CHECKS.map(c=>`<div class="check"><label for="ck-${c.k}"><b style="font-weight:600">${c.t}</b><br><span class="muted" style="font-size:13px">${c.d}</span></label><span class="switch"><input type="checkbox" id="ck-${c.k}" data-ck="${c.k}"><span></span></span></div>`).join("");
+  $("pillars").addEventListener("click",e=>{const b=e.target.closest("button[data-k]");if(!b)return;if(!form.staffId){toast("Choose a team member first.");$("person").focus();return}form.ratings[b.dataset.k]=+b.dataset.v;$("beh-"+b.dataset.k).classList.remove("missing");paintForm()});
+  PILLARS.forEach(p=>$("note-"+p.key).addEventListener("input",e=>{form.notes[p.key]=e.target.value}));
+  $("checks").addEventListener("change",e=>{const i=e.target.closest("input[data-ck]");if(i)form.checks[i.dataset.ck]=i.checked});
+  $("cafe").addEventListener("change",e=>{store.set("sca-cafe-id",e.target.value);selectCafe(e.target.value)});
+  $("person").addEventListener("change",e=>selectPerson(e.target.value));
+  $("save").addEventListener("click",save);
+  $("mylist").addEventListener("click",e=>{const b=e.target.closest("[data-pick]");if(b){$("person").value=b.dataset.pick;selectPerson(b.dataset.pick);window.scrollTo({top:0,behavior:"smooth"})}});
+  $("cl").addEventListener("change",toggleItem);
+}
+function paintForm(){
+  document.querySelectorAll("#pillars button[data-k]").forEach(b=>b.setAttribute("aria-pressed",String(form.ratings[b.dataset.k]===+b.dataset.v)));
+  PILLARS.forEach(p=>{const t=$("note-"+p.key);if(t.value!==(form.notes[p.key]||""))t.value=form.notes[p.key]||""});
+  CHECKS.forEach(c=>$("ck-"+c.k).checked=!!form.checks[c.k]);
+  $("progress").textContent=`${ALLK.filter(k=>form.ratings[k]).length} of 9 rated`;
+  const p=roster.find(r=>r.staff_id===form.staffId), last=form.staffId?(assess[form.staffId]||[])[0]:null;
+  $("save").textContent=last?"Save update":"Save assessment"; $("save").disabled=saving||!form.staffId;
+  $("prev").innerHTML=!p?"":last?`<span class="pill ${STATUS_CLS[status(p.staff_id)]}">${STATUS_LBL[status(p.staff_id)]}</span> Last saved ${when(last.assessed_at)} by ${esc(names[last.assessed_by]||"—")}. Their answers are filled in; change what's different and save. Each save is kept as history.`:`${esc(p.job)} · not assessed yet.`;
+  renderChecklist();
+}
+
+/* ---------- café + person ----------
+   Order (Jon, Nov 12): LM, AM, Shift Lead, then everyone else by tenure, longest first.
+   AM = Square job title "Assistant Manager" / "Assistant Bar Manager" / "ALM". */
+function rankOf(m){
+  if(m.role==="location_manager")return 0;
+  const j=(m.job_title||"").toLowerCase();
+  if(/assistant (bar |location |store )?manager|\balm\b|^am$/.test(j))return 1;
+  if(/shift lead|shift leader|shift supervisor/.test(j))return 2;
+  return 3;
+}
+function byOrder(a,b){return a.rank-b.rank||(a.hire||"9999").localeCompare(b.hire||"9999")||a.name.localeCompare(b.name)}
+function tenure(h){if(!h)return "";const m=Math.max(0,Math.floor((Date.now()-new Date(h+"T12:00:00Z"))/(30.44*864e5)));return m<12?`${m} mo`:`${Math.floor(m/12)} yr${m>=24?"s":""}${m%12?` ${m%12} mo`:""}`}
+async function selectCafe(id){
+  $("person").disabled=true; $("person").innerHTML='<option value="">Loading team…</option>';
+  form=blankForm(); paintForm(); renderMyList(true);
+  if(!id){$("person").innerHTML='<option value="">Choose a café first</option>';return}
+  try{
+    const t=await fn("store-team",{location_id:id});
+    if($("cafe").value!==id)return;
+    roster=(t.members||[]).filter(m=>(m.role==="team_member"||m.role==="location_manager")&&m.staff_id!==me.id)  // nobody rates themselves
+      .map(m=>({staff_id:m.staff_id,name:m.name,job:m.role==="location_manager"?"Location Manager":(m.job_title||"Team member"),hire:m.hire_date||null,rank:rankOf(m)}))
+      .sort(byOrder);
+    await loadPeople(roster.map(r=>r.staff_id));
+  }catch(err){roster=[];toast("Couldn't load this café's team: "+err.message)}
+  $("person").innerHTML='<option value="">Choose a team member</option>'+roster.map(r=>`<option value="${r.staff_id}">${esc(r.name)} · ${esc(r.job)} · ${STATUS_LBL[status(r.staff_id)]}</option>`).join("");
+  $("person").disabled=false;
+  const want=new URLSearchParams(location.search).get("staff");
+  if(want&&roster.some(r=>r.staff_id===want)){$("person").value=want;selectPerson(want)}
+  renderMyList();
+}
+function selectPerson(id){
+  form=blankForm(); form.staffId=id;
+  const last=(assess[id]||[])[0];
+  if(last){Object.entries(last.ratings||{}).forEach(([k,v])=>form.ratings[k]=Number(v));form.notes={...form.notes,...(last.notes||{})};form.checks={...form.checks,...(last.checks||{})}}
+  document.querySelectorAll(".beh.missing").forEach(x=>x.classList.remove("missing"));
+  paintForm(); renderMyList();
+}
+
+/* ---------- save ---------- */
+async function save(){
+  if(!form.staffId)return toast("Choose a team member."),$("person").focus();
+  const missing=ALLK.filter(k=>!form.ratings[k]);
+  if(missing.length){missing.forEach(k=>$("beh-"+k).classList.add("missing"));$("beh-"+missing[0]).scrollIntoView({behavior:"smooth",block:"center"});return toast(`Rate all 9 behaviors (${missing.length} left).`)}
+  saving=true; paintForm();
+  const p=roster.find(r=>r.staff_id===form.staffId);
+  const {error}=await sb.from("team_assessments").insert({staff_id:form.staffId,location_id:$("cafe").value,ratings:form.ratings,notes:form.notes,checks:form.checks,assessed_by:me.id});
+  saving=false;
+  if(error){paintForm();return toast("Didn't save: "+error.message)}
+  await loadPeople([form.staffId]);
+  const s=status(form.staffId);
+  toast(`Saved ${p?.name||""}. ${s==="verified"?"Verified ✓":s==="flagged"?"Flagged for coaching.":"In progress."}`);
+  const opt=[...$("person").options].find(o=>o.value===form.staffId); if(opt)opt.textContent=`${p.name} · ${p.job} · ${STATUS_LBL[s]}`;
+  // move on to the next person in order (LM, AM, Shift Lead, tenure) not yet assessed
+  const i0=roster.findIndex(r=>r.staff_id===form.staffId);
+  const next=roster.slice(i0+1).concat(roster.slice(0,i0)).find(r=>!(assess[r.staff_id]||[]).length);
+  if(next){$("person").value=next.staff_id;selectPerson(next.staff_id)}else{$("person").value="";form=blankForm();paintForm();renderMyList()}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ---------- Barista refresh checklist ---------- */
+function renderChecklist(){
+  const id=form.staffId;
+  if(!id){$("cl-card").hidden=true;return}
+  $("cl-card").hidden=false;
+  const s=signed[id]||{}, cl=clState(id), open=new Set([...document.querySelectorAll("#cl details[open]")].map(d=>d.dataset.stage));
+  $("cl-count").textContent=`${cl.done} of ${cl.total}${cl.complete?" · Barista 1":""}`;
+  $("cl-fill").style.width=cl.total?(100*cl.done/cl.total)+"%":"0";
+  const groups=[]; items.forEach(i=>{let g=groups.find(x=>x.stage===i.stage);if(!g)groups.push(g={stage:i.stage,label:i.label,title:i.title,list:[]});g.list.push(i)});
+  $("cl").innerHTML=groups.map(g=>{const d=g.list.filter(i=>s[i.key]).length;return `<details class="cl-group" data-stage="${g.stage}" ${open.has(g.stage)?"open":""}><summary><span>${esc(g.label)} · ${esc(g.title)}</span><span class="muted">${d}/${g.list.length}</span></summary>
+    ${g.list.map(i=>{const x=s[i.key];return `<label class="cl-item ${x?"done":""}"><input type="checkbox" data-item="${i.key}" ${x?"checked":""} ${x?.src==="training"?"disabled":""}><span class="txt">${esc(i.text)}${x?`<span class="by">${x.src==="training"?"Barista training":"Signed off"} · ${esc(names[x.by]||"—")} · ${when(x.at)}</span>`:""}</span></label>`}).join("")}</details>`}).join("");
+}
+async function toggleItem(e){
+  const cb=e.target.closest("input[data-item]"); if(!cb)return;
+  const id=form.staffId,key=cb.dataset.item; cb.disabled=true;
+  const r=cb.checked
+    ? await sb.from("barista_refresh_signoffs").insert({staff_id:id,item_key:key,location_id:$("cafe").value,signed_by:me.id})
+    : await sb.from("barista_refresh_signoffs").delete().eq("staff_id",id).eq("item_key",key);
+  if(r.error){cb.checked=!cb.checked;cb.disabled=false;return toast("Didn't save: "+r.error.message)}
+  if(cb.checked){signed[id][key]={by:me.id,at:new Date().toISOString(),src:"refresh"};names[me.id]=me.name}else delete signed[id][key];
+  renderChecklist(); renderMyList(); paintForm();
+}
+
+/* ---------- café list ---------- */
+function renderMyList(loading){
+  const c=cafes.find(x=>x.id===$("cafe").value);
+  $("mylist-title").textContent=c?`${c.name} so far`:"Your café so far";
+  if(!c){$("mylist").innerHTML='<div class="empty">Choose a café to see the team.</div>';$("mylist-count").textContent="";return}
+  if(loading){$("mylist").innerHTML='<div class="empty">Loading…</div>';return}
+  const done=roster.filter(r=>(assess[r.staff_id]||[]).length).length;
+  $("mylist-count").textContent=`${done} of ${roster.length} assessed`;
+  if(!roster.length){$("mylist").innerHTML='<div class="empty">No team members with a Square shift here in the last 60 days.</div>';return}
+  $("mylist").innerHTML=roster.map(r=>{const a=(assess[r.staff_id]||[])[0],s=status(r.staff_id),cl=clState(r.staff_id);
+    return `<button class="myrow" type="button" data-pick="${r.staff_id}" ${r.staff_id===form.staffId?'aria-current="true"':""}>
+      <span><span class="pname">${esc(r.name)}</span> <span class="pill ${STATUS_CLS[s]}">${STATUS_LBL[s]}</span><br><span class="pmeta">${esc(r.job)}${r.hire?` · ${tenure(r.hire)}`:""} · ${a?`${a.checks?CHECKS.filter(c=>a.checks[c.k]).length:0}/4 checks · `:""}refresh ${cl.done}/${cl.total} · tap to ${a?"update":"assess"}</span></span>
+      <span class="pscores">${a?PILLARS.map(p=>{const v=pillarAvg(a,p);return `<span class="sc b${band(v)}" title="${p.name}">${p.short} ${fmt(v)}</span>`}).join(""):""}</span></button>`}).join("");
+}
+
+let tt;function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3800)}
+function gate(html){$("gate").innerHTML=html;$("gate").hidden=false;$("view-assess").hidden=true;$("submitbar").hidden=true}
+
+/* ---------- boot ---------- */
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session)return gate(`<h2>Sign in first</h2><p class="muted">Use your PIN on the Command Deck, then come back to this page.</p><a class="btn primary" href="/" style="text-decoration:none">Go to the Command Deck</a>`);
+  const {data:st}=await sb.from("staff").select("id,name,role").eq("auth_user_id",session.user.id).maybeSingle();
+  if(!st||!CD_ROLES.includes(st.role))return gate(`<h2>No access</h2><p class="muted">Team assessments are for LMs, GMs and the leadership team.</p>`);
+  me=st; $("who").textContent=`${me.name} · Training Night`;
+  const {data:locs}=await sb.from("locations").select("id,name,type").eq("type","cafe").order("name");
+  if(FULL.includes(me.role)||me.role==="gm")cafes=locs||[];
+  else if(me.role==="location_manager"){const {data:a}=await sb.from("staff_locations").select("location_id").eq("staff_id",me.id);const mine=new Set((a||[]).map(x=>x.location_id));cafes=(locs||[]).filter(l=>mine.has(l.id))}
+  if(!cafes.length)return gate(`<h2>View only</h2><p class="muted">You can see every assessment on the Command Deck dashboard, but you can't assess anyone from your role.</p><a class="btn primary" href="/?view=teamassess" style="text-decoration:none">Open the dashboard</a>`);
+  if(!(FULL.includes(me.role)||me.role==="gm"))$("tab-dashboard").hidden=true;
+  await loadItems();
+  $("view-assess").hidden=false; $("submitbar").hidden=false;
+  $("cafe").innerHTML=(cafes.length>1?'<option value="">Choose a café</option>':"")+cafes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  buildForm(); paintForm();
+  const want=new URLSearchParams(location.search).get("loc")||store.get("sca-cafe-id")||(cafes.length===1?cafes[0].id:"");
+  if(want&&cafes.some(c=>c.id===want)){$("cafe").value=want;selectCafe(want)}else renderMyList();
+})();
+</script>
+</body>
+</html>
