@@ -217,10 +217,14 @@ body{margin:0}
           <label class="lbl" for="cafe">Café</label>
           <select id="cafe"></select>
         </div>
-        <div class="field">
-          <label class="lbl" for="person">Team member</label>
-          <select id="person" disabled><option value="">Choose a café first</option></select>
+        <div class="field" id="assessor-field" hidden>
+          <label class="lbl" for="assessor">Your name</label>
+          <select id="assessor" disabled><option value="">Choose a café first</option></select>
         </div>
+      </div>
+      <div class="field">
+        <label class="lbl" for="person">Team member</label>
+        <select id="person" disabled><option value="">Choose a café first</option></select>
       </div>
       <div class="prev" id="prev"></div>
     </div>
@@ -316,12 +320,38 @@ const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
 const when=ts=>ts?new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"America/New_York"}):"—";
 
 /* ---------- state ---------- */
-let me=null, cafes=[], roster=[], items=[], names={};
+let me=null, cafes=[], roster=[], rosterAll=[], items=[], names={};
+function applyRoster(){roster=rosterAll.filter(r=>r.staff_id!==me?.id)}  // nobody rates themselves
 const assess={}, signed={};
 let form=blankForm(), saving=false;
 function blankForm(){return {staffId:"",ratings:{},notes:{lead:"",craft:"",care:""},checks:{espresso:false,q30:false,q60:false,q90:false}}}
 
-/* ---------- data ---------- */
+/* ---------- data ----------
+   Two ways in:
+   - QR link (?k=<key>): no sign-in. Everything goes through the team-assess-open edge
+     function, which checks the key and the chosen assessor (LM = own café, GM/C-suite = any).
+   - Signed in on the Command Deck (no key): reads/writes Supabase directly under RLS. */
+const KEY=new URLSearchParams(location.search).get("k");
+let assessors=[];
+async function openCall(action,payload){
+  const r=await fetch(`${SUPABASE_URL}/functions/v1/team-assess-open`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({key:KEY,action,...(payload||{})})});
+  const b=await r.json().catch(()=>({})); if(!r.ok)throw new Error(b.error||`Request failed (${r.status})`); return b;
+}
+function fillPeople(ids,res){
+  ids.forEach(id=>{assess[id]=[];signed[id]={}});
+  (res.assess||[]).forEach(r=>assess[r.staff_id]&&assess[r.staff_id].push(r));
+  (res.training||[]).forEach(r=>signed[r.staff_id]&&(signed[r.staff_id][r.item_key]={by:r.signed_by,at:r.signed_at,src:"training"}));
+  (res.signed||[]).forEach(r=>signed[r.staff_id]&&(signed[r.staff_id][r.item_key]={by:r.signed_by,at:r.signed_at,src:"refresh"}));
+  Object.assign(names,res.names||{});
+}
+function buildItems(it,st){
+  const S=Object.fromEntries((st||[]).map(s=>[s.key,s])), seen=new Set();
+  items=[];
+  (it||[]).slice().sort((a,b)=>((S[a.stage]?.sort??99)-(S[b.stage]?.sort??99))||a.sort-b.sort).forEach(x=>(x.signoffs||[]).forEach(so=>{
+    if(!so?.id||seen.has(so.id))return; seen.add(so.id);
+    items.push({key:so.id,text:so.text,stage:x.stage,label:S[x.stage]?.label||x.stage,title:S[x.stage]?.title||""});
+  }));
+}
 async function fn(name,payload){
   const {data:{session}}=await sb.auth.getSession();
   const r=await fetch(`${SUPABASE_URL}/functions/v1/${name}`,{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${session?.access_token||""}`,"apikey":SUPABASE_ANON_KEY},body:JSON.stringify(payload)});
@@ -329,12 +359,7 @@ async function fn(name,payload){
 }
 async function loadItems(){
   const [{data:it},{data:st}]=await Promise.all([sb.from("training_plan_items").select("id,stage,sort,signoffs").order("sort"),sb.from("training_stages").select("key,label,title,sort").order("sort")]);
-  const S=Object.fromEntries((st||[]).map(s=>[s.key,s])), seen=new Set();
-  items=[];
-  (it||[]).slice().sort((a,b)=>((S[a.stage]?.sort??99)-(S[b.stage]?.sort??99))||a.sort-b.sort).forEach(x=>(x.signoffs||[]).forEach(so=>{
-    if(!so?.id||seen.has(so.id))return; seen.add(so.id);
-    items.push({key:so.id,text:so.text,stage:x.stage,label:S[x.stage]?.label||x.stage,title:S[x.stage]?.title||""});
-  }));
+  buildItems(it,st);
 }
 async function loadPeople(ids){
   if(!ids.length)return;
@@ -374,13 +399,20 @@ function buildForm(){
       <div class="notefield field"><label class="lbl" for="note-${p.key}">${p.name} notes (optional)</label><textarea id="note-${p.key}" placeholder="What did you see? What should they work on?"></textarea></div>
     </section>`).join("");
   $("checks").innerHTML=CHECKS.map(c=>`<div class="check"><label for="ck-${c.k}"><b style="font-weight:600">${c.t}</b><br><span class="muted" style="font-size:13px">${c.d}</span></label><span class="switch"><input type="checkbox" id="ck-${c.k}" data-ck="${c.k}"><span></span></span></div>`).join("");
-  $("pillars").addEventListener("click",e=>{const b=e.target.closest("button[data-k]");if(!b)return;if(!form.staffId){toast("Choose a team member first.");$("person").focus();return}form.ratings[b.dataset.k]=+b.dataset.v;$("beh-"+b.dataset.k).classList.remove("missing");paintForm()});
+  $("pillars").addEventListener("click",e=>{const b=e.target.closest("button[data-k]");if(!b)return;if(!me){toast("Choose your name first.");$("assessor").focus();return}if(!form.staffId){toast("Choose a team member first.");$("person").focus();return}form.ratings[b.dataset.k]=+b.dataset.v;$("beh-"+b.dataset.k).classList.remove("missing");paintForm()});
   PILLARS.forEach(p=>$("note-"+p.key).addEventListener("input",e=>{form.notes[p.key]=e.target.value}));
   $("checks").addEventListener("change",e=>{const i=e.target.closest("input[data-ck]");if(i)form.checks[i.dataset.ck]=i.checked});
   $("cafe").addEventListener("change",e=>{store.set("sca-cafe-id",e.target.value);selectCafe(e.target.value)});
   $("person").addEventListener("change",e=>selectPerson(e.target.value));
+  $("assessor").addEventListener("change",e=>{
+    me=assessors.find(a=>a.id===e.target.value)||null; store.set("sca-assessor-id",me?me.id:"");
+    $("who").textContent=me?`${me.name} · Training Night`:"Salt City Coffee · Training Night";
+    if(form.staffId===me?.id){form=blankForm()}
+    applyRoster(); fillPersonOptions(); paintForm(); renderMyList();
+    if(me&&!form.staffId){const next=roster.find(r=>!(assess[r.staff_id]||[]).length);if(next){$("person").value=next.staff_id;selectPerson(next.staff_id)}}
+  });
   $("save").addEventListener("click",save);
-  $("mylist").addEventListener("click",e=>{const b=e.target.closest("[data-pick]");if(b){$("person").value=b.dataset.pick;selectPerson(b.dataset.pick);window.scrollTo({top:0,behavior:"smooth"})}});
+  $("mylist").addEventListener("click",e=>{const b=e.target.closest("[data-pick]");if(b&&!me){toast("Choose your name first.");$("assessor").focus();return}if(b){$("person").value=b.dataset.pick;selectPerson(b.dataset.pick);window.scrollTo({top:0,behavior:"smooth"})}});
   $("cl").addEventListener("change",toggleItem);
 }
 function paintForm(){
@@ -411,18 +443,35 @@ async function selectCafe(id){
   form=blankForm(); paintForm(); renderMyList(true);
   if(!id){$("person").innerHTML='<option value="">Choose a café first</option>';return}
   try{
-    const t=await fn("store-team",{location_id:id});
+    const t=KEY?await openCall("roster",{cafe:id}):await fn("store-team",{location_id:id});
     if($("cafe").value!==id)return;
-    roster=(t.members||[]).filter(m=>(m.role==="team_member"||m.role==="location_manager")&&m.staff_id!==me.id)  // nobody rates themselves
+    rosterAll=(t.members||[]).filter(m=>m.role==="team_member"||m.role==="location_manager")
       .map(m=>({staff_id:m.staff_id,name:m.name,job:m.role==="location_manager"?"Location Manager":(m.job_title||"Team member"),hire:m.hire_date||null,rank:rankOf(m)}))
       .sort(byOrder);
-    await loadPeople(roster.map(r=>r.staff_id));
-  }catch(err){roster=[];toast("Couldn't load this café's team: "+err.message)}
-  $("person").innerHTML='<option value="">Choose a team member</option>'+roster.map(r=>`<option value="${r.staff_id}">${esc(r.name)} · ${esc(r.job)} · ${STATUS_LBL[status(r.staff_id)]}</option>`).join("");
-  $("person").disabled=false;
+    if(KEY)fillPeople(rosterAll.map(r=>r.staff_id),t); else await loadPeople(rosterAll.map(r=>r.staff_id));
+  }catch(err){rosterAll=[];toast("Couldn't load this café's team: "+err.message)}
+  if(KEY)fillAssessors(id);
+  applyRoster(); fillPersonOptions();
   const want=new URLSearchParams(location.search).get("staff");
   if(want&&roster.some(r=>r.staff_id===want)){$("person").value=want;selectPerson(want)}
   renderMyList();
+}
+function fillPersonOptions(){
+  const cur=$("person").value;
+  $("person").innerHTML='<option value="">Choose a team member</option>'+roster.map(r=>`<option value="${r.staff_id}">${esc(r.name)} · ${esc(r.job)} · ${STATUS_LBL[status(r.staff_id)]}</option>`).join("");
+  $("person").disabled=!!KEY&&!me;
+  if(cur&&roster.some(r=>r.staff_id===cur))$("person").value=cur;
+}
+function fillAssessors(cafeId){
+  const lmHere=a=>a.role==="location_manager"&&Array.isArray(a.cafes)&&a.cafes.includes(cafeId);
+  const ok=assessors.filter(a=>a.cafes==="any"||lmHere(a));
+  const rank=a=>lmHere(a)?0:a.role==="gm"?1:2;
+  ok.sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name));
+  const saved=store.get("sca-assessor-id");
+  $("assessor").innerHTML='<option value="">Choose your name</option>'+ok.map(a=>`<option value="${a.id}">${esc(a.name)}${a.role==="location_manager"?" · LM":a.role==="gm"?" · GM":""}</option>`).join("");
+  $("assessor").disabled=false;
+  me=ok.find(a=>a.id===saved)||null; $("assessor").value=me?me.id:"";
+  $("who").textContent=me?`${me.name} · Training Night`:"Salt City Coffee · Training Night";
 }
 function selectPerson(id){
   form=blankForm(); form.staffId=id;
@@ -434,15 +483,19 @@ function selectPerson(id){
 
 /* ---------- save ---------- */
 async function save(){
+  if(!me)return toast("Choose your name first."),$("assessor").focus();
   if(!form.staffId)return toast("Choose a team member."),$("person").focus();
   const missing=ALLK.filter(k=>!form.ratings[k]);
   if(missing.length){missing.forEach(k=>$("beh-"+k).classList.add("missing"));$("beh-"+missing[0]).scrollIntoView({behavior:"smooth",block:"center"});return toast(`Rate all 9 behaviors (${missing.length} left).`)}
   saving=true; paintForm();
   const p=roster.find(r=>r.staff_id===form.staffId);
-  const {error}=await sb.from("team_assessments").insert({staff_id:form.staffId,location_id:$("cafe").value,ratings:form.ratings,notes:form.notes,checks:form.checks,assessed_by:me.id});
+  let error=null;
+  if(KEY){try{await openCall("save",{cafe:$("cafe").value,assessor:me.id,staff_id:form.staffId,ratings:form.ratings,notes:form.notes,checks:form.checks})}catch(e){error=e}}
+  else ({error}=await sb.from("team_assessments").insert({staff_id:form.staffId,location_id:$("cafe").value,ratings:form.ratings,notes:form.notes,checks:form.checks,assessed_by:me.id}));
   saving=false;
   if(error){paintForm();return toast("Didn't save: "+error.message)}
-  await loadPeople([form.staffId]);
+  if(KEY){assess[form.staffId].unshift({staff_id:form.staffId,location_id:$("cafe").value,ratings:{...form.ratings},notes:{...form.notes},checks:{...form.checks},assessed_by:me.id,assessed_at:new Date().toISOString()});names[me.id]=me.name}
+  else await loadPeople([form.staffId]);
   const s=status(form.staffId);
   toast(`Saved ${p?.name||""}. ${s==="verified"?"Verified ✓":s==="flagged"?"Flagged for coaching.":"In progress."}`);
   const opt=[...$("person").options].find(o=>o.value===form.staffId); if(opt)opt.textContent=`${p.name} · ${p.job} · ${STATUS_LBL[s]}`;
@@ -468,7 +521,9 @@ function renderChecklist(){
 async function toggleItem(e){
   const cb=e.target.closest("input[data-item]"); if(!cb)return;
   const id=form.staffId,key=cb.dataset.item; cb.disabled=true;
-  const r=cb.checked
+  let r;
+  if(KEY){try{await openCall("sign",{cafe:$("cafe").value,assessor:me.id,staff_id:id,item_key:key,on:cb.checked});r={}}catch(e){r={error:e}}}
+  else r=cb.checked
     ? await sb.from("barista_refresh_signoffs").insert({staff_id:id,item_key:key,location_id:$("cafe").value,signed_by:me.id})
     : await sb.from("barista_refresh_signoffs").delete().eq("staff_id",id).eq("item_key",key);
   if(r.error){cb.checked=!cb.checked;cb.disabled=false;return toast("Didn't save: "+r.error.message)}
@@ -495,7 +550,19 @@ let tt;function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clear
 function gate(html){$("gate").innerHTML=html;$("gate").hidden=false;$("view-assess").hidden=true;$("submitbar").hidden=true}
 
 /* ---------- boot ---------- */
+async function bootLink(){
+  let b;
+  try{b=await openCall("boot")}catch(e){return gate(`<h2>Link not working</h2><p class="muted">${esc(e.message)}</p>`)}
+  cafes=b.cafes||[]; assessors=b.assessors||[]; buildItems(b.items,b.stages);
+  $("assessor-field").hidden=false; $("tab-dashboard").hidden=true; $("deck-link").hidden=true;
+  $("view-assess").hidden=false; $("submitbar").hidden=false;
+  $("cafe").innerHTML='<option value="">Choose your café</option>'+cafes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  buildForm(); paintForm();
+  const want=new URLSearchParams(location.search).get("loc")||store.get("sca-cafe-id")||"";
+  if(want&&cafes.some(c=>c.id===want)){$("cafe").value=want;selectCafe(want)}else renderMyList();
+}
 (async()=>{
+  if(KEY)return bootLink();
   const {data:{session}}=await sb.auth.getSession();
   if(!session)return gate(`<h2>Sign in first</h2><p class="muted">Use your PIN on the Command Deck, then come back to this page.</p><a class="btn primary" href="/" style="text-decoration:none">Go to the Command Deck</a>`);
   const {data:st}=await sb.from("staff").select("id,name,role").eq("auth_user_id",session.user.id).maybeSingle();
