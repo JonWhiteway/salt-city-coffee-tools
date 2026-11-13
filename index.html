@@ -1167,6 +1167,30 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 #sec-teamassess .lm-card-title .hint{font-size:12px; color:var(--ink-3);}
 #sec-teamassess .lm-pad{padding:16px;}
 .ta-table thead th, .ta-table th{background:transparent !important; color:var(--ink-3) !important;}
+/* ===== What's new since your last visit (LM portal, Nov 13 2026) ===== */
+#sec-lmgm .lm-tab{position:relative;}
+.lm-tab-new{position:absolute; top:-9px; right:-9px; min-width:22px; height:22px; padding:0 6px; border-radius:999px; background:var(--critical); color:#fff; font-size:11.5px; font-weight:800; line-height:22px; text-align:center; box-shadow:0 0 0 2px var(--surface); animation:lmNewPulse 1.6s ease-in-out infinite; pointer-events:none;}
+.nav-item .lm-tab-new{position:static; display:inline-block; margin-left:auto; box-shadow:none;}
+@keyframes lmNewPulse{0%,100%{transform:scale(1); box-shadow:0 0 0 2px var(--surface),0 0 0 0 rgba(208,59,59,.55);} 50%{transform:scale(1.08); box-shadow:0 0 0 2px var(--surface),0 0 0 7px rgba(208,59,59,0);}}
+.lm-whatsnew{margin:12px 0 16px; border:2px solid var(--critical); background:var(--critical-soft); border-radius:12px; padding:14px 16px;}
+.lm-whatsnew-top{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+.lm-whatsnew-top h3{margin:0; font-family:var(--font-display); text-transform:uppercase; letter-spacing:.03em; font-size:16px; color:var(--critical); display:flex; align-items:center; gap:8px;}
+.lm-whatsnew-top h3::before{content:""; width:10px; height:10px; border-radius:50%; background:var(--critical); animation:lmNewPulse 1.6s ease-in-out infinite;}
+.lm-whatsnew-top .since{font-size:12.5px; color:var(--ink-2);}
+.lm-whatsnew-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:8px;}
+.lm-whatsnew-item{all:unset; box-sizing:border-box; cursor:pointer; background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--critical); border-radius:9px; padding:9px 11px; display:flex; flex-direction:column; gap:3px;}
+.lm-whatsnew-item:hover{box-shadow:var(--shadow-2);}
+.lm-whatsnew-item:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.lm-whatsnew-item .t{font-weight:700; font-size:13.5px; display:flex; justify-content:space-between; gap:8px;}
+.lm-whatsnew-item .t b{color:var(--critical);}
+.lm-whatsnew-item .w{font-size:11.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em;}
+.lm-whatsnew-item .s{font-size:12.5px; color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.lm-new-chip{display:inline-flex; align-items:center; gap:6px; margin-left:10px; padding:3px 10px; border-radius:999px; background:var(--critical); color:#fff; font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; vertical-align:middle; white-space:nowrap;}
+.lm-new-chip::before{content:""; width:7px; height:7px; border-radius:50%; background:#fff; animation:lmNewPulse 1.6s ease-in-out infinite;}
+.lm-new-glow{box-shadow:0 0 0 2px var(--critical), 0 0 18px rgba(208,59,59,.25) !important; border-radius:10px;}
+.lm-new-list{margin:6px 0 10px; padding:8px 12px; background:var(--critical-soft); border-radius:8px; font-size:12.5px; color:var(--ink);}
+.lm-new-list li{margin:2px 0;}
+@media (prefers-reduced-motion: reduce){ .lm-tab-new, .lm-new-chip::before, .lm-whatsnew-top h3::before{animation:none;} }
 </style>
 
 <div id="gate-wrap">
@@ -1867,6 +1891,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 
     <div id="lmgm-view-detail" hidden>
       <button class="btn ghost" id="lmgm-back-to-portfolio" hidden style="margin-bottom:14px;">← Back to your locations</button>
+      <div class="lm-whatsnew" id="lm-whatsnew" hidden role="status" aria-live="polite"></div>
     <div class="lm-view" data-lmview="dashboard">
       <div class="grid kpi-row">
         <div class="card kpi"><div class="label">MTD revenue</div><div class="value tabular" id="lmgm-d-rev">—</div><div class="delta" id="lmgm-d-rev-delta"></div></div>
@@ -2074,7 +2099,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
         </a>
         <a class="td-tool td-tool-lead" id="td-assess-link" href="assess.html">
           <div class="ttitle">Team Assessment ↗</div>
-          <div class="tsub">Rate the whole team, one after another, plus the Barista refresh checklist</div>
+          <div class="tsub">Rate the whole team, one after another</div>
         </a>
       </div>
       <div class="empty-note" id="td-status" style="padding-top:0;">Loading this store's team…</div>
@@ -5000,6 +5025,7 @@ function lmShowView(view, anchor){
   }
   $$(".lm-view").forEach(v => v.hidden = v.dataset.lmview !== view);
   $$("#lm-tabs .lm-tab").forEach(t => t.classList.toggle("active", t.dataset.lmtab === view));
+  lmNewSeenTab(view);
   lmSetTitles();
   if(view === "dashboard" && currentDetailLocId) loadSalesTrends(currentDetailLocId);
   if(view === "teamdev" && currentDetailLocId) loadTeamDev(currentDetailLocId);
@@ -5037,6 +5063,7 @@ function lmOnStoreChange(locId){
   evLoad(locId);
   tabLoad(locId);
   lmSetTitles();
+  lmWhatsNew(locId);
 }
 
 /* ---------------- To-do list ---------------- */
@@ -8615,6 +8642,87 @@ function renderBookkeeperList(rows){
     loadDirectory();
   }
 })();
+
+
+/* =====================================================================
+   WHAT'S NEW SINCE YOUR LAST VISIT (Nov 13 2026)
+   lm_visit(loc) records this load and returns the previous one; lm_changes(loc, since)
+   returns other people's changes at this cafe grouped by section:
+   [{k, tab, target, label, n, items[], latest}]. Tabs get a pulsing count (cleared when
+   the tab is opened); each changed section gets a "N new" chip, a glow and the list of what
+   changed; a banner under the tabs lists everything. "Got it" clears the highlights.
+   ===================================================================== */
+const LM_NEW_TAB = { dashboard:"Store Dashboard", ordering:"Ordering", performance:"Performance", teamdev:"Team Development", scheduling:"Scheduling", events:"Events" };
+let lmNew = {};   // locId -> { since, groups, seenTabs:Set, dismissed }
+async function lmWhatsNew(locId){
+  if(!locId) return;
+  if(lmNew[locId]) return lmNewRender(locId);  // already fetched this session: keep showing it
+  const { data: prev, error } = await sb.rpc("lm_visit", { p_loc: locId });
+  if(error){ console.warn("lm_visit", error); return; }
+  let groups = [];
+  if(prev){
+    const { data, error: e2 } = await sb.rpc("lm_changes", { p_loc: locId, p_since: prev });
+    if(e2) console.warn("lm_changes", e2); else groups = data || [];
+  }
+  lmNew[locId] = { since: prev, groups, seenTabs: new Set(), dismissed: false };
+  if(locId === currentDetailLocId) lmNewRender(locId);
+}
+function lmNewClear(){
+  $$(".lm-tab-new").forEach(b => b.remove());
+  $$(".lm-new-chip, .lm-new-list").forEach(b => b.remove());
+  $$(".lm-new-glow").forEach(b => b.classList.remove("lm-new-glow"));
+  const w = $("#lm-whatsnew"); if(w){ w.hidden = true; w.innerHTML = ""; }
+}
+function lmNewHost(el){
+  // the visible header for a section: a card's title row, or the section-head above it
+  if(el.classList.contains("section-head")) return { head: el.querySelector("h2") || el, box: el, after: el };
+  if(el.tagName === "H2") return { head: el, box: el.closest(".section-head") || el.parentElement, after: el.closest(".section-head") || el.parentElement };
+  const card = el.classList.contains("card") ? el : el.closest(".card");
+  if(card){ const t = card.querySelector(".lm-card-title h3") || card.querySelector("h3, h2"); return { head: t || card, box: card, after: card.querySelector(".lm-card-title") || t }; }
+  let p = el.previousElementSibling; while(p && !p.classList.contains("section-head")) p = p.previousElementSibling;
+  const h = p ? p.querySelector("h2") : null;
+  return { head: h || el, box: el, after: p || el };
+}
+function lmNewRender(locId){
+  lmNewClear();
+  const st = lmNew[locId]; if(!st || st.dismissed || !st.groups.length) return;
+  const when = new Date(st.since).toLocaleString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit", timeZone: LM_TZ });
+  // tabs (top tabs + sidebar items)
+  const byTab = {};
+  st.groups.forEach(g => byTab[g.tab] = (byTab[g.tab] || 0) + Number(g.n));
+  Object.entries(byTab).forEach(([tab, n]) => {
+    if(st.seenTabs.has(tab)) return;
+    const side = $(`.nav-item.lm-nav[data-lmview="${tab}"]`);  // first sidebar item for that tab
+    [...$$(`#lm-tabs .lm-tab[data-lmtab="${tab}"]`), ...(side ? [side] : [])].forEach(b => {
+      const s = document.createElement("span"); s.className = "lm-tab-new"; s.textContent = n > 99 ? "99+" : n; s.title = `${n} new since your last visit`; b.appendChild(s);
+    });
+  });
+  // sections
+  st.groups.forEach(g => {
+    const el = document.getElementById(g.target); if(!el) return;
+    const h = lmNewHost(el);
+    const chip = document.createElement("span"); chip.className = "lm-new-chip"; chip.textContent = `${g.n} new`; chip.title = (g.items||[]).join("\n");
+    h.head.appendChild(chip);
+    h.box.classList.add("lm-new-glow");
+    const ul = document.createElement("ul"); ul.className = "lm-new-list";
+    ul.innerHTML = (g.items||[]).map(t => `<li>${lmEsc(t)}</li>`).join("") + (g.n > (g.items||[]).length ? `<li>…and ${g.n - g.items.length} more</li>` : "");
+    if(h.after && h.after !== h.box) h.after.insertAdjacentElement("afterend", ul); else h.box.insertAdjacentElement(h.box.tagName === "DIV" && h.box.classList.contains("section-head") ? "afterend" : "afterbegin", ul);
+  });
+  // banner
+  const w = $("#lm-whatsnew"); if(!w) return;
+  const total = st.groups.reduce((a, g) => a + Number(g.n), 0);
+  w.innerHTML = `<div class="lm-whatsnew-top"><h3>${total} change${total === 1 ? "" : "s"} since your last visit</h3>
+      <span class="since">Last here ${lmEsc(when)} · <button type="button" class="btn small" id="lm-whatsnew-ok">Got it, clear highlights</button></span></div>
+    <div class="lm-whatsnew-grid">${st.groups.map(g => `<button type="button" class="lm-whatsnew-item" data-go="${g.tab}" data-anchor="${g.target}">
+      <span class="w">${lmEsc(LM_NEW_TAB[g.tab] || g.tab)}</span><span class="t">${lmEsc(g.label)} <b>${g.n} new</b></span><span class="s">${lmEsc((g.items||[])[0] || "")}</span></button>`).join("")}</div>`;
+  w.hidden = false;
+  $("#lm-whatsnew-ok").addEventListener("click", () => { st.dismissed = true; lmNewClear(); });
+}
+function lmNewSeenTab(view){
+  const st = lmNew[currentDetailLocId]; if(!st || st.dismissed) return;
+  st.seenTabs.add(view);
+  $$(`#lm-tabs .lm-tab[data-lmtab="${view}"] .lm-tab-new, .nav-item.lm-nav[data-lmview="${view}"] .lm-tab-new`).forEach(b => b.remove());
+}
 
 /* =====================================================================
    TEAM ASSESSMENT + BARISTA REFRESH (Training Night, Nov 12 2026)
