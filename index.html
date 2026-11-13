@@ -1318,6 +1318,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <li class="gm-only"><a class="nav-item nav-link" href="walkthrough.html" target="_blank" rel="noopener" title="Score a cafe walk-through (opens the walk-through page)"><span class="nav-dot"></span>Walk-Through Audit<span class="nav-ext" aria-hidden="true">↗</span></a></li>
       <li class="exec-only"><button class="nav-item" data-section="lmgm" data-audits="secret_shopper"><span class="nav-dot"></span>Secret Shopper</button></li>
       <li class="exec-only"><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
+      <li><a class="nav-item nav-link" href="hr-cases.html" title="Confidential harassment & discrimination complaints sent to you"><span class="nav-dot"></span>Complaints <span id="hc-nav-count" class="chip critical" style="display:none; margin-left:6px; padding:1px 7px;"></span></a></li>
     </ul>
     </div>
     <div class="sidebar-foot coo-nav-group">
@@ -2129,6 +2130,9 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 
       <div class="section-head" id="lm-anchor-training"><h2>Barista training</h2><span class="hint">Barista Beginner · first 90 days · tap a name to open their training</span></div>
       <div class="card lm-pad"><div id="td-training-list"></div></div>
+
+      <div class="section-head" id="lm-anchor-shpt"><h2 id="shpt-trk-title">Sexual harassment training</h2><span class="hint">NY requires it every year · due Dec 31 · new hires within 30 days</span></div>
+      <div class="card lm-pad"><div id="shpt-trk"><div class="empty-note">Loading…</div></div></div>
 
       <div class="section-head" id="lm-anchor-pips"><h2>Performance improvement plans</h2><span class="hint">30 days hourly · 60 days salaried · weekly written check-ins</span></div>
       <div id="td-pip-list"></div>
@@ -4735,6 +4739,12 @@ async function initApp(){
   $$(".exec-nav-group").forEach(el => el.hidden = !(EXEC_ROLES.includes(myStaff.role) || myStaff.role === "gm"));
   $$(".exec-nav-group .exec-only").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
   $$(".exec-nav-group .gm-only").forEach(el => el.style.display = myStaff.role === "gm" ? "" : "none");
+  if(EXEC_ROLES.includes(myStaff.role) || myStaff.role === "gm"){
+    sb.from("harassment_complaints").select("id,recipient_ids,subject_staff_id").eq("status","new").then(({ data }) => {
+      const n = (data||[]).filter(c => (c.recipient_ids||[]).includes(myStaff.id) && c.subject_staff_id !== myStaff.id).length;
+      const b = document.getElementById("hc-nav-count"); if(b && n){ b.textContent = n; b.style.display = "inline-flex"; }
+    });
+  }
   if(myStaff.role === "location_manager") window.__commandDeckGate.enableLmNav();
   else if(LM_NAV_ROLES.includes(myStaff.role)) window.__commandDeckGate.hideLmEntryPoints();
 
@@ -5045,6 +5055,7 @@ window.addEventListener("lm:view", e => { if(myStaff) lmShowView(e.detail.view, 
 $("#sec-lmgm").addEventListener("click", e => {
   const go = e.target.closest("[data-go]");
   if(!go) return;
+  if(go.dataset.go.endsWith(".html")){ location.href = go.dataset.go; return; }
   window.__commandDeckGate.openLmView(go.dataset.go, go.dataset.anchor || null);
 });
 
@@ -5551,18 +5562,22 @@ async function loadTrainingTodos(locId){
   const { data: hr } = await sb.from("staff_hr_details").select("staff_id,harassment_training_on").in("staff_id", ids);
   const by = Object.fromEntries((hr||[]).map(h => [h.staff_id, h.harassment_training_on]));
   const t = lmToday(), soon = lmAddDays(t, 30);
-  const overdue = [], dueSoon = [], missing = [];
+  const overdue = [], dueSoon = [], missing = [], out0 = [];
   team.forEach(m => {
-    const last = by[m.staff_id];
-    if(!last){ missing.push(m); return; }
-    const due = tdTrainingDue(last);
-    if(due < t) overdue.push(m); else if(due <= soon) dueSoon.push(m);
+    const s = tdTrainingStatus(m.hire_date, by[m.staff_id], t);
+    if(s.state === "overdue") overdue.push(m); else if(s.state === "soon") dueSoon.push(m);
   });
+  try{
+    const { data: qs } = await sb.from("compliance_completions").select("staff_id").in("staff_id", ids).not("employee_question", "is", null).is("question_answered_at", null);
+    if(qs && qs.length) out0.push({ text:`${qs.length} harassment-training question${qs.length===1?"":"s"} waiting for your answer`, go:"teamdev", anchor:"lm-anchor-shpt" });
+    const { data: hc } = await sb.from("harassment_complaints").select("id,recipient_ids,subject_staff_id,status").in("status", ["new","reviewing","investigating"]);
+    const mine = (hc||[]).filter(c => (c.recipient_ids||[]).includes(myStaff.id) && c.subject_staff_id !== myStaff.id);
+    if(mine.length) out0.unshift({ text:`${mine.length} confidential complaint${mine.length===1?"":"s"} sent to you${mine.some(c => c.status==="new") ? " (new)" : ""}`, go:"hr-cases.html" });
+  }catch(e){}
   const names = arr => arr.slice(0, 3).map(m => m.name.split(" ")[0]).join(", ") + (arr.length > 3 ? ` +${arr.length - 3}` : "");
-  const out = [];
-  if(overdue.length) out.push({ text:`Sexual harassment training overdue: ${names(overdue)}`, go:"teamdev", anchor:"lm-anchor-anniv" });
-  if(dueSoon.length) out.push({ text:`Sexual harassment training due in 30 days: ${names(dueSoon)}`, go:"teamdev", anchor:"lm-anchor-anniv" });
-  if(missing.length) out.push({ text:`${missing.length} team member${missing.length===1?" has":"s have"} no harassment training date on file`, go:"teamdev", anchor:"lm-anchor-anniv" });
+  const out = out0;
+  if(overdue.length) out.push({ text:`Sexual harassment training overdue: ${names(overdue)}`, go:"teamdev", anchor:"lm-anchor-shpt" });
+  if(dueSoon.length) out.push({ text:`Sexual harassment training due in 30 days: ${names(dueSoon)}`, go:"teamdev", anchor:"lm-anchor-shpt" });
   tdTrainingTodos[locId] = out;
   renderTodos(locId);
 }
@@ -5590,7 +5605,18 @@ function tdBuildPipTodos(locId){
   tdPipTodos[locId] = out;
 }
 
-const tdTrainingDue = last => { const d = new Date(last + "T12:00:00Z"); d.setUTCFullYear(d.getUTCFullYear() + 1); return d.toISOString().slice(0,10); };
+/* NY sexual harassment prevention training: everyone by Dec 31 each year; new hires within 30 days of hire.
+   Same rule as the Academy's Required Training tab (shptStatus in academy.html). */
+function tdTrainingStatus(hire, last, today){
+  today = today || lmToday();
+  const Y = today.slice(0,4);
+  if(last && last.slice(0,4) >= Y) return { state:"done", due:null, year:Number(Y) };
+  let due = `${Y}-12-31`, newHire = false;
+  if(hire){ const h30 = lmAddDays(hire, 30); if(h30 >= `${Y}-01-01` && hire >= lmAddDays(`${Y}-01-01`, -30)){ due = h30; newHire = true; } }
+  const days = tdDays(today, due);
+  return { state: days < 0 ? "overdue" : days <= 30 ? "soon" : "due", due, days, newHire, year:Number(Y) };
+}
+const tdTrainingDue = (last, hire) => { const s = tdTrainingStatus(hire, last); return s.due || `${Number(lmToday().slice(0,4)) + 1}-12-31`; };
 function tdAnniversaries(locId){
   const team = tdTeam[locId]?.members || [], hr = tdData[locId]?.hr || {};
   const t = lmToday(), horizon = lmAddDays(t, 60), out = [];
@@ -5613,11 +5639,9 @@ function tdAnniversaries(locId){
       const bd = nextYearly(h.birthday.slice(5));
       if(bd <= horizon) out.push({ date:bd, who:m, kind:"birthday", label:"Birthday", detail:"" });
     }
-    // NY annual sexual harassment prevention training: due one year after the last completion
-    if(h.harassment_training_on){
-      const due = tdTrainingDue(h.harassment_training_on);
-      if(due <= horizon) out.push({ date:due, who:m, kind:"training", label: due < t ? "Sexual harassment training OVERDUE" : "Sexual harassment training due", detail:`Last completed ${lmFmtDate(h.harassment_training_on)}, ${h.harassment_training_on.slice(0,4)}` });
-    }
+    // NY sexual harassment prevention training: Dec 31 each year, new hires within 30 days
+    { const s = tdTrainingStatus(m.hire_date, h.harassment_training_on, t);
+      if(s.state !== "done" && s.due <= horizon) out.push({ date:s.due, who:m, kind:"training", label: s.state === "overdue" ? "Sexual harassment training OVERDUE" : "Sexual harassment training due", detail: h.harassment_training_on ? `Last completed ${lmFmtDate(h.harassment_training_on)}, ${h.harassment_training_on.slice(0,4)}` : (s.newHire ? "New hire · within 30 days" : "No completion on file") }); }
     if(h.grade_started_on){
       const ga = nextYearly(h.grade_started_on.slice(5));
       const yrs = Number(ga.slice(0,4)) - Number(h.grade_started_on.slice(0,4));
@@ -5716,7 +5740,7 @@ function renderTeamDev(locId){
   $("#td-k-ann").textContent = soon30.length;
   $("#td-k-ann-sub").textContent = soon30.filter(x => x.kind === "probation").length ? `${soon30.filter(x => x.kind === "probation").length} probation ending` : "";
   const missingBday = team.filter(m => !(d.hr||{})[m.staff_id]?.birthday).length;
-  const missingTraining = team.filter(m => !(d.hr||{})[m.staff_id]?.harassment_training_on).length;
+  const missingTraining = 0; // now shown in the Sexual harassment training tracker
   $("#td-anniv-list").innerHTML = (ann.length ? ann.map(x => {
       const dd = new Date(x.date + "T12:00:00Z"), days = tdDays(t, x.date);
       return `<div class="td-ann ${days<=14?"soon":""} ${days<0?"overdue":""}"><div class="event-date"><div class="d">${dd.getUTCDate()}</div><div class="m">${dd.toLocaleDateString("en-US",{month:"short", timeZone:"UTC"})}</div></div>
@@ -5733,6 +5757,7 @@ function renderTeamDev(locId){
   const ptsBy = Object.fromEntries(withPts.map(r => [r.sid, r.active]));
   $("#td-k-over").textContent = overdue.length;
   tdRenderTraining(locId);
+  shptRenderTracker(locId);
   $("#td-roster-body").innerHTML = team.length ? team.map(m => {
     const flags = [];
     if((m.role === "team_member" || m.role === "location_manager") && taLoaded.has(m.staff_id)){ const ts = taState(m.staff_id).status; flags.push(`<span class="chip ${TA_STATUS[ts][1]}" title="Team assessment">${TA_STATUS[ts][0]}</span>`); }
@@ -5994,6 +6019,94 @@ function tdOpenPip(pipId){
   });
 }
 
+/* ---------------- Sexual harassment training tracker (Team Development) ----------------
+   Reads compliance_completions (in-app, manager-logged, legacy) for this cafe's team.
+   Status uses tdTrainingStatus: Dec 31 each year, new hires within 30 days. */
+let shptTrk = {};
+const SHPT_METHOD = { in_app:"Academy", manager_logged:"Logged by manager", legacy:"On file" };
+async function shptRenderTracker(locId){
+  const el = $("#shpt-trk"); if(!el) return;
+  const team = (tdTeam[locId]?.members || []).filter(m => !["coo","ceo","cbo"].includes(m.role));
+  const t = lmToday(), Y = t.slice(0,4);
+  $("#shpt-trk-title").textContent = `Sexual harassment training · ${Y}`;
+  const ids = team.map(m => m.staff_id);
+  const { data, error } = ids.length ? await sb.from("compliance_completions").select("*").in("staff_id", ids).eq("training_key","ny_shpt").order("completed_on", { ascending:false }) : { data:[] };
+  if(error){ el.innerHTML = `<div class="empty-note">Couldn't load training records: ${lmEsc(error.message)}</div>`; return; }
+  const by = {}; (data||[]).forEach(r => (by[r.staff_id] ||= []).push(r));
+  const hr = tdData[locId]?.hr || {};
+  const rows = team.map(m => {
+    const recs = by[m.staff_id] || [];
+    const last = [recs[0]?.completed_on, hr[m.staff_id]?.harassment_training_on].filter(Boolean).sort().pop() || null;
+    const s = tdTrainingStatus(m.hire_date, last, t);
+    const cur = recs.find(r => String(r.compliance_year) === Y);
+    const openQ = recs.find(r => r.employee_question && !r.question_answered_at);
+    return { m, s, cur, last, openQ };
+  });
+  const order = { overdue:0, soon:1, due:2, done:3 };
+  rows.sort((a,b) => order[a.s.state] - order[b.s.state] || a.m.name.localeCompare(b.m.name));
+  shptTrk[locId] = rows;
+  const n = k => rows.filter(r => r.s.state === k).length;
+  const pct = rows.length ? Math.round(n("done") / rows.length * 100) : 0;
+  const chip = s => s.state === "done" ? `<span class="chip good">Done</span>` : s.state === "overdue" ? `<span class="chip critical">Overdue · ${lmFmtDate(s.due)}</span>` : `<span class="chip ${s.state==="soon"?"warn":"neutral"}">Due ${lmFmtDate(s.due)}${s.newHire?" · new hire":""}</span>`;
+  el.innerHTML = `
+    <div style="display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin-bottom:12px;">
+      <div><span class="tabular" style="font-size:22px; font-weight:700;">${pct}%</span> <span class="muted" style="font-size:12.5px;">done for ${Y} (${n("done")} of ${rows.length})</span></div>
+      <span class="chip critical">${n("overdue")} overdue</span><span class="chip warn">${n("soon")} due in 30 days</span><span class="chip neutral">${n("due")} not started</span>
+      <span style="flex:1"></span>
+      <button type="button" class="btn small ghost" id="shpt-csv">Export ${Y} record (CSV)</button>
+    </div>
+    <div class="lm-table-wrap"><table class="lm-table">
+      <thead><tr><th>Team member</th><th>${Y} status</th><th>Completed</th><th>How</th><th>Their question</th></tr></thead>
+      <tbody>${rows.map(r => `<tr>
+        <td><button type="button" class="td-person" data-profile="${r.m.staff_id}">${lmEsc(r.m.name)}</button></td>
+        <td>${chip(r.s)}</td>
+        <td>${r.cur ? lmFmtDate(r.cur.completed_on) : r.last ? `<span class="muted">Last: ${lmFmtDate(r.last)}, ${r.last.slice(0,4)}</span>` : `<span class="muted">—</span>`}</td>
+        <td>${r.cur ? `${SHPT_METHOD[r.cur.method]||r.cur.method}${r.cur.language?` · ${r.cur.language.toUpperCase()}`:""}${r.cur.signature_name?` · signed`:""}` : ""}</td>
+        <td>${r.openQ ? `<span style="font-size:12.5px;">“${lmEsc(r.openQ.employee_question)}”</span> <button type="button" class="btn small" data-shpt-answer="${r.openQ.id}">Answer</button>` : (r.cur && r.cur.employee_question ? `<span class="muted" style="font-size:12px;">Answered</span>` : "")}</td>
+      </tr>`).join("") || `<tr><td colspan="5" class="empty-note">No one on this team yet.</td></tr>`}</tbody>
+    </table></div>
+    <div class="empty-note" style="padding-bottom:0;">Team members take the state's free training themselves in the Academy → Required Training (English or Spanish): policy, video, case-study questions, e-signature. For an in-person or paper session, open the person's profile and enter the date.</div>`;
+  $("#shpt-csv").addEventListener("click", () => shptCsv(locId));
+  $$("#shpt-trk [data-shpt-answer]").forEach(b => b.addEventListener("click", () => shptAnswer(b.dataset.shptAnswer, locId)));
+}
+function shptCsv(locId){
+  const rows = shptTrk[locId] || [], Y = lmToday().slice(0,4);
+  const q = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
+  const loc = myLocations.find(l => l.id === locId)?.name || "";
+  const lines = [["Cafe","Name","Role","Hire date","Status","Due","Completed","Method","Language","Signed name","Signed at","First-try correct","Supervisor"].map(q).join(",")]
+    .concat(rows.map(r => [loc, r.m.name, r.m.job_title || r.m.role, r.m.hire_date || "", r.s.state, r.s.due || "", r.cur?.completed_on || "", r.cur ? SHPT_METHOD[r.cur.method] : "", r.cur?.language || "", r.cur?.signature_name || "", r.cur?.signed_at || "", r.cur?.question_count ? `${r.cur.first_try_correct}/${r.cur.question_count}` : "", r.cur?.is_supervisor ? "yes" : ""].map(q).join(",")));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type:"text/csv" }));
+  a.download = `harassment-training-${Y}-${loc.replace(/\W+/g,"-").toLowerCase()}.csv`; a.click();
+}
+async function shptAnswer(id, locId){
+  const ans = prompt("Your answer (the team member sees it in the Academy):");
+  if(!ans || !ans.trim()) return;
+  const { error } = await sb.from("compliance_completions").update({ question_answer: ans.trim(), question_answered_at: new Date().toISOString(), question_answered_by: myStaff.id }).eq("id", id);
+  if(error){ alert(`Couldn't save: ${error.message}`); return; }
+  shptRenderTracker(locId); loadTrainingTodos(locId);
+}
+async function shptFillProfile(staffId){
+  const el = $("#shpt-prof"); if(!el) return;
+  const { data } = await sb.from("compliance_completions").select("*").eq("staff_id", staffId).eq("training_key","ny_shpt").order("completed_on", { ascending:false });
+  if(!el.isConnected || !data || !data.length) return;
+  el.innerHTML = "History: " + data.map(r => `${r.compliance_year} · ${lmFmtDate(r.completed_on)} · ${SHPT_METHOD[r.method]||r.method}${r.language?` (${r.language.toUpperCase()})`:""}${r.signature_name?` · signed “${lmEsc(r.signature_name)}”`:""}${r.question_count?` · ${r.first_try_correct}/${r.question_count} first try`:""}`).join("<br>");
+}
+
+async function docsFillProfile(staffId){
+  const el = $("#docs-prof"); if(!el) return;
+  const [{ data: docs }, { data: acks }] = await Promise.all([
+    sb.from("company_documents").select("key,title,version").eq("requires_ack", true).eq("is_active", true),
+    sb.from("document_acknowledgments").select("doc_key,doc_version,signature_name,signed_at").eq("staff_id", staffId),
+  ]);
+  if(!el.isConnected) return;
+  const hb = (docs||[]).find(d => d.key === "employee_handbook");
+  if(!hb){ el.textContent = "—"; return; }
+  const a = (acks||[]).find(x => x.doc_key === hb.key && x.doc_version === hb.version);
+  el.innerHTML = a ? `<span class="chip good">Signed</span> ${hb.version} edition · “${lmEsc(a.signature_name)}” on ${lmFmtDate(a.signed_at.slice(0,10))}, ${a.signed_at.slice(0,4)}`
+                   : `<span class="chip warn">Not signed</span> ${hb.version} edition · they sign it in the Academy → Documents &amp; Forms`;
+}
+
 /* ---------------- Profile ---------------- */
 function tdOpenProfile(staffId){
   const locId = currentDetailLocId, m = (tdTeam[locId]?.members || []).find(x => x.staff_id === staffId);
@@ -6020,14 +6133,17 @@ function tdOpenProfile(staffId){
       <dt>Hours on record</dt><dd>${m.lifetime_hours ? `${lmNum(m.lifetime_hours)} hrs · PTO tier ${ptoTier} (${ptoHrs} hrs/yr)` : "None logged"} <span class="muted">· official balances live in Gusto</span></dd>
       <dt>Academy</dt><dd>Leadership ${lvl("leadership")} · Craft ${lvl("craft")} · Customer Care ${lvl("customer_care")}</dd>
       <dt>Attendance</dt><dd>${active} active points · <span class="chip ${scls}">${standing}</span></dd>
-      <dt>Harassment training</dt><dd>${h.harassment_training_on ? (() => { const due = tdTrainingDue(h.harassment_training_on); return `Last completed ${lmFmtDate(h.harassment_training_on)}, ${h.harassment_training_on.slice(0,4)} · ${due < t ? `<span class="chip critical">Overdue since ${lmFmtDate(due)}</span>` : tdDays(t, due) <= 30 ? `<span class="chip warn">Due ${lmFmtDate(due)}</span>` : `Next due ${lmFmtDate(due)}, ${due.slice(0,4)}`}`; })() : `<span class="chip critical">Not on file</span>`}</dd>
+      <dt>Harassment training</dt><dd>${(() => { const s = tdTrainingStatus(m.hire_date, h.harassment_training_on, t);
+        const last = h.harassment_training_on ? `Last completed ${lmFmtDate(h.harassment_training_on)}, ${h.harassment_training_on.slice(0,4)}` : "No completion on file";
+        return s.state === "done" ? `<span class="chip good">Done for ${s.year}</span> ${last}` : `<span class="chip ${s.state==="overdue"?"critical":s.state==="soon"?"warn":"neutral"}">${s.state==="overdue"?"Overdue since":"Due"} ${lmFmtDate(s.due)}</span> ${last}`; })()}<div id="shpt-prof" class="muted" style="font-size:12px; margin-top:4px;"></div></dd>
+      <dt>Employee Handbook</dt><dd id="docs-prof">…</dd>
     </dl>
     <div class="lm-modal-section">Dates for anniversaries</div>
     <form class="lm-form" id="td-hr-form">
       <div><label>Birthday</label><input type="date" id="td-hr-bday" value="${h.birthday||""}"></div>
       <div><label>Started current role on</label><input type="date" id="td-hr-grade" value="${h.grade_started_on||""}"><div class="help">For time in grade</div></div>
       <div><label>Probation length (days)</label><input type="number" id="td-hr-prob" min="0" max="365" value="${h.probation_days ?? 90}"></div>
-      <div><label>Sexual harassment training completed</label><input type="date" id="td-hr-train" value="${h.harassment_training_on||""}" max="${t}"><div class="help">Most recent completion. Due again 1 year later (NY annual requirement)</div></div>
+      <div><label>Sexual harassment training completed</label><input type="date" id="td-hr-train" value="${h.harassment_training_on||""}" max="${t}"><div class="help">For in-person or paper trainings. Team members can also complete it themselves in the Academy (Required Training tab). Due every calendar year.</div></div>
       <div class="lm-form-actions"><span class="err" id="td-hr-err"></span><button type="submit" class="btn small">Save dates</button></div>
     </form>
     <div class="lm-modal-section">Attendance history (this store)</div>
@@ -6037,12 +6153,18 @@ function tdOpenProfile(staffId){
     <div class="lm-modal-section">Recent coaching</div>
     ${coach.length ? coach.map(c => `<details class="td-1on1"><summary><span>${c.conversation_type === "1-1" ? "1-1" : lmEsc(c.conversation_type)}</span><span class="when">${tdAgo(c.occurred_at)}</span></summary>${c.template_notes ? `<div class="td-notes">${tdNotesHtml(c.template_notes)}</div>` : ""}</details>`).join("") : `<div class="empty-note">No coaching conversations logged yet.</div>`}`);
   taFillProfile(staffId, locId, m.name);
+  shptFillProfile(staffId);
+  docsFillProfile(staffId);
   $("#td-hr-form").addEventListener("submit", async e => {
     e.preventDefault();
     const btn = e.submitter; btn.disabled = true;
     const { error } = await sb.from("staff_hr_details").upsert({ staff_id: staffId, birthday: $("#td-hr-bday").value || null, grade_started_on: $("#td-hr-grade").value || null, probation_days: Number($("#td-hr-prob").value || 90), harassment_training_on: $("#td-hr-train").value || null, updated_by: myStaff.id, updated_at: new Date().toISOString() }, { onConflict:"staff_id" });
     btn.disabled = false;
     if(error){ $("#td-hr-err").textContent = `Couldn't save: ${error.message}`; return; }
+    const trainOn = $("#td-hr-train").value;
+    if(trainOn && trainOn !== (h.harassment_training_on || "")){
+      await sb.from("compliance_completions").upsert({ staff_id: staffId, training_key:"ny_shpt", compliance_year:Number(trainOn.slice(0,4)), completed_on: trainOn, method:"manager_logged", recorded_by: myStaff.id, notes:"Logged from Team Development profile" }, { onConflict:"staff_id,training_key,compliance_year", ignoreDuplicates:true });
+    }
     $("#td-hr-err").textContent = "Saved.";
     tdRefresh();
   });

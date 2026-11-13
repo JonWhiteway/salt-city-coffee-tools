@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harassment & Discrimination Complaints · Salt City</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;600;700&display=swap');
+/* Private case list for the digital harassment / discrimination complaint form (academy.html → Documents & Forms).
+   Row-level security only returns complaints sent to you, and never ones about you.
+   Steps follow the Complaints & Investigations section of the 2025 Employee Handbook. */
+:root{
+  --lead-900:#0D1B2A; --lead-700:#1B365D; --lead-100:#EEF2F8; --care-700:#C75D3D; --care-100:#FFF6EE;
+  --ink:#241A12; --ink-soft:#4A3B2E; --muted:#7A6A57; --paper:#FFFFFF; --panel:#F7F5F1; --line:#E3DED6;
+  --green:#4C7A52; --green-tint:#E8F0E8; --amber:#B8863B; --amber-tint:#F5EBD8; --red:#A3453A; --red-tint:#F5E3E0;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{ font-family:'Montserrat',sans-serif; background:var(--panel); color:var(--ink); min-height:100vh; line-height:1.5; }
+h1,h2,h3{ font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:.3px; }
+.topbar{ background:linear-gradient(120deg,var(--lead-900),#0a1420); color:#fff; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.topbar .brand-name{ font-family:'Oswald',sans-serif; font-weight:700; font-size:18px; letter-spacing:1px; }
+.topbar .brand-sub{ font-size:10.5px; color:#9FB3C8; letter-spacing:2px; text-transform:uppercase; }
+.topbar a{ color:#fff; font-size:12px; font-weight:700; text-decoration:none; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); border-radius:8px; padding:8px 12px; }
+main{ max-width:1000px; margin:0 auto; padding:28px 16px 80px; }
+.page-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+.eyebrow{ font-size:11.5px; letter-spacing:2.5px; color:var(--care-700); font-weight:700; text-transform:uppercase; }
+.page-head h1{ font-size:28px; color:var(--lead-700); margin-top:4px; }
+.sub{ color:var(--muted); font-size:13.5px; margin-top:2px; max-width:640px; }
+.card{ background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:16px; box-shadow:0 1px 3px rgba(13,27,42,.08); }
+.card h2{ font-family:'Montserrat',sans-serif; font-size:12px; letter-spacing:1.5px; color:var(--muted); font-weight:700; margin-bottom:12px; }
+.msg{ font-size:13.5px; padding:11px 14px; border-radius:8px; margin-bottom:14px; }
+.msg.error{ background:var(--red-tint); color:var(--red); } .msg.info{ background:var(--paper); color:var(--ink-soft); border:1px solid var(--line); }
+.btn{ font:700 13px 'Montserrat',sans-serif; background:var(--care-700); color:#fff; border:none; border-radius:8px; padding:9px 14px; cursor:pointer; }
+.btn.ghost{ background:none; color:var(--care-700); border:1px solid var(--care-700); }
+.btn.small{ padding:6px 10px; font-size:12px; }
+.btn[disabled]{ opacity:.45; cursor:not-allowed; }
+table{ width:100%; border-collapse:collapse; font-size:13px; }
+th{ text-align:left; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:#fff; background:var(--lead-700); padding:8px 10px; }
+td{ padding:10px; border-bottom:1px solid var(--line); vertical-align:top; }
+tr.click{ cursor:pointer; } tr.click:hover td{ background:var(--lead-100); }
+.pill{ display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; }
+.pill.amber{ background:var(--amber-tint); color:#8a6223; } .pill.green{ background:var(--green-tint); color:var(--green); } .pill.red{ background:var(--red-tint); color:var(--red); } .pill.muted{ background:var(--panel); color:var(--muted); }
+.filters{ display:flex; gap:6px; flex-wrap:wrap; }
+.filters button{ border:1px solid var(--line); background:#fff; border-radius:99px; padding:6px 12px; font:700 12px 'Montserrat',sans-serif; color:var(--muted); cursor:pointer; }
+.filters button.on{ background:var(--lead-700); color:#fff; border-color:var(--lead-700); }
+dl.kv{ display:grid; grid-template-columns:200px 1fr; gap:6px 16px; font-size:13.5px; }
+dl.kv dt{ color:var(--muted); font-weight:600; } dl.kv dd{ white-space:pre-wrap; }
+.text{ font-size:14px; white-space:pre-wrap; line-height:1.6; background:var(--panel); border-radius:10px; padding:12px 14px; }
+.steps{ list-style:none; }
+.steps li{ display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+.steps .n{ flex:0 0 26px; height:26px; border-radius:50%; background:var(--line); color:#fff; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; }
+.steps li.done .n{ background:var(--green); }
+.steps .t{ flex:1; } .steps .when{ font-size:12px; color:var(--green); font-weight:600; }
+.log{ border-left:3px solid var(--line); padding:4px 0 4px 14px; margin:10px 0; font-size:13.5px; }
+.log .meta{ font-size:11.5px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.form label{ display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin:12px 0 5px; }
+.form input, .form select, .form textarea{ width:100%; font-family:inherit; font-size:14px; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); }
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
+.checks{ display:grid; grid-template-columns:1fr 1fr; gap:4px 16px; }
+.checks label{ display:flex; gap:8px; align-items:center; font-weight:500; color:var(--ink); margin:4px 0; } .checks input{ width:auto; }
+.confidential{ font-size:12px; color:var(--red); font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+@media (max-width:720px){ dl.kv, .grid2, .checks{ grid-template-columns:1fr; } }
+@media print{ .topbar, .noprint{ display:none !important; } body{ background:#fff; } .card{ box-shadow:none; break-inside:avoid; } main{ padding:0; } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><div class="brand-name">Salt City</div><div class="brand-sub">Harassment &amp; Discrimination Complaints</div></div>
+  <a href="/">&larr; Command Deck</a>
+</div>
+<main id="app"><div class="msg info">Loading&hellip;</div></main>
+
+<script>
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eXN2Y3ByenZtaHhycm5vZ3FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODMxMTAsImV4cCI6MjEwMDc1OTExMH0.KZXVYcdDa9lKo3YNXbUYnYGOWjS-ZFtlV4YeyzTs_h0';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const LEADERS = ['gm','coo','ceo','cbo'];
+const CAN_OPEN = [...LEADERS, 'location_manager'];
+const STATUS = { new:['New','red'], reviewing:['Under review','amber'], investigating:['Investigating','amber'], resolved:['Resolved','green'], closed:['Closed','muted'] };
+const TYPE = { sexual_harassment:'Sexual harassment', discrimination:'Discrimination', retaliation:'Retaliation', other:'Other' };
+const REL = { supervisor:'Supervisor', subordinate:'Someone they supervise', coworker:'Co-worker', customer:'Customer', vendor:'Vendor / delivery', other:'Other' };
+const PREF = { email:'Email', phone:'Phone', in_person:'In person' };
+const KIND = { note:'Note', status:'Status', interim_action:'Interim action', document:'Documents reviewed / preserved', interview:'Interview', finding:'Finding / decision', notified:'Notification', external_rights:'External rights' };
+const app = document.getElementById('app');
+const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
+const fmt = d => d ? new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
+const fmtT = d => d ? new Date(d).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+const daysSince = d => Math.floor((Date.now() - new Date(d)) / 86400000);
+const params = new URLSearchParams(location.search);
+let me = null, staff = [], cases = [], filter = 'open';
+const nameOf = id => (staff.find(s => s.id === id) || {}).name || 'Unknown';
+
+async function loadCases(){
+  const { data, error } = await sb.from('harassment_complaints').select('*').order('created_at', { ascending:false });
+  if (error) throw error;
+  // only cases sent to me (my own filed reports are in the Academy)
+  cases = (data || []).filter(c => (c.recipient_ids || []).includes(me.id) && c.subject_staff_id !== me.id);
+}
+
+function renderList(){
+  const open = c => !['resolved','closed'].includes(c.status);
+  const shown = cases.filter(c => filter === 'all' ? true : filter === 'open' ? open(c) : !open(c));
+  app.innerHTML = `
+    <div class="page-head">
+      <div><div class="eyebrow">Confidential</div><h1>Complaints sent to you</h1>
+        <div class="sub">Only the people a complaint was sent to can see it, and never the person it's about. Investigate promptly, keep it confidential as far as possible, and document each step.</div></div>
+      ${LEADERS.includes(me.role) ? `<button class="btn" onclick="renderVerbal()">+ Record a verbal complaint</button>` : ''}
+    </div>
+    <div class="card">
+      <div class="filters" style="margin-bottom:12px;">${[['open','Open'],['done','Resolved / closed'],['all','All']].map(([k,l]) => `<button class="${filter===k?'on':''}" onclick="filter='${k}'; renderList()">${l} (${cases.filter(c => k==='all'?true:k==='open'?open(c):!open(c)).length})</button>`).join('')}</div>
+      ${shown.length ? `<table><tr><th>Received</th><th>From</th><th>About</th><th>Type</th><th>Status</th></tr>
+        ${shown.map(c => { const [l, cls] = STATUS[c.status] || [c.status,'muted']; return `<tr class="click" onclick="openCase('${c.id}')">
+          <td>${fmt(c.created_at)}<div style="font-size:11.5px; color:var(--muted);">${open(c) ? `${daysSince(c.created_at)} days open` : ''}</div></td>
+          <td>${esc(c.complainant_name)}${c.on_behalf_of ? `<div style="font-size:11.5px; color:var(--muted);">for ${esc(c.on_behalf_of)}</div>` : ''}${c.source === 'verbal_recorded' ? `<div style="font-size:11.5px; color:var(--muted);">verbal, recorded by ${esc(nameOf(c.filed_by))}</div>` : ''}</td>
+          <td>${esc(c.subject_name)}</td><td>${TYPE[c.complaint_type] || ''}</td><td><span class="pill ${cls}">${l}</span></td></tr>`; }).join('')}</table>`
+      : `<div class="msg info" style="margin:0;">Nothing here.</div>`}
+    </div>`;
+}
+
+async function openCase(id){
+  history.replaceState(null, '', '?case=' + id);
+  const c = cases.find(x => x.id === id);
+  if (!c) return renderList();
+  if (!c.acknowledged_at) {
+    const { data } = await sb.from('harassment_complaints').update({ acknowledged_at: new Date().toISOString(), acknowledged_by: me.id, status: c.status === 'new' ? 'reviewing' : c.status }).eq('id', id).select().single();
+    if (data) Object.assign(c, data);
+    await sb.from('harassment_complaint_events').insert({ complaint_id:id, author_id:me.id, kind:'status', body:`Opened by ${me.name}. Status: Under review.` });
+  }
+  const { data: log } = await sb.from('harassment_complaint_events').select('*').eq('complaint_id', id).order('created_at');
+  const has = k => (log || []).some(e => e.kind === k);
+  const [sl, scls] = STATUS[c.status] || [c.status,'muted'];
+  const steps = [
+    ['Review the allegations, set the scope, and take any interim actions (e.g. no contact between the people involved). If the report was verbal, write it up on this form.', has('interim_action') || c.status !== 'reviewing', 'interim_action'],
+    ['Get, review and preserve relevant documents, emails, texts and phone records.', has('document'), 'document'],
+    ['Interview everyone involved, including witnesses.', has('interview'), 'interview'],
+    ['Write up the investigation: documents reviewed, people interviewed and what they said, a timeline, any prior incidents, and the basis for the decision with corrective actions.', has('finding'), 'finding'],
+    ['Keep the documentation secure and confidential. (This case file is visible only to the people it was sent to.)', true, null],
+    ['Tell the person who reported, and the person it is about, that the investigation is complete, and carry out any corrective actions.', !!(c.complainant_notified_at && c.subject_notified_at), 'notified'],
+    ['Tell the person who reported about their right to file outside the company (NYS DHR, EEOC, court).', !!c.external_rights_informed_at, 'external_rights'],
+  ];
+  app.innerHTML = `
+    <div class="noprint" style="margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn ghost small" onclick="history.replaceState(null,'','?'); renderList()">← All complaints</button>
+      <button class="btn ghost small" onclick="window.print()">Print case file</button>
+    </div>
+    <div class="page-head">
+      <div><div class="confidential">Confidential · Case ${c.id.slice(0,8)}</div><h1>${TYPE[c.complaint_type] || 'Complaint'} · ${esc(c.subject_name)}</h1>
+        <div class="sub">Received ${fmtT(c.created_at)} · ${c.source === 'verbal_recorded' ? `verbal report recorded by ${esc(nameOf(c.filed_by))}` : 'submitted in the Academy'} · sent to ${(c.recipient_ids||[]).map(nameOf).map(esc).join(', ')}</div></div>
+      <div class="noprint"><select id="st" onchange="setStatus('${c.id}', this.value)">${Object.entries(STATUS).map(([k,[l]]) => `<option value="${k}" ${c.status===k?'selected':''}>${l}</option>`).join('')}</select></div>
+    </div>
+
+    <div class="card"><h2>Person reporting</h2><dl class="kv">
+      <dt>Name</dt><dd>${esc(c.complainant_name)}${c.complainant_title ? ` · ${esc(c.complainant_title)}` : ''}</dd>
+      ${c.on_behalf_of ? `<dt>Reporting for</dt><dd>${esc(c.on_behalf_of)}</dd>` : ''}
+      <dt>Work location</dt><dd>${esc(c.complainant_location || '—')}</dd>
+      <dt>Contact</dt><dd>${[c.complainant_phone, c.complainant_email].filter(Boolean).map(esc).join(' · ') || '—'}${c.preferred_contact ? ` · prefers ${PREF[c.preferred_contact]}` : ''}</dd>
+      <dt>Immediate supervisor</dt><dd>${esc([c.supervisor_name, c.supervisor_title].filter(Boolean).join(', ') || '—')}</dd>
+    </dl></div>
+
+    <div class="card"><h2>Complaint</h2><dl class="kv">
+      <dt>About</dt><dd>${esc(c.subject_name)}${c.subject_title ? ` · ${esc(c.subject_title)}` : ''}${c.subject_location ? ` · ${esc(c.subject_location)}` : ''}${c.subject_relationship ? ` · ${REL[c.subject_relationship]}` : ''}</dd>
+      <dt>Date(s)</dt><dd>${esc(c.incident_dates || '—')}</dd>
+      <dt>Still happening?</dt><dd>${c.is_continuing == null ? '—' : c.is_continuing ? '<b style="color:var(--red)">Yes</b>' : 'No'}</dd>
+    </dl>
+      <h2 style="margin-top:14px;">What happened</h2><div class="text">${esc(c.description)}</div>
+      <dl class="kv" style="margin-top:14px;">
+        <dt>Witnesses / others with information</dt><dd>${esc(c.witnesses || '—')}</dd>
+        <dt>Earlier related complaints</dt><dd>${esc(c.prior_complaints || '—')}</dd>
+        <dt>Legal counsel</dt><dd>${esc(c.legal_counsel || '—')}</dd>
+        <dt>Signed</dt><dd>“${esc(c.signature_name)}” · ${fmtT(c.signed_at)}</dd>
+      </dl></div>
+
+    <div class="card"><h2>Investigation steps (Employee Handbook)</h2>
+      <ul class="steps">${steps.map(([t, done, kind], i) => `<li class="${done?'done':''}"><span class="n">${i+1}</span><div class="t">${t}
+        ${kind === 'notified' ? `<div class="noprint" style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">
+            ${c.complainant_notified_at ? `<span class="when">Reporter notified ${fmt(c.complainant_notified_at)}</span>` : `<button class="btn ghost small" onclick="stamp('${c.id}','complainant_notified_at','Notified the person who reported that the investigation is complete.')">Reporter notified</button>`}
+            ${c.subject_notified_at ? `<span class="when">Subject notified ${fmt(c.subject_notified_at)}</span>` : `<button class="btn ghost small" onclick="stamp('${c.id}','subject_notified_at','Notified the person the complaint was about that the investigation is complete.')">Subject notified</button>`}</div>` : ''}
+        ${kind === 'external_rights' ? (c.external_rights_informed_at ? `<div class="when">Done ${fmt(c.external_rights_informed_at)}</div>` : `<div class="noprint" style="margin-top:6px;"><button class="btn ghost small" onclick="stamp('${c.id}','external_rights_informed_at','Informed the person who reported of their right to file with NYS DHR, the EEOC, or in court.')">Mark done</button></div>`) : ''}
+        ${kind && !['notified','external_rights'].includes(kind) ? `<div class="noprint" style="margin-top:6px;"><button class="btn ghost small" onclick="document.getElementById('lk').value='${kind}'; document.getElementById('lb').focus()">Add ${KIND[kind].toLowerCase()} note</button></div>` : ''}
+      </div></li>`).join('')}</ul></div>
+
+    <div class="card"><h2>Case log</h2>
+      ${(log || []).map(e => `<div class="log"><div class="meta">${KIND[e.kind] || e.kind} · ${esc(nameOf(e.author_id))} · ${fmtT(e.created_at)}</div>${esc(e.body)}</div>`).join('') || '<div class="msg info">No entries yet.</div>'}
+      <div class="form noprint">
+        <div class="grid2"><div><label>Type</label><select id="lk">${Object.entries(KIND).filter(([k]) => k !== 'status').map(([k,l]) => `<option value="${k}">${l}</option>`).join('')}</select></div><div></div></div>
+        <label>Entry (can't be edited later)</label><textarea id="lb" rows="4"></textarea>
+        <div style="margin-top:10px;"><button class="btn" onclick="addLog('${c.id}')">Add to case log</button></div>
+      </div></div>
+
+    <div class="card form"><h2>Resolution</h2>
+      <label>Outcome summary. The person who reported will see this in the Academy.</label>
+      <textarea id="res" rows="4">${esc(c.resolution_summary || '')}</textarea>
+      <div class="noprint" style="margin-top:10px; display:flex; gap:8px;"><button class="btn" onclick="resolve('${c.id}')">Save and mark resolved</button></div>
+      ${c.resolved_at ? `<div class="when" style="margin-top:8px; color:var(--green); font-weight:600;">Resolved ${fmtT(c.resolved_at)}</div>` : ''}
+    </div>
+    <div class="msg info">Outside options for the person who reported: <a href="https://dhr.ny.gov/complaint" target="_blank" rel="noopener">NYS Division of Human Rights</a> (3 years), <a href="https://www.eeoc.gov/filing-charge-discrimination" target="_blank" rel="noopener">U.S. EEOC</a> (300 days), state court, and the NY Sexual Harassment Hotline 1-800-HARASS-3. Reporting internally doesn't extend those deadlines.</div>`;
+}
+async function refresh(id){ await loadCases(); id ? openCase(id) : renderList(); }
+async function setStatus(id, s){
+  const { error } = await sb.from('harassment_complaints').update({ status:s }).eq('id', id);
+  if (error) return alert(error.message);
+  await sb.from('harassment_complaint_events').insert({ complaint_id:id, author_id:me.id, kind:'status', body:`Status changed to ${STATUS[s][0]}.` });
+  refresh(id);
+}
+async function stamp(id, field, body){
+  const { error } = await sb.from('harassment_complaints').update({ [field]: new Date().toISOString() }).eq('id', id);
+  if (error) return alert(error.message);
+  await sb.from('harassment_complaint_events').insert({ complaint_id:id, author_id:me.id, kind: field === 'external_rights_informed_at' ? 'external_rights' : 'notified', body });
+  refresh(id);
+}
+async function addLog(id){
+  const body = document.getElementById('lb').value.trim(); if (!body) return;
+  const { error } = await sb.from('harassment_complaint_events').insert({ complaint_id:id, author_id:me.id, kind:document.getElementById('lk').value, body });
+  if (error) return alert(error.message);
+  refresh(id);
+}
+async function resolve(id){
+  const res = document.getElementById('res').value.trim();
+  if (!res) return alert('Add an outcome summary first.');
+  const { error } = await sb.from('harassment_complaints').update({ resolution_summary:res, status:'resolved', resolved_at:new Date().toISOString() }).eq('id', id);
+  if (error) return alert(error.message);
+  await sb.from('harassment_complaint_events').insert({ complaint_id:id, author_id:me.id, kind:'status', body:'Marked resolved. Outcome summary shared with the person who reported.' });
+  refresh(id);
+}
+
+/* A leader writes up a complaint that was made verbally (policy step 1). */
+function renderVerbal(){
+  const leaders = staff.filter(s => LEADERS.includes(s.role) && s.id !== me.id);
+  app.innerHTML = `
+    <div class="noprint" style="margin-bottom:12px;"><button class="btn ghost small" onclick="renderList()">← All complaints</button></div>
+    <div class="page-head"><div><div class="eyebrow">Confidential</div><h1>Record a verbal complaint</h1>
+      <div class="sub">Use this when someone reports harassment or discrimination to you in person, by phone or by email and prefers not to fill out the form. Give them a copy (print the case file) once it's saved.</div></div></div>
+    <div class="card form">
+      <h2>Also send to</h2><div class="checks">${leaders.map(s => `<label><input type="checkbox" name="to" value="${s.id}" checked> ${esc(s.name)} <span style="color:var(--muted); font-size:12px;">${esc(s.job_title || s.role)}</span></label>`).join('')}</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:6px;">You're always included. Uncheck anyone who shouldn't see it.</div>
+      <h2 style="margin-top:18px;">Person reporting</h2>
+      <div class="grid2">
+        <div><label>Employee</label><select id="v-who"><option value="">Not an employee / other</option>${staff.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+        <div><label>Name *</label><input id="v-name"></div>
+        <div><label>Job title</label><input id="v-title"></div><div><label>Work location</label><input id="v-loc"></div>
+        <div><label>Phone</label><input id="v-phone"></div><div><label>Email</label><input id="v-email"></div>
+        <div><label>Best way to reach them</label><select id="v-pref"><option value="">—</option><option value="email">Email</option><option value="phone">Phone</option><option value="in_person">In person</option></select></div>
+      </div>
+      <h2 style="margin-top:18px;">Who it's about</h2>
+      <div class="grid2">
+        <div><label>Name *</label><input id="v-subj" list="v-staff"><datalist id="v-staff">${staff.map(s => `<option value="${esc(s.name)}">`).join('')}</datalist></div>
+        <div><label>Their title</label><input id="v-subj-title"></div>
+        <div><label>Relationship to the person reporting</label><select id="v-rel"><option value="">—</option>${Object.entries(REL).map(([k,l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
+        <div><label>Type</label><select id="v-type">${Object.entries(TYPE).map(([k,l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
+      </div>
+      <label>What they reported *</label><textarea id="v-desc" rows="7"></textarea>
+      <div class="grid2"><div><label>Date(s)</label><input id="v-dates"></div><div><label>Still happening?</label><select id="v-cont"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
+      <label>Witnesses</label><textarea id="v-wit" rows="2"></textarea>
+      <label>Earlier related complaints</label><textarea id="v-prior" rows="2"></textarea>
+      <label>Your name (recorded by) *</label><input id="v-sig" value="${esc(me.name)}">
+      <div id="v-err" style="color:var(--red); font-size:13px; margin-top:8px;"></div>
+      <div style="margin-top:12px;"><button class="btn" id="v-save" onclick="saveVerbal()">Save complaint</button></div>
+    </div>`;
+  document.getElementById('v-who').addEventListener('change', e => { const s = staff.find(x => x.id === e.target.value); if (s) { document.getElementById('v-name').value = s.name; document.getElementById('v-title').value = s.job_title || ''; } });
+}
+async function saveVerbal(){
+  const v = id => document.getElementById(id).value.trim();
+  if (!v('v-name') || !v('v-subj') || !v('v-desc') || !v('v-sig')) { document.getElementById('v-err').textContent = 'Name, who it is about, what they reported and your name are required.'; return; }
+  const subj = staff.find(s => s.name.toLowerCase() === v('v-subj').toLowerCase());
+  const to = [me.id, ...[...document.querySelectorAll('input[name="to"]:checked')].map(i => i.value)];
+  document.getElementById('v-save').disabled = true;
+  const { data, error } = await sb.from('harassment_complaints').insert({
+    source:'verbal_recorded', filed_by:me.id, complainant_staff_id: v('v-who') || null,
+    complainant_name:v('v-name'), complainant_title:v('v-title') || null, complainant_location:v('v-loc') || null,
+    complainant_phone:v('v-phone') || null, complainant_email:v('v-email') || null, preferred_contact:v('v-pref') || null,
+    subject_staff_id: subj ? subj.id : null, subject_name:v('v-subj'), subject_title:v('v-subj-title') || null, subject_relationship:v('v-rel') || null,
+    complaint_type:v('v-type'), description:v('v-desc'), incident_dates:v('v-dates') || null, is_continuing: v('v-cont') ? v('v-cont') === 'yes' : null,
+    witnesses:v('v-wit') || null, prior_complaints:v('v-prior') || null, signature_name:v('v-sig'), recipient_ids:to,
+  }).select().single();
+  if (error) { document.getElementById('v-save').disabled = false; document.getElementById('v-err').textContent = error.message; return; }
+  await sb.from('harassment_complaint_events').insert({ complaint_id:data.id, author_id:me.id, kind:'note', body:`Verbal complaint written up by ${me.name}.` });
+  refresh(data.id);
+}
+Object.assign(window, { openCase, renderList, renderVerbal, saveVerbal, setStatus, stamp, addLog, resolve });
+
+(async () => {
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { location.replace('/?next=' + encodeURIComponent(location.pathname + location.search)); return; }
+    const { data: prof } = await sb.from('staff').select('id,name,role').eq('auth_user_id', user.id).single();
+    me = prof;
+    if (!me) { app.innerHTML = '<div class="msg error">Your sign-in isn\'t linked to a staff profile.</div>'; return; }
+    if (!CAN_OPEN.includes(me.role)) { app.innerHTML = '<div class="msg info">This page is for the leaders who receive harassment and discrimination complaints. To make a report, open the Academy → Documents &amp; Forms.</div>'; return; }
+    const { data: st } = await sb.from('staff').select('id,name,role,job_title').neq('is_active', false).order('name');
+    staff = st || [];
+    await loadCases();
+    params.get('case') ? openCase(params.get('case')) : renderList();
+  } catch (e) { app.innerHTML = `<div class="msg error">${esc(e.message || e)}</div>`; }
+})();
+</script>
+</body>
+</html>
