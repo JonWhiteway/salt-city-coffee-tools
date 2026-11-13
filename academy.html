@@ -2772,8 +2772,13 @@ async function docsOpen(key){
     const { data, error } = await sb.storage.from('company-docs').createSignedUrl(d.storage_path, 3600);
     if (!error && data) { w.location = data.signedUrl + (d.policy_page ? `#page=${d.policy_page}` : ''); return; }
   }
-  if (key === 'harassment_policy') { w.location = SHPT_STATE_POLICY; return; }
-  w.close(); alert("This document hasn't been uploaded yet. Ask your manager for a copy.");
+  w.close();
+  if (DOCS_FULL.includes(currentProfile.role)) {
+    if (confirm(`The ${d ? d.title : 'document'} PDF hasn't been uploaded yet.\n\nGo to Documents & Forms now to upload it with "Replace PDF"?`)) { empSwitch('docs'); docsGo('home'); }
+    return;
+  }
+  if (key === 'harassment_policy' && confirm("Salt City's policy PDF isn't available right now. Your manager can give you a copy.\n\nOpen New York State's model policy (which ours is based on) instead?")) { window.open(SHPT_STATE_POLICY, '_blank'); return; }
+  if (key !== 'harassment_policy') alert("This document hasn't been uploaded yet. Ask your manager for a copy.");
 }
 
 /* ---------- Overview card ---------- */
