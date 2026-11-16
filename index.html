@@ -5578,6 +5578,15 @@ async function loadTrainingTodos(locId){
   const out = out0;
   if(overdue.length) out.push({ text:`Sexual harassment training overdue: ${names(overdue)}`, go:"teamdev", anchor:"lm-anchor-shpt" });
   if(dueSoon.length) out.push({ text:`Sexual harassment training due in 30 days: ${names(dueSoon)}`, go:"teamdev", anchor:"lm-anchor-shpt" });
+  try{
+    const supTeam = team.filter(supvIsSup);
+    if(supTeam.length){
+      const { data: sr } = await sb.from("compliance_completions").select("staff_id,completed_on").in("staff_id", supTeam.map(m => m.staff_id)).eq("training_key","ny_shpt_sup");
+      const last = {}; (sr||[]).forEach(r => { if(!last[r.staff_id] || r.completed_on > last[r.staff_id]) last[r.staff_id] = r.completed_on; });
+      const supLate = supTeam.filter(m => tdTrainingStatus(m.hire_date, last[m.staff_id], t).state === "overdue");
+      if(supLate.length) out.push({ text:`Supervisor harassment add-on overdue: ${names(supLate)}`, go:"teamdev", anchor:"lm-anchor-shpt" });
+    }
+  }catch(e){}
   tdTrainingTodos[locId] = out;
   renderTodos(locId);
 }
@@ -6024,6 +6033,9 @@ function tdOpenPip(pipId){
    Status uses tdTrainingStatus: Dec 31 each year, new hires within 30 days. */
 let shptTrk = {};
 const SHPT_METHOD = { in_app:"Academy", manager_logged:"Logged by manager", legacy:"On file" };
+/* Supervisor add-on (ny_shpt_sup): same rule as academy.html supvIsSup() */
+const SUPV_ROLES = ["gm","location_manager","production_manager","coo","ceo","cbo"];
+const supvIsSup = m => SUPV_ROLES.includes(m.role) || /shift lead|assistant manager|manager|supervisor/i.test(m.job_title || "");
 async function shptRenderTracker(locId){
   const el = $("#shpt-trk"); if(!el) return;
   const team = (tdTeam[locId]?.members || []).filter(m => !["coo","ceo","cbo"].includes(m.role));
@@ -6033,8 +6045,11 @@ async function shptRenderTracker(locId){
   const { data, error } = ids.length ? await sb.from("compliance_completions").select("*").in("staff_id", ids).eq("training_key","ny_shpt").order("completed_on", { ascending:false }) : { data:[] };
   if(error){ el.innerHTML = `<div class="empty-note">Couldn't load training records: ${lmEsc(error.message)}</div>`; return; }
   const by = {}; (data||[]).forEach(r => (by[r.staff_id] ||= []).push(r));
-  const { data: prog } = ids.length ? await sb.from("compliance_progress").select("staff_id,step,language,video,q_idx,answers,updated_at").in("staff_id", ids).eq("training_key","ny_shpt").eq("compliance_year", Number(Y)) : { data:[] };
-  const progBy = Object.fromEntries((prog||[]).map(p => [p.staff_id, p]));
+  const { data: prog } = ids.length ? await sb.from("compliance_progress").select("staff_id,training_key,step,language,video,q_idx,answers,updated_at").in("staff_id", ids).in("training_key",["ny_shpt","ny_shpt_sup"]).eq("compliance_year", Number(Y)) : { data:[] };
+  const progBy = Object.fromEntries((prog||[]).filter(p => p.training_key === "ny_shpt").map(p => [p.staff_id, p]));
+  const supProgBy = Object.fromEntries((prog||[]).filter(p => p.training_key === "ny_shpt_sup").map(p => [p.staff_id, p]));
+  const { data: supRows } = ids.length ? await sb.from("compliance_completions").select("staff_id,completed_on,compliance_year,signature_name").in("staff_id", ids).eq("training_key","ny_shpt_sup").order("completed_on", { ascending:false }) : { data:[] };
+  const supBy = {}; (supRows||[]).forEach(r => (supBy[r.staff_id] ||= []).push(r));
   const hr = tdData[locId]?.hr || {};
   const rows = team.map(m => {
     const recs = by[m.staff_id] || [];
@@ -6042,32 +6057,41 @@ async function shptRenderTracker(locId){
     const s = tdTrainingStatus(m.hire_date, last, t);
     const cur = recs.find(r => String(r.compliance_year) === Y);
     const openQ = recs.find(r => r.employee_question && !r.question_answered_at);
-    return { m, s, cur, last, openQ, prog: cur ? null : progBy[m.staff_id] };
+    let sup = null;
+    if(supvIsSup(m)){
+      const sr = supBy[m.staff_id] || [], start = [m.hire_date, hr[m.staff_id]?.grade_started_on].filter(Boolean).sort().pop() || null;
+      const ss = tdTrainingStatus(start, sr[0]?.completed_on || null, t);
+      sup = { s: ss, cur: sr.find(r => String(r.compliance_year) === Y), prog: supProgBy[m.staff_id] };
+    }
+    return { m, s, cur, last, openQ, prog: cur ? null : progBy[m.staff_id], sup };
   });
   const order = { overdue:0, soon:1, due:2, done:3 };
   rows.sort((a,b) => order[a.s.state] - order[b.s.state] || a.m.name.localeCompare(b.m.name));
   shptTrk[locId] = rows;
   const n = k => rows.filter(r => r.s.state === k).length;
   const pct = rows.length ? Math.round(n("done") / rows.length * 100) : 0;
+  const sups = rows.filter(r => r.sup), supDone = sups.filter(r => r.sup.s.state === "done").length;
   const chip = s => s.state === "done" ? `<span class="chip good">Done</span>` : s.state === "overdue" ? `<span class="chip critical">Overdue · ${lmFmtDate(s.due)}</span>` : `<span class="chip ${s.state==="soon"?"warn":"neutral"}">Due ${lmFmtDate(s.due)}${s.newHire?" · new hire":""}</span>`;
   el.innerHTML = `
     <div style="display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin-bottom:12px;">
       <div><span class="tabular" style="font-size:22px; font-weight:700;">${pct}%</span> <span class="muted" style="font-size:12.5px;">done for ${Y} (${n("done")} of ${rows.length})</span></div>
       <span class="chip critical">${n("overdue")} overdue</span><span class="chip warn">${n("soon")} due in 30 days</span><span class="chip neutral">${n("due")} not started</span>
+      ${sups.length ? `<span class="chip ${supDone === sups.length ? "good" : "neutral"}">Supervisor add-on: ${supDone} of ${sups.length}</span>` : ""}
       <span style="flex:1"></span>
       <button type="button" class="btn small ghost" id="shpt-csv">Export ${Y} record (CSV)</button>
     </div>
     <div class="lm-table-wrap"><table class="lm-table">
-      <thead><tr><th>Team member</th><th>${Y} status</th><th>Completed</th><th>How</th><th>Their question</th></tr></thead>
+      <thead><tr><th>Team member</th><th>${Y} status</th><th>Completed</th><th>How</th><th>Supervisor add-on</th><th>Their question</th></tr></thead>
       <tbody>${rows.map(r => `<tr>
         <td><button type="button" class="td-person" data-profile="${r.m.staff_id}">${lmEsc(r.m.name)}</button></td>
         <td>${chip(r.s)}${r.prog ? `<div class="muted" style="font-size:11.5px; margin-top:3px;">${shptProgText(r.prog)}</div>` : ""}</td>
         <td>${r.cur ? lmFmtDate(r.cur.completed_on) : r.last ? `<span class="muted">Last: ${lmFmtDate(r.last)}, ${r.last.slice(0,4)}</span>` : `<span class="muted">—</span>`}</td>
         <td>${r.cur ? `${SHPT_METHOD[r.cur.method]||r.cur.method}${r.cur.language?` · ${r.cur.language.toUpperCase()}`:""}${r.cur.signature_name?` · signed`:""}` : ""}</td>
+        <td>${!r.sup ? `<span class="muted">—</span>` : r.sup.s.state === "done" ? `<span class="chip good">Done ${r.sup.cur ? lmFmtDate(r.sup.cur.completed_on) : ""}</span>` : `${chip(r.sup.s)}${r.sup.prog ? `<div class="muted" style="font-size:11.5px; margin-top:3px;">In progress · ${["Started","Your duties","When someone tells you","Customers & retaliation","Scenarios","Ready to sign"][r.sup.prog.step] || "Started"} · ${tdAgo(r.sup.prog.updated_at)}</div>` : ""}`}</td>
         <td>${r.openQ ? `<span style="font-size:12.5px;">“${lmEsc(r.openQ.employee_question)}”</span> <button type="button" class="btn small" data-shpt-answer="${r.openQ.id}">Answer</button>` : (r.cur && r.cur.employee_question ? `<span class="muted" style="font-size:12px;">Answered</span>` : "")}</td>
-      </tr>`).join("") || `<tr><td colspan="5" class="empty-note">No one on this team yet.</td></tr>`}</tbody>
+      </tr>`).join("") || `<tr><td colspan="6" class="empty-note">No one on this team yet.</td></tr>`}</tbody>
     </table></div>
-    <div class="empty-note" style="padding-bottom:0;">Team members take the state's free training themselves in the Academy → Required Training (English or Spanish): policy, video, case-study questions, e-signature. For an in-person or paper session, open the person's profile and enter the date.</div>`;
+    <div class="empty-note" style="padding-bottom:0;">Team members take the state's free training themselves in the Academy → Required Training (English or Spanish): policy, video, case-study questions, e-signature. Supervisors (LMs, Assistant Managers, Shift Leads and up) also take Salt City's 10-minute supervisor add-on there. For an in-person or paper session, open the person's profile and enter the date.</div>`;
   $("#shpt-csv").addEventListener("click", () => shptCsv(locId));
   $$("#shpt-trk [data-shpt-answer]").forEach(b => b.addEventListener("click", () => shptAnswer(b.dataset.shptAnswer, locId)));
 }
@@ -6082,8 +6106,8 @@ function shptCsv(locId){
   const rows = shptTrk[locId] || [], Y = lmToday().slice(0,4);
   const q = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
   const loc = myLocations.find(l => l.id === locId)?.name || "";
-  const lines = [["Cafe","Name","Role","Hire date","Status","Due","Completed","Method","Language","Signed name","Signed at","First-try correct","Supervisor"].map(q).join(",")]
-    .concat(rows.map(r => [loc, r.m.name, r.m.job_title || r.m.role, r.m.hire_date || "", r.s.state, r.s.due || "", r.cur?.completed_on || "", r.cur ? SHPT_METHOD[r.cur.method] : "", r.cur?.language || "", r.cur?.signature_name || "", r.cur?.signed_at || "", r.cur?.question_count ? `${r.cur.first_try_correct}/${r.cur.question_count}` : "", r.cur?.is_supervisor ? "yes" : ""].map(q).join(",")));
+  const lines = [["Cafe","Name","Role","Hire date","Status","Due","Completed","Method","Language","Signed name","Signed at","First-try correct","Supervisor","Supervisor add-on"].map(q).join(",")]
+    .concat(rows.map(r => [loc, r.m.name, r.m.job_title || r.m.role, r.m.hire_date || "", r.s.state, r.s.due || "", r.cur?.completed_on || "", r.cur ? SHPT_METHOD[r.cur.method] : "", r.cur?.language || "", r.cur?.signature_name || "", r.cur?.signed_at || "", r.cur?.question_count ? `${r.cur.first_try_correct}/${r.cur.question_count}` : "", r.cur?.is_supervisor ? "yes" : "", !r.sup ? "" : r.sup.s.state === "done" ? (r.sup.cur?.completed_on || "done") : r.sup.s.state].map(q).join(",")));
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type:"text/csv" }));
   a.download = `harassment-training-${Y}-${loc.replace(/\W+/g,"-").toLowerCase()}.csv`; a.click();
@@ -6097,9 +6121,9 @@ async function shptAnswer(id, locId){
 }
 async function shptFillProfile(staffId){
   const el = $("#shpt-prof"); if(!el) return;
-  const { data } = await sb.from("compliance_completions").select("*").eq("staff_id", staffId).eq("training_key","ny_shpt").order("completed_on", { ascending:false });
+  const { data } = await sb.from("compliance_completions").select("*").eq("staff_id", staffId).in("training_key",["ny_shpt","ny_shpt_sup"]).order("completed_on", { ascending:false });
   if(!el.isConnected || !data || !data.length) return;
-  el.innerHTML = "History: " + data.map(r => `${r.compliance_year} · ${lmFmtDate(r.completed_on)} · ${SHPT_METHOD[r.method]||r.method}${r.language?` (${r.language.toUpperCase()})`:""}${r.signature_name?` · signed “${lmEsc(r.signature_name)}”`:""}${r.question_count?` · ${r.first_try_correct}/${r.question_count} first try`:""}`).join("<br>");
+  el.innerHTML = "History: " + data.map(r => `${r.training_key === "ny_shpt_sup" ? "Supervisor add-on " : ""}${r.compliance_year} · ${lmFmtDate(r.completed_on)} · ${SHPT_METHOD[r.method]||r.method}${r.language?` (${r.language.toUpperCase()})`:""}${r.signature_name?` · signed “${lmEsc(r.signature_name)}”`:""}${r.question_count?` · ${r.first_try_correct}/${r.question_count} first try`:""}`).join("<br>");
 }
 
 async function docsFillProfile(staffId){

@@ -576,7 +576,7 @@ async function renderEmployeeView(){
   empBadges();
   empRender();
   // Required training (NY sexual harassment prevention)
-  shptLoad().then(() => { empBadges(); if (['overview','compliance'].includes(empTab)) empRender(); })
+  Promise.all([shptLoad(), supvLoad()]).then(() => { empBadges(); if (['overview','compliance'].includes(empTab)) empRender(); })
     .catch(e => console.warn('required training', e));
   docsLoad().then(() => { empBadges(); if (['overview','docs'].includes(empTab)) empRender(); })
     .catch(e => console.warn('documents', e));
@@ -599,7 +599,7 @@ function empBadges(){
   set('pip', empData.pips.some(p => ['active','extended'].includes(p.status)) ? '!' : '');
   const pending = empMe && !empMe.error ? [...(empMe.pto_requests || []), ...(empMe.avail_requests || [])].filter(r => r.status === 'new').length : 0;
   set('requests', pending ? String(pending) : '');
-  set('compliance', typeof shptBadge === 'function' ? shptBadge() : '');
+  set('compliance', (typeof shptBadge === 'function' && shptBadge()) || (typeof supvBadge === 'function' && supvBadge()) || '');
   set('docs', typeof docsBadge === 'function' ? docsBadge() : '');
 }
 
@@ -662,6 +662,7 @@ function empOverview(){
   }).join('') + gm360ScoreCard(empData.gm360Score);
   return `
     ${shptOverviewCard()}
+    ${supvOverviewCard()}
     ${docsOverviewCard()}
     ${l360Cards}
     <div class="emp-stats">
@@ -2539,6 +2540,7 @@ function shptBadge(){ if (!shpt.loaded) return ''; return shptMine().state === '
 /* ---------- the tab ---------- */
 function empCompliance(){
   if (!shpt.loaded) return `<div class="card"><div class="emp-empty">Loading…</div></div>`;
+  if (supv.open) return supvView();
   const s = shptMine();
   const cur = shpt.rows.find(r => r.compliance_year === s.year);
   const head = `
@@ -2547,13 +2549,13 @@ function empCompliance(){
       <h2 class="shpt-title">${st('title')} · ${s.year}</h2></div>
       <div class="shpt-lang">${['en','es'].map(l => `<button class="${shpt.lang===l?'active':''}" onclick="shptLang('${l}')">${l==='en'?'English':'Español'}</button>`).join('')}</div>
     </div>`;
-  if (cur) return head + shptDoneHtml(cur, s) + shptHistory();
+  if (cur) return head + shptDoneHtml(cur, s) + supvCard() + shptHistory();
   const steps = st('steps');
   return head + `
     <div class="shpt-steps">${steps.map((n,i) => `<div class="${i===shpt.step?'on':''} ${i<shpt.step?'past':''}"><span>${i+1}</span>${n}</div>`).join('')}</div>
     ${shpt.resumedFrom ? `<div class="emp-disclaimer" style="margin:0 0 12px;">${shpt.lang==='es' ? 'Bienvenido de nuevo. Continúa donde lo dejaste' : 'Welcome back. You\'re picking up where you left off'} (${steps[shpt.step]}${shptVideoPctText()}).</div>` : ''}
     <div class="card shpt-body" id="shpt-body">${shptStepHtml(s)}</div>
-    <div class="emp-note" id="shpt-saved" style="text-align:right; margin:-12px 4px 16px;">${shpt.lang==='es' ? 'Su progreso se guarda automáticamente.' : 'Your progress saves automatically.'}</div>` + shptHistory();
+    <div class="emp-note" id="shpt-saved" style="text-align:right; margin:-12px 4px 16px;">${shpt.lang==='es' ? 'Su progreso se guarda automáticamente.' : 'Your progress saves automatically.'}</div>` + supvCard() + shptHistory();
 }
 function shptVideoPctText(){
   const vids = ((shpt.cfg||{}).videos || {})[shpt.lang] || [];
@@ -3034,6 +3036,226 @@ Object.assign(window, { docsOpen, docsGo, docsSign, docsUpload, docsSendComplain
 .docs-check input{ width:17px !important; height:17px; margin-top:2px; flex:0 0 auto; }
 .docs-form textarea{ width:100%; }
 @media (max-width:700px){ .docs-grid, .docs-checks{ grid-template-columns:1fr; } }
+</style>
+
+<script>
+/* =====================================================================
+   SUPERVISOR ADD-ON — Responding to Harassment (Salt City's own module; NY doesn't require a separate one)
+   Who: GM, LM, Production Manager, COO/CEO/CBO, and anyone titled Shift Lead / Assistant Manager / ... Manager / Supervisor.
+   Due: Dec 31 each year; new supervisors within 30 days of their role start date (or hire date).
+   Saves to compliance_completions (training_key ny_shpt_sup); progress autosaves to compliance_progress.
+   ===================================================================== */
+const SUPV_KEY = 'ny_shpt_sup';
+const SUPV_ROLES = ['gm','location_manager','production_manager','coo','ceo','cbo'];
+const supvIsSup = p => SUPV_ROLES.includes((p || currentProfile).role) || /shift lead|assistant manager|manager|supervisor/i.test((p || currentProfile).job_title || '');
+let supv = { loaded:false, rows:[], open:false, step:0, answers:{}, qIdx:0, restored:false };
+
+async function supvLoad(){
+  if (!supvIsSup()) { supv.loaded = true; return; }
+  const year = Number(eToday().slice(0,4));
+  const [{ data: rows }, { data: pr }] = await Promise.all([
+    sb.from('compliance_completions').select('*').eq('staff_id', currentProfile.id).eq('training_key', SUPV_KEY).order('completed_on', { ascending:false }),
+    sb.from('compliance_progress').select('*').eq('staff_id', currentProfile.id).eq('training_key', SUPV_KEY).eq('compliance_year', year).maybeSingle(),
+  ]);
+  supv.rows = rows || [];
+  if (pr && !supv.restored) Object.assign(supv, { step:pr.step || 0, answers:pr.answers || {}, qIdx:pr.q_idx || 0, resumed:true });
+  supv.restored = true; supv.loaded = true;
+}
+function supvMine(){
+  const start = [currentProfile.hire_date, empMe && !empMe.error && empMe.hr ? empMe.hr.grade_started_on : null].filter(Boolean).sort().pop() || null;
+  return shptStatus(start, (supv.rows[0] || {}).completed_on || null, eToday());
+}
+const supvBadge = () => supv.loaded && supvIsSup() && supvMine().state !== 'done' ? '!' : '';
+
+let supvTimer = null;
+function supvSave(){
+  clearTimeout(supvTimer);
+  supvTimer = setTimeout(async () => {
+    const year = Number(eToday().slice(0,4));
+    if (supv.rows.some(r => r.compliance_year === year)) return;
+    await sb.from('compliance_progress').upsert({ staff_id: currentProfile.id, training_key: SUPV_KEY, compliance_year: year, step: supv.step, answers: supv.answers, q_idx: supv.qIdx },
+      { onConflict:'staff_id,training_key,compliance_year' });
+  }, 300);
+}
+
+/* ---------- content ---------- */
+const SUPV_STEPS = ['Start','Your duties','When someone tells you','Customers & retaliation','Scenarios','Sign'];
+const SUPV_LESSONS = {
+  1: { h:'Your duties as a supervisor', body:`
+    <p class="shpt-p">Everyone takes the yearly NY training. As a supervisor, the handbook gives you extra responsibilities, and New York law holds supervisors to a higher standard.</p>
+    <ul class="supv-list">
+      <li><b>You must report.</b> Any complaint you receive, and any harassment you see or hear about (even secondhand, even about a customer), goes to the <b>General Manager or an Owner</b>, <b>the same day</b>.</li>
+      <li><b>You can't promise secrecy.</b> You can promise it will only be shared with the people who need to know to fix it.</li>
+      <li><b>You don't investigate.</b> Don't question the person accused, ask around, or decide whether it "counts." The GM or an Owner runs the investigation.</li>
+      <li><b>You never retaliate, and you don't let anyone else.</b> That includes cutting hours, changing shifts, cold-shouldering, or sudden write-ups for someone who reported or helped.</li>
+      <li><b>There are real consequences.</b> Supervisors who harass, retaliate, or let harassment continue face discipline up to termination, and can be personally liable under NY law.</li>
+    </ul>
+    <div class="emp-disclaimer">If the complaint is about the General Manager, go to an Owner (Aaron, Maria or Jon). If it's about an Owner, go to the General Manager or another Owner.</div>` },
+  2: { h:'When someone tells you', body:`
+    <div class="supv-cols">
+      <div><div class="emp-sub" style="color:var(--green);">Do</div><ul class="supv-list">
+        <li>Find a private spot. Listen. Thank them for telling you.</li>
+        <li>Say what happens next: "I have to share this with the GM or an Owner so it gets handled. It'll stay as private as possible."</li>
+        <li>Ask if they feel safe right now and what they need for the rest of this shift.</li>
+        <li>Write down what they said, in their words, with dates and names. Don't add opinions.</li>
+        <li>Offer the private form: Academy → Documents &amp; Forms → <b>Report harassment</b>. They don't have to use it.</li>
+      </ul></div>
+      <div><div class="emp-sub" style="color:var(--red);">Don't</div><ul class="supv-list">
+        <li>Don't say "Are you sure?", "He's just like that", or "That's not really harassment."</li>
+        <li>Don't confront the person accused or tell the team.</li>
+        <li>Don't promise an outcome ("they'll be fired").</li>
+        <li>Don't move or reduce the hours of the person who reported to "fix" it.</li>
+        <li>Don't wait to see if it happens again.</li>
+      </ul></div>
+    </div>
+    <div class="emp-sub">The first 24 hours</div>
+    <ol class="supv-list">
+      <li><b>Safety first.</b> If anyone is in danger, call 911.</li>
+      <li><b>Report it today.</b> Tell the GM or an Owner directly. If it's after hours, message them and follow up first thing.</li>
+      <li><b>Put it in writing.</b> Shift leads, Assistant Managers and LMs: file the complaint form yourself with <b>"I'm reporting this on behalf of someone else"</b> checked. GMs and Owners: use <b>Complaints → Record a verbal complaint</b> in the Command Deck.</li>
+      <li><b>Hands off.</b> Any schedule change or other interim step is decided by the GM or an Owner, and it should never cost the person who reported.</li>
+    </ol>` },
+  3: { h:'Customers, schedules and retaliation', body:`
+    <div class="emp-sub">When it's a customer</div>
+    <ul class="supv-list">
+      <li>Step in. Take over the register or the interaction yourself, or have someone else serve that customer.</li>
+      <li>You can ask a customer to stop, refuse service, or ask them to leave. If they won't, or you feel unsafe, call 911.</li>
+      <li>Tell the team member they did nothing wrong. Write down what happened (date, time, description of the person) and report it to the GM or an Owner the same day, like any other complaint.</li>
+    </ul>
+    <div class="emp-sub">Retaliation is easy to do by accident</div>
+    <p class="shpt-p">Retaliation is any action that could discourage someone from reporting. It's illegal even if the original complaint isn't proven. Watch for:</p>
+    <ul class="supv-list">
+      <li>Fewer hours, worse shifts, or moving the person who reported away from their regular schedule or cafe.</li>
+      <li>Sudden discipline, attendance points or nit-picking that you wouldn't give anyone else. Before any discipline for someone involved in a complaint, check with the GM or an Owner first.</li>
+      <li>Leaving them out, gossip, or letting coworkers take sides.</li>
+      <li>Treating witnesses or people who helped differently.</li>
+    </ul>` },
+};
+const SUPV_Q = [
+  { id:'customer', q:'A barista says a regular keeps asking for her number. "It\'s not a big deal, don\'t make it weird." What do you do?',
+    o:['Let it go, since she said it\'s not a big deal.',
+       'Thank her, tell her you need to pass it to the GM or an Owner, take over when that customer comes in, write down what she said, and report it today.',
+       'Ban the customer yourself and post about it in the team chat.'], a:1,
+    x:'Harassment by customers counts, and you have to report it even if the person downplays it. Handle the customer in the moment, keep it private, and let the GM or an Owner decide next steps.' },
+  { id:'rumor', q:'You hear secondhand that an Assistant Manager has been texting a barista inappropriately. Nobody has complained to you. What now?',
+    o:['Nothing until someone makes a formal complaint.',
+       'Ask a few coworkers what they\'ve seen so you have more to go on.',
+       'Report what you heard to the GM or an Owner today, and don\'t investigate it yourself.'], a:2,
+    x:'Supervisors must report harassment they become aware of, even secondhand. Asking around or confronting people can hurt the investigation and spread the story.' },
+  { id:'secret', q:'A team member says: "I\'ll only tell you if you promise not to tell anyone." What\'s the right answer?',
+    o:['"I promise." Then keep it to yourself.',
+       '"I can\'t promise that, but I\'ll only share it with the people who need to know to fix it."',
+       '"Then don\'t tell me."'], a:1,
+    x:'You can\'t promise secrecy because you\'re required to report. You can promise discretion. Being honest up front keeps their trust.' },
+  { id:'schedule', q:'A barista reported a coworker. They\'re both on Saturday\'s schedule together. What\'s OK?',
+    o:['Move the barista who reported to weekdays so things stay calm.',
+       'Ask the GM or an Owner to decide on an interim change that doesn\'t cost the person who reported any hours or preferred shifts.',
+       'Leave it and tell them both to keep it professional.'], a:1,
+    x:'Interim steps are decided by the GM or an Owner. Moving or cutting the hours of the person who reported can be retaliation, even if it\'s meant kindly.' },
+  { id:'discipline', q:'Two weeks after reporting harassment, a barista is late twice. What should you do?',
+    o:['Don\'t log it. They\'ve been through enough.',
+       'Log it exactly as you would for anyone, but check with the GM or an Owner before any discipline so it\'s reviewed.',
+       'Give a written warning right away so it\'s clear the complaint doesn\'t protect them.'], a:1,
+    x:'The rules apply the same way to everyone, but discipline right after a complaint can look like retaliation. A second set of eyes protects both of you.' },
+  { id:'gm', q:'A shift lead tells you the General Manager made a sexual comment to them. Who do you report to?',
+    o:['The General Manager, since all complaints go to the GM.',
+       'An Owner (Aaron, Maria or Jon). On the online form, uncheck the GM.',
+       'Nobody. It\'s too awkward to report your own boss.'], a:1,
+    x:'A complaint never goes to the person it\'s about. The online form also removes them automatically if you name them.' },
+];
+
+/* ---------- card in the Required Training tab + Overview ---------- */
+function supvCard(){
+  if (!supv.loaded || !supvIsSup()) return '';
+  const s = supvMine(), cur = supv.rows.find(r => r.compliance_year === s.year);
+  const pill = cur ? `<span class="emp-pill green">Done ${eFmt(cur.completed_on)}</span>` : s.state === 'overdue' ? `<span class="emp-pill red">Overdue since ${eFmt(s.due)}</span>` : `<span class="emp-pill amber">Due ${eFmt(s.due)}</span>`;
+  return `<div class="card l360-card" style="border-left-color:var(--lead-700);">
+    <div><div class="emp-label" style="color:var(--lead-700);">For supervisors · ${s.year}</div>
+      <div class="l360-title">Supervisor add-on: responding to harassment</div>
+      <div class="emp-note">${pill} About 10 minutes: what you have to do when someone reports harassment, how to handle customers, and how to avoid retaliation.</div></div>
+    ${cur ? `<button class="emp-btn ghost" onclick="supvCert('${cur.id}')">Certificate</button>` : `<button class="emp-btn" onclick="supvOpen()">${supv.step > 0 ? 'Continue →' : 'Start →'}</button>`}
+  </div>`;
+}
+function supvOverviewCard(){ return supvBadge() ? supvCard() : ''; }
+
+/* ---------- the flow ---------- */
+function supvOpen(){ supv.open = true; if (empTab !== 'compliance') empSwitch('compliance'); else empRender(); window.scrollTo({ top:0, behavior:'smooth' }); }
+function supvClose(){ supv.open = false; empRender(); }
+function supvGo(d){ supv.step = Math.max(0, Math.min(5, supv.step + d)); supv.resumed = false; supvSave(); empRender(); window.scrollTo({ top:0, behavior:'smooth' }); }
+function supvQ(d){ supv.qIdx = Math.max(0, Math.min(SUPV_Q.length - 1, supv.qIdx + d)); supvSave(); empRender(); }
+function supvPick(id, k){ const a = supv.answers[id] || (supv.answers[id] = { tries:[] }); if (!a.tries.includes(k)) a.tries.push(k); supvSave(); empRender(); }
+
+function supvView(){
+  const nav = (ok = true) => `<div class="shpt-nav">${supv.step ? `<button class="emp-btn ghost" onclick="supvGo(-1)">← Back</button>` : `<button class="emp-btn ghost" onclick="supvClose()">← Required training</button>`}
+    <button class="emp-btn" ${ok ? '' : 'disabled'} onclick="supvGo(1)">Next →</button></div>`;
+  let body = '';
+  if (supv.step === 0) body = `
+    <div class="q">Supervisor add-on: responding to harassment</div>
+    <p class="shpt-p" style="margin-top:8px;">This is a short Salt City module for everyone who supervises others. It covers your duties under our Sexual Harassment &amp; Discrimination Policy, what to do in the first 24 hours after someone tells you something, how to handle customers, and how to avoid retaliation.</p>
+    <p class="shpt-p">It takes about 10 minutes: three short readings, six scenarios, then you sign. Your progress saves as you go. It's in addition to the yearly NY training, not instead of it.</p>
+    ${nav()}`;
+  else if (SUPV_LESSONS[supv.step]) body = `<div class="q">${SUPV_LESSONS[supv.step].h}</div><div style="margin-top:10px;">${SUPV_LESSONS[supv.step].body}</div>${nav()}`;
+  else if (supv.step === 4) {
+    const i = supv.qIdx, q = SUPV_Q[i], a = supv.answers[q.id] || { tries:[] }, solved = a.tries.includes(q.a), last = a.tries[a.tries.length - 1];
+    const allDone = SUPV_Q.every(x => (supv.answers[x.id] || { tries:[] }).tries.includes(x.a));
+    body = `<div class="emp-note">Pick the best answer. If you miss one, read why and try again.</div>
+      <div class="emp-sub">Scenario ${i+1} of ${SUPV_Q.length}</div>
+      <div class="q" style="font-size:18px; margin-bottom:12px;">${q.q}</div>
+      <div class="shpt-opts">${q.o.map((o,k) => `<button class="shpt-opt ${a.tries.includes(k) ? (k===q.a?'right':'wrong') : ''}" ${solved?'disabled':''} onclick="supvPick('${q.id}',${k})">${o}</button>`).join('')}</div>
+      ${last != null ? `<div class="shpt-fb ${last===q.a?'right':'wrong'}"><b>${last===q.a?'Correct.':'Not quite. Read why, then try again.'}</b> ${last===q.a ? q.x : ''}</div>` : ''}
+      <div class="shpt-nav"><button class="emp-btn ghost" onclick="${i ? 'supvQ(-1)' : 'supvGo(-1)'}">← Back</button>
+        <button class="emp-btn" ${solved ? '' : 'disabled'} onclick="${i < SUPV_Q.length-1 ? 'supvQ(1)' : (allDone ? 'supvGo(1)' : 'supvQ(1)')}">Next →</button></div>`;
+  } else body = `
+    <div class="q">Sign and finish</div>
+    <p class="shpt-p" style="margin-top:8px;">I understand my responsibilities as a supervisor under Salt City Coffee's Sexual Harassment &amp; Discrimination Policy. I will report any harassment I see or hear about, including by customers, to the General Manager or an Owner the same day. I won't investigate on my own or promise secrecy, and I won't retaliate or allow retaliation against anyone who reports or helps an investigation.</p>
+    <div class="emp-form"><label>Type your full name</label><input id="supv-sig" placeholder="${escapeHtml(currentProfile.name)}" oninput="document.getElementById('supv-submit').disabled = this.value.trim().length < 3">
+      <label>Date</label><input value="${eFmt(eToday())}" disabled></div>
+    <div class="emp-note" id="supv-err" style="color:var(--red); margin-top:8px;"></div>
+    <div class="shpt-nav"><button class="emp-btn ghost" onclick="supvGo(-1)">← Back</button><button class="emp-btn" id="supv-submit" disabled onclick="supvSubmit()">Sign and submit</button></div>`;
+  return `
+    <div class="shpt-head"><div><div class="emp-label" style="color:var(--lead-700);">For supervisors · Salt City</div>
+      <h2 class="shpt-title">Responding to Harassment · ${Number(eToday().slice(0,4))}</h2></div></div>
+    <div class="shpt-steps">${SUPV_STEPS.map((n,i) => `<div class="${i===supv.step?'on':''} ${i<supv.step?'past':''}"><span>${i+1}</span>${n}</div>`).join('')}</div>
+    ${supv.resumed && supv.step ? `<div class="emp-disclaimer" style="margin:0 0 12px;">Welcome back. You're picking up where you left off (${SUPV_STEPS[supv.step]}).</div>` : ''}
+    <div class="card shpt-body">${body}</div>
+    <div class="emp-note" style="text-align:right; margin:-12px 4px 16px;">Your progress saves automatically.</div>`;
+}
+async function supvSubmit(){
+  const btn = document.getElementById('supv-submit'), err = document.getElementById('supv-err'), sig = document.getElementById('supv-sig').value.trim();
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const answers = Object.fromEntries(SUPV_Q.map(q => [q.id, (supv.answers[q.id] || { tries:[] }).tries]));
+  const year = Number(eToday().slice(0,4));
+  const { error } = await sb.from('compliance_completions').insert({
+    staff_id: currentProfile.id, training_key: SUPV_KEY, compliance_year: year, completed_on: eToday(), method:'in_app', language:'en',
+    answers, first_try_correct: SUPV_Q.filter(q => (answers[q.id] || [])[0] === q.a).length, question_count: SUPV_Q.length,
+    policy_acknowledged: true, signature_name: sig, is_supervisor: true,
+  });
+  if (error) { btn.disabled = false; btn.textContent = 'Sign and submit'; err.textContent = `Couldn't save: ${error.message}`; return; }
+  await sb.from('compliance_progress').delete().eq('staff_id', currentProfile.id).eq('training_key', SUPV_KEY).eq('compliance_year', year);
+  supv.restored = false; supv.step = 0; supv.answers = {}; supv.qIdx = 0; supv.open = false;
+  await supvLoad(); empBadges(); empRender(); window.scrollTo({ top:0, behavior:'smooth' });
+}
+function supvCert(id){
+  const r = supv.rows.find(x => x.id === id); if (!r) return;
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>Certificate</title><style>
+    body{font-family:Georgia,serif;margin:0;padding:60px;color:#241A12;} .c{border:6px double #1B365D;padding:56px;text-align:center;max-width:820px;margin:0 auto;}
+    h1{font-size:28px;color:#1B365D;letter-spacing:2px;margin:0 0 6px;} .s{color:#7A6A57;font-size:14px;letter-spacing:3px;text-transform:uppercase;}
+    .n{font-size:34px;margin:36px 0 8px;border-bottom:1px solid #ccc;display:inline-block;padding:0 40px 6px;} p{font-size:15px;line-height:1.6;}
+    .f{display:flex;justify-content:space-between;margin-top:48px;font-size:13px;color:#4A3B2E;text-align:left;}</style></head><body><div class="c">
+    <div class="s">Salt City Coffee</div><h1>Certificate of Completion</h1><div class="n">${escapeHtml(currentProfile.name)}</div>
+    <p>completed the Supervisor Add-on: Responding to Harassment<br>(supervisor duties, first-response steps, customer harassment and retaliation) for calendar year ${r.compliance_year}.</p>
+    <div class="f"><div>Completed: <b>${eFmt(r.completed_on)}</b><br>Signed: <b>${escapeHtml(r.signature_name || '')}</b></div><div>Record ID: ${r.id.slice(0,8)}</div></div></div>
+    <script>setTimeout(()=>window.print(),300)<\/script></body></html>`);
+  w.document.close();
+}
+Object.assign(window, { supvOpen, supvClose, supvGo, supvQ, supvPick, supvSubmit, supvCert });
+</script>
+<style>
+.supv-list{ margin:6px 0 12px 20px; font-size:14px; line-height:1.65; color:var(--ink); }
+.supv-list li{ margin-bottom:6px; }
+.supv-cols{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media (max-width:700px){ .supv-cols{ grid-template-columns:1fr; } }
 </style>
 
 </body>
