@@ -6033,6 +6033,8 @@ async function shptRenderTracker(locId){
   const { data, error } = ids.length ? await sb.from("compliance_completions").select("*").in("staff_id", ids).eq("training_key","ny_shpt").order("completed_on", { ascending:false }) : { data:[] };
   if(error){ el.innerHTML = `<div class="empty-note">Couldn't load training records: ${lmEsc(error.message)}</div>`; return; }
   const by = {}; (data||[]).forEach(r => (by[r.staff_id] ||= []).push(r));
+  const { data: prog } = ids.length ? await sb.from("compliance_progress").select("staff_id,step,language,video,q_idx,answers,updated_at").in("staff_id", ids).eq("training_key","ny_shpt").eq("compliance_year", Number(Y)) : { data:[] };
+  const progBy = Object.fromEntries((prog||[]).map(p => [p.staff_id, p]));
   const hr = tdData[locId]?.hr || {};
   const rows = team.map(m => {
     const recs = by[m.staff_id] || [];
@@ -6040,7 +6042,7 @@ async function shptRenderTracker(locId){
     const s = tdTrainingStatus(m.hire_date, last, t);
     const cur = recs.find(r => String(r.compliance_year) === Y);
     const openQ = recs.find(r => r.employee_question && !r.question_answered_at);
-    return { m, s, cur, last, openQ };
+    return { m, s, cur, last, openQ, prog: cur ? null : progBy[m.staff_id] };
   });
   const order = { overdue:0, soon:1, due:2, done:3 };
   rows.sort((a,b) => order[a.s.state] - order[b.s.state] || a.m.name.localeCompare(b.m.name));
@@ -6059,7 +6061,7 @@ async function shptRenderTracker(locId){
       <thead><tr><th>Team member</th><th>${Y} status</th><th>Completed</th><th>How</th><th>Their question</th></tr></thead>
       <tbody>${rows.map(r => `<tr>
         <td><button type="button" class="td-person" data-profile="${r.m.staff_id}">${lmEsc(r.m.name)}</button></td>
-        <td>${chip(r.s)}</td>
+        <td>${chip(r.s)}${r.prog ? `<div class="muted" style="font-size:11.5px; margin-top:3px;">${shptProgText(r.prog)}</div>` : ""}</td>
         <td>${r.cur ? lmFmtDate(r.cur.completed_on) : r.last ? `<span class="muted">Last: ${lmFmtDate(r.last)}, ${r.last.slice(0,4)}</span>` : `<span class="muted">—</span>`}</td>
         <td>${r.cur ? `${SHPT_METHOD[r.cur.method]||r.cur.method}${r.cur.language?` · ${r.cur.language.toUpperCase()}`:""}${r.cur.signature_name?` · signed`:""}` : ""}</td>
         <td>${r.openQ ? `<span style="font-size:12.5px;">“${lmEsc(r.openQ.employee_question)}”</span> <button type="button" class="btn small" data-shpt-answer="${r.openQ.id}">Answer</button>` : (r.cur && r.cur.employee_question ? `<span class="muted" style="font-size:12px;">Answered</span>` : "")}</td>
@@ -6068,6 +6070,13 @@ async function shptRenderTracker(locId){
     <div class="empty-note" style="padding-bottom:0;">Team members take the state's free training themselves in the Academy → Required Training (English or Spanish): policy, video, case-study questions, e-signature. For an in-person or paper session, open the person's profile and enter the date.</div>`;
   $("#shpt-csv").addEventListener("click", () => shptCsv(locId));
   $$("#shpt-trk [data-shpt-answer]").forEach(b => b.addEventListener("click", () => shptAnswer(b.dataset.shptAnswer, locId)));
+}
+const SHPT_STEPS = ["Started","Reading the policy","Watching the video","Answering questions","Feedback","Ready to sign"];
+function shptProgText(p){
+  let t = `In progress · ${SHPT_STEPS[p.step] || "Started"}`;
+  if(p.step === 2){ const v = Object.values(p.video || {}); if(v.length) t += ` (${Math.round(v.reduce((a,x) => a + Math.min(100, x.pct||0), 0) / v.length)}%)`; }
+  if(p.step === 3) t += ` (${Object.keys(p.answers || {}).length} of 11)`;
+  return `${t} · ${tdAgo(p.updated_at)}`;
 }
 function shptCsv(locId){
   const rows = shptTrk[locId] || [], Y = lmToday().slice(0,4);

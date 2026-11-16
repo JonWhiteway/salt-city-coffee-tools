@@ -2353,8 +2353,46 @@ async function shptLoad(){
   ]);
   shpt.cfg = cfg || { title:'NY Sexual Harassment Prevention Training', videos:{ en:[{ id:'A9gudpiQ40M', label:'Training video' }], es:[{ id:'VH3T4agU8XE', label:'Video de capacitación' },{ id:'IP-i7R4SfWA', label:'Casos de estudio' }] } };
   shpt.rows = rows || [];
+  const year = Number(eToday().slice(0,4));
+  if (!shpt.rows.some(r => r.compliance_year === year)) {
+    const { data: pr } = await sb.from('compliance_progress').select('*')
+      .eq('staff_id', currentProfile.id).eq('training_key', SHPT_KEY).eq('compliance_year', year).maybeSingle();
+    if (pr && !shpt.restored) {
+      Object.assign(shpt, { step:pr.step || 0, lang:pr.language || shpt.lang, attested:!!pr.attested, policyOk:!!pr.policy_ok,
+        answers:pr.answers || {}, qIdx:pr.q_idx || 0, feedback:pr.feedback || '', rating:pr.rating || 0, question:pr.question || '',
+        resumedFrom:pr.updated_at });
+      shpt.watched = Object.fromEntries(Object.entries(pr.video || {}).map(([id, v]) => [id, { secs:v.secs || 0, pct:v.pct || 0, pos:v.pos || 0, last:null }]));
+    }
+  }
+  shpt.restored = true;
   shpt.loaded = true;
 }
+
+/* ---------- autosave: progress is saved to compliance_progress so people can pick up where they left off ---------- */
+let shptSaveTimer = null, shptSaving = false;
+function shptSave(soon){
+  clearTimeout(shptSaveTimer);
+  shptSaveTimer = setTimeout(shptSaveNow, soon ? 300 : 2500);
+}
+async function shptSaveNow(){
+  clearTimeout(shptSaveTimer);
+  if (!shpt.loaded || shptSaving) return;
+  const year = Number(eToday().slice(0,4));
+  if (shpt.rows.some(r => r.compliance_year === year)) return;
+  shptSaving = true;
+  const video = Object.fromEntries(Object.entries(shpt.watched).map(([id, w]) => [id, { secs:Math.round(w.secs || 0), pct:Math.round(w.pct || 0), pos:Math.floor(w.pos || 0), dur:Math.round(w.dur || 0) }]));
+  const { error } = await sb.from('compliance_progress').upsert({
+    staff_id: currentProfile.id, training_key: SHPT_KEY, compliance_year: year,
+    step: shpt.step, language: shpt.lang, video, attested: !!shpt.attested, policy_ok: !!shpt.policyOk,
+    answers: shpt.answers, q_idx: shpt.qIdx, feedback: shpt.feedback || null, rating: shpt.rating || null, question: shpt.question || null,
+  }, { onConflict:'staff_id,training_key,compliance_year' });
+  shptSaving = false;
+  const el = document.getElementById('shpt-saved');
+  if (el) el.textContent = error ? "Couldn't save your progress just now. We'll keep trying." : `Progress saved ${new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' })}`;
+}
+// save when the tab is hidden or closed (phone locks, app switch, browser closed)
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && empTab === 'compliance') shptSaveNow(); });
+window.addEventListener('pagehide', () => { if (empTab === 'compliance') shptSaveNow(); });
 
 /* ---------- words (English / Spanish) ---------- */
 const SHPT_T = {
@@ -2493,7 +2531,7 @@ function shptOverviewCard(){
         <div class="l360-title">Sexual Harassment Prevention ${s.year}</div>
         <div class="emp-note"><span class="emp-pill ${cls}">${s.state === 'overdue' ? `Overdue since ${eFmt(s.due)}` : `Due ${eFmt(s.due)}`}</span>
           ${s.newHire ? ' New team members complete it within 30 days of starting.' : ' Everyone completes it once a year.'} About 45–60 minutes. English or Spanish.</div></div>
-      <button class="emp-btn" onclick="empSwitch('compliance')">${Object.keys(shpt.answers).length ? 'Continue training →' : 'Start training →'}</button>
+      <button class="emp-btn" onclick="empSwitch('compliance')">${(shpt.step > 0 || Object.keys(shpt.watched).length) ? 'Continue training →' : 'Start training →'}</button>
     </div>`;
 }
 function shptBadge(){ if (!shpt.loaded) return ''; return shptMine().state === 'done' ? '' : '!'; }
@@ -2513,7 +2551,15 @@ function empCompliance(){
   const steps = st('steps');
   return head + `
     <div class="shpt-steps">${steps.map((n,i) => `<div class="${i===shpt.step?'on':''} ${i<shpt.step?'past':''}"><span>${i+1}</span>${n}</div>`).join('')}</div>
-    <div class="card shpt-body" id="shpt-body">${shptStepHtml(s)}</div>` + shptHistory();
+    ${shpt.resumedFrom ? `<div class="emp-disclaimer" style="margin:0 0 12px;">${shpt.lang==='es' ? 'Bienvenido de nuevo. Continúa donde lo dejaste' : 'Welcome back. You\'re picking up where you left off'} (${steps[shpt.step]}${shptVideoPctText()}).</div>` : ''}
+    <div class="card shpt-body" id="shpt-body">${shptStepHtml(s)}</div>
+    <div class="emp-note" id="shpt-saved" style="text-align:right; margin:-12px 4px 16px;">${shpt.lang==='es' ? 'Su progreso se guarda automáticamente.' : 'Your progress saves automatically.'}</div>` + shptHistory();
+}
+function shptVideoPctText(){
+  const vids = ((shpt.cfg||{}).videos || {})[shpt.lang] || [];
+  if (shpt.step !== 2 || !vids.length) return '';
+  const pct = Math.round(vids.reduce((a, v) => a + Math.min(100, (shpt.watched[v.id] || {}).pct || 0), 0) / vids.length);
+  return `, ${pct}% ${st('watched')}`;
 }
 function shptHistory(){
   if (!shpt.rows.length) return '';
@@ -2547,7 +2593,7 @@ function shptStepHtml(s){
       <div class="emp-note">${st('policyWhere')}</div>
       <div class="emp-sub">${st('reportH')}</div>
       <ul class="shpt-list">${st('reportList').map((li,i) => `<li>${li}${i===1 ? ` <a href="#" onclick="empSwitch('docs'); docsGo('complaint'); return false;">${st('complaint')} →</a>` : ''}</li>`).join('')}</ul>
-      <label class="shpt-ack"><input type="checkbox" ${shpt.policyOk?'checked':''} onchange="shpt.policyOk=this.checked; document.getElementById('shpt-next').disabled=!this.checked;"> ${st('policyAck')}</label>
+      <label class="shpt-ack"><input type="checkbox" ${shpt.policyOk?'checked':''} onchange="shpt.policyOk=this.checked; shptSave(true); document.getElementById('shpt-next').disabled=!this.checked;"> ${st('policyAck')}</label>
       ${nav(shpt.policyOk)}`;
   case 2: {
     const vids = (cfg.videos || {})[shpt.lang] || [];
@@ -2576,9 +2622,9 @@ function shptStepHtml(s){
       <div class="q">${st('fbH')}</div>
       <div class="emp-form">
         <label>${st('fbRate')}</label>
-        <div class="shpt-rate">${[1,2,3,4,5].map(n => `<button class="${shpt.rating===n?'on':''}" onclick="shpt.rating=${n}; shptRerender()">${n}</button>`).join('')}</div>
-        <label>${st('fbText')}</label><textarea id="shpt-fb" rows="3" oninput="shpt.feedback=this.value">${escapeHtml(shpt.feedback)}</textarea>
-        <label>${st('askText')}</label><textarea id="shpt-ask" rows="3" oninput="shpt.question=this.value">${escapeHtml(shpt.question)}</textarea>
+        <div class="shpt-rate">${[1,2,3,4,5].map(n => `<button class="${shpt.rating===n?'on':''}" onclick="shpt.rating=${n}; shptSave(true); shptRerender()">${n}</button>`).join('')}</div>
+        <label>${st('fbText')}</label><textarea id="shpt-fb" rows="3" oninput="shpt.feedback=this.value; shptSave()">${escapeHtml(shpt.feedback)}</textarea>
+        <label>${st('askText')}</label><textarea id="shpt-ask" rows="3" oninput="shpt.question=this.value; shptSave()">${escapeHtml(shpt.question)}</textarea>
         <div class="emp-note">${st('askNote')}</div>
       </div>
       ${nav(true)}`;
@@ -2598,11 +2644,11 @@ function shptStepHtml(s){
 
 /* ---------- navigation ---------- */
 function shptRerender(){ const b = document.getElementById('shpt-body'); if (!b) return empRender(); b.innerHTML = shptStepHtml(shptMine()); shptAfter(); }
-function shptGo(d){ shpt.step = Math.max(0, Math.min(5, shpt.step + d)); empRender(); window.scrollTo({ top:0, behavior:'smooth' }); }
-function shptQ(d){ const n = shptQuestions().length; shpt.qIdx = Math.max(0, Math.min(n - 1, shpt.qIdx + d)); shptRerender(); }
-function shptLang(l){ shpt.lang = l; empRender(); }
-function shptPick(id, k){ const a = shpt.answers[id] || (shpt.answers[id] = { tries:[] }); if (!a.tries.includes(k)) a.tries.push(k); shptRerender(); }
-Object.assign(window, { shptGo, shptQ, shptLang, shptPick, shptRerender, shptSubmit, shptPrintCert, shptCheckVideo });
+function shptGo(d){ shpt.step = Math.max(0, Math.min(5, shpt.step + d)); shpt.resumedFrom = null; shptSave(true); empRender(); window.scrollTo({ top:0, behavior:'smooth' }); }
+function shptQ(d){ const n = shptQuestions().length; shpt.qIdx = Math.max(0, Math.min(n - 1, shpt.qIdx + d)); shptSave(true); shptRerender(); }
+function shptLang(l){ shpt.lang = l; shptSave(true); empRender(); }
+function shptPick(id, k){ const a = shpt.answers[id] || (shpt.answers[id] = { tries:[] }); if (!a.tries.includes(k)) a.tries.push(k); shptSave(true); shptRerender(); }
+Object.assign(window, { shptGo, shptQ, shptLang, shptPick, shptRerender, shptSubmit, shptPrintCert, shptCheckVideo, shptSave });
 
 /* ---------- video progress (YouTube IFrame API; falls back to an attestation) ---------- */
 function shptVideosDone(){
@@ -2610,23 +2656,29 @@ function shptVideosDone(){
   const att = document.getElementById('shpt-attest');
   return (att && att.checked) || shpt.attested || (vids.length && vids.every(v => (shpt.watched[v.id]||{}).pct >= 90));
 }
-function shptCheckVideo(){ const att = document.getElementById('shpt-attest'); if (att) shpt.attested = att.checked; const n = document.getElementById('shpt-next'); if (n) n.disabled = !shptVideosDone(); }
+function shptCheckVideo(){ const att = document.getElementById('shpt-attest'); if (att) shpt.attested = att.checked; shptSave(true); const n = document.getElementById('shpt-next'); if (n) n.disabled = !shptVideosDone(); }
 function shptAfter(){
   if (empTab !== 'compliance' || shpt.step !== 2) return;
   const vids = ((shpt.cfg||{}).videos || {})[shpt.lang] || [];
   const mount = () => vids.forEach(v => {
     const el = document.getElementById('shpt-yt-' + v.id); if (!el) return;
-    const w = shpt.watched[v.id] || (shpt.watched[v.id] = { secs:0, pct:0, last:null });
-    const p = new YT.Player(el, { videoId:v.id, host:'https://www.youtube-nocookie.com', playerVars:{ rel:0, modestbranding:1, hl:shpt.lang },
-      events:{ onStateChange: e => { if (e.data === YT.PlayerState.ENDED) { w.pct = 100; shptPaint(v.id); } } } });
+    const w = shpt.watched[v.id] || (shpt.watched[v.id] = { secs:0, pct:0, pos:0, last:null });
+    w.last = null;
+    const resumeAt = w.pct < 100 && w.pos > 5 ? Math.max(0, Math.floor(w.pos) - 3) : 0;   // back up 3 seconds for context
+    const p = new YT.Player(el, { videoId:v.id, host:'https://www.youtube-nocookie.com', playerVars:{ rel:0, modestbranding:1, hl:shpt.lang, start:resumeAt },
+      events:{ onStateChange: e => {
+        if (e.data === YT.PlayerState.ENDED) { w.pct = 100; w.pos = 0; shptPaint(v.id); shptSave(true); }
+        if (e.data === YT.PlayerState.PAUSED) { w.pos = p.getCurrentTime(); shptSave(true); }
+      } } });
     clearInterval(w.timer);
     w.timer = setInterval(() => {
       if (!document.body.contains(p.getIframe && p.getIframe())) return clearInterval(w.timer);
       if (!p.getPlayerState || p.getPlayerState() !== 1) { w.last = null; return; }
       const t = p.getCurrentTime(), dur = p.getDuration();
       if (w.last != null && t > w.last && t - w.last < 3) w.secs += t - w.last;   // only count real playback, not skipping ahead
-      w.last = t;
+      w.last = t; w.pos = t; if (dur) w.dur = dur;
       if (dur) { w.pct = Math.max(w.pct, Math.min(100, (w.secs / dur) * 100)); shptPaint(v.id); }
+      w.tick = (w.tick || 0) + 1; if (w.tick % 15 === 0) shptSaveNow();   // every ~15 seconds of playback
     }, 1000);
   });
   if (window.YT && YT.Player) return mount();
@@ -2636,7 +2688,7 @@ function shptAfter(){
 }
 function shptFallback(){
   const vids = ((shpt.cfg||{}).videos || {})[shpt.lang] || [];
-  vids.forEach(v => { const el = document.getElementById('shpt-yt-' + v.id); if (el && el.tagName !== 'IFRAME') el.outerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${v.id}?rel=0" allowfullscreen></iframe>`; });
+  vids.forEach(v => { const el = document.getElementById('shpt-yt-' + v.id); if (el && el.tagName !== 'IFRAME') { const w = shpt.watched[v.id] || {}; const st0 = w.pct < 100 && w.pos > 5 ? Math.floor(w.pos) - 3 : 0; el.outerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${v.id}?rel=0${st0 ? `&start=${st0}` : ''}" allowfullscreen></iframe>`; } });
   const f = document.getElementById('shpt-fallback'); if (f) f.style.display = 'block';
 }
 function shptPaint(id){
@@ -2664,8 +2716,9 @@ async function shptSubmit(){
   };
   const { error } = await sb.from('compliance_completions').insert(row);
   if (error) { btn.disabled = false; btn.textContent = st('submit'); err.textContent = `Couldn't save: ${error.message}`; return; }
+  await sb.from('compliance_progress').delete().eq('staff_id', currentProfile.id).eq('training_key', SHPT_KEY).eq('compliance_year', row.compliance_year);
   await shptLoad();
-  shpt.step = 0; shpt.answers = {}; shpt.qIdx = 0;
+  shpt.step = 0; shpt.answers = {}; shpt.qIdx = 0; shpt.watched = {};
   empBadges(); empRender(); window.scrollTo({ top:0, behavior:'smooth' });
 }
 
