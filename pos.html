@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice POS · Salt City Academy</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="pos-data.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;600;700&display=swap');
+:root{
+  --navy:#0D1B2A; --blue:#1B365D; --blue-100:#EEF2F8; --olive:#6D745A; --gold:#B28C4E; --rust:#C75D3D; --rust-d:#8C3E2A;
+  --ink:#17212B; --ink-2:#53606B; --ink-3:#7C817C; --paper:#FFFFFF; --bg:#F1EEE7; --line:#DDD6C8;
+  --good:#2F7A3A; --good-100:#E3F0E3; --bad:#B23B2E; --bad-100:#F7DEDA; --warn:#9A6B12; --warn-100:#F6EBCF;
+  --t-Espresso:#1B365D; --t-Brewed:#6D745A; --t-OnTap:#8C3E2A; --t-Tea:#3E7C74; --t-Food:#B28C4E; --t-Retail:#5A4E78;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;display:flex;flex-direction:column}
+button{font-family:inherit;font-size:14px;cursor:pointer;color:inherit}
+input,select{font-family:inherit;font-size:14px}
+h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.3px}
+.top{background:var(--navy);color:#fff;display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
+.top .brand{font-family:'Oswald';font-weight:700;font-size:17px;letter-spacing:1px}
+.top .brand small{display:block;font-family:'Montserrat';font-size:10px;letter-spacing:2px;color:#9FB3C8;font-weight:600}
+.modes{display:flex;background:rgba(255,255,255,.1);border-radius:9px;padding:3px;margin-left:8px}
+.modes button{background:none;border:none;color:#B9C4CE;padding:7px 14px;border-radius:7px;font-weight:700;font-size:12.5px}
+.modes button.on{background:var(--rust);color:#fff}
+.top .sp{flex:1}
+.top select,.top .tbtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 10px;font-weight:700;font-size:12.5px;text-decoration:none}
+.top select option{color:#000}
+.wrap{flex:1;display:grid;grid-template-columns:1fr 360px;min-height:0}
+.left{display:flex;flex-direction:column;min-height:0;padding:12px 14px;gap:10px}
+.banner{background:var(--paper);border:2px solid var(--rust);border-radius:12px;padding:12px 16px;display:flex;gap:14px;align-items:center}
+.banner .num{font-family:'Oswald';font-size:28px;color:var(--rust);min-width:64px}
+.banner .say{font-size:19px;font-weight:600;line-height:1.35;flex:1}
+.banner .clock{font-family:'Oswald';font-size:24px;color:var(--blue);min-width:70px;text-align:right}
+.reg{flex:1;display:flex;flex-direction:column;min-height:0;background:#fff;border-radius:12px;border:1px solid var(--line);overflow:hidden}
+.menubar{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #ECECEC;font-weight:700;font-size:15px}
+.menubar .hb{font-size:20px;line-height:1;color:#333}
+.menubar .crumb{color:#7A2FE0;cursor:pointer}
+.menubar .sp{flex:1}
+.menubar .ic{width:30px;height:30px;border:1px solid #DDD;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#555;font-size:14px}
+.grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-content:start;padding:12px 14px}
+.tile{border:none;border-radius:6px;min-height:58px;padding:9px 11px;color:#fff;text-align:left;display:flex;flex-direction:column;justify-content:space-between;font-weight:600;font-size:13.5px;line-height:1.2}
+.tile .fl{font-size:11px;opacity:.85;font-weight:600;display:flex;align-items:center;gap:5px}
+.tile.empty{opacity:.45}
+.tile.item{background:#F4F4F6;color:#1A1A1A;border-left:6px solid var(--c)}
+.tile.item small{color:#666;font-weight:500;font-size:11.5px}
+.tile.back{background:#fff;color:#333;border:1.5px solid #CCC}
+.tile:active{transform:scale(.98)}
+.navbar{display:flex;justify-content:space-around;border-top:1px solid #ECECEC;padding:8px 0;font-size:11.5px;color:#666;font-weight:600}
+.navbar span.on{color:#1A1A1A}
+.right{background:var(--paper);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.right h2{font-family:'Montserrat';text-transform:none;letter-spacing:0;font-size:18px;padding:14px 16px 6px;color:#1A1A1A;display:flex;justify-content:space-between;align-items:center}
+.ctabs{display:flex;gap:18px;padding:0 16px;border-bottom:1px solid #ECECEC;font-size:13px;font-weight:600;color:#777}
+.ctabs span{padding:8px 0}.ctabs span.on{color:#1A1A1A;border-bottom:2px solid #1A1A1A}
+.right h2 button{font-family:'Montserrat';text-transform:none;letter-spacing:0;font-size:12px;background:none;border:1px solid var(--line);border-radius:7px;padding:4px 9px;color:var(--ink-2)}
+.lines{flex:1;overflow:auto}
+.line{padding:10px 16px;border-bottom:1px solid #EFEBE3;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.line:hover{background:#FAF8F3}
+.line .nm{font-weight:700}
+.line .md{grid-column:1/2;font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.line .pr{font-weight:700;text-align:right}
+.empty{color:var(--ink-3);padding:24px 16px;font-style:italic}
+.totals{padding:10px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}
+.totals div{display:flex;justify-content:space-between;padding:2px 0}
+.totals .tt{font-size:16px;font-weight:700;color:var(--ink)}
+.charge{margin:10px 16px 16px;background:#006AFF;color:#fff;border:none;border-radius:10px;padding:16px;font-size:18px;font-weight:700}
+.charge:disabled{opacity:.4;cursor:default}
+.ov{position:fixed;inset:0;background:rgba(13,27,42,.5);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.ov.show{display:flex}
+.sheet{background:var(--paper);border-radius:14px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.sheet .hd{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.sheet .hd h3{font-size:19px;color:var(--blue);flex:1}
+.sheet .bd{overflow:auto;padding:14px 18px}
+.sheet .ft{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line);align-items:center}
+.grp{margin-bottom:14px}
+.grp .gh{font-weight:700;font-size:13px;color:var(--ink-2);margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.req{font-size:10.5px;font-weight:700;background:var(--warn-100);color:var(--warn);border-radius:5px;padding:2px 6px}
+.req.ok{background:var(--good-100);color:var(--good)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;font-weight:600;font-size:13px;text-align:left}
+.chip small{display:block;font-weight:600;color:var(--ink-3);font-size:11px}
+.chip.on{border-color:var(--blue);background:var(--blue);color:#fff}
+.chip.on small{color:#C9D5E6}
+.btn{border:none;border-radius:9px;padding:11px 18px;font-weight:700;background:var(--rust);color:#fff}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink-2)}
+.btn.navy{background:var(--blue)}
+.btn.green{background:var(--good)}
+.btn:disabled{opacity:.4;cursor:default}
+.pay{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pay button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:22px 10px;font-weight:700;font-size:16px}
+.pay button:hover{border-color:var(--blue)}
+.cashq{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.big{font-family:'Oswald';font-size:30px;color:var(--blue)}
+.hl{outline:4px solid var(--rust);outline-offset:3px;border-radius:10px;position:relative;z-index:30}
+.tour{position:fixed;right:376px;bottom:16px;width:380px;background:var(--navy);color:#fff;border-radius:14px;padding:16px 18px;z-index:45;box-shadow:0 12px 32px rgba(0,0,0,.3)}
+.tour h3{font-size:16px;color:#F2A900;margin-bottom:6px}
+.tour p{line-height:1.5;font-size:14px}
+.tour .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.tour .row span{font-size:12px;color:#9FB3C8}
+.tour button{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;font-size:12.5px}
+.panel{max-width:860px;margin:0 auto;width:100%}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:12px}
+.card h2{font-size:18px;color:var(--blue);margin-bottom:8px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi .l{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.kpi .v{font-family:'Oswald';font-size:30px;color:var(--blue)}
+.kpi .s{font-size:12px;color:var(--ink-2)}
+table.res{width:100%;border-collapse:collapse;font-size:13px}
+table.res th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);padding:6px;border-bottom:1px solid var(--line)}
+table.res td{padding:8px 6px;border-bottom:1px solid #EFEBE3;vertical-align:top}
+.ok{color:var(--good);font-weight:700}.no{color:var(--bad);font-weight:700}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:20px;padding:3px 9px}
+.pill.good{background:var(--good-100);color:var(--good)}.pill.bad{background:var(--bad-100);color:var(--bad)}.pill.warn{background:var(--warn-100);color:var(--warn)}
+.issues{font-size:12.5px;color:var(--bad);margin-top:3px}
+.exp{font-size:12px;color:var(--ink-2);margin-top:3px}
+.slow{background:#FFF7E8}
+ul.tips{margin:8px 0 0 18px;line-height:1.6}
+.fieldrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.fieldrow select{padding:9px;border:1px solid var(--line);border-radius:8px;min-width:240px}
+.toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:9px 16px;border-radius:9px;font-weight:600;z-index:60;display:none}
+@media (max-width:520px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important} .banner .say{font-size:15px} }
+@media (max-width:900px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr))} .wrap{grid-template-columns:1fr} .right{border-left:none;border-top:1px solid var(--line);max-height:46vh} .tour{right:16px;left:16px;width:auto} .kpis{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">Practice POS<small>Salt City Academy · Day 4</small></div>
+  <div class="modes" id="modes">
+    <button data-m="tour">Layout tour</button>
+    <button data-m="explore">Explore</button>
+    <button data-m="test">15-order test</button>
+  </div>
+  <div class="sp"></div>
+  <select id="loc"></select>
+  <a class="tbtn" id="back" href="training.html">Barista Training</a>
+</div>
+<div id="main" style="flex:1;display:flex;flex-direction:column;min-height:0"></div>
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eXN2Y3ByenZtaHhycm5vZ3FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxODMxMTAsImV4cCI6MjEwMDc1OTExMH0.KZXVYcdDa9lKo3YNXbUYnYGOWjS-ZFtlV4YeyzTs_h0';
+const sb = window.sb || (window.supabase && window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+const D = window.POS_DATA;
+const TARGET = { correct: 13, avgSec: 45 };
+const TAX = 0.08;
+const MANAGERS = ['gm','location_manager','production_manager','coo','ceo','cbo'];
+
+const S = { me:null, locKey:null, mode:'explore', cat:null, cart:[], editing:null,
+            test:null, trainees:[], trainee:null, track:null, history:[], tourStep:0 };
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = s => document.querySelector(s);
+const money = c => '$' + (c / 100).toFixed(2);
+const sec = ms => (ms / 1000).toFixed(1) + 's';
+function toast(m){ const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 2200); }
+const L = () => D[S.locKey];
+const itemById = id => L().items.find(i => i.id === id);
+function modInfo(item, modId){ for (const g of item.g){ const gr = L().groups[g]; const m = gr && gr.m.find(x => x[0] === modId); if (m) return { g, gr, m }; } return null; }
+function linePrice(l){ const it = itemById(l.item); const v = it.v.find(x => x[0] === l.var); let p = v ? v[2] : 0; l.mods.forEach(id => { const mi = modInfo(it, id); if (mi) p += mi.m[2]; }); return p; }
+
+/* ---------------- boot ---------------- */
+async function init(){
+  const params = new URLSearchParams(location.search);
+  if (sb && sb.auth){
+    const { data:{ user } } = await sb.auth.getUser();
+    if (!user){ location.replace('/?next=' + encodeURIComponent('pos.html' + location.search)); return; }
+    const { data: me } = await sb.from('staff').select('*').eq('auth_user_id', user.id).single();
+    S.me = me || null;
+  }
+  // café: from ?loc (Supabase location id) or the person's store
+  const byId = Object.entries(D).find(([k, v]) => v.location_id === params.get('loc'));
+  let saved = null; try { saved = localStorage.getItem('pos_loc'); } catch(e){}
+  S.locKey = byId ? byId[0] : (D[saved] ? saved : Object.keys(D)[0]);
+  if (!byId && S.me){
+    const { data: sl } = await sb.from('staff_locations').select('location_id').eq('staff_id', S.me.id);
+    const hit = Object.entries(D).find(([k, v]) => (sl || []).some(r => r.location_id === v.location_id));
+    if (hit && !D[saved]) S.locKey = hit[0];
+  }
+  $('#loc').innerHTML = Object.entries(D).map(([k, v]) => `<option value="${k}" ${k === S.locKey ? 'selected' : ''}>${esc(v.name)}</option>`).join('');
+  $('#loc').onchange = e => { S.locKey = e.target.value; try { localStorage.setItem('pos_loc', S.locKey); } catch(x){} S.cart = []; S.cat = null; loadTrainees().then(() => setMode(S.mode === 'test' ? 'test' : S.mode)); };
+  $('#back').href = 'training.html' + (params.get('t') ? `?t=${encodeURIComponent(params.get('t'))}` : '');
+  document.querySelectorAll('#modes button').forEach(b => b.onclick = () => setMode(b.dataset.m));
+  S.presetTrack = params.get('t');
+  await loadTrainees();
+  setMode(params.get('mode') || (S.presetTrack ? 'test' : 'tour'));
+}
+
+async function loadTrainees(){
+  S.trainees = [];
+  if (!sb || !S.me || !MANAGERS.includes(S.me.role)) return;
+  const { data: tracks } = await sb.from('training_tracks').select('id,staff_id,status').eq('location_id', L().location_id).in('status', ['active','paused']);
+  const ids = (tracks || []).map(t => t.staff_id);
+  const names = ids.length ? ((await sb.from('staff').select('id,name').in('id', ids)).data || []) : [];
+  S.trainees = (tracks || []).map(t => ({ track: t.id, staff: t.staff_id, name: (names.find(n => n.id === t.staff_id) || {}).name || 'Trainee' })).sort((a, b) => a.name.localeCompare(b.name));
+  if (S.presetTrack){ const p = S.trainees.find(t => t.track === S.presetTrack); if (p) S.trainee = p; }
+}
+
+function setMode(m){
+  S.mode = m; S.test = null; S.cart = []; S.tourStep = 0;
+  document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  closeSheet(); removeTour();
+  if (m === 'test') return renderTestStart();
+  renderPOS();
+  if (m === 'tour') showTour();
+}
+
+/* ---------------- the register ---------------- */
+function itemCat(id){ const m = L().menu; return m.order.find(c => m.cats[c].i.includes(id)); }
+function renderPOS(){
+  const d = L(), m = d.menu; if (S.cat && !m.cats[S.cat]) S.cat = null;
+  const sc = S.test && S.test.scen[S.test.i];
+  const tiles = !S.cat
+    ? m.order.map(c => { const k = m.cats[c]; return `<button class="tile ${k.i.length ? '' : 'empty'}" style="background:${k.c}" data-cat="${c}">${esc(k.n)}<span class="fl">&#128193; ${k.i.length} item${k.i.length === 1 ? '' : 's'}</span></button>`; }).join('')
+    : `<button class="tile back" data-cat="">&#8249; Back</button>` + (m.cats[S.cat].i.length ? m.cats[S.cat].i.map(id => { const i = itemById(id); return `<button class="tile item" style="--c:${i.c || m.cats[S.cat].c}" data-item="${i.id}">${esc(i.n)}<small>${i.v.length > 1 ? i.v.length + ' sizes' : money(i.v[0][2])}</small></button>`; }).join('') : `<div class="empty" style="grid-column:2/-1">Nothing from this folder sold enough in the last two weeks to be in practice mode.</div>`);
+  $('#main').innerHTML = `<div class="wrap">
+    <div class="left">
+      ${sc ? `<div class="banner"><div class="num">${S.test.i + 1}/${S.test.scen.length}</div><div class="say">${esc(sc.say)}</div><div class="clock" id="clock">0.0s</div></div>` : ''}
+      <div class="reg">
+        <div class="menubar" id="menubar"><span class="hb">&#9776;</span><span class="crumb" data-cat="">${esc(m.name)}</span>${S.cat ? `<span style="color:#999">/</span><span>${esc(m.cats[S.cat].n)}</span>` : ''}<span class="sp"></span><span class="ic">&#9906;</span></div>
+        <div class="grid" id="grid">${tiles}</div>
+        <div class="navbar"><span>Lock</span><span>Free Pay</span><span class="on">Menu</span><span>Orders</span><span>Transactions</span></div>
+      </div>
+    </div>
+    <div class="right" id="sale">
+      <h2>New Sale <button id="clear">Clear</button></h2>
+      <div class="ctabs"><span class="on">Check</span><span>Actions</span><span>Guest</span></div>
+      <div class="lines" id="lines"></div>
+      <div class="totals" id="totals"></div>
+      <button class="charge" id="charge">Pay</button>
+    </div></div>`;
+  const nav = e => { const b = e.target.closest('[data-cat]'); if (b){ S.cat = b.dataset.cat || null; renderPOS(); if (S.mode === 'tour') showTour(); return true; } };
+  $('#menubar').onclick = nav;
+  $('#grid').onclick = e => { if (nav(e)) return; const b = e.target.closest('[data-item]'); if (b) openItem(b.dataset.item); };
+  $('#clear').onclick = () => { S.cart = []; renderCart(); };
+  $('#charge').onclick = openPay;
+  renderCart();
+  if (sc) tick();
+}
+function renderCart(){
+  const lines = $('#lines'); if (!lines) return;
+  lines.innerHTML = S.cart.map((l, i) => { const it = itemById(l.item); const v = it.v.find(x => x[0] === l.var);
+    const mods = l.mods.map(id => { const mi = modInfo(it, id); return mi ? mi.m[1] : ''; }).filter(Boolean);
+    return `<div class="line" data-i="${i}"><div class="nm">${esc(it.n)}</div><div class="pr">${money(linePrice(l))}</div><div class="md">${esc(v ? v[1] : '')}${mods.length ? ' · ' + esc(mods.join(', ')) : ''}</div></div>`; }).join('') || `<div class="empty">No items on check</div>`;
+  lines.onclick = e => { const r = e.target.closest('[data-i]'); if (r) openItem(S.cart[+r.dataset.i].item, +r.dataset.i); };
+  const sub = S.cart.reduce((a, l) => a + linePrice(l), 0), tax = Math.round(sub * TAX);
+  $('#totals').innerHTML = `<div><span>Subtotal</span><span>${money(sub)}</span></div><div><span>Tax (est.)</span><span>${money(tax)}</span></div><div class="tt"><span>Total</span><span>${money(sub + tax)}</span></div>`;
+  $('#charge').disabled = !S.cart.length;
+  $('#charge').textContent = S.cart.length ? `Pay ${money(sub + tax)}` : 'Pay';
+}
+
+/* ---------------- item sheet (sizes + modifiers) ---------------- */
+function openItem(id, editIndex){
+  const it = itemById(id); const d = L();
+  const cur = editIndex != null ? JSON.parse(JSON.stringify(S.cart[editIndex])) : { item:id, var: it.v.length === 1 ? it.v[0][0] : null, mods:[] };
+  S.editing = { cur, editIndex };
+  const draw = () => {
+    const missing = it.g.filter(g => { const gr = d.groups[g]; return gr.min > 0 && cur.mods.filter(m => gr.m.some(x => x[0] === m)).length < gr.min; });
+    $('#sheet').innerHTML = `<div class="hd"><h3>${esc(it.n)}</h3><span style="font-weight:700">${money(linePrice(cur))}</span></div>
+      <div class="bd">
+        <div class="grp" id="g-size"><div class="gh">Size <span class="req ${cur.var ? 'ok' : ''}">Required</span></div>
+          <div class="chips">${it.v.map(v => `<button class="chip ${cur.var === v[0] ? 'on' : ''}" data-var="${v[0]}">${esc(v[1])}<small>${money(v[2])}</small></button>`).join('')}</div></div>
+        ${it.g.map(g => { const gr = d.groups[g]; const n = cur.mods.filter(m => gr.m.some(x => x[0] === m)).length;
+          return `<div class="grp" data-gname="${esc(gr.n)}"><div class="gh">${esc(gr.n)} ${gr.min > 0 ? `<span class="req ${n >= gr.min ? 'ok' : ''}">Required</span>` : ''}<span style="font-weight:600;color:var(--ink-3);font-size:11.5px">${gr.max === 1 ? 'Pick one' : 'Pick any'}</span></div>
+          <div class="chips">${gr.m.map(m => `<button class="chip ${cur.mods.includes(m[0]) ? 'on' : ''}" data-g="${g}" data-mod="${m[0]}">${esc(m[1])}${m[2] ? `<small>+${money(m[2])}</small>` : ''}</button>`).join('')}</div></div>`; }).join('')}
+      </div>
+      <div class="ft">${editIndex != null ? `<button class="btn ghost" id="rm" style="margin-right:auto;color:var(--bad)">Remove item</button>` : ''}<button class="btn ghost" id="cx">Cancel</button><button class="btn navy" id="add" ${!cur.var || missing.length ? 'disabled' : ''}>${editIndex != null ? 'Save' : 'Add to sale'}</button></div>`;
+    $('#sheet').onclick = e => {
+      const v = e.target.closest('[data-var]'); if (v){ cur.var = v.dataset.var; return draw(); }
+      const c = e.target.closest('[data-mod]');
+      if (c){ const gr = d.groups[c.dataset.g]; const id = c.dataset.mod;
+        if (cur.mods.includes(id)) cur.mods = cur.mods.filter(x => x !== id);
+        else { if (gr.max === 1) cur.mods = cur.mods.filter(x => !gr.m.some(m => m[0] === x)); cur.mods.push(id); }
+        return draw(); }
+    };
+    $('#cx').onclick = closeSheet;
+    if ($('#rm')) $('#rm').onclick = () => { S.cart.splice(editIndex, 1); closeSheet(); renderCart(); };
+    $('#add').onclick = () => { if (editIndex != null) S.cart[editIndex] = cur; else S.cart.push(cur); closeSheet(); renderCart(); };
+    if (S.mode === 'tour') highlightTour();
+  };
+  draw(); $('#ov').classList.add('show');
+}
+function closeSheet(){ $('#ov').classList.remove('show'); S.editing = null; }
+$('#ov').addEventListener('click', e => { if (e.target.id === 'ov' && S.mode !== 'tour') closeSheet(); });
+
+/* ---------------- payment ---------------- */
+function openPay(){
+  if (!S.cart.length) return;
+  const sub = S.cart.reduce((a, l) => a + linePrice(l), 0), total = sub + Math.round(sub * TAX);
+  $('#sheet').innerHTML = `<div class="hd"><h3>Charge ${money(total)}</h3></div>
+    <div class="bd"><p style="color:var(--ink-2);margin-bottom:12px">How are they paying? In the café the card goes on the reader; here you just pick the tender.</p>
+      <div class="pay"><button data-pay="card">Card</button><button data-pay="cash">Cash</button><button data-pay="split">Split payment</button></div>
+      <div id="paybody"></div></div>
+    <div class="ft"><button class="btn ghost" id="cx">Back</button></div>`;
+  $('#cx').onclick = closeSheet;
+  $('#sheet').querySelector('.pay').onclick = e => { const b = e.target.closest('[data-pay]'); if (!b) return;
+    if (b.dataset.pay === 'card') return finishSale('card', null);
+    if (b.dataset.pay === 'cash'){
+      const q = [Math.ceil(total / 100) * 100, 1000, 2000, 5000].filter((v, i, a) => v >= total && a.indexOf(v) === i);
+      $('#paybody').innerHTML = `<div class="card" style="margin-top:14px"><b>Cash tendered</b><div class="cashq">${q.map(v => `<button class="btn ghost" data-cash="${v}">${money(v)}</button>`).join('')}<button class="btn ghost" data-cash="${total}">Exact</button></div><div id="change"></div></div>`;
+      $('#paybody').onclick = ev => { const c = ev.target.closest('[data-cash]'); if (!c) return; const given = +c.dataset.cash;
+        $('#change').innerHTML = `<div class="big">Change ${money(given - total)}</div><button class="btn green" id="done" style="margin-top:10px">Done</button>`;
+        $('#done').onclick = () => finishSale('cash', given); };
+    }
+    if (b.dataset.pay === 'split'){
+      const half = Math.floor(total / 2);
+      $('#paybody').innerHTML = `<div class="card" style="margin-top:14px"><b>Split into 2 payments</b><p style="margin:8px 0;color:var(--ink-2)">Payment 1: ${money(half)} · Payment 2: ${money(total - half)}</p><button class="btn navy" id="p1">Card 1 · ${money(half)}</button> <button class="btn navy" id="p2" disabled>Card 2 · ${money(total - half)}</button></div>`;
+      $('#p1').onclick = () => { $('#p1').disabled = true; $('#p1').textContent = 'Card 1 paid'; $('#p2').disabled = false; };
+      $('#p2').onclick = () => finishSale('split', null);
+    }
+  };
+  $('#ov').classList.add('show');
+}
+function finishSale(tender, cashGiven){
+  closeSheet();
+  if (S.mode === 'test' && S.test) return scoreScenario(tender);
+  toast(tender === 'card' ? 'Paid by card' : tender === 'cash' ? 'Paid in cash' : 'Split payment complete');
+  S.cart = []; renderCart();
+}
+
+/* ---------------- tour ---------------- */
+function tourSteps(){
+  const d = L(); const latte = d.items.find(i => i.n === 'Hot Latte') || d.items.find(i => i.t === 'Espresso');
+  const milk = latte && latte.g.map(g => d.groups[g]).find(g => /milk/i.test(g.n));
+  const oat = milk && milk.m.find(m => /oat/i.test(m[1]));
+  const syrup = latte && latte.g.map(g => d.groups[g]).find(g => /syrup/i.test(g.n));
+  const espCat = latte && itemCat(latte.id);
+  const s = [
+    { t:'The menu', sel:'#grid', home:true, p:`This is the ${d.menu.name}. Every button is a folder: drinks in purple, baked goods and food in green, beans in brown, retail in blue. Tap one to open it, and tap Back or the menu name to come home.` },
+    { t:'Item buttons', sel:'#grid', cat:espCat, p:`Inside a folder you see the items. Hot lattes, cappuccinos, mochas and cortados all live in ${espCat ? d.menu.cats[espCat].n : 'Espresso Drinks'}. Tap an item to open its options.` },
+    { t:'Size first', sel:'#g-size', open:true, p:`Every drink starts with a size. Small hot drinks are 12 oz, large is 16 oz. Iced drinks are 16 and 20 oz. Cappuccino and cortado are one size.` },
+    { t:'For here or to go', g:/to stay/i, open:true, p:`Always ask. “To Stay” is for the small size only, because that’s what fits our mugs.` },
+    { t:'Espresso', g:/espresso\?$/i, open:true, p:`Dark Arts is our house espresso and the default. Decaf and Half Caff are here. “Dirty” chai means Add an Espresso Shot, which is a separate list.` },
+    { t:'Milk', g:/milk/i, open:true, p:`Whole is the default. ${oat ? `Alt milks like oat add ${money(oat[2])}.` : 'Alt milks add a charge.'} Always ring the milk they ask for: it’s how the bar knows about allergies.` },
+    { t:'Syrups', g:/syrup/i, open:true, p:`${syrup ? `Most syrups add ${money((syrup.m.find(m => m[2]) || [0,0,93])[2])}.` : 'Syrups add a charge.'} You can pick more than one.` },
+    { t:'Extra Info', g:/extra info/i, open:true, p:`Light ice, extra hot, less sweet and other notes for the bar go here, so they print on the ticket.` },
+    { t:'The check', sel:'#sale', p:`Everything you ring shows on the check. Tap a line to change it or remove it. Check it against what the guest said before you charge.` },
+    { t:'Paying', sel:'#charge', p:`Tap Pay, then pick the tender: Card, Cash (enter what they hand you and give the change shown) or Split for guests paying separately.` },
+    { t:'Things to always do', sel:null, p:`Greet first. Ask hot or iced, size, milk, and for here or to go. Repeat the order back before charging.${S.locKey === 'clay' ? ' At the drive-thru: headset on, greet within a few seconds, read the order back, and tell them the total.' : ''} Then try Explore, and the 15-order test when you’re ready.` },
+  ];
+  return { s, latte };
+}
+function showTour(){
+  removeTour();
+  const { s, latte } = tourSteps(); const st = s[S.tourStep];
+  if (st.home && S.cat){ S.cat = null; renderPOS(); }
+  if ((st.cat || st.open) && latte && S.cat !== (st.cat || itemCat(latte.id))){ S.cat = st.cat || itemCat(latte.id); if (S.editing) closeSheet(); renderPOS(); }
+  if (st.open && latte && !S.editing) openItem(latte.id);
+  if (!st.open && S.editing) closeSheet();
+  const box = document.createElement('div'); box.className = 'tour'; box.id = 'tour';
+  box.innerHTML = `<h3>${S.tourStep + 1}. ${esc(st.t)}</h3><p>${esc(st.p)}</p><div class="row"><span>${S.tourStep + 1} of ${s.length}</span><div><button id="tb" ${S.tourStep === 0 ? 'disabled' : ''}>Back</button> <button id="tn">${S.tourStep === s.length - 1 ? 'Start exploring' : 'Next'}</button></div></div>`;
+  document.body.appendChild(box);
+  $('#tb').onclick = () => { S.tourStep--; showTour(); };
+  $('#tn').onclick = () => { if (S.tourStep === s.length - 1){ closeSheet(); setMode('explore'); } else { S.tourStep++; showTour(); } };
+  highlightTour();
+}
+function highlightTour(){
+  document.querySelectorAll('.hl').forEach(e => e.classList.remove('hl'));
+  if (S.mode !== 'tour') return;
+  const st = tourSteps().s[S.tourStep]; let el = null;
+  if (st.sel) el = document.querySelector(st.sel);
+  if (st.g) el = [...document.querySelectorAll('.grp[data-gname]')].find(g => st.g.test(g.dataset.gname));
+  if (el){ el.classList.add('hl'); el.scrollIntoView({ block:'nearest', behavior:'smooth' }); }
+}
+function removeTour(){ const t = $('#tour'); if (t) t.remove(); document.querySelectorAll('.hl').forEach(e => e.classList.remove('hl')); }
+
+/* ---------------- test ---------------- */
+function renderTestStart(){
+  const d = L();
+  const canSave = S.trainees.length > 0;
+  $('#main').innerHTML = `<div style="overflow:auto;padding:16px"><div class="panel">
+    <div class="card"><h2>15-order test · ${esc(d.name)}</h2>
+      <p style="color:var(--ink-2);line-height:1.6">You’ll get 15 real orders, one at a time, from easy to hard. Ring each one exactly as the guest asks, then charge it with the right tender. The clock runs from when the order appears until it’s paid. You’ll see your results at the end, not during.</p>
+      <p style="margin-top:8px"><b>Ready for live POS:</b> ${TARGET.correct} of 15 correct, averaging ${TARGET.avgSec} seconds or less.</p>
+      ${canSave ? `<div class="fieldrow"><b>Who’s practicing?</b><select id="who"><option value="">Practice only (don’t save)</option>${S.trainees.map(t => `<option value="${t.track}" ${S.trainee && S.trainee.track === t.track ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></div>` : `<p style="margin-top:8px;color:var(--ink-3);font-size:13px">Results aren’t saved on this device. To save them to a trainee’s record, open this from their page in Barista Training.</p>`}
+      <div class="fieldrow"><button class="btn" id="go">Start the test</button><button class="btn ghost" id="tourbtn">Take the layout tour first</button></div>
+    </div>
+    <div class="card" id="hist" style="display:none"></div>
+  </div></div>`;
+  if ($('#who')) $('#who').onchange = e => { S.trainee = S.trainees.find(t => t.track === e.target.value) || null; loadHistory(); };
+  $('#go').onclick = startTest;
+  $('#tourbtn').onclick = () => setMode('tour');
+  loadHistory();
+}
+async function loadHistory(){
+  S.history = [];
+  const box = $('#hist'); if (box) box.style.display = 'none';
+  if (!S.trainee || !sb) return;
+  const { data } = await sb.from('pos_practice_attempts').select('id,created_at,correct,total,avg_ms,passed,location_id').eq('staff_id', S.trainee.staff).order('created_at', { ascending:false }).limit(10);
+  S.history = data || [];
+  if (box && S.history.length){ box.style.display = 'block'; box.innerHTML = `<h2>${esc(S.trainee.name)}’s earlier tries</h2>${histTable(S.history)}`; }
+}
+function histTable(h){
+  return `<table class="res"><tr><th>When</th><th>Correct</th><th>Avg time</th><th>Result</th></tr>${h.map(a => `<tr><td>${new Date(a.created_at).toLocaleString('en-US',{ month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}</td><td>${a.correct}/${a.total}</td><td>${sec(a.avg_ms)}</td><td>${a.passed ? '<span class="pill good">Ready</span>' : '<span class="pill warn">Keep practicing</span>'}</td></tr>`).join('')}</table>`;
+}
+function startTest(){
+  S.test = { scen: L().scen, i: 0, results: [], started: performance.now() };
+  S.cart = []; S.cat = null;
+  S.test.t0 = performance.now();
+  renderPOS();
+}
+function tick(){
+  cancelAnimationFrame(tick.r);
+  const loop = () => { const c = $('#clock'); if (!c || !S.test) return; c.textContent = sec(performance.now() - S.test.t0); tick.r = requestAnimationFrame(loop); };
+  loop();
+}
+function scoreScenario(tender){
+  const sc = S.test.scen[S.test.i]; const ms = performance.now() - S.test.t0;
+  const issues = []; const left = S.cart.map(l => l);
+  sc.lines.forEach(exp => {
+    const idx = left.findIndex(l => l.item === exp.item);
+    if (idx < 0){ issues.push(`Missing ${exp.itemName}`); return; }
+    const l = left.splice(idx, 1)[0]; const it = itemById(l.item);
+    if (l.var !== exp.var){ const v = it.v.find(x => x[0] === l.var); issues.push(`${exp.itemName}: size ${v ? v[1] : '?'}, should be ${exp.varName}`); }
+    exp.req.forEach(r => { if (!r.any.some(id => l.mods.includes(id))) issues.push(`${exp.itemName}: missing ${r.label}`); });
+    const allowed = new Set([...exp.req.flatMap(r => r.any), ...exp.ok]);
+    l.mods.filter(id => !allowed.has(id)).forEach(id => { const mi = modInfo(it, id); issues.push(`${exp.itemName}: extra ${mi ? mi.m[1] : 'option'}`); });
+  });
+  left.forEach(l => issues.push(`Extra item: ${itemById(l.item).n}`));
+  if (tender !== sc.pay) issues.push(`Paid by ${tender}, should be ${sc.pay === 'split' ? 'split payment' : sc.pay}`);
+  const rung = S.cart.map(l => { const it = itemById(l.item); const v = it.v.find(x => x[0] === l.var); return `${it.n} ${v ? v[1] : ''}${l.mods.length ? ' (' + l.mods.map(id => (modInfo(it, id) || { m:[0,''] }).m[1]).join(', ') + ')' : ''}`; }).join(' + ');
+  S.test.results.push({ n: sc.n, say: sc.say, ms: Math.round(ms), ok: !issues.length, issues, rung, tender, tip: sc.tip,
+    expected: sc.lines.map(e => `${e.itemName} ${e.varName}${e.req.length ? ' (' + e.req.map(r => r.label).join(', ') + ')' : ''}`).join(' + ') + ` · ${sc.pay === 'split' ? 'split payment' : sc.pay}` });
+  S.test.i++; S.cart = []; S.cat = null;
+  if (S.test.i >= S.test.scen.length) return finishTest();
+  S.test.t0 = performance.now(); renderPOS();
+}
+async function finishTest(){
+  cancelAnimationFrame(tick.r);
+  const R = S.test.results; const correct = R.filter(r => r.ok).length; const total = R.reduce((a, r) => a + r.ms, 0); const avg = Math.round(total / R.length);
+  const passed = correct >= TARGET.correct && avg <= TARGET.avgSec * 1000;
+  const slow = [...R].sort((a, b) => b.ms - a.ms).slice(0, 3).map(r => r.n);
+  const prev = S.history[0];
+  let savedNote = '';
+  if (S.trainee && sb){
+    const { error } = await sb.rpc('pos_practice_save', { p_staff: S.trainee.staff, p_location: L().location_id, p_track: S.trainee.track, p_correct: correct, p_total: R.length, p_total_ms: total, p_avg_ms: avg, p_passed: passed, p_results: R });
+    savedNote = error ? `<span class="pill bad">Couldn’t save: ${esc(error.message)}</span>` : `<span class="pill good">Saved to ${esc(S.trainee.name)}’s training record</span>`;
+  }
+  const cmp = prev ? `<div class="s">${correct - prev.correct >= 0 ? '+' : ''}${correct - prev.correct} vs last try</div>` : '<div class="s">First saved try</div>';
+  const cmpT = prev ? `<div class="s">${avg <= prev.avg_ms ? (sec(prev.avg_ms - avg) + ' faster') : (sec(avg - prev.avg_ms) + ' slower')} than last try</div>` : '<div class="s">Target ' + TARGET.avgSec + 's or less</div>';
+  $('#main').innerHTML = `<div style="overflow:auto;padding:16px"><div class="panel">
+    <div class="card"><h2>Results · ${esc(L().name)}${S.trainee ? ' · ' + esc(S.trainee.name) : ''}</h2>
+      <p>${passed ? '<span class="pill good">Ready for live POS</span>' : `<span class="pill warn">Keep practicing: the goal is ${TARGET.correct}/15 correct, averaging ${TARGET.avgSec}s or less</span>`} ${savedNote}</p></div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Correct</div><div class="v">${correct}/${R.length}</div>${cmp}</div>
+      <div class="kpi"><div class="l">Average per order</div><div class="v">${sec(avg)}</div>${cmpT}</div>
+      <div class="kpi"><div class="l">Total time</div><div class="v">${Math.floor(total / 60000)}:${String(Math.round(total / 1000) % 60).padStart(2,'0')}</div><div class="s">All 15 orders</div></div>
+      <div class="kpi"><div class="l">Slowest</div><div class="v" style="font-size:24px">#${slow.join(', #')}</div><div class="s">Highlighted below</div></div>
+    </div>
+    <div class="card"><h2>Order by order</h2>
+      <table class="res"><tr><th>#</th><th>The guest said</th><th>Time</th><th>Result</th></tr>
+      ${R.map(r => `<tr class="${slow.includes(r.n) ? 'slow' : ''}"><td>${r.n}</td><td>${esc(r.say)}<div class="exp">You rang: ${esc(r.rung || 'nothing')}</div>${r.ok ? '' : `<div class="exp"><b>Should be:</b> ${esc(r.expected)}</div><div class="issues">${r.issues.map(esc).join(' · ')}</div><div class="exp">Tip: ${esc(r.tip)}</div>`}</td><td>${sec(r.ms)}</td><td>${r.ok ? '<span class="ok">Correct</span>' : '<span class="no">Fix</span>'}</td></tr>`).join('')}
+      </table></div>
+    ${S.history.length ? `<div class="card"><h2>Earlier tries</h2>${histTable(S.history)}</div>` : ''}
+    <div class="fieldrow"><button class="btn" id="again">Try again</button><button class="btn ghost" id="exp">Explore the register</button></div>
+  </div></div>`;
+  $('#again').onclick = () => { loadHistory().then(startTest); };
+  $('#exp').onclick = () => setMode('explore');
+  S.test = null;
+}
+
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && S.mode !== 'tour') closeSheet(); });
+if (!window.__TEST__) init().catch(e => { $('#main').innerHTML = `<div class="card" style="margin:40px auto;max-width:600px">Something went wrong: ${esc(e.message || e)}</div>`; });
+</script>
+</body>
+</html>
