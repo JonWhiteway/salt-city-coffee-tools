@@ -412,7 +412,7 @@ function renderTrack(){
 
   ${items.map(i => blockHtml(i, mk, canEdit)).join('')}
 
-  ${['d4','d5'].includes(d.stage) ? `<div class="card" style="border-left:6px solid var(--rust,#C75D3D)"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">Practice POS</h2><div class="muted small">Layout tour, then the 15-order test on this café's menu. Goal: 13 of 15 correct, averaging 45 seconds or less. Results save to this record.</div></div><a class="btn" href="pos.html?t=${encodeURIComponent(t.id)}&loc=${encodeURIComponent(t.location_id)}">Open Practice POS</a></div></div>` : ''}
+  ${['d4','d5'].includes(d.stage) ? `<div class="card" style="border-left:6px solid var(--rust,#C75D3D)"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">Practice POS</h2><div class="muted small">Layout tour, then the 15-order test on this café's menu. Goal to work toward: 13 of 15 correct, about 45 seconds per order. Results save to this record.</div></div><a class="btn" href="pos.html?t=${encodeURIComponent(t.id)}&loc=${encodeURIComponent(t.location_id)}">Open Practice POS</a></div></div>` : ''}
 
   ${(st.materials || []).length ? `<details class="card"><summary style="cursor:pointer;font-weight:700;color:var(--lead-700)">Materials for ${esc(st.label)}</summary><ul class="mats" style="margin-top:8px">${st.materials.map(m => `<li>${esc(m)}</li>`).join('')}</ul></details>` : ''}
 

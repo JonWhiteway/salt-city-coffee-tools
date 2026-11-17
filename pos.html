@@ -37,7 +37,9 @@ h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing
 .banner{background:var(--paper);border:2px solid var(--rust);border-radius:12px;padding:12px 16px;display:flex;gap:14px;align-items:center}
 .banner .num{font-family:'Oswald';font-size:28px;color:var(--rust);min-width:64px}
 .banner .say{font-size:19px;font-weight:600;line-height:1.35;flex:1}
-.banner .clock{font-family:'Oswald';font-size:24px;color:var(--blue);min-width:70px;text-align:right}
+.ostrip{background:#FFF4EF;border-bottom:2px solid var(--rust);padding:10px 18px;display:flex;gap:12px;align-items:center}
+.ostrip .num{font-family:'Oswald';font-size:18px;color:var(--rust);white-space:nowrap}
+.ostrip .say{font-size:16px;font-weight:600;line-height:1.35}
 .reg{flex:1;display:flex;flex-direction:column;min-height:0;background:#fff;border-radius:12px;border:1px solid var(--line);overflow:hidden}
 .menubar{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #ECECEC;font-weight:700;font-size:15px}
 .menubar .hb{font-size:20px;line-height:1;color:#333}
@@ -224,7 +226,7 @@ function renderPOS(){
     : `<button class="tile back" data-cat="">&#8249; Back</button>` + (m.cats[S.cat].i.length ? m.cats[S.cat].i.map(id => { const i = itemById(id); return `<button class="tile item" style="--c:${i.c || m.cats[S.cat].c}" data-item="${i.id}">${esc(i.n)}<small>${i.v.length > 1 ? i.v.length + ' sizes' : money(i.v[0][2])}</small></button>`; }).join('') : `<div class="empty" style="grid-column:2/-1">Nothing from this folder sold enough in the last two weeks to be in practice mode.</div>`);
   $('#main').innerHTML = `<div class="wrap">
     <div class="left">
-      ${sc ? `<div class="banner"><div class="num">${S.test.i + 1}/${S.test.scen.length}</div><div class="say">${esc(sc.say)}</div><div class="clock" id="clock">0.0s</div></div>` : ''}
+      ${sc ? `<div class="banner"><div class="num">${S.test.i + 1}/${S.test.scen.length}</div><div class="say">${esc(sc.say)}</div></div>` : ''}
       <div class="reg">
         <div class="menubar" id="menubar"><span class="hb">&#9776;</span><span class="crumb" data-cat="">${esc(m.name)}</span>${S.cat ? `<span style="color:#999">/</span><span>${esc(m.cats[S.cat].n)}</span>` : ''}<span class="sp"></span><span class="ic">&#9906;</span></div>
         <div class="grid" id="grid">${tiles}</div>
@@ -244,7 +246,6 @@ function renderPOS(){
   $('#clear').onclick = () => { S.cart = []; renderCart(); };
   $('#charge').onclick = openPay;
   renderCart();
-  if (sc) tick();
 }
 function renderCart(){
   const lines = $('#lines'); if (!lines) return;
@@ -265,7 +266,7 @@ function openItem(id, editIndex){
   S.editing = { cur, editIndex };
   const draw = () => {
     const missing = it.g.filter(g => { const gr = d.groups[g]; return gr.min > 0 && cur.mods.filter(m => gr.m.some(x => x[0] === m)).length < gr.min; });
-    $('#sheet').innerHTML = `<div class="hd"><h3>${esc(it.n)}</h3><span style="font-weight:700">${money(linePrice(cur))}</span></div>
+    $('#sheet').innerHTML = orderStrip() + `<div class="hd"><h3>${esc(it.n)}</h3><span style="font-weight:700">${money(linePrice(cur))}</span></div>
       <div class="bd">
         <div class="grp" id="g-size"><div class="gh">Size <span class="req ${cur.var ? 'ok' : ''}">Required</span></div>
           <div class="chips">${it.v.map(v => `<button class="chip ${cur.var === v[0] ? 'on' : ''}" data-var="${v[0]}">${esc(v[1])}<small>${money(v[2])}</small></button>`).join('')}</div></div>
@@ -289,6 +290,7 @@ function openItem(id, editIndex){
   };
   draw(); $('#ov').classList.add('show');
 }
+function orderStrip(){ const sc = S.test && S.test.scen[S.test.i]; return sc ? `<div class="ostrip"><div class="num">Order ${S.test.i + 1}/${S.test.scen.length}</div><div class="say">${esc(sc.say)}</div></div>` : ''; }
 function closeSheet(){ $('#ov').classList.remove('show'); S.editing = null; }
 $('#ov').addEventListener('click', e => { if (e.target.id === 'ov' && S.mode !== 'tour') closeSheet(); });
 
@@ -296,7 +298,7 @@ $('#ov').addEventListener('click', e => { if (e.target.id === 'ov' && S.mode !==
 function openPay(){
   if (!S.cart.length) return;
   const sub = S.cart.reduce((a, l) => a + linePrice(l), 0), total = sub + Math.round(sub * TAX);
-  $('#sheet').innerHTML = `<div class="hd"><h3>Charge ${money(total)}</h3></div>
+  $('#sheet').innerHTML = orderStrip() + `<div class="hd"><h3>Charge ${money(total)}</h3></div>
     <div class="bd"><p style="color:var(--ink-2);margin-bottom:12px">How are they paying? In the café the card goes on the reader; here you just pick the tender.</p>
       <div class="pay"><button data-pay="card">Card</button><button data-pay="cash">Cash</button><button data-pay="split">Split payment</button></div>
       <div id="paybody"></div></div>
@@ -379,8 +381,8 @@ function renderTestStart(){
   const canSave = S.trainees.length > 0;
   $('#main').innerHTML = `<div style="overflow:auto;padding:16px"><div class="panel">
     <div class="card"><h2>15-order test · ${esc(d.name)}</h2>
-      <p style="color:var(--ink-2);line-height:1.6">You’ll get 15 real orders, one at a time, from easy to hard. Ring each one exactly as the guest asks, then charge it with the right tender. The clock runs from when the order appears until it’s paid. You’ll see your results at the end, not during.</p>
-      <p style="margin-top:8px"><b>Ready for live POS:</b> ${TARGET.correct} of 15 correct, averaging ${TARGET.avgSec} seconds or less.</p>
+      <p style="color:var(--ink-2);line-height:1.6">You’ll get 15 real orders, one at a time, from easy to hard. Ring each one exactly as the guest asks, then charge it with the right tender. Take your time and get it right. You’ll see how you did at the end, not during.</p>
+      <p style="margin-top:8px;color:var(--ink-2)"><b>What we’re working toward:</b> ${TARGET.correct} of 15 correct, about ${TARGET.avgSec} seconds per order. It’s a goal to grow into, not a pass/fail.</p>
       ${canSave ? `<div class="fieldrow"><b>Who’s practicing?</b><select id="who"><option value="">Practice only (don’t save)</option>${S.trainees.map(t => `<option value="${t.track}" ${S.trainee && S.trainee.track === t.track ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></div>` : `<p style="margin-top:8px;color:var(--ink-3);font-size:13px">Results aren’t saved on this device. To save them to a trainee’s record, open this from their page in Barista Training.</p>`}
       <div class="fieldrow"><button class="btn" id="go">Start the test</button><button class="btn ghost" id="tourbtn">Take the layout tour first</button></div>
     </div>
@@ -400,7 +402,7 @@ async function loadHistory(){
   if (box && S.history.length){ box.style.display = 'block'; box.innerHTML = `<h2>${esc(S.trainee.name)}’s earlier tries</h2>${histTable(S.history)}`; }
 }
 function histTable(h){
-  return `<table class="res"><tr><th>When</th><th>Correct</th><th>Avg time</th><th>Result</th></tr>${h.map(a => `<tr><td>${new Date(a.created_at).toLocaleString('en-US',{ month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}</td><td>${a.correct}/${a.total}</td><td>${sec(a.avg_ms)}</td><td>${a.passed ? '<span class="pill good">Ready</span>' : '<span class="pill warn">Keep practicing</span>'}</td></tr>`).join('')}</table>`;
+  return `<table class="res"><tr><th>When</th><th>Correct</th><th>Avg time</th></tr>${h.map(a => `<tr><td>${new Date(a.created_at).toLocaleString('en-US',{ month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}</td><td>${a.correct}/${a.total}</td><td>${sec(a.avg_ms)}</td></tr>`).join('')}</table>`;
 }
 function startTest(){
   S.test = { scen: L().scen, i: 0, results: [], started: performance.now() };
@@ -445,11 +447,11 @@ async function finishTest(){
     const { error } = await sb.rpc('pos_practice_save', { p_staff: S.trainee.staff, p_location: L().location_id, p_track: S.trainee.track, p_correct: correct, p_total: R.length, p_total_ms: total, p_avg_ms: avg, p_passed: passed, p_results: R });
     savedNote = error ? `<span class="pill bad">Couldn’t save: ${esc(error.message)}</span>` : `<span class="pill good">Saved to ${esc(S.trainee.name)}’s training record</span>`;
   }
-  const cmp = prev ? `<div class="s">${correct - prev.correct >= 0 ? '+' : ''}${correct - prev.correct} vs last try</div>` : '<div class="s">First saved try</div>';
-  const cmpT = prev ? `<div class="s">${avg <= prev.avg_ms ? (sec(prev.avg_ms - avg) + ' faster') : (sec(avg - prev.avg_ms) + ' slower')} than last try</div>` : '<div class="s">Target ' + TARGET.avgSec + 's or less</div>';
+  const cmp = `<div class="s">Goal ${TARGET.correct}+${prev ? ` · ${correct - prev.correct >= 0 ? '+' : ''}${correct - prev.correct} vs last try` : ''}</div>`;
+  const cmpT = `<div class="s">Goal about ${TARGET.avgSec}s${prev ? ` · ${avg <= prev.avg_ms ? sec(prev.avg_ms - avg) + ' faster' : sec(avg - prev.avg_ms) + ' slower'} than last try` : ''}</div>`;
   $('#main').innerHTML = `<div style="overflow:auto;padding:16px"><div class="panel">
     <div class="card"><h2>Results · ${esc(L().name)}${S.trainee ? ' · ' + esc(S.trainee.name) : ''}</h2>
-      <p>${passed ? '<span class="pill good">Ready for live POS</span>' : `<span class="pill warn">Keep practicing: the goal is ${TARGET.correct}/15 correct, averaging ${TARGET.avgSec}s or less</span>`} ${savedNote}</p></div>
+      <p style="color:var(--ink-2)">Goal to work toward: ${TARGET.correct} of 15 correct, about ${TARGET.avgSec} seconds per order. ${savedNote}</p></div>
     <div class="kpis">
       <div class="kpi"><div class="l">Correct</div><div class="v">${correct}/${R.length}</div>${cmp}</div>
       <div class="kpi"><div class="l">Average per order</div><div class="v">${sec(avg)}</div>${cmpT}</div>
