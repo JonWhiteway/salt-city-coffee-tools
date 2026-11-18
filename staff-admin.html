@@ -157,60 +157,175 @@ button,input,select{font-family:inherit;}
 }
 </style>
 
-<style id="command-deck-visual-theme">
+<style id="command-deck-redesign-v2">
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:wght@400;500;600;700&display=swap');
+/* COMMAND DECK — full visual system aligned to the original index(2).html.
+   This stylesheet intentionally changes presentation only. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 :root{
---bg:#F7F4EC;--surface:#FFFFFF;--surface-alt:#EFE9DA;--surface-raised:#FFFFFF;
---ink:#241F18;--ink-2:#5A5245;--ink-3:#8B826F;--border:#E1D9C4;--border-soft:#EEE7D6;
---accent:#EB6834;--accent-ink:#FFFFFF;--accent-soft:#FCE3D4;--caramel:#B9852E;--caramel-soft:#F3E2BC;
---good:#0CA30C;--warn:#B8860B;--serious:#C15A34;--critical:#D03B3B;
---good-soft:#DCF3DC;--warn-soft:#F7EBC9;--serious-soft:#F7DFCF;--critical-soft:#F8DADA;
---font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
---font-body:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
---font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
---nav-w:248px;--radius:10px;--radius-sm:6px;
---navy:#191410;--navy-900:#191410;--navy-deep:#191410;--lead-900:#191410;--lead-700:#5A5245;
---blue:#5A5245;--rust:#EB6834;--rust-mid:#EB6834;--care-700:#EB6834;--craft-700:#B9852E;
---paper:#FFFFFF;--panel:#F7F4EC;--line:#E1D9C4;--muted:#8B826F;
---shadow:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
---shadow-sm:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
---shadow-md:0 6px 20px rgba(36,31,24,.10);color-scheme:light}
-html{background:var(--bg);scroll-behavior:smooth}
-body{background:var(--bg)!important;color:var(--ink)!important;font-family:var(--font-body)!important}
-h1,h2,h3,h4,h5,h6{font-family:var(--font-display)!important;color:var(--ink)!important}
-button,input,select,textarea{font-family:var(--font-body)!important}
-a{color:var(--accent)}
-::selection{background:var(--accent-soft);color:var(--ink)}
-:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
-.topbar,header.topbar,.header,.app-header,.site-header{
-background:rgba(247,244,236,.96)!important;color:var(--ink)!important;
-border-bottom:1px solid var(--border-soft)!important;box-shadow:none!important;backdrop-filter:blur(8px)}
-.topbar h1,.topbar h2,.topbar .brand-name,.topbar .brand-title,header h1,header h2{color:var(--ink)!important}
-.topbar .brand-sub,.topbar .subtitle,.topbar small{color:var(--ink-3)!important}
-.brand-mark,.brand-dot,.brand .dot,.logo-mark{background:var(--accent)!important;box-shadow:none!important}
-.card,.panel-card,.section-card,.metric-card,.stat-card,.form-card,.tile,.modal-card{
-background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:var(--radius)!important;box-shadow:var(--shadow-sm)!important}
-button,.btn,.button,[role="button"],input[type="submit"],input[type="button"]{border-radius:7px}
-.btn-primary,.primary,.btn:not(.ghost):not(.secondary):not(.outline):not(.danger),button.primary,input[type="submit"]{
-background:var(--accent)!important;border-color:var(--accent)!important;color:#fff!important}
-.btn-primary:hover,.primary:hover,.btn:not(.ghost):not(.secondary):not(.outline):not(.danger):hover,button.primary:hover,input[type="submit"]:hover{background:#D95727!important}
-.btn-secondary,.secondary,.ghost,.outline,button.ghost{background:var(--surface)!important;color:var(--ink-2)!important;border:1px solid var(--border)!important}
-input,select,textarea{background:var(--surface)!important;color:var(--ink)!important;border:1px solid var(--border)!important;border-radius:7px!important}
-input:focus,select:focus,textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-soft)!important}
-table{border-color:var(--border)!important}th{background:var(--surface-alt)!important;color:var(--ink-2)!important}
-td,th{border-color:var(--border-soft)!important}
-.tabs button[aria-selected="true"],.tab.active,.tab[aria-selected="true"],.nav-tab.active{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}
-.progress,.progress-track,.prog-track{background:var(--surface-alt)!important}
-.progress-bar,.progress-fill,.prog-fill{background:var(--accent)!important}
-hr,.divider{border-color:var(--border-soft)!important}
-.sidebar{background:#191410!important;color:#EDE3D2!important;border-right:1px solid #2B2318!important}
+  --bg:#F7F4EC !important; --surface:#FFFFFF !important; --surface-alt:#EFE9DA !important;
+  --surface-raised:#FFFFFF !important; --ink:#241F18 !important; --ink-2:#5A5245 !important;
+  --ink-3:#8B826F !important; --border:#E1D9C4 !important; --border-soft:#EEE7D6 !important;
+  --accent:#EB6834 !important; --accent-ink:#FFFFFF !important; --accent-soft:#FCE3D4 !important;
+  --caramel:#B9852E !important; --caramel-soft:#F3E2BC !important;
+  --good:#0CA30C !important; --warn:#B8860B !important; --serious:#C15A34 !important; --critical:#D03B3B !important;
+  --green:#0CA30C !important; --amber:#B8860B !important; --red:#D03B3B !important;
+  --paper:#FFFFFF !important; --panel:#F7F4EC !important; --line:#E1D9C4 !important; --muted:#8B826F !important;
+  --navy:#191410 !important; --navy-900:#191410 !important; --navy-deep:#191410 !important;
+  --lead-900:#191410 !important; --lead-700:#5A5245 !important; --blue:#5A5245 !important;
+  --rust:#EB6834 !important; --rust-mid:#EB6834 !important; --care-700:#EB6834 !important;
+  --craft-700:#B9852E !important;
+  --font-display:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif !important;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace !important;
+  --shadow-1:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04) !important;
+  --shadow-2:0 6px 20px rgba(36,31,24,.10) !important;
+  --shadow:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04) !important;
+  --shadow-sm:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04) !important;
+  --shadow-md:0 6px 20px rgba(36,31,24,.10) !important;
+  --radius:10px !important; color-scheme:light !important;
+}
+html{background:#F7F4EC!important;color-scheme:light!important}
+body{
+  background:#F7F4EC!important;color:#241F18!important;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+  font-size:14px!important;line-height:1.55!important;letter-spacing:0!important;
+  -webkit-font-smoothing:antialiased!important;
+}
+h1,h2,h3,h4,h5,h6{
+  color:#241F18!important;font-family:'Fraunces',Georgia,serif!important;
+  font-weight:600!important;letter-spacing:-.025em!important;text-transform:none!important;
+}
+p{color:inherit}
+a{color:#EB6834}
+button,input,select,textarea{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important}
+button{cursor:pointer}
+:focus-visible{outline:2px solid #EB6834!important;outline-offset:2px!important}
+::selection{background:#FCE3D4!important;color:#241F18!important}
+
+/* A single, restrained top bar instead of the old navy application headers. */
+.topbar,header.topbar,.top,.topbar-wrap,.app-header,.site-header,.header{
+  background:#F7F4EC!important;color:#241F18!important;
+  background-image:none!important;border:0!important;border-bottom:1px solid #E1D9C4!important;
+  border-radius:0!important;box-shadow:none!important;backdrop-filter:blur(10px)!important;
+}
+.topbar,header.topbar,.topbar-wrap,.app-header,.site-header{
+  min-height:66px!important;padding:14px clamp(18px,3vw,36px)!important;
+}
+.topbar h1,.topbar h2,.topbar h3,.topbar .brand-name,.topbar .brand-title,
+.topbar .brand-sub,.topbar .subtitle,.topbar small,header h1,header h2,header h3{
+  color:#241F18!important;
+}
+.topbar .brand-sub,.topbar .subtitle,.topbar small{opacity:.68!important}
+.brand .dot,.brand-dot,.brand-mark,.logo-mark{background:#EB6834!important;box-shadow:none!important}
+
+/* Page canvas and hierarchy. */
+main,.wrap,.content,.main-content,.container{
+  color:#241F18!important;
+}
+main{padding-top:30px!important;padding-bottom:64px!important}
+.wrap{padding-top:34px!important;padding-bottom:70px!important}
+.page-head,.page-header,.hero,.head,.hero-in{
+  margin-bottom:24px!important;
+}
+.eyebrow,.kicker,.overline{
+  color:#EB6834!important;font-size:10.5px!important;font-weight:700!important;
+  letter-spacing:.12em!important;text-transform:uppercase!important;
+}
+.page-head h1,.head h1,.hero h1,.wrap h1{
+  font-size:clamp(30px,4vw,42px)!important;line-height:1.08!important;
+  margin-top:7px!important;color:#241F18!important;
+}
+.sub,.subtitle,.lede,.hero p,.page-head p{
+  color:#5A5245!important;line-height:1.65!important;
+}
+
+/* Rebuild the content surfaces: quiet borders, more whitespace, consistent radii. */
+.card,.panel,.panel-card,.section-card,.metric-card,.stat-card,.form-card,.tile,
+.modal-card,.subject,.ticket,.brief,.loc-grid,.table-wrap,.box,.well{
+  background:#FFFFFF!important;background-image:none!important;color:#241F18!important;
+  border:1px solid #E1D9C4!important;border-radius:10px!important;
+  box-shadow:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04)!important;
+}
+.card,.panel-card,.section-card,.metric-card,.stat-card,.form-card{padding:20px!important}
+.card h2,.panel h2,.section-head h2,.section-title{
+  color:#241F18!important;font-family:'Fraunces',Georgia,serif!important;
+  font-size:17px!important;letter-spacing:-.02em!important;text-transform:none!important;
+}
+.card p,.card label,.card .sub{color:#5A5245}
+.section-head,.section-title{margin-bottom:14px!important}
+
+/* Inputs become quiet, legible controls. */
+input:not([type=checkbox]):not([type=radio]):not([type=range]),
+select,textarea{
+  background:#FFFFFF!important;color:#241F18!important;border:1px solid #D8CFBA!important;
+  border-radius:7px!important;box-shadow:none!important;min-height:38px;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#EB6834!important;box-shadow:0 0 0 3px #FCE3D4!important;outline:0!important;
+}
+label,.lbl,.lab,.field-label{color:#5A5245!important;font-weight:600!important}
+::placeholder{color:#A59B88!important;opacity:1!important}
+
+/* Buttons: primary actions orange; secondary actions stay quiet. */
+button,.btn,.button,.site-btn,input[type=submit],input[type=button]{
+  border-radius:7px!important;font-weight:600!important;box-shadow:none!important;
+}
+.btn.primary,.primary,.btn-primary,button.primary,input[type=submit],.submit{
+  background:#EB6834!important;border:1px solid #EB6834!important;color:#FFFFFF!important;
+}
+.btn.primary:hover,.primary:hover,.btn-primary:hover,button.primary:hover,input[type=submit]:hover{
+  background:#D95727!important;border-color:#D95727!important;
+}
+.btn.ghost,.ghost,.secondary,.btn-secondary,.site-btn,.btn:not(.primary):not(.danger){
+  background:#FFFFFF!important;color:#5A5245!important;border:1px solid #E1D9C4!important;
+}
+.btn.ghost:hover,.ghost:hover,.secondary:hover,.site-btn:hover{
+  background:#EFE9DA!important;color:#241F18!important;
+}
+button:disabled,.btn:disabled{opacity:.48!important}
+
+/* Tables, lists, tabs, progress. */
+table{border-collapse:collapse!important;color:#241F18!important}
+th{
+  background:#EFE9DA!important;color:#5A5245!important;border-color:#E1D9C4!important;
+  font-size:10px!important;letter-spacing:.09em!important;text-transform:uppercase!important;
+}
+td{border-color:#EEE7D6!important}
+tr:hover td{background:#FCFAF5!important}
+.tabs{border-color:#E1D9C4!important}
+.tabs button,.tab,.nav-tab{
+  border-radius:7px!important;font-weight:600!important;
+}
+.tabs button[aria-selected=true],.tab.active,.tab[aria-selected=true],.nav-tab.active{
+  background:#EB6834!important;color:#FFFFFF!important;border-color:#EB6834!important;
+}
+.progress,.progress-track,.prog-track{background:#EFE9DA!important;border-radius:99px!important}
+.progress>span,.progress-bar,.progress-fill,.prog-fill{background:#EB6834!important;border-radius:99px!important}
+hr,.divider{border-color:#EEE7D6!important}
+
+/* The main Command Deck navigation remains a dark, fixed rail. */
+.sidebar,aside.sidebar{
+  background:#191410!important;color:#EDE3D2!important;border-right:1px solid #2B2318!important;
+}
 .sidebar h1,.sidebar h2,.sidebar h3,.sidebar .brand-text strong{color:#FBF6EB!important}
-.sidebar a,.sidebar button{color:#D9CDB4}
+.sidebar .brand-text span,.sidebar .nav-group-label,.sidebar .sidebar-foot{color:#A99A7E!important}
+.sidebar a,.sidebar button,.sidebar .nav-item{color:#D9CDB4!important}
+.sidebar .nav-item:hover{background:#241D14!important;color:#FBF6EB!important}
 .sidebar .active,.sidebar .nav-item.active{background:#2C2115!important;color:#FBF6EB!important}
 .sidebar .active:before,.sidebar .nav-item.active:before{background:#F0824C!important}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:light}}
-:root[data-theme="dark"]{color-scheme:light}
+
+/* Accent callouts and statuses retain their semantic meaning, not legacy brand hues. */
+.badge,.pill,.chip{border-radius:99px!important}
+.toast,.msg.info,.notice{background:#EFE9DA!important;color:#5A5245!important;border-color:#E1D9C4!important}
+.msg.error,.error{border-color:#D03B3B!important}
+.success,.ok,.msg.ok{color:#0CA30C!important}
+@media(max-width:760px){
+  main{padding:22px 16px 48px!important}
+  .wrap{padding:24px 16px 52px!important}
+  .topbar,header.topbar,.topbar-wrap{padding:12px 16px!important}
+  .card,.panel-card,.section-card,.metric-card,.stat-card,.form-card{padding:16px!important}
+}
 
 </style>
 </head>
