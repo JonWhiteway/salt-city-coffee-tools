@@ -245,6 +245,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
 .tabs button.on, .tabs button.active{box-shadow:inset 0 -3px 0 var(--sd-gold);}
 
 </style>
+<style>.btn.navy{background:var(--sd-navy,#284A70);color:var(--sd-cream,#F0E7DA);box-shadow:none}.btn.green{color:#fff}</style>
 </head>
 <body>
 <div id="app"><div class="loading">Loading…</div></div>
@@ -437,7 +438,7 @@ function startModal(){
   const busy = new Set(S.tracks.filter(t => ['active','paused'].includes(t.status)).map(t => t.staff_id));
   const here = new Set(S.trainers.map(t => t.id));
   const opts = S.staff.filter(s => s.is_active && !busy.has(s.id)).sort((a, b) => (here.has(b.id) - here.has(a.id)) || a.name.localeCompare(b.name));
-  openModal(`<h2>Start training</h2><div class="muted small">Creates their 90-day plan at ${esc(S.loc.name)} with default dates you can change.</div>
+  openModal(`<h2>Start training</h2><div class="muted small">Creates their 90-day plan at ${esc(S.loc.name)}. Only Day 1 gets a date now. You'll set Days 2–5 when they come in for their first café shift.</div>
     <label class="f">New hire</label>
     <select class="inp" id="st-who"><option value="">Choose…</option>${opts.map(s => `<option value="${s.id}">${esc(s.name)}${here.has(s.id) ? '' : ' (other store)'}</option>`).join('')}</select>
     <div class="small muted" style="margin-top:4px">Not listed? Add them on Team &amp; Locations first (or wait for the nightly Square sync).</div>
@@ -528,6 +529,8 @@ function renderTrack(){
       </div>
     </div></div>` : ''}
 
+  ${planCard(t, ds)}
+
   ${(prevDay && prevDay.handoff_note) || carry.length ? `<div class="carry">
     ${prevDay && prevDay.handoff_note ? `<h3>Handoff from ${esc(first(prevDay.released_by))} (${esc(stageOf(prevDay.stage).label)})</h3><div style="margin-bottom:6px">“${esc(prevDay.handoff_note)}”</div>` : ''}
     ${carry.length ? `<h3>Still needs practice</h3><ul>${carry.map(m => { const it = S.items.find(i => i.id === m.key); return `<li><b>${esc(it ? it.title : m.key)}</b> <span class="small muted">(${esc(it ? stageOf(it.stage).label : '')})</span>${m.note ? ` · ${esc(m.note)}` : ''}</li>`; }).join('')}</ul>` : ''}
@@ -537,7 +540,6 @@ function renderTrack(){
 
   ${items.map(i => blockHtml(i, mk, canEdit)).join('')}
 
-  ${['d4','d5'].includes(d.stage) ? `<div class="card" style="border-left:6px solid var(--rust,#C75D3D)"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">Practice POS</h2><div class="muted small">Layout tour, then the 15-order test on this café's menu. Goal to work toward: 13 of 15 correct, about 45 seconds per order. Results save to this record.</div></div><a class="btn" href="pos.html?t=${encodeURIComponent(t.id)}&loc=${encodeURIComponent(t.location_id)}">Open Practice POS</a></div></div>` : ''}
 
   ${(st.materials || []).length ? `<details class="card"><summary style="cursor:pointer;font-weight:700;color:var(--lead-700)">Materials for ${esc(st.label)}</summary><ul class="mats" style="margin-top:8px">${st.materials.map(m => `<li>${esc(m)}</li>`).join('')}</ul></details>` : ''}
 
@@ -557,11 +559,47 @@ function renderTrack(){
   </details>` : ''}`;
 }
 
+const CAFE_DAYS = ['d2','d3','d4','d5'];
+function planCard(t, ds){
+  if (S.selfView || !CAFE_DAYS.includes(S.stage)) return '';
+  const rows = CAFE_DAYS.map(k => ds.find(x => x.stage === k) || { stage:k });
+  if (rows.every(d => d.scheduled_on || d.verified_at)) return '';
+  const today = todayISO();
+  const d2 = rows[0];
+  const summary = rows.map(d => `${esc(stageOf(d.stage).label)} ${d.verified_at ? '✓' : d.scheduled_on ? fmtD(d.scheduled_on) : '<span style="color:var(--amber,#9A6B12)">not set</span>'}`).join(' · ');
+  if (d2.scheduled_on || d2.verified_at) return `<details class="card" style="border-left:6px solid var(--gold,#B28C4E)"><summary style="cursor:pointer"><b>Café days</b> <span class="small muted">${summary}</span></summary><div style="margin-top:10px">${planRows(rows, today)}</div></details>`;
+  return `<div class="card" style="border-left:6px solid var(--gold,#B28C4E)">
+    <h2 style="margin:0 0 4px">Plan ${esc(first(t.staff_id))}'s café days</h2>
+    <div class="small muted" style="margin-bottom:10px">Set these once they're here for their first café shift. Days don't have to be back to back: pick the dates they're actually scheduled. A day without a date never shows as late, and claiming it dates it today.</div>
+    ${planRows(rows, today)}
+  </div>`;
+}
+function planRows(rows, today){
+  return `${rows.map(d => { const st = stageOf(d.stage); const locked = !!d.verified_at;
+      return `<div class="row" style="margin-bottom:8px;align-items:center"><b style="min-width:150px">${esc(st.label)} · ${esc(st.title)}</b>
+        <input type="date" class="inp plan-d" data-stage="${d.stage}" style="width:auto;padding:6px 8px" value="${d.scheduled_on || (d.stage === 'd2' ? today : '')}" ${locked ? 'disabled' : ''}>
+        <select class="inp plan-t" data-stage="${d.stage}" style="width:auto;padding:6px 8px" ${locked ? 'disabled' : ''}><option value="">Trainer…</option>${S.trainers.map(x => `<option value="${x.id}" ${x.id === d.scheduled_trainer ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+        ${locked ? '<span class="chip verified">Verified</span>' : ''}</div>`; }).join('')}
+    <div class="row" style="justify-content:flex-end"><button class="btn" onclick="savePlan(this)">Save café days</button></div>`;
+}
+async function savePlan(b){
+  b.disabled = true;
+  try {
+    for (const el of document.querySelectorAll('.plan-d:not([disabled])')){
+      const k = el.dataset.stage; const tr = document.querySelector(`.plan-t[data-stage="${k}"]`).value || null;
+      const cur = S.days.find(x => x.track_id === S.track.id && x.stage === k) || {};
+      if ((el.value || null) === (cur.scheduled_on || null) && tr === (cur.scheduled_trainer || null)) continue;
+      await rpc('training_schedule', { p_track: S.track.id, p_stage: k, p_date: el.value || null, p_trainer: tr });
+    }
+    await loadTrack(S.track.id); renderTrack(); toast('Café days saved');
+  } catch(e){ toast(errMsg(e)); b.disabled = false; }
+}
+
 function evText(e){
   const st = e.stage ? stageOf(e.stage).label + ': ' : '';
   return st + ({ start:`training started for ${nm(e.staff_id)}`, claim:`${nm(e.staff_id)} claimed the day`, release:`${nm(e.staff_id)} released the day${e.note ? ` (“${e.note}”)` : ''}`,
     take_back:`${nm(e.actor)} took the day back from ${nm(e.staff_id)}${e.note ? ` (${e.note})` : ''}`, verify:`verified by ${nm(e.actor)}${e.note ? ` (“${e.note}”)` : ''}`, unverify:`un-verified by ${nm(e.actor)}`,
-    schedule:`scheduled ${e.note ? fmtD(e.note) : '(no date)'}${e.staff_id ? ` with ${nm(e.staff_id)}` : ''}`, status:`status set to ${e.note} by ${nm(e.actor)}` }[e.event] || e.event);
+    schedule:`scheduled ${e.note ? fmtD(e.note) : '(no date)'}${e.staff_id ? ` with ${nm(e.staff_id)}` : ''}`, status:`status set to ${e.note} by ${nm(e.actor)}`, pos_complete:`finished all 15 Practice POS orders (${e.note || ''}); sign-off checked automatically` }[e.event] || e.event);
 }
 
 function ownBar(d, st){
@@ -593,6 +631,7 @@ function blockHtml(i, mk, canEdit){
     </div>
     <div class="bbody">
       ${say.length && !S.selfView ? `<details class="say" ${openSay ? 'open' : ''}><summary>What to say &amp; do</summary><ul>${say.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>` : ''}
+      ${i.id === 'd4-03' && !S.selfView ? posBox() : ''}
       ${i.look_for ? `<div class="look"><b>Looks like:</b> ${esc(i.look_for)}</div>` : ''}
       ${(i.signoffs || []).map(so => { const sm = mk[so.id];
         return `<label class="so"><input type="checkbox" ${sm ? 'checked' : ''} ${canEdit ? '' : 'disabled'} onchange="signoff('${so.id}', this.checked)"><span>${esc(so.text)}${sm ? `<div class="by">✓ ${esc(first(sm.by_staff))} · ${fmtT(sm.at)}</div>` : ''}</span></label>`; }).join('')}
@@ -600,6 +639,13 @@ function blockHtml(i, mk, canEdit){
       ${canEdit && m && m.status !== 'got_it' ? `<input class="note" placeholder="Add a note for the next trainer…" value="${esc(m.note || '')}" onchange="rate('${i.id}','${m.status}', this.value)">` : ''}
     </div>
   </div>`;
+}
+
+function posBox(){
+  const t = S.track; const done = S.marks.find(m => m.key === 'd42');
+  return `<div class="row" style="justify-content:space-between;align-items:center;background:#FFF4EF;border:1px solid #F0C9B8;border-radius:10px;padding:10px 12px;margin:8px 0">
+    <div class="small"><b>Practice POS · 15-order test</b><br>Every order has to be rung right. After 3 misses on one order, the answer shows.${done ? ' <b style="color:var(--green,#2F7A3A)">All 15 done.</b>' : ''}</div>
+    <a class="btn" href="pos.html?t=${encodeURIComponent(t.id)}&loc=${encodeURIComponent(t.location_id)}&mode=test">Open Practice POS</a></div>`;
 }
 
 /* ---------------- actions ---------------- */

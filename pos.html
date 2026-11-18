@@ -37,6 +37,9 @@ h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing
 .banner{background:var(--paper);border:2px solid var(--rust);border-radius:12px;padding:12px 16px;display:flex;gap:14px;align-items:center}
 .banner .num{font-family:'Oswald';font-size:28px;color:var(--rust);min-width:64px}
 .banner .say{font-size:19px;font-weight:600;line-height:1.35;flex:1}
+.fb{margin-top:6px;font-size:14px;font-weight:600;color:var(--warn)}
+.fb.ans{color:var(--ink);background:var(--warn-100);border-radius:8px;padding:8px 10px;font-weight:500}
+.fb.ans b{color:var(--bad)}
 .ostrip{background:#FFF4EF;border-bottom:2px solid var(--rust);padding:10px 18px;display:flex;gap:12px;align-items:center}
 .ostrip .num{font-family:'Oswald';font-size:18px;color:var(--rust);white-space:nowrap}
 .ostrip .say{font-size:16px;font-weight:600;line-height:1.35}
@@ -126,7 +129,7 @@ table.res td{padding:8px 6px;border-bottom:1px solid #EFEBE3;vertical-align:top}
 ul.tips{margin:8px 0 0 18px;line-height:1.6}
 .fieldrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
 .fieldrow select{padding:9px;border:1px solid var(--line);border-radius:8px;min-width:240px}
-.toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:9px 16px;border-radius:9px;font-weight:600;z-index:60;display:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:9px 16px;border-radius:9px;font-weight:600;z-index:60;display:none}
 @media (max-width:520px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important} .banner .say{font-size:15px} }
 @media (max-width:900px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr))} .wrap{grid-template-columns:1fr} .right{border-left:none;border-top:1px solid var(--line);max-height:46vh} .tour{right:16px;left:16px;width:auto} .kpis{grid-template-columns:repeat(2,1fr)} }
 </style>
@@ -351,7 +354,7 @@ function renderPOS(){
     : `<button class="tile back" data-cat="">&#8249; Back</button>` + (m.cats[S.cat].i.length ? m.cats[S.cat].i.map(id => { const i = itemById(id); return `<button class="tile item" style="--c:${i.c || m.cats[S.cat].c}" data-item="${i.id}">${esc(i.n)}<small>${i.v.length > 1 ? i.v.length + ' sizes' : money(i.v[0][2])}</small></button>`; }).join('') : `<div class="empty" style="grid-column:2/-1">Nothing from this folder sold enough in the last two weeks to be in practice mode.</div>`);
   $('#main').innerHTML = `<div class="wrap">
     <div class="left">
-      ${sc ? `<div class="banner"><div class="num">${S.test.i + 1}/${S.test.scen.length}</div><div class="say">${esc(sc.say)}</div></div>` : ''}
+      ${sc ? `<div class="banner"><div class="num">${S.test.i + 1}/${S.test.scen.length}</div><div style="flex:1"><div class="say">${esc(sc.say)}</div>${feedback()}</div></div>` : ''}
       <div class="reg">
         <div class="menubar" id="menubar"><span class="hb">&#9776;</span><span class="crumb" data-cat="">${esc(m.name)}</span>${S.cat ? `<span style="color:#999">/</span><span>${esc(m.cats[S.cat].n)}</span>` : ''}<span class="sp"></span><span class="ic">&#9906;</span></div>
         <div class="grid" id="grid">${tiles}</div>
@@ -415,7 +418,14 @@ function openItem(id, editIndex){
   };
   draw(); $('#ov').classList.add('show');
 }
-function orderStrip(){ const sc = S.test && S.test.scen[S.test.i]; return sc ? `<div class="ostrip"><div class="num">Order ${S.test.i + 1}/${S.test.scen.length}</div><div class="say">${esc(sc.say)}</div></div>` : ''; }
+function orderStrip(){ const sc = S.test && S.test.scen[S.test.i]; return sc ? `<div class="ostrip"><div class="num">Order ${S.test.i + 1}/${S.test.scen.length}</div><div><div class="say">${esc(sc.say)}</div>${feedback()}</div></div>` : ''; }
+function expectedText(sc){ return sc.lines.map(e => `${e.itemName} ${e.varName}${e.req.length ? ' (' + e.req.map(r => r.label).join(', ') + ')' : ''}`).join(' + ') + ` · pay by ${sc.pay === 'split' ? 'split payment' : sc.pay}`; }
+function feedback(){
+  const T = S.test; if (!T || !T.miss) return '';
+  const sc = T.scen[T.i];
+  if (T.miss < 3) return `<div class="fb">Not quite. Look at the order again, fix what's on the check and pay again. (Try ${T.miss + 1}: the answer shows after 3 misses.)</div>`;
+  return `<div class="fb ans"><b>Here's how to ring it:</b> ${esc(expectedText(sc))}<br><span style="color:var(--ink-2)">Tip: ${esc(sc.tip)} Fix the check to match, then pay again.</span></div>`;
+}
 function closeSheet(){ $('#ov').classList.remove('show'); S.editing = null; }
 $('#ov').addEventListener('click', e => { if (e.target.id === 'ov' && S.mode !== 'tour') closeSheet(); });
 
@@ -506,8 +516,8 @@ function renderTestStart(){
   const canSave = S.trainees.length > 0;
   $('#main').innerHTML = `<div style="overflow:auto;padding:16px"><div class="panel">
     <div class="card"><h2>15-order test · ${esc(d.name)}</h2>
-      <p style="color:var(--ink-2);line-height:1.6">You’ll get 15 real orders, one at a time, from easy to hard. Ring each one exactly as the guest asks, then charge it with the right tender. Take your time and get it right. You’ll see how you did at the end, not during.</p>
-      <p style="margin-top:8px;color:var(--ink-2)"><b>What we’re working toward:</b> ${TARGET.correct} of 15 correct, about ${TARGET.avgSec} seconds per order. It’s a goal to grow into, not a pass/fail.</p>
+      <p style="color:var(--ink-2);line-height:1.6">You’ll get 15 real orders, one at a time, from easy to hard. Ring each one exactly as the guest asks, then charge it with the right tender. If one isn’t right, you’ll try it again: after 3 misses we’ll show you the answer, then you ring it once more. Finish all 15 and the Day 4 sign-off checks itself. Take your time.</p>
+      <p style="margin-top:8px;color:var(--ink-2)"><b>What we’re working toward:</b> ${TARGET.correct} of 15 right on the first try, about ${TARGET.avgSec} seconds per order. It’s a goal to grow into, not a pass/fail.</p>
       ${canSave ? `<div class="fieldrow"><b>Who’s practicing?</b><select id="who"><option value="">Practice only (don’t save)</option>${S.trainees.map(t => `<option value="${t.track}" ${S.trainee && S.trainee.track === t.track ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></div>` : `<p style="margin-top:8px;color:var(--ink-3);font-size:13px">Results aren’t saved on this device. To save them to a trainee’s record, open this from their page in Barista Training.</p>`}
       <div class="fieldrow"><button class="btn" id="go">Start the test</button><button class="btn ghost" id="tourbtn">Take the layout tour first</button></div>
     </div>
@@ -527,10 +537,10 @@ async function loadHistory(){
   if (box && S.history.length){ box.style.display = 'block'; box.innerHTML = `<h2>${esc(S.trainee.name)}’s earlier tries</h2>${histTable(S.history)}`; }
 }
 function histTable(h){
-  return `<table class="res"><tr><th>When</th><th>Correct</th><th>Avg time</th></tr>${h.map(a => `<tr><td>${new Date(a.created_at).toLocaleString('en-US',{ month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}</td><td>${a.correct}/${a.total}</td><td>${sec(a.avg_ms)}</td></tr>`).join('')}</table>`;
+  return `<table class="res"><tr><th>When</th><th>First try</th><th>Avg time</th></tr>${h.map(a => `<tr><td>${new Date(a.created_at).toLocaleString('en-US',{ month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}</td><td>${a.correct}/${a.total}</td><td>${sec(a.avg_ms)}</td></tr>`).join('')}</table>`;
 }
 function startTest(){
-  S.test = { scen: L().scen, i: 0, results: [], started: performance.now() };
+  S.test = { scen: L().scen, i: 0, results: [], miss: 0, misses: [], started: performance.now() };
   S.cart = []; S.cat = null;
   S.test.t0 = performance.now();
   renderPOS();
@@ -541,7 +551,7 @@ function tick(){
   loop();
 }
 function scoreScenario(tender){
-  const sc = S.test.scen[S.test.i]; const ms = performance.now() - S.test.t0;
+  const T = S.test, sc = T.scen[T.i];
   const issues = []; const left = S.cart.map(l => l);
   sc.lines.forEach(exp => {
     const idx = left.findIndex(l => l.item === exp.item);
@@ -555,16 +565,24 @@ function scoreScenario(tender){
   left.forEach(l => issues.push(`Extra item: ${itemById(l.item).n}`));
   if (tender !== sc.pay) issues.push(`Paid by ${tender}, should be ${sc.pay === 'split' ? 'split payment' : sc.pay}`);
   const rung = S.cart.map(l => { const it = itemById(l.item); const v = it.v.find(x => x[0] === l.var); return `${it.n} ${v ? v[1] : ''}${l.mods.length ? ' (' + l.mods.map(id => (modInfo(it, id) || { m:[0,''] }).m[1]).join(', ') + ')' : ''}`; }).join(' + ');
-  S.test.results.push({ n: sc.n, say: sc.say, ms: Math.round(ms), ok: !issues.length, issues, rung, tender, tip: sc.tip,
-    expected: sc.lines.map(e => `${e.itemName} ${e.varName}${e.req.length ? ' (' + e.req.map(r => r.label).join(', ') + ')' : ''}`).join(' + ') + ` · ${sc.pay === 'split' ? 'split payment' : sc.pay}` });
-  S.test.i++; S.cart = []; S.cat = null;
-  if (S.test.i >= S.test.scen.length) return finishTest();
-  S.test.t0 = performance.now(); renderPOS();
+  if (issues.length){
+    T.miss = (T.miss || 0) + 1; T.misses.push({ rung, tender, issues });
+    renderPOS();
+    toast(T.miss < 3 ? 'Not quite. Try again.' : 'Here’s the answer. Ring it once more.');
+    return;
+  }
+  const ms = performance.now() - T.t0;
+  T.results.push({ n: sc.n, say: sc.say, ms: Math.round(ms), ok: true, first: !T.miss, tries: (T.miss || 0) + 1, shown: (T.miss || 0) >= 3,
+    misses: T.misses, rung, tender, tip: sc.tip, expected: expectedText(sc) });
+  T.i++; T.miss = 0; T.misses = []; S.cart = []; S.cat = null;
+  if (T.i >= T.scen.length) return finishTest();
+  toast('Correct!');
+  T.t0 = performance.now(); renderPOS();
 }
 async function finishTest(){
   cancelAnimationFrame(tick.r);
-  const R = S.test.results; const correct = R.filter(r => r.ok).length; const total = R.reduce((a, r) => a + r.ms, 0); const avg = Math.round(total / R.length);
-  const passed = correct >= TARGET.correct && avg <= TARGET.avgSec * 1000;
+  const R = S.test.results; const correct = R.filter(r => r.first).length; const total = R.reduce((a, r) => a + r.ms, 0); const avg = Math.round(total / R.length);
+  const passed = R.length === S.test.scen.length; // finished all 15 (each one rung right) -> checks the Day 4 sign-off
   const slow = [...R].sort((a, b) => b.ms - a.ms).slice(0, 3).map(r => r.n);
   const prev = S.history[0];
   let savedNote = '';
@@ -576,16 +594,16 @@ async function finishTest(){
   const cmpT = `<div class="s">Goal about ${TARGET.avgSec}s${prev ? ` · ${avg <= prev.avg_ms ? sec(prev.avg_ms - avg) + ' faster' : sec(avg - prev.avg_ms) + ' slower'} than last try` : ''}</div>`;
   $('#main').innerHTML = `<div style="overflow:auto;padding:16px"><div class="panel">
     <div class="card"><h2>Results · ${esc(L().name)}${S.trainee ? ' · ' + esc(S.trainee.name) : ''}</h2>
-      <p style="color:var(--ink-2)">Goal to work toward: ${TARGET.correct} of 15 correct, about ${TARGET.avgSec} seconds per order. ${savedNote}</p></div>
+      <p style="color:var(--ink-2)">${passed && S.trainee ? '<b style="color:var(--good)">All 15 done. “Has completed the POS scenario” is checked on Day 4.</b><br>' : ''}Goal to work toward: ${TARGET.correct} of 15 right on the first try, about ${TARGET.avgSec} seconds per order. ${savedNote}</p></div>
     <div class="kpis">
-      <div class="kpi"><div class="l">Correct</div><div class="v">${correct}/${R.length}</div>${cmp}</div>
+      <div class="kpi"><div class="l">Right first try</div><div class="v">${correct}/${R.length}</div>${cmp}</div>
       <div class="kpi"><div class="l">Average per order</div><div class="v">${sec(avg)}</div>${cmpT}</div>
       <div class="kpi"><div class="l">Total time</div><div class="v">${Math.floor(total / 60000)}:${String(Math.round(total / 1000) % 60).padStart(2,'0')}</div><div class="s">All 15 orders</div></div>
       <div class="kpi"><div class="l">Slowest</div><div class="v" style="font-size:24px">#${slow.join(', #')}</div><div class="s">Highlighted below</div></div>
     </div>
     <div class="card"><h2>Order by order</h2>
       <table class="res"><tr><th>#</th><th>The guest said</th><th>Time</th><th>Result</th></tr>
-      ${R.map(r => `<tr class="${slow.includes(r.n) ? 'slow' : ''}"><td>${r.n}</td><td>${esc(r.say)}<div class="exp">You rang: ${esc(r.rung || 'nothing')}</div>${r.ok ? '' : `<div class="exp"><b>Should be:</b> ${esc(r.expected)}</div><div class="issues">${r.issues.map(esc).join(' · ')}</div><div class="exp">Tip: ${esc(r.tip)}</div>`}</td><td>${sec(r.ms)}</td><td>${r.ok ? '<span class="ok">Correct</span>' : '<span class="no">Fix</span>'}</td></tr>`).join('')}
+      ${R.map(r => `<tr class="${slow.includes(r.n) ? 'slow' : ''}"><td>${r.n}</td><td>${esc(r.say)}${r.first ? '' : `<div class="exp"><b>Rung as:</b> ${esc(r.expected)}</div><div class="issues">First miss: ${esc((r.misses[0] || {}).issues ? r.misses[0].issues.join(' · ') : '')}</div><div class="exp">Tip: ${esc(r.tip)}</div>`}</td><td>${sec(r.ms)}</td><td>${r.first ? '<span class="ok">First try</span>' : r.shown ? `<span class="no">Answer shown</span><div class="exp">${r.tries} tries</div>` : `<span style="color:var(--warn);font-weight:700">Try ${r.tries}</span>`}</td></tr>`).join('')}
       </table></div>
     ${S.history.length ? `<div class="card"><h2>Earlier tries</h2>${histTable(S.history)}</div>` : ''}
     <div class="fieldrow"><button class="btn" id="again">Try again</button><button class="btn ghost" id="exp">Explore the register</button></div>
