@@ -893,7 +893,7 @@ function empCoaching(){
       return `<details class="emp-convo" ${i === 0 ? 'open' : ''}>
         <summary><span><strong>${labelConvo(c.conversation_type)}</strong>${who ? ` with ${escapeHtml(who)}` : ''}</span><span class="emp-note">${eFmt(c.occurred_at)}</span></summary>
         <div class="emp-convo-body">
-          ${c.template_notes ? render1on1Notes(c.template_notes) : ''}
+          ${c.template_notes ? (c.conversation_type === 'writeup' ? renderWriteupNotes(c.template_notes) : render1on1Notes(c.template_notes)) : ''}
           ${c.notes ? `<div style="margin-top:6px;"><strong style="color:var(--ink);">Notes:</strong> ${escapeHtml(c.notes)}</div>` : ''}
           ${!c.template_notes && !c.notes ? '<span class="emp-note">No notes recorded.</span>' : ''}
         </div>
@@ -1265,7 +1265,7 @@ async function loadStaffProfile(staffId){
               <span>${labelConvo(c.conversation_type)}</span>
               <span class="fdate">${timeAgo(c.occurred_at)}</span>
             </div>
-            ${c.template_notes ? `<div style="margin-top:10px; font-size:12.5px; color:var(--ink-soft); line-height:1.6;">${render1on1Notes(c.template_notes)}</div>` : ''}
+            ${c.template_notes ? `<div style="margin-top:10px; font-size:12.5px; color:var(--ink-soft); line-height:1.6;">${c.conversation_type === 'writeup' ? renderWriteupNotes(c.template_notes) : render1on1Notes(c.template_notes)}</div>` : ''}
           </div>
         `).join('') : `<div style="color:var(--muted); font-size:13px;">No coaching conversations logged yet.</div>`}
       </div>
@@ -2150,8 +2150,19 @@ async function submit1on1(){
 window.submit1on1 = submit1on1;
 
 
+function renderWriteupNotes(n){
+  n = n || {};
+  const B = { leadership:'Leadership', craft:'Craft', customer_care:'Customer care' };
+  const d = v => v ? new Date(v + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
+  const row = (l, v) => v ? `<div><strong style="color:var(--ink);">${l}:</strong> ${escapeHtml(v)}</div>` : '';
+  const out = n.outcome === 'improved' ? 'Closed: progress made' : n.outcome === 'pip' ? 'Moved to write-up 2 and a performance improvement plan' : 'Open';
+  return row('Area', B[n.bucket] || n.bucket) + row("What isn't meeting expectations", n.issue) + row('What needs to change', n.expectation)
+    + row('Support', n.support) + row('Follow-up date', d(n.followup_on))
+    + `<div><strong style="color:var(--ink);">Next step if there's no progress:</strong> write-up 2 and a performance improvement plan.</div>`
+    + row('Your comments', n.employee_comments) + row('Status', out + (n.outcome_on ? ' · ' + d(n.outcome_on) : ''));
+}
 function labelConvo(type){
-  const map = { '1-1':'1-1 Conversation', '360':'360 Assessment', 'walkthrough_audit_review':'Audit Trend Review', 'pulse_survey_followup':'Pulse Survey Follow-Up' };
+  const map = { '1-1':'1-1 Conversation', 'writeup':'Write-up (corrective step 1)', '360':'360 Assessment', 'walkthrough_audit_review':'Audit Trend Review', 'pulse_survey_followup':'Pulse Survey Follow-Up' };
   return map[type] || type;
 }
 function timeAgo(dateStr){
