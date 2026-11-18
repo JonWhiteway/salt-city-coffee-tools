@@ -1468,6 +1468,7 @@ body::before{display:none !important;}
     <div class="nav-group-label" id="nav-workspace-label">My Workspace</div>
     <ul class="nav-list" id="nav-portal-item">
       <li><button class="nav-item" data-section="lmgm"><span class="nav-dot"></span>LM / GM / PM / Bookkeeper Portal</button></li>
+      <li class="sa-nav-pm" style="display:none;"><a class="nav-item nav-link" href="staff-admin.html"><span class="nav-dot"></span>Staff &amp; Locations <span class="nav-ext">↗</span></a></li>
     </ul>
     <div class="lm-nav-group" id="lm-nav-group" hidden>
       <ul class="nav-list">
@@ -1499,6 +1500,7 @@ body::before{display:none !important;}
       <li><button class="nav-item" data-section="sales"><span class="nav-dot"></span>Sales &amp; Labor</button></li>
       <li><button class="nav-item" data-section="crm"><span class="nav-dot"></span>Customer Journey &amp; Marketing</button></li>
       <li class="mb-nav" style="display:none;"><button class="nav-item" data-section="mobilebar"><span class="nav-dot"></span>Mobile Bar Bookings</button></li>
+      <li class="sa-nav" style="display:none;"><a class="nav-item nav-link" href="staff-admin.html" title="PINs, location assignments, roles, and who no longer works here"><span class="nav-dot"></span>Staff &amp; Locations <span class="nav-ext">↗</span></a></li>
     </ul>
     </div>
     <div class="coo-nav-group">
@@ -5074,6 +5076,9 @@ async function initApp(){
   // Performance group: execs see everything; GMs see only Leadership 360s (they start 360s for their LMs).
   $$(".exec-nav-group").forEach(el => el.hidden = !(EXEC_ROLES.includes(myStaff.role) || myStaff.role === "gm"));
   $$(".mb-nav").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
+  // Staff Admin (PINs, locations, roles) is COO / Production Manager only.
+  $$(".sa-nav").forEach(el => el.style.display = myStaff.role === "coo" ? "" : "none");
+  $$(".sa-nav-pm").forEach(el => el.style.display = myStaff.role === "production_manager" ? "" : "none");
   if(EXEC_ROLES.includes(myStaff.role)) setTimeout(mbLoad, 0);  // fills the "new requests" badge
   $$(".exec-nav-group .exec-only").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
   $$(".exec-nav-group .gm-only").forEach(el => el.style.display = myStaff.role === "gm" ? "" : "none");
