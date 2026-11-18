@@ -1191,6 +1191,37 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 .lm-new-list{margin:6px 0 10px; padding:8px 12px; background:var(--critical-soft); border-radius:8px; font-size:12.5px; color:var(--ink);}
 .lm-new-list li{margin:2px 0;}
 @media (prefers-reduced-motion: reduce){ .lm-tab-new, .lm-new-chip::before, .lm-whatsnew-top h3::before{animation:none;} }
+/* ===== Mobile Bar bookings (Nov 16 2026) ===== */
+#sec-mobilebar .mb-tools{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px;}
+#sec-mobilebar .mb-tools input{flex:1 1 220px; font:inherit; font-size:13.5px; padding:9px 11px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--ink);}
+.mb-filters{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px;}
+.mb-filters button{flex:none; font:inherit; font-size:12.5px; font-weight:700; padding:7px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer;}
+.mb-filters button[aria-pressed="true"]{background:var(--sc-navy, #0D1B2A); border-color:var(--sc-navy, #0D1B2A); color:#F7F5F2;}
+.mb-filters .n{opacity:.7; margin-left:4px; font-weight:600;}
+.mb-list{display:flex; flex-direction:column; gap:10px;}
+.mb-row{all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:64px 1fr auto; gap:14px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; box-shadow:var(--shadow-1);}
+.mb-row:hover{border-color:var(--accent);}
+.mb-row:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.mb-row.is-new{border-left:5px solid var(--critical);}
+.mb-row .event-date{width:56px; text-align:center; padding:6px 0;}
+.mb-row .event-date .d{font-family:var(--font-display); font-size:22px; line-height:1;}
+.mb-row .event-date .m{font-size:10.5px; text-transform:uppercase; letter-spacing:.08em;}
+.mb-row .event-date .y{font-size:10px; opacity:.75;}
+.mb-row .who{font-weight:700; font-size:14.5px;}
+.mb-row .meta{font-size:12.5px; color:var(--ink-2); margin-top:2px;}
+.mb-row .right{display:flex; flex-direction:column; align-items:flex-end; gap:6px;}
+.mb-row .ago{font-size:11.5px; color:var(--ink-3);}
+@media (max-width:600px){ .mb-row{grid-template-columns:56px 1fr;} .mb-row .right{grid-column:1 / -1; flex-direction:row; justify-content:space-between; align-items:center;} }
+.mb-share{display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:13px;}
+.mb-share code{font-size:12px; word-break:break-all;}
+.mb-detail{display:grid; grid-template-columns:150px 1fr; gap:7px 14px; font-size:13.5px; margin:0 0 14px;}
+.mb-detail dt{color:var(--ink-3); font-size:11px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; padding-top:2px;}
+.mb-detail dd{margin:0; overflow-wrap:anywhere;}
+@media (max-width:560px){ .mb-detail{grid-template-columns:1fr; gap:2px;} .mb-detail dd{margin-bottom:8px;} }
+.mb-status-pick{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+.mb-status-pick button{font:inherit; font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer;}
+.mb-status-pick button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.mb-nav-badge{margin-left:auto; min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:var(--critical); color:#fff; font-size:11px; font-weight:800; line-height:20px; text-align:center;}
 </style>
 
 <div id="gate-wrap">
@@ -1288,6 +1319,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
       <li><button class="nav-item active" data-section="overview"><span class="nav-dot"></span>Overview</button></li>
       <li><button class="nav-item" data-section="sales"><span class="nav-dot"></span>Sales &amp; Labor</button></li>
       <li><button class="nav-item" data-section="crm"><span class="nav-dot"></span>Customer Journey &amp; Marketing</button></li>
+      <li class="mb-nav" style="display:none;"><button class="nav-item" data-section="mobilebar"><span class="nav-dot"></span>Mobile Bar Bookings</button></li>
     </ul>
     </div>
     <div class="coo-nav-group">
@@ -1554,6 +1586,21 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
           <div><div class="lc-title">Open Marketing Planning →</div><div class="lc-sub">salt-city-coffee-tools.netlify.app/marketing-planning.html — submit campaign requests, move them through the planning board. Not wired to a CRM yet — see note below.</div></div>
           <div class="arrow">↗</div>
         </a>
+      </section>
+
+      <!-- ============ MOBILE BAR BOOKINGS (COO / CEO / CBO) ============ -->
+      <section class="panel" id="sec-mobilebar">
+        <div class="grid kpi-row" id="mb-kpis"></div>
+        <div class="section-head"><h2>Booking requests</h2><span class="hint" id="mb-hint">Loading…</span></div>
+        <div class="mb-tools"><input type="search" id="mb-search" placeholder="Search name, email, venue…" aria-label="Search booking requests"><button type="button" class="btn small" id="mb-refresh">Refresh</button></div>
+        <div class="mb-filters" id="mb-filters" role="group" aria-label="Filter by status"></div>
+        <div class="mb-list" id="mb-list"><div class="empty-note">Loading…</div></div>
+        <div class="section-head"><h2>The booking form</h2><span class="hint">Public page: anyone with the link can send a request. It can't read any bookings.</span></div>
+        <div class="card" style="padding:16px;"><div class="mb-share">
+          <code id="mb-form-url">mobile-bar-booking.html</code>
+          <button type="button" class="btn small" id="mb-copy">Copy link</button>
+          <a class="btn small" id="mb-open" href="mobile-bar-booking.html" target="_blank" rel="noopener">Open form ↗</a>
+        </div></div>
       </section>
 
       <!-- ============ PERFORMANCE ROUNDUP (COO / CEO / CBO) ============ -->
@@ -1928,6 +1975,10 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
             <div class="lm-card-title"><h3>Upcoming store events</h3><span class="hint"><button type="button" class="ev-link" data-ev-new>+ Add</button> · <button type="button" class="ev-link" data-go="events">All events →</button></span></div>
             <div class="event-list" id="ev-dash-list"><div class="lm-loading">Loading…</div></div>
           </div>
+          <div class="card lm-pad" id="mb-lm-card" hidden>
+            <div class="lm-card-title"><h3>Booking requests</h3><span class="hint"><button type="button" class="ev-link" data-go="events" data-anchor="mb-lm-wrap">See all</button></span></div>
+            <div id="mb-lm-dash"><div class="lm-loading">Loading…</div></div>
+          </div>
           <div class="card lm-pad">
             <div class="lm-card-title"><h3>Open tabs</h3><span class="hint"><button type="button" class="ev-link" id="tab-copy-link">Copy sign-up link</button></span></div>
             <div id="tab-dash-list"><div class="lm-loading">Loading…</div></div>
@@ -2069,6 +2120,11 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
         <div class="card kpi"><div class="label">Open prep tasks</div><div class="value tabular" id="ev-k-tasks">—</div><div class="delta" id="ev-k-tasks-sub"></div></div>
         <div class="card kpi"><div class="label">Booked, next 30 days</div><div class="value tabular" id="ev-k-rev">—</div><div class="delta">Buyouts, catering &amp; rentals</div></div>
         <div class="card kpi"><div class="label">Waiting on a debrief</div><div class="value tabular" id="ev-k-deb">—</div><div class="delta">Past events with no results yet</div></div>
+      </div>
+      <div id="mb-lm-wrap" hidden style="margin-top:14px;">
+        <div class="section-head" style="margin-top:0;"><h2>Booking requests</h2>
+          <div class="pf-toolbar"><span class="hint" id="mb-lm-hint"></span><button type="button" class="btn small" id="mb-lm-all">Show all requests</button><button type="button" class="btn small" id="mb-lm-copy">Copy booking form link</button></div></div>
+        <div class="mb-list" id="mb-lm-list"><div class="lm-loading">Loading…</div></div>
       </div>
       <div class="card lm-pad" style="margin-top:12px;"><div id="ev-list"><div class="lm-loading">Loading…</div></div></div>
     </div>
@@ -2485,7 +2541,7 @@ const LOCATIONS = [
   { id:"lemoyne",      sbId:"35a199d6-c152-45ad-9398-c9b1c0918c7e", name:"LeMoyne",        lm:"Location Manager — open",             rev:76200,  laborPct:32.1, txns:5340, ticket:6.55, trend:-2.3, status:"serious", trendSeries:[82,80,81,78,79,76,77,75,76,74,75,76] },
   { id:"clay",         sbId:"55ef8519-c9f8-4601-acbb-c1f7812345d4", name:"Clay",           lm:"Location Manager — open",             rev:68900,  laborPct:33.6, txns:4890, ticket:6.20, trend:9.4,  status:"warn",   trendSeries:[46,49,52,54,58,57,61,63,62,66,65,69] },
   { id:"fayetteville", sbId:"96c421ad-cb6c-4efc-bf43-861ec810b2c2", name:"Fayetteville",   lm:"Location Manager — open",             rev:84300,  laborPct:30.2, txns:5760, ticket:6.60, trend:-0.8, status:"warn",   trendSeries:[87,86,88,85,86,84,85,83,85,84,83,84] },
-  { id:"mobilebar",    sbId:"3c29e883-0bb8-4bb1-9b4d-a4a78985f712", name:"Mobile Bar",     lm:"Jacob Ellison — Mobile Bar Manager",  rev:18400,  laborPct:null, txns:820,  ticket:22.44, trend:null, status:"good", trendSeries:null, note:"6 events booked this quarter — event-staffed, not a daily labor %." }
+  { id:"mobilebar",    sbId:"3c29e883-0bb8-4bb1-9b4d-a4a78985f712", name:"Mobile Bar",     lm:"No manager", laborExempt:true,  rev:18400,  laborPct:null, txns:820,  ticket:22.44, trend:null, status:"good", trendSeries:null, note:"6 events booked this quarter — event-staffed, not a daily labor %." }
 ];
 // Marks each location's numbers as sample until a live Supabase fetch overwrites them.
 LOCATIONS.forEach(l => l.live = false);
@@ -2696,6 +2752,12 @@ function renderSalesPortfolio(){
   const underTarget = `<svg class="mark under" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 5-5"/></svg>`;
   $("#labor-barlist").innerHTML = LOCATIONS.filter(l=>l.laborPct!=null).map(l => {
     const over = l.laborPct > 28;
+    if(l.laborExempt) return `
+    <div class="row" title="Reported only: not held to the 28% target">
+      <div class="name">${esc(l.name)} <span class="muted" style="font-size:10.5px;">(not targeted)</span></div>
+      <div class="track"><span style="width:${Math.min(100,l.laborPct/40*100).toFixed(1)}%; background:var(--ink-3);"></span></div>
+      <div class="val tabular">${pct1(l.laborPct)}</div>
+    </div>`;
     return `
     <div class="row">
       <div class="name">${esc(l.name)}</div>
@@ -2873,7 +2935,7 @@ function applyRangeToAllLocations(){
     loc.laborPct = cur.laborPct;
     loc.laborPctPrev = prior.laborPct;
     loc.trend = prior.revenue > 0 ? ((cur.revenue - prior.revenue) / prior.revenue * 100) : null;
-    loc.status = loc.laborPct==null ? "good" : (loc.laborPct<=28 ? "good" : loc.laborPct<=31 ? "warn" : "serious");
+    loc.status = (loc.laborPct==null || loc.laborExempt) ? "good" : (loc.laborPct<=28 ? "good" : loc.laborPct<=31 ? "warn" : "serious");
   });
 }
 
@@ -3015,9 +3077,9 @@ function renderOverviewFinance(){
   const live = LOCATIONS.some(l=>l.live);
   const totalRev = LOCATIONS.reduce((a,l)=>a+l.rev,0);
   const totalTxn = LOCATIONS.reduce((a,l)=>a+l.txns,0);
-  const laborLocs = LOCATIONS.filter(l=>l.laborPct!=null);
+  const laborLocs = LOCATIONS.filter(l=>l.laborPct!=null && !l.laborExempt);  // Mobile Bar is reported but left out of the blended number
   const blendedLabor = laborLocs.length ? laborLocs.reduce((a,l)=>a+l.laborPct,0)/laborLocs.length : null;
-  const prevLaborLocs = LOCATIONS.filter(l=>l.laborPctPrev!=null);
+  const prevLaborLocs = LOCATIONS.filter(l=>l.laborPctPrev!=null && !l.laborExempt);
   const blendedLaborPrev = prevLaborLocs.length ? prevLaborLocs.reduce((a,l)=>a+l.laborPctPrev,0)/prevLaborLocs.length : null;
   const avgTicket = totalTxn>0 ? totalRev/totalTxn : 0;
   const trendedLocs = LOCATIONS.filter(l=>l.trend!=null);
@@ -3950,6 +4012,7 @@ const SECTION_META = {
   overview:   { title:"Overview", sub:"Portfolio pulse — company-wide, trailing 30 days" },
   sales:      { title:"Sales & Labor", sub:"Square: sales, labor cost, team — portfolio and per-location" },
   crm:        { title:"Customer Journey & Marketing", sub:"CRM in progress — journey stages, marketing calendar, campaigns" },
+  mobilebar:  { title:"Mobile Bar Bookings", sub:"COO / CEO / CBO · requests from the public booking form · reply, quote, book" },
   performance:{ title:"Performance Roundup", sub:"COO / CEO / CBO · GM and LM measurables, people, audits and 360s across every cafe" },
   academy:    { title:"Academy Engagement", sub:"Leadership · Craft · Customer Care completion and cadence" },
   teamassess: { title:"Team Assessment", sub:"GMs + C-suite · every barista Verified or Flagged by Dec 31 · assess from any team member's profile" },
@@ -3977,7 +4040,7 @@ function updateSectionPill(id){
   if((id === "overview" || id === "sales") && squareLive){
     pill.classList.add("is-live"); iconGood.style.display = "block";
     text.textContent = "Live — Square";
-  } else if(id === "l360" || id === "performance" || id === "teamassess"){
+  } else if(id === "l360" || id === "performance" || id === "teamassess" || id === "mobilebar"){
     pill.classList.add("is-live"); iconGood.style.display = "block";
     text.textContent = "Live — Supabase";
   } else if(id === "productdev" && bakeryLive){
@@ -4004,7 +4067,7 @@ function updateSectionPill(id){
 function setActiveSection(id){
   currentSection = id;
   $$(".panel").forEach(p => p.classList.toggle("active", p.id === "sec-"+id));
-  $$(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.section === id));
+  $$(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.section === id && !b.dataset.audits));
   const meta = SECTION_META[id];
   if(meta){ $("#topbar-title").textContent = meta.title; $("#topbar-sub").textContent = meta.sub; }
   if(id === "sales"){ $("#sales-portfolio").style.display = "block"; $("#sales-location").style.display = "none"; }
@@ -4737,6 +4800,8 @@ async function initApp(){
   }
   // Performance group: execs see everything; GMs see only Leadership 360s (they start 360s for their LMs).
   $$(".exec-nav-group").forEach(el => el.hidden = !(EXEC_ROLES.includes(myStaff.role) || myStaff.role === "gm"));
+  $$(".mb-nav").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
+  if(EXEC_ROLES.includes(myStaff.role)) setTimeout(mbLoad, 0);  // fills the "new requests" badge
   $$(".exec-nav-group .exec-only").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
   $$(".exec-nav-group .gm-only").forEach(el => el.style.display = myStaff.role === "gm" ? "" : "none");
   if(EXEC_ROLES.includes(myStaff.role) || myStaff.role === "gm"){
@@ -4774,7 +4839,8 @@ async function initApp(){
       ? await sb.from("staff_locations").select("location_id, locations(id,name,type,square_location_id)").in("staff_id", mgrIds)
       : { data: [] };
     const seen = new Set();
-    myLocations = (assign||[]).map(a => a.locations).filter(Boolean).filter(l => {
+    const { data: mobiles } = await sb.from("locations").select("id,name,type,square_location_id").eq("type", "mobile");
+    myLocations = (assign||[]).map(a => a.locations).filter(Boolean).concat(mobiles || []).filter(l => {
       if(seen.has(l.id)) return false;
       seen.add(l.id); return true;
     }).sort((a,b) => a.name.localeCompare(b.name));
@@ -5075,6 +5141,7 @@ function lmOnStoreChange(locId){
   tabLoad(locId);
   lmSetTitles();
   lmWhatsNew(locId);
+  mbLmLoad(locId);
 }
 
 /* ---------------- To-do list ---------------- */
@@ -5297,7 +5364,8 @@ function renderLabor(locId){
   $("#lm-labor-body").innerHTML = keys.length ? keys.map(k => {
     const w = weeks.get(k);
     const pct = w.hasLabor && w.rev > 0 ? w.cost / w.rev * 100 : null;
-    const chip = pct==null ? "" : `<span class="chip ${pct<=28?"good":pct<=31?"warn":"serious"}" style="margin-left:6px;">${pct<=28?"On target":pct<=31?"Watch":"High"}</span>`;
+    const exempt = (myLocations.find(l => l.id === locId) || {}).type === "mobile";  // Mobile Bar: labor % reported, not targeted
+    const chip = pct==null ? "" : exempt ? `<span class="chip neutral" style="margin-left:6px;">Not targeted</span>` : `<span class="chip ${pct<=28?"good":pct<=31?"warn":"serious"}" style="margin-left:6px;">${pct<=28?"On target":pct<=31?"Watch":"High"}</span>`;
     return `<tr>
       <td>${lmFmtDate(k)}${k===thisWeek?` <span class="muted">(so far)</span>`:""}</td>
       <td class="num">${money(w.rev)}</td>
@@ -8879,6 +8947,177 @@ function lmNewSeenTab(view){
   $$(`#lm-tabs .lm-tab[data-lmtab="${view}"] .lm-tab-new, .nav-item.lm-nav[data-lmview="${view}"] .lm-tab-new`).forEach(b => b.remove());
 }
 
+
+/* =====================================================================
+   MOBILE BAR BOOKINGS (Nov 16 2026)
+   Public form mobile-bar-booking.html → rpc submit_mobile_bar_inquiry → mobile_bar_inquiries.
+   RLS: COO/CEO/CBO read + update. Statuses: new → contacted → quoted → booked, or lost / spam.
+   ===================================================================== */
+const MB_STATUS = { new:["New","critical"], contacted:["Contacted","warn"], quoted:["Quoted","warn"], booked:["Booked","good"], lost:["Lost","neutral"], spam:["Spam","neutral"] };
+const MB_ORDER = ["new","contacted","quoted","booked","lost","spam"];
+let mbRows = [], mbFilter = "open", mbLoading = false;
+const mbMoney = n => n == null || n === "" ? "—" : "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits:2 });
+const mbAgo = ts => { const d = Math.floor((Date.now() - new Date(ts)) / 864e5); return d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`; };
+const mbType = r => r.event_type === "Other" && r.event_type_other ? r.event_type_other : r.event_type;
+
+async function mbLoad(){
+  if(!myStaff || !EXEC_ROLES.includes(myStaff.role) || mbLoading) return;
+  mbLoading = true;
+  const { data, error } = await sb.from("mobile_bar_inquiries").select("*").order("created_at", { ascending:false });
+  mbLoading = false;
+  if(error){ $("#mb-list").innerHTML = `<div class="empty-note lm-error">Couldn't load booking requests (${lmEsc(error.message)}).</div>`; return; }
+  mbRows = data || [];
+  mbRender(); mbBadge();
+}
+function mbBadge(){
+  const n = mbRows.filter(r => r.status === "new").length;
+  $$('.nav-item[data-section="mobilebar"] .mb-nav-badge').forEach(b => b.remove());
+  if(n) $$('.nav-item[data-section="mobilebar"]').forEach(b => { const s = document.createElement("span"); s.className = "mb-nav-badge"; s.textContent = n; s.title = `${n} new booking request${n===1?"":"s"}`; b.appendChild(s); });
+}
+function mbRender(){
+  if(!$("#mb-kpis")) return;
+  const t = lmToday();
+  const open = r => ["new","contacted","quoted"].includes(r.status);
+  const upcoming = mbRows.filter(r => r.status === "booked" && r.event_date >= t);
+  const pipeline = mbRows.filter(r => r.status === "quoted").reduce((a, r) => a + Number(r.quote_amount || 0), 0);
+  const bookedVal = upcoming.reduce((a, r) => a + Number(r.quote_amount || 0), 0);
+  $("#mb-kpis").innerHTML = [
+    ["New requests", mbRows.filter(r => r.status === "new").length, "Waiting on a first reply"],
+    ["In progress", mbRows.filter(r => r.status === "contacted" || r.status === "quoted").length, `${mbMoney(pipeline)} quoted`],
+    ["Booked, upcoming", upcoming.length, `${mbMoney(bookedVal)} booked`],
+    ["All requests", mbRows.filter(r => r.status !== "spam").length, "Since the form went live"],
+  ].map(([l, v, s]) => `<div class="card kpi"><div class="label">${l}</div><div class="value tabular">${v}</div><div class="delta">${lmEsc(s)}</div></div>`).join("");
+  const counts = { open: mbRows.filter(open).length, all: mbRows.length };
+  MB_ORDER.forEach(s => counts[s] = mbRows.filter(r => r.status === s).length);
+  $("#mb-filters").innerHTML = [["open","Open"], ...MB_ORDER.map(s => [s, MB_STATUS[s][0]]), ["all","All"]]
+    .map(([k, l]) => `<button type="button" data-mb-filter="${k}" aria-pressed="${k === mbFilter}">${l}<span class="n">${counts[k]}</span></button>`).join("");
+  const q = ($("#mb-search").value || "").trim().toLowerCase();
+  let rows = mbRows.filter(r => mbFilter === "all" ? true : mbFilter === "open" ? open(r) : r.status === mbFilter)
+    .filter(r => !q || [r.name, r.email, r.phone, r.event_location, mbType(r)].some(x => String(x || "").toLowerCase().includes(q)));
+  // open requests: soonest event first; everything else newest request first
+  rows = rows.sort((a, b) => (mbFilter === "open" || mbFilter === "booked") ? String(a.event_date).localeCompare(String(b.event_date)) : String(b.created_at).localeCompare(String(a.created_at)));
+  $("#mb-hint").textContent = `${rows.length} shown · tap one for details`;
+  $("#mb-list").innerHTML = rows.length ? rows.map(r => {
+    const d = new Date(r.event_date + "T12:00:00Z"), st = MB_STATUS[r.status] || [r.status, "neutral"];
+    const past = r.event_date < t;
+    return `<button type="button" class="mb-row ${r.status === "new" ? "is-new" : ""}" data-mb-open="${r.id}">
+      <div class="event-date"><div class="m">${d.toLocaleDateString("en-US", { month:"short", timeZone:"UTC" })}</div><div class="d">${d.getUTCDate()}</div><div class="y">${d.getUTCFullYear()}</div></div>
+      <div style="min-width:0;"><div class="who">${lmEsc(r.name)} · ${lmEsc(mbType(r))}</div>
+        <div class="meta">${lmEsc(r.event_location)} · ${lmEsc(r.timeframe)} · ${lmEsc(r.headcount)} guests${past && r.status !== "booked" ? " · date has passed" : ""}</div></div>
+      <div class="right"><span class="chip ${st[1]}">${st[0]}</span><span class="ago">${r.quote_amount != null ? mbMoney(r.quote_amount) + " · " : ""}sent ${mbAgo(r.created_at)}</span></div>
+    </button>`; }).join("")
+    : `<div class="empty-note">${mbRows.length ? "Nothing matches this filter." : "No booking requests yet. Share the form link below."}</div>`;
+}
+function mbOpen(id){
+  const r = mbRows.find(x => x.id === id); if(!r) return;
+  const d = new Date(r.event_date + "T12:00:00Z");
+  lmModal(`<h3>${lmEsc(r.name)}</h3>
+    <div class="sub">${lmEsc(mbType(r))} · ${d.toLocaleDateString("en-US", { weekday:"long", month:"long", day:"numeric", year:"numeric", timeZone:"UTC" })} · request sent ${new Date(r.created_at).toLocaleString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" })}</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+      <a class="btn small primary" href="mailto:${encodeURIComponent(r.email)}?subject=${encodeURIComponent("Your Salt City Mobile Espresso Bar request")}">Email ${lmEsc(r.name.split(" ")[0])}</a>
+      <a class="btn small" href="tel:${lmEsc(String(r.phone).replace(/[^\d+]/g, ""))}">Call ${lmEsc(r.phone)}</a>
+    </div>
+    <dl class="mb-detail">
+      <dt>Email</dt><dd>${lmEsc(r.email)}</dd>
+      <dt>Phone</dt><dd>${lmEsc(r.phone)}</dd>
+      <dt>Event date</dt><dd>${lmFmtDate(r.event_date)}, ${r.event_date.slice(0,4)}</dd>
+      <dt>Timeframe</dt><dd>${lmEsc(r.timeframe)}</dd>
+      <dt>Location</dt><dd>${lmEsc(r.event_location)}</dd>
+      <dt>Type of event</dt><dd>${lmEsc(mbType(r))}</dd>
+      <dt>Headcount</dt><dd>${lmEsc(r.headcount)}</dd>
+      <dt>Heard about us</dt><dd>${lmEsc(r.heard_about)}</dd>
+      <dt>Favorite menu item</dt><dd>${lmEsc(r.menu_item)}</dd>
+      <dt>Event on TV</dt><dd>${lmEsc(r.tv_show)}</dd>
+      <dt>Additional info</dt><dd style="white-space:pre-wrap;">${lmEsc(r.additional_info)}</dd>
+    </dl>
+    <div class="lm-modal-section">Status</div>
+    <div class="help" style="font-size:12px; color:var(--ink-3); margin:-2px 0 8px;">${r.store_event_id ? "This booking is on the Mobile Bar's Store Events." : "Marking it Booked adds it to the Mobile Bar's Store Events."}</div>
+    <div class="mb-status-pick" id="mb-status">${MB_ORDER.map(s => `<button type="button" data-mb-st="${s}" aria-pressed="${s === r.status}">${MB_STATUS[s][0]}</button>`).join("")}</div>
+    <form class="lm-form" id="mb-form">
+      <div><label>Quote</label><input type="number" id="mb-quote" min="0" step="0.01" value="${r.quote_amount ?? ""}" placeholder="$"></div>
+      <div><label>Square invoice #</label><input type="text" id="mb-inv" value="${lmEsc(r.square_invoice_number || "")}"></div>
+      <div class="wide"><label>Internal notes</label><textarea id="mb-notes" placeholder="Calls, menu, staffing, travel…">${lmEsc(r.internal_notes || "")}</textarea></div>
+      <div class="lm-form-actions"><span class="err" id="mb-err"></span><button type="button" class="btn ghost sm" data-modal-cancel>Close</button><button type="submit" class="btn small primary">Save</button></div>
+    </form>`);
+  $("#lm-modal-card").classList.add("wide");
+  let status = r.status;
+  $("#mb-status").addEventListener("click", e => { const b = e.target.closest("[data-mb-st]"); if(!b) return; status = b.dataset.mbSt; $$("#mb-status button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
+  $("#mb-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const btn = e.submitter; btn.disabled = true; $("#mb-err").textContent = "";
+    const q = $("#mb-quote").value;
+    const patch = { status, quote_amount: q === "" ? null : Number(q), square_invoice_number: $("#mb-inv").value.trim() || null, internal_notes: $("#mb-notes").value.trim() || null, handled_by: myStaff.id, updated_at: new Date().toISOString() };
+    const { error } = await sb.from("mobile_bar_inquiries").update(patch).eq("id", r.id);
+    btn.disabled = false;
+    if(error){ $("#mb-err").textContent = `Couldn't save: ${error.message}`; return; }
+    Object.assign(r, patch);
+    if(status === "booked" && !r.store_event_id){ const { data: fresh } = await sb.from("mobile_bar_inquiries").select("store_event_id").eq("id", r.id).maybeSingle(); if(fresh) r.store_event_id = fresh.store_event_id; }
+    mbRender(); mbBadge(); if(typeof mbLmRender === "function" && !$("#mb-lm-wrap").hidden) mbLmRender();
+    if(currentDetailLocId && mbIsMobile(currentDetailLocId)) evLoad(currentDetailLocId);
+    lmModalClose();
+  });
+}
+document.addEventListener("click", e => {
+  const f = e.target.closest("[data-mb-filter]"); if(f){ mbFilter = f.dataset.mbFilter; return mbRender(); }
+  const o = e.target.closest("[data-mb-open]"); if(o) return mbOpen(o.dataset.mbOpen);
+});
+$("#mb-search").addEventListener("input", mbRender);
+$("#mb-refresh").addEventListener("click", mbLoad);
+(function(){
+  const url = new URL("mobile-bar-booking.html", location.href).href;
+  $("#mb-form-url").textContent = url;
+  $("#mb-copy").addEventListener("click", async () => {
+    try{ await navigator.clipboard.writeText(url); $("#mb-copy").textContent = "Copied"; setTimeout(() => $("#mb-copy").textContent = "Copy link", 1600); }
+    catch(e){ prompt("Copy this link:", url); }
+  });
+})();
+document.querySelectorAll('.nav-item[data-section="mobilebar"]').forEach(btn => btn.addEventListener("click", mbLoad));
+
+
+/* ---- Mobile Bar as a location (Nov 16 2026): booking requests inside its LM portal ---- */
+const mbIsMobile = locId => (myLocations.find(l => l.id === locId) || {}).type === "mobile";
+async function mbLmLoad(locId){
+  const on = mbIsMobile(locId);
+  $("#mb-lm-card").hidden = !on; $("#mb-lm-wrap").hidden = !on;
+  if(!on) return;
+  const { data, error } = await sb.from("mobile_bar_inquiries").select("*").order("created_at", { ascending:false });
+  if(locId !== currentDetailLocId) return;
+  if(error){ $("#mb-lm-list").innerHTML = $("#mb-lm-dash").innerHTML = `<div class="empty-note lm-error">Couldn't load booking requests (${lmEsc(error.message)}).</div>`; return; }
+  mbRows = data || [];
+  mbLmRender(); if($("#sec-mobilebar")?.classList.contains("active")) mbRender(); mbBadge();
+}
+function mbRowHtml(r){
+  const t = lmToday(), d = new Date(r.event_date + "T12:00:00Z"), st = MB_STATUS[r.status] || [r.status, "neutral"];
+  return `<button type="button" class="mb-row ${r.status === "new" ? "is-new" : ""}" data-mb-open="${r.id}">
+    <div class="event-date"><div class="m">${d.toLocaleDateString("en-US", { month:"short", timeZone:"UTC" })}</div><div class="d">${d.getUTCDate()}</div><div class="y">${d.getUTCFullYear()}</div></div>
+    <div style="min-width:0;"><div class="who">${lmEsc(r.name)} · ${lmEsc(mbType(r))}</div>
+      <div class="meta">${lmEsc(r.event_location)} · ${lmEsc(r.timeframe)} · ${lmEsc(r.headcount)} guests${r.event_date < t && r.status !== "booked" ? " · date has passed" : ""}</div></div>
+    <div class="right"><span class="chip ${st[1]}">${st[0]}</span><span class="ago">${r.quote_amount != null ? mbMoney(r.quote_amount) + " · " : ""}sent ${mbAgo(r.created_at)}</span></div></button>`;
+}
+let mbLmShowAll = false;
+function mbLmRender(){
+  const t = lmToday();
+  const open = mbRows.filter(r => ["new","contacted","quoted"].includes(r.status)).sort((a,b) => String(a.event_date).localeCompare(String(b.event_date)));
+  const booked = mbRows.filter(r => r.status === "booked" && r.event_date >= t).sort((a,b) => String(a.event_date).localeCompare(String(b.event_date)));
+  const nNew = mbRows.filter(r => r.status === "new").length;
+  // dashboard card
+  $("#mb-lm-dash").innerHTML = `<div class="td-boxes" style="margin-bottom:10px;">
+      <button type="button" class="td-box ${nNew ? "up" : ""}" data-go="events" data-anchor="mb-lm-wrap" style="cursor:pointer; border:0;"><div class="n">${nNew}</div><div class="l">New</div></button>
+      <button type="button" class="td-box" data-go="events" data-anchor="mb-lm-wrap" style="cursor:pointer; border:0;"><div class="n">${open.length - nNew}</div><div class="l">In progress</div></button>
+      <button type="button" class="td-box" data-go="events" data-anchor="mb-lm-wrap" style="cursor:pointer; border:0;"><div class="n">${booked.length}</div><div class="l">Booked, upcoming</div></button></div>`
+    + (open.length ? open.slice(0, 3).map(mbRowHtml).join("") : `<div class="empty-note">No open booking requests.</div>`);
+  // events tab list
+  const rows = mbLmShowAll ? mbRows.slice().sort((a,b) => String(b.created_at).localeCompare(String(a.created_at))) : open.concat(booked);
+  $("#mb-lm-hint").textContent = mbLmShowAll ? `${rows.length} requests, newest first` : `${open.length} open · ${booked.length} booked and coming up`;
+  $("#mb-lm-all").textContent = mbLmShowAll ? "Show open & upcoming" : "Show all requests";
+  $("#mb-lm-list").innerHTML = rows.length ? rows.map(mbRowHtml).join("") : `<div class="empty-note">No booking requests to show. Share the form: <a href="mobile-bar-booking.html" target="_blank" rel="noopener">mobile-bar-booking.html ↗</a></div>`;
+}
+$("#mb-lm-all").addEventListener("click", () => { mbLmShowAll = !mbLmShowAll; mbLmRender(); });
+$("#mb-lm-copy").addEventListener("click", async () => {
+  const url = new URL("mobile-bar-booking.html", location.href).href;
+  try{ await navigator.clipboard.writeText(url); $("#mb-lm-copy").textContent = "Copied"; setTimeout(() => $("#mb-lm-copy").textContent = "Copy booking form link", 1600); } catch(e){ prompt("Copy this link:", url); }
+});
+
 /* =====================================================================
    TEAM ASSESSMENT + BARISTA REFRESH (Training Night, Nov 12 2026)
    Goal: by Dec 31 2026 every current barista is Verified or Flagged.
@@ -9260,3 +9499,59 @@ document.querySelectorAll('.nav-item[data-section="teamassess"]').forEach(btn =>
 
 })();
 </script>
+<style id="command-deck-visual-theme">
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:wght@400;500;600;700&display=swap');
+:root{
+--bg:#F7F4EC;--surface:#FFFFFF;--surface-alt:#EFE9DA;--surface-raised:#FFFFFF;
+--ink:#241F18;--ink-2:#5A5245;--ink-3:#8B826F;--border:#E1D9C4;--border-soft:#EEE7D6;
+--accent:#EB6834;--accent-ink:#FFFFFF;--accent-soft:#FCE3D4;--caramel:#B9852E;--caramel-soft:#F3E2BC;
+--good:#0CA30C;--warn:#B8860B;--serious:#C15A34;--critical:#D03B3B;
+--good-soft:#DCF3DC;--warn-soft:#F7EBC9;--serious-soft:#F7DFCF;--critical-soft:#F8DADA;
+--font-display:'Fraunces',Georgia,'Iowan Old Style',serif;
+--font-body:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+--font-mono:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace;
+--nav-w:248px;--radius:10px;--radius-sm:6px;
+--navy:#191410;--navy-900:#191410;--navy-deep:#191410;--lead-900:#191410;--lead-700:#5A5245;
+--blue:#5A5245;--rust:#EB6834;--rust-mid:#EB6834;--care-700:#EB6834;--craft-700:#B9852E;
+--paper:#FFFFFF;--panel:#F7F4EC;--line:#E1D9C4;--muted:#8B826F;
+--shadow:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+--shadow-sm:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+--shadow-md:0 6px 20px rgba(36,31,24,.10);color-scheme:light}
+html{background:var(--bg);scroll-behavior:smooth}
+body{background:var(--bg)!important;color:var(--ink)!important;font-family:var(--font-body)!important}
+h1,h2,h3,h4,h5,h6{font-family:var(--font-display)!important;color:var(--ink)!important}
+button,input,select,textarea{font-family:var(--font-body)!important}
+a{color:var(--accent)}
+::selection{background:var(--accent-soft);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent)!important;outline-offset:2px}
+.topbar,header.topbar,.header,.app-header,.site-header{
+background:rgba(247,244,236,.96)!important;color:var(--ink)!important;
+border-bottom:1px solid var(--border-soft)!important;box-shadow:none!important;backdrop-filter:blur(8px)}
+.topbar h1,.topbar h2,.topbar .brand-name,.topbar .brand-title,header h1,header h2{color:var(--ink)!important}
+.topbar .brand-sub,.topbar .subtitle,.topbar small{color:var(--ink-3)!important}
+.brand-mark,.brand-dot,.brand .dot,.logo-mark{background:var(--accent)!important;box-shadow:none!important}
+.card,.panel-card,.section-card,.metric-card,.stat-card,.form-card,.tile,.modal-card{
+background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:var(--radius)!important;box-shadow:var(--shadow-sm)!important}
+button,.btn,.button,[role="button"],input[type="submit"],input[type="button"]{border-radius:7px}
+.btn-primary,.primary,.btn:not(.ghost):not(.secondary):not(.outline):not(.danger),button.primary,input[type="submit"]{
+background:var(--accent)!important;border-color:var(--accent)!important;color:#fff!important}
+.btn-primary:hover,.primary:hover,.btn:not(.ghost):not(.secondary):not(.outline):not(.danger):hover,button.primary:hover,input[type="submit"]:hover{background:#D95727!important}
+.btn-secondary,.secondary,.ghost,.outline,button.ghost{background:var(--surface)!important;color:var(--ink-2)!important;border:1px solid var(--border)!important}
+input,select,textarea{background:var(--surface)!important;color:var(--ink)!important;border:1px solid var(--border)!important;border-radius:7px!important}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-soft)!important}
+table{border-color:var(--border)!important}th{background:var(--surface-alt)!important;color:var(--ink-2)!important}
+td,th{border-color:var(--border-soft)!important}
+.tabs button[aria-selected="true"],.tab.active,.tab[aria-selected="true"],.nav-tab.active{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}
+.progress,.progress-track,.prog-track{background:var(--surface-alt)!important}
+.progress-bar,.progress-fill,.prog-fill{background:var(--accent)!important}
+hr,.divider{border-color:var(--border-soft)!important}
+.sidebar{background:#191410!important;color:#EDE3D2!important;border-right:1px solid #2B2318!important}
+.sidebar h1,.sidebar h2,.sidebar h3,.sidebar .brand-text strong{color:#FBF6EB!important}
+.sidebar a,.sidebar button{color:#D9CDB4}
+.sidebar .active,.sidebar .nav-item.active{background:#2C2115!important;color:#FBF6EB!important}
+.sidebar .active:before,.sidebar .nav-item.active:before{background:#F0824C!important}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:light}}
+:root[data-theme="dark"]{color-scheme:light}
+
+</style>
