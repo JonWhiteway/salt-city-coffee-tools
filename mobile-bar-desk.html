@@ -154,6 +154,12 @@ details.more>summary{cursor:pointer;color:var(--care);font-size:13px}
 @media (max-width:1100px){.grid2{grid-template-columns:1fr}}
 textarea.tpl{min-height:180px;font-size:14px}
 </style>
+<style id="mb-embed-css">
+html.embed .hero .wm, html.embed .hero .brandrow, html.embed .hero h1{display:none !important}
+html.embed .hero{padding-top:10px !important; padding-bottom:0 !important; border-bottom-width:3px}
+html.embed .wrap{padding-top:16px}
+</style>
+<script>if(new URLSearchParams(location.search).get("embed")==="1") document.documentElement.classList.add("embed");</script>
 </head>
 <body>
 <div class="hero">
@@ -200,7 +206,7 @@ function setv(k) { var v = S.settings[k]; return v; }
 // ---------------- boot ----------------
 sb.auth.getSession().then(function (r) {
   var sess = r.data && r.data.session;
-  if (!sess) { $("#app").innerHTML = '<div class="msg warn">Sign in on the <a href="/">Command Deck</a> first, then come back to this page.</div>'; return; }
+  if (!sess) { $("#app").innerHTML = '<div class="msg warn">Sign in on the <a href="/" target="_top">Command Deck</a> first, then come back to this page.</div>'; return; }
   return sb.from("staff").select("id,name,role").eq("auth_user_id", sess.user.id).maybeSingle().then(function (s) {
     S.me = s.data;
     if (!S.me || ["coo", "ceo", "cbo"].indexOf(S.me.role) < 0) { $("#app").innerHTML = '<div class="msg warn">The Mobile Bar desk is for the CBO, COO and CEO. Event leads use the event link Maria shares with them.</div>'; return; }
