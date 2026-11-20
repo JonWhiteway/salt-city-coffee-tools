@@ -155,11 +155,19 @@ details.more>summary{cursor:pointer;color:var(--care);font-size:13px}
 textarea.tpl{min-height:180px;font-size:14px}
 </style>
 <style id="mb-embed-css">
+html.embed body{background:var(--bg)}
 html.embed .hero .wm, html.embed .hero .brandrow, html.embed .hero h1{display:none !important}
-html.embed .hero{padding-top:10px !important; padding-bottom:0 !important; border-bottom-width:3px}
-html.embed .wrap{padding-top:16px}
+html.embed .hero{background:var(--surface) !important; color:var(--ink) !important; padding:10px 16px !important; border-bottom:2px solid var(--line) !important; position:sticky; top:0; z-index:5}
+html.embed .hero-in{max-width:none !important}
+html.embed .tabs{margin-top:0}
+html.embed .tabs button{border:1px solid var(--line); color:var(--ink); background:var(--bg); font-family:var(--f-label); font-weight:700; font-size:11px; letter-spacing:.14em; text-transform:uppercase; padding:8px 14px}
+html.embed .tabs button[aria-pressed="true"]{background:#284A70; color:#F0E7DA; border-color:#284A70; box-shadow:inset 0 -3px 0 var(--gold)}
+html.embed .who{color:var(--muted)}
+html.embed .wrap, html.embed .wrap.wide{max-width:none !important; padding:16px !important}
+html.embed.nolist .layout{grid-template-columns:minmax(0,1fr) !important}
+html.embed.nolist .layout > div:first-child{display:none !important}
 </style>
-<script>if(new URLSearchParams(location.search).get("embed")==="1") document.documentElement.classList.add("embed");</script>
+<script>(function(){ var q = new URLSearchParams(location.search); if(q.get("embed")==="1"){ document.documentElement.classList.add("embed"); if(q.get("list")==="0") document.documentElement.classList.add("nolist"); } })();</script>
 </head>
 <body>
 <div class="hero">
@@ -229,9 +237,18 @@ function loadRef() {
 }
 
 // ---------------- events ----------------
+var EMBED = document.documentElement.classList.contains("embed");
+function tellParent(msg) { if (EMBED && window.parent !== window) try { window.parent.postMessage(msg, location.origin); } catch (e) {} }
+window.addEventListener("message", function (e) {
+  if (e.origin !== location.origin || !e.data || !e.data.mbOpen || !S.me) return;
+  S.tab = "events"; $$(".tabs button[data-tab]").forEach(function (x) { x.setAttribute("aria-pressed", String(x.dataset.tab === "events")); });
+  S.cur = e.data.mbOpen;
+  if (S.events.some(function (x) { return x.id === S.cur; })) renderEvents(); else loadEvents(S.cur);
+});
 function loadEvents(selectId) {
   return sb.from("mobile_bar_inquiries").select("*").order("event_date", { ascending: true }).then(function (r) {
     S.events = must(r) || [];
+    if (S._loaded) tellParent({ mbChanged: true }); S._loaded = true;
     if (selectId) S.cur = selectId;
     if (S.tab === "events") renderEvents();
   });
@@ -257,7 +274,7 @@ function renderEvents() {
         '<span class="sub">' + dfmt(e.event_date, { weekday: "short", month: "short", day: "numeric", year: "numeric" }) + ' · ' + esc(e.event_type === "Other" ? (e.event_type_other || "Other") : e.event_type) + ' · ' + esc(e.headcount) + ' guests</span>' +
         (e.quote_amount ? '<span class="sub">' + money(e.quote_amount) + (e.event_lead_id ? ' · lead: ' + esc((S.staff.find(function (s) { return s.id === e.event_lead_id; }) || {}).name || "") : '') + '</span>' : '') + '</button>';
     }).join("") || '<div class="empty">Nothing here.</div>') + '</div></div>' +
-    '<div id="detail">' + (S.cur ? '<div class="card"><p class="muted">Loading…</p></div>' : '<div class="card empty">Pick an event on the left.</div>') + '</div></div>';
+    '<div id="detail">' + (S.cur ? '<div class="card"><p class="muted">Loading…</p></div>' : '<div class="card empty">Pick ' + (document.documentElement.classList.contains("nolist") ? 'a request from the list' : 'an event on the left') + '.</div>') + '</div></div>';
   $$(".chipsel button").forEach(function (b) { b.addEventListener("click", function () { S.filter = b.dataset.f; renderEvents(); }); });
   $("#q").addEventListener("input", function () { S.q = this.value; var pos = this.selectionStart; renderEvents(); var qi = $("#q"); qi.focus(); qi.setSelectionRange(pos, pos); });
   $$("#list .item").forEach(function (b) { b.addEventListener("click", function () { S.cur = b.dataset.id; history.replaceState(null, "", "?id=" + S.cur); renderEvents(); if (window.innerWidth < 900) $("#detail").scrollIntoView({ behavior: "smooth" }); }); });
