@@ -6504,7 +6504,22 @@ function tdFindWriteup(id){ return (tdData[currentDetailLocId]?.coaching || []).
 function tdViewWriteup(id){
   const c = tdFindWriteup(id); if(!c) return;
   lmModal(`<h3>Write-up 1: ${lmEsc(tdName(currentDetailLocId, c.staff_id))}</h3><div class="sub">${lmFmtDate(String(c.occurred_at).slice(0,10))} · <span class="chip ${wuState(c, lmToday())[1]}">${wuState(c, lmToday())[0]}</span></div>
-    <div class="td-notes">${wuNotesHtml(c.template_notes)}</div>`);
+    <div class="td-notes">${wuNotesHtml(c.template_notes)}</div>
+    ${EXEC_ROLES.includes(myStaff?.role) ? `<div class="lm-form-actions"><span class="err"></span><button type="button" class="btn small" id="td-wu-remove" style="color:var(--critical); border-color:var(--critical);">Remove write-up</button><button type="button" class="btn small primary" data-modal-cancel>Close</button></div>` : ""}`);
+  const rm = $("#td-wu-remove"); if(!rm) return;
+  rm.addEventListener("click", () => {
+    const who = lmEsc(tdName(currentDetailLocId, c.staff_id));
+    lmModal(`<h3>Remove this write-up?</h3><div class="sub">${who} · ${lmFmtDate(String(c.occurred_at).slice(0,10))}</div>
+      <p style="margin:10px 0 0;">This permanently deletes the write-up from ${who}'s record and from their Academy view. It can't be undone. Use this for a write-up entered by mistake; to end one that worked, use "Progress made: close it" instead.</p>
+      ${(c.template_notes||{}).outcome === "pip" ? `<p class="lm-error" style="margin:8px 0 0;">This write-up led to a PIP. Removing it does not remove the PIP.</p>` : ""}
+      <div class="lm-form-actions"><span class="err"></span><button type="button" class="btn small" data-modal-cancel>Keep it</button><button type="button" class="btn small primary" id="td-wu-remove-yes" style="background:var(--critical); border-color:var(--critical);">Delete write-up</button></div>`);
+    $("#td-wu-remove-yes").addEventListener("click", async e => {
+      e.currentTarget.disabled = true;
+      const { error, count } = await sb.from("academy_coaching_log").delete({ count: "exact" }).eq("id", c.id).eq("conversation_type", "writeup");
+      if(error || !count){ e.currentTarget.disabled = false; return tdErr(error ? `Couldn't remove: ${error.message}` : "Couldn't remove it: your account doesn't have permission."); }
+      lmModalClose(); tdRefresh();
+    });
+  });
 }
 async function tdWriteupOutcome(id, outcome){
   const c = tdFindWriteup(id); if(!c) return;
