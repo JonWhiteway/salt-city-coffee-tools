@@ -1243,6 +1243,89 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 #sec-mobilebar .mb-main{position:sticky; top:120px;}
 #mb-desk-frame{display:block; width:100%; height:820px; border:1px solid var(--border); border-radius:14px; background:#F4F1EA;}
 @media (max-width:1100px){ #sec-mobilebar .mb-hybrid{grid-template-columns:1fr;} #sec-mobilebar .mb-main{position:static;} #sec-mobilebar .mb-side .mb-list{max-height:420px;} }
+
+/* attendance policy infographic */
+.lm-modal-card.ap-modal{max-width:880px;}
+.ap{color:#284A70;}
+.ap-hero{background:#284A70; color:#F0E7DA; border-bottom:5px solid #F2A900; border-radius:14px 14px 0 0; padding:22px 22px 18px; margin:-6px -6px 16px;}
+.ap-eyebrow{font-family:"SCC Label",Arial,sans-serif; font-weight:700; font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:#F2A900;}
+.ap-hero h2{color:#F0E7DA; font-size:26px; letter-spacing:.06em; margin:6px 0 6px; line-height:1.1;}
+.ap-hero p{margin:0; font-size:14px; color:rgba(240,231,218,.85); max-width:60ch;}
+.ap-sec{margin:0 0 18px;}
+.ap-sec h3{font-size:16px; letter-spacing:.07em; border-bottom:2px solid #284A70; padding-bottom:6px; margin:0 0 12px;}
+.ap-events{display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:10px;}
+.ap-ev{background:#FBFAF7; border:1px solid #D6D2C4; border-top:4px solid #F2A900; border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:4px;}
+.ap-pts{font-family:"Oswald",Georgia,serif; font-size:34px; line-height:1; color:#284A70;}
+.ap-ev-u{font-family:"SCC Label",Arial,sans-serif; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:#6B7A8C; font-weight:700;}
+.ap-ev-l{font-size:13px; font-weight:600; line-height:1.3; min-height:34px;}
+.ap-note{margin-top:10px; font-size:13px; background:#F8E1DE; color:#B23A2E; border-radius:10px; padding:8px 12px;}
+.ap-meter{position:relative; height:46px; margin:4px 8px 6px;}
+.ap-bar{position:absolute; left:0; right:0; top:22px; height:12px; border-radius:99px; background:#E4E0D5; overflow:hidden;}
+.ap-bar i{position:absolute; top:0; bottom:0;}
+.ap-bar i.ok{background:#2F7A52;}
+.ap-tick{position:absolute; top:0; transform:translateX(-50%); font-family:"SCC Label",Arial,sans-serif; font-size:11px; font-weight:700; color:#4A5D73;}
+.ap-ladder{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:6px;}
+.ap-step{display:flex; flex-direction:column; gap:4px; background:#FBFAF7; border:1px solid #D6D2C4; border-left:5px solid var(--c,#2F7A52); border-radius:12px; padding:10px 12px; font-size:12.5px; line-height:1.4;}
+.ap-step.ok{--c:#2F7A52;}
+.ap-step b{display:block; font-size:13px; margin-bottom:2px;}
+.ap-at{font-family:"Oswald",Georgia,serif; font-size:22px; line-height:1; min-width:38px; color:var(--c,#2F7A52);}
+.ap-two{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+.ap-box{background:#FBFAF7; border:1px solid #D6D2C4; border-radius:14px; padding:14px;}
+.ap-box h3{margin-bottom:10px;}
+.ap-row{display:flex; gap:12px; align-items:flex-start; margin-bottom:10px; font-size:13px; line-height:1.4;}
+.ap-ic{flex:none; width:44px; height:44px; border-radius:50%; background:#284A70; color:#F0E7DA; display:grid; place-items:center; font-family:"Oswald",Georgia,serif; font-size:17px; box-shadow:inset 0 -3px 0 #F2A900;}
+.ap-list{margin:0; padding-left:18px; font-size:13px; line-height:1.7;}
+.ap-foot{font-size:12.5px; color:#4A5D73; border-top:1px solid #D6D2C4; padding-top:10px;}
+@media (max-width:640px){ .ap-two{grid-template-columns:1fr;} .ap-hero h2{font-size:21px;} }
+@media print{ body *{visibility:hidden;} .ap, .ap *{visibility:visible;} .ap{position:absolute; left:0; top:0; width:100%;} }
+
+/* --- Scheduling: team availability & rules · Suggest a schedule · Store Health --- */
+#app-root .av-filters{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+#app-root .av-filters button{font:600 12px var(--font-text,inherit); border:1px solid rgba(40,74,112,.22); background:#fff; color:#284A70; border-radius:999px; padding:5px 12px; cursor:pointer;}
+#app-root .av-filters button[aria-pressed="true"]{background:#284A70; color:#fff; border-color:#284A70;}
+#app-root .av-filters .n{margin-left:6px; opacity:.7; font-variant-numeric:tabular-nums;}
+#app-root .av-table td{vertical-align:top;}
+#app-root .av-row{cursor:pointer;}
+#app-root .av-row:hover td{background:rgba(242,169,0,.07);}
+#app-root .av-row.flag td:first-child{box-shadow:inset 3px 0 0 #F2A900;}
+#app-root .av-flags{display:flex; flex-wrap:wrap; gap:4px; margin-top:5px;}
+#app-root .av-flags .chip{font-size:10.5px; padding:1px 7px;}
+#app-root .av-week{display:flex; gap:3px;}
+#app-root .av-d{width:20px; height:20px; border-radius:5px; display:grid; place-items:center; font:700 10px var(--font-text,inherit);}
+#app-root .av-d.y{background:#2F7A52; color:#fff;}
+#app-root .av-d.w{background:#CFE5D8; color:#1E5238; box-shadow:inset 0 0 0 1px #2F7A52;}
+#app-root .av-d.n{background:#F3D9D5; color:#8E2B21;}
+#app-root .av-d.u{background:#EEE8DE; color:#9A8E7A;}
+#app-root .av-use{position:relative; width:64px; height:7px; border-radius:99px; background:#EEE8DE; overflow:hidden; display:inline-block; vertical-align:middle; margin-right:6px;}
+#app-root .av-use i{position:absolute; inset:0 auto 0 0; border-radius:99px;}
+#app-root .av-legend{display:flex; flex-wrap:wrap; gap:12px; font-size:11.5px; color:#6B6152; margin:-2px 0 10px;}
+#app-root .av-legend .av-d{display:inline-grid; margin-right:4px; vertical-align:middle;}
+.lm-modal-card .av-ed{display:grid; gap:6px;}
+.lm-modal-card .av-ed-row{display:grid; grid-template-columns:44px minmax(150px,1fr) 110px 110px; gap:8px; align-items:center;}
+.lm-modal-card .av-ed-row input[hidden]{display:none;}
+.lm-modal-card .av-chk{display:inline-flex !important; align-items:center; gap:5px; font-weight:500 !important; text-transform:none !important; letter-spacing:0 !important; margin-right:12px;}
+.lm-modal-card .sg-table tr.open td{background:rgba(178,58,46,.06);}
+.lm-modal-card .sg-table select{max-width:230px;}
+.lm-modal-card .sg-hours{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:6px 18px;}
+.lm-modal-card .sg-h{display:grid; grid-template-columns:1fr 70px 70px; align-items:center; gap:8px; font-size:12.5px;}
+.lm-modal-card .sg-h .av-use{width:70px;}
+.lm-modal-card .av-use{position:relative; height:7px; border-radius:99px; background:#EEE8DE; overflow:hidden; display:inline-block;}
+.lm-modal-card .av-use i{position:absolute; inset:0 auto 0 0; border-radius:99px;}
+#app-root .sg-cta{background:#F2A900 !important; color:#284A70 !important; border-color:#F2A900 !important; font-weight:700;}
+#app-root .sh-score{display:flex; align-items:center; gap:6px;}
+#app-root .sh-n{display:inline-block; min-width:24px; padding:1px 7px; border-radius:99px; text-align:center; font-weight:700;}
+#app-root .sh-n.zero{color:#B5AA97; font-weight:500;}
+#app-root .sh-n.warn{background:#FCEFCF; color:#7A5600;}
+#app-root .sh-n.bad{background:#F3D9D5; color:#8E2B21;}
+#app-root .sh-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px;}
+#app-root .ac-title{display:inline-block; font:700 10.5px var(--font-label,inherit); letter-spacing:.08em; text-transform:uppercase; padding:2px 8px; border-radius:99px; background:#284A70; color:#fff; margin-left:6px; white-space:nowrap;}
+#app-root .ac-title.none{background:#EEE8DE; color:#6B6152;}
+.lm-modal-card .ac-title{display:inline-block; font:700 10.5px var(--font-label,inherit); letter-spacing:.08em; text-transform:uppercase; padding:2px 8px; border-radius:99px; background:#284A70; color:#fff; margin-left:6px;}
+.lm-modal-card .ac-title.none{background:#EEE8DE; color:#6B6152;}
+.lm-modal-card .ac-path{margin-top:6px; font-size:12px; color:#6B6152;}
+.lm-modal-card .ac-path .av-use{width:120px; height:7px; margin-right:6px; vertical-align:middle;}
+@media (max-width:640px){ .lm-modal-card .av-ed-row{grid-template-columns:40px 1fr; } .lm-modal-card .av-ed-row input{grid-column:2;} }
+
 </style>
 <style id="sc-showdown">
 @font-face{font-family:'Oswald';src:url(data:font/woff2;base64,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) format('woff2');font-weight:100 950;font-style:normal;font-display:swap}
@@ -1547,6 +1630,7 @@ body::before{display:none !important;}
     <div class="nav-group-label">Performance</div>
     <ul class="nav-list">
       <li class="exec-only"><button class="nav-item" data-section="performance"><span class="nav-dot"></span>Performance Roundup</button></li>
+      <li><button class="nav-item" data-section="storehealth"><span class="nav-dot"></span>Store Health</button></li>
       <li><button class="nav-item" data-section="teamassess"><span class="nav-dot"></span>Team Assessment</button></li>
       <li><button class="nav-item" data-section="l360"><span class="nav-dot"></span>Leadership 360s</button></li>
       <li class="exec-only"><button class="nav-item" data-section="lmgm" data-audits="walkthrough"><span class="nav-dot"></span>Walk-Through Audits</button></li>
@@ -1821,6 +1905,15 @@ body::before{display:none !important;}
       </section>
 
       <!-- ============ TEAM ASSESSMENT (GMs + C-suite) ============ -->
+
+      <section class="panel" id="sec-storehealth">
+        <div class="section-head" style="margin-top:0;"><h2>Every store at a glance</h2><div class="pf-toolbar"><span class="hint">Worst first</span><button type="button" class="btn small" id="sh-refresh">Refresh</button></div></div>
+        <div class="empty-note" id="sh-status" style="padding-top:0;">Loading…</div>
+        <div class="sh-kpis" id="sh-kpis"></div>
+        <div class="card lm-pad" style="margin-top:14px;" id="sh-table"></div>
+        <div class="section-head"><h2>People who need a look</h2><span class="hint">Attendance standing, PIPs, sick days and scheduling flags · tap Open to go to that store</span></div>
+        <div class="card lm-pad" id="sh-people"></div>
+      </section>
       <section class="panel" id="sec-teamassess">
         <div class="section-head" style="margin-top:0;"><h2>Barista standard · end of 2026</h2>
           <div class="pf-toolbar"><span class="hint" id="ta-dash-hint">Loading…</span><button type="button" class="btn small" id="ta-refresh">Refresh</button></div></div>
@@ -2412,7 +2505,7 @@ body::before{display:none !important;}
       <div class="section-head" id="lm-anchor-pips"><h2>Performance improvement plans</h2><span class="hint">30 days hourly · 60 days salaried · weekly written check-ins</span></div>
       <div id="td-pip-list"></div>
 
-      <div class="section-head" id="lm-anchor-points"><h2>Attendance points</h2><span class="hint">Points expire after 90 days · 30 clean days removes 1 point</span></div>
+      <div class="section-head" id="lm-anchor-points"><h2>Attendance points</h2><span class="hint">Points expire after 90 days · 30 clean days removes 1 point · <button type="button" class="btn small" data-ap-open>Attendance policy</button></span></div>
       <div class="card lm-pad">
         <div class="lm-table-wrap">
           <table class="lm-table">
@@ -2444,7 +2537,15 @@ body::before{display:none !important;}
         <button type="button" class="card kpi lm-stat" data-td-jump="lm-anchor-avail" style="text-align:left;"><div class="label">Availability requests</div><div class="value tabular" id="sc-k-av">—</div><div class="delta">Waiting for review</div></button>
         <button type="button" class="card kpi lm-stat" data-td-jump="lm-anchor-sched" style="text-align:left;"><div class="label">Draft shifts this week</div><div class="value tabular" id="sc-k-draft">—</div><div class="delta" id="sc-k-draft-sub">Not yet published to Square</div></button>
       </div>
-      <div class="section-head" style="margin-top:0;">
+
+      <div class="section-head" id="av-anchor" style="margin-top:30px;"><h2>Team availability &amp; rules</h2><span class="hint">Availability vs. hours worked · changes in the last 90 days · days off that aren't PTO or sick <button type="button" class="btn small" id="av-refresh">↻</button></span></div>
+      <div class="sc-summary" id="av-k"></div>
+      <div class="card lm-pad">
+        <div class="av-filters" id="av-filters"></div>
+        <div class="av-legend"><span><span class="av-d y">M</span>Available all day</span><span><span class="av-d w">M</span>Part of the day</span><span><span class="av-d n">M</span>Not available</span><span><span class="av-d u">M</span>Not set</span></div>
+        <div id="av-body"><div class="empty-note">Loading…</div></div>
+      </div>
+      <div class="section-head">
         <h2 id="lm-anchor-tc">Open timecard requests</h2>
         <span class="hint">Log what an employee reported, reconcile it against their real Square timecard, then apply or deny — right here.</span>
       </div>
@@ -2576,6 +2677,7 @@ body::before{display:none !important;}
           <button class="btn small" id="lmgm-wk-next">Next week →</button>
         </div>
         <div class="sched-quick-actions">
+          <button class="btn small sg-cta" id="sg-suggest-btn" title="Fill this week from your store rules and everyone's availability. You choose what to keep.">✦ Suggest a schedule</button>
           <button class="btn small" id="sc-rules-btn">⚙ Rules &amp; templates</button>
           <button class="btn small" id="lmgm-sched-refresh-btn">↻ Refresh</button>
           <button class="btn small" id="lmgm-sched-copy-prev-btn">Copy prior week</button>
@@ -4235,6 +4337,7 @@ const SECTION_META = {
   mobilebar:  { title:"Mobile Bar Desk", sub:"Requests, quotes, conversations and event sheets · COO / CEO / CBO" },
   performance:{ title:"Performance Roundup", sub:"COO / CEO / CBO · GM and LM measurables, people, audits and 360s across every cafe" },
   academy:    { title:"Academy Engagement", sub:"Leadership · Craft · Customer Care completion and cadence" },
+  storehealth:{ title:"Store Health", sub:"GMs + C-suite · attendance, timecards, time-off requests and scheduling issues across your stores" },
   teamassess: { title:"Team Assessment", sub:"GMs + C-suite · every barista Verified or Flagged by Dec 31 · assess from any team member's profile" },
   l360:       { title:"Leadership 360s", sub:"Six leadership styles · start a 360, share the rater link, release the report" },
   calendar:   { title:"Calendar & Events", sub:"Quarterly events linked to the master company calendar" },
@@ -4291,6 +4394,7 @@ function setActiveSection(id){
   $$(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.section === id && !b.dataset.audits));
   const meta = SECTION_META[id];
   if(meta){ $("#topbar-title").textContent = meta.title; $("#topbar-sub").textContent = meta.sub; }
+  if(id === "storehealth" && window.__shLoad) setTimeout(() => window.__shLoad(), 0);
   if(id === "sales"){ $("#sales-portfolio").style.display = "block"; $("#sales-location").style.display = "none"; }
   updateSectionPill(id);
   if(id === "mobilebar") mbDeskShow();
@@ -5454,7 +5558,7 @@ function lmShowView(view, anchor){
   if(view === "dashboard" && currentDetailLocId) loadSalesTrends(currentDetailLocId);
   if(view === "teamdev" && currentDetailLocId) loadTeamDev(currentDetailLocId);
   if(view === "performance" && currentDetailLocId) loadPerformance(currentDetailLocId);
-  if(view === "scheduling" && currentDetailLocId) scRenderSummary(currentDetailLocId);
+  if(view === "scheduling" && currentDetailLocId){ scRenderSummary(currentDetailLocId); avLoad(currentDetailLocId); }
   if(view === "events" && currentDetailLocId) evLoad(currentDetailLocId);
   if(anchor){
     const el = document.getElementById(anchor);
@@ -6099,6 +6203,10 @@ function renderTeamDev(locId){
       <div class="val">${avg[c]==null?"—":avg[c]+"%"}</div></div>`).join("")
       + `<div class="empty-note" style="padding-bottom:0;">${COMP[weakest]} is the team's lowest average: a good focus for this month's 1-1s.</div>`
     : `<div class="empty-note">No Academy levels recorded for this team yet. They appear here as levels are set in the Academy.</div>`;
+  { const baristas = team.filter(m => !m.role || m.role === "team_member");
+    const b1 = baristas.filter(m => acTitle(d, m)), onPath = baristas.filter(m => !acTitle(d, m));
+    const late = onPath.filter(m => m.hire_date && tdDays(m.hire_date, t) > ((d.hr||{})[m.staff_id]?.probation_days ?? 90));
+    if(baristas.length) $("#td-weak").insertAdjacentHTML("beforeend", `<div class="empty-note" style="padding-bottom:0;"><b>${b1.length} of ${baristas.length}</b> baristas have reached Barista 1${onPath.length - late.length ? ` · ${onPath.length - late.length} still in their first 90 days` : ""}${late.length ? ` · <span style="color:var(--critical);">${late.length} past 90 days without it: ${late.map(m => lmEsc(m.name)).join(", ")}</span>` : ""}.</div>`); }
 
   // --- monthly progress comparison
   const base = {};
@@ -6199,7 +6307,7 @@ function renderTeamDev(locId){
       <td class="muted">${lmEsc(m.job_title || ROLE_LABEL[m.role] || m.role || "")}</td>
       <td class="muted">${tdTenure(m.hire_date)}</td>
       <td class="num">${m.hours_60d ? lmNum(m.hours_60d) : "—"}</td>
-      <td><span class="td-lvl">${lvl(m.staff_id,"leadership")}</span> <span class="td-lvl">${lvl(m.staff_id,"craft")}</span> <span class="td-lvl">${lvl(m.staff_id,"customer_care")}</span></td>
+      <td><span class="td-lvl">${lvl(m.staff_id,"leadership")}</span> <span class="td-lvl">${lvl(m.staff_id,"craft")}</span> <span class="td-lvl">${lvl(m.staff_id,"customer_care")}</span>${acTitle(d, m) ? `<span class="ac-title">${acTitle(d, m)}</span>` : ""}</td>
       <td class="${!l1 || tdDays(String(l1).slice(0,10), t) > 30 ? "lm-down" : "muted"}">${tdAgo(l1)}</td>
       <td>${flags.join(" ")}</td></tr>`;
   }).join("") : `<tr><td colspan="7" class="empty-note">No team found for this store.</td></tr>`;
@@ -6670,6 +6778,537 @@ async function docsFillProfile(staffId){
                    : `<span class="chip warn">Not signed</span> ${hb.version} edition · they sign it in the Academy → Documents &amp; Forms`;
 }
 
+
+/* =====================================================================
+   ATTENDANCE POLICY — one-page infographic (Team Development → Attendance)
+   Same numbers the points log uses: PT_EVENTS, tdStanding, 90-day expiry,
+   1 point earned back per 30 clean days.
+   ===================================================================== */
+function apPolicyHtml(){
+  const ev = Object.values(PT_EVENTS);
+  const ladder = [
+    { at:3, t:"Coaching conversation", d:"A documented talk with your LM. Nothing goes in your file yet.", c:"#F2A900" },
+    { at:5, t:"Written warning", d:"A formal write-up, signed. A plan to get back under 3.", c:"#E08A1E" },
+    { at:7, t:"Final warning", d:"Last step. Any new point can end employment.", c:"#C0532B" },
+    { at:8, t:"Dismissal", d:"Employment ends.", c:"#B23A2E" },
+  ];
+  return `<div class="ap">
+    <div class="ap-hero">
+      <div class="ap-eyebrow">Salt City Coffee · Attendance policy</div>
+      <h2>Show up. It's how we take care of each other.</h2>
+      <p>Points track late arrivals, early exits, call-outs and no-shows. They fade on their own, and clean attendance earns them back faster.</p>
+    </div>
+    <div class="ap-sec"><h3>What earns points</h3>
+      <div class="ap-events">${ev.map(e => `<div class="ap-ev"><div class="ap-pts">${e.pts}</div><div class="ap-ev-l">${lmEsc(e.label)}</div><div class="ap-ev-u">point${e.pts === 1 ? "" : "s"}</div></div>`).join("")}</div>
+      <div class="ap-note"><b>Two no-call/no-shows in a row</b> are treated as quitting.</div>
+    </div>
+    <div class="ap-sec"><h3>Where points lead</h3>
+      <div class="ap-meter">
+        ${[...Array(9)].map((_, i) => `<div class="ap-tick" style="left:${i/8*100}%"><span>${i}</span></div>`).join("")}
+        <div class="ap-bar">${ladder.map((s, i) => { const from = s.at, to = i < ladder.length - 1 ? ladder[i+1].at : 8.6; return `<i style="left:${from/8.6*100}%; width:${(to-from)/8.6*100}%; background:${s.c}"></i>`; }).join("")}<i class="ok" style="left:0; width:${3/8.6*100}%"></i></div>
+      </div>
+      <div class="ap-ladder">
+        <div class="ap-step ok"><div class="ap-at">0–2.5</div><div><b>In good standing</b><div>No action. Keep it up.</div></div></div>
+        ${ladder.map(s => `<div class="ap-step" style="--c:${s.c}"><div class="ap-at">${s.at}${s.at < 8 ? "+" : ""}</div><div><b>${s.t}</b><div>${s.d}</div></div></div>`).join("")}
+      </div>
+    </div>
+    <div class="ap-sec ap-two">
+      <div class="ap-box"><h3>How points come off</h3>
+        <div class="ap-row"><span class="ap-ic">90</span><div><b>Every point expires after 90 days.</b><div>Counted from the day it happened.</div></div></div>
+        <div class="ap-row"><span class="ap-ic">30</span><div><b>30 clean days removes 1 point.</b><div>Every 30 days in a row with nothing new takes one point off.</div></div></div>
+      </div>
+      <div class="ap-box"><h3>Never earns points</h3>
+        <ul class="ap-list"><li>Approved time off and PTO</li><li>Shift swaps your LM approved</li><li>Protected leave, including NY paid sick leave</li><li>Injuries</li><li>Store closures</li></ul>
+      </div>
+    </div>
+    <div class="ap-foot">Questions about your points? Ask your LM. You can always see your own points and when the next one comes off in the Academy, under Attendance.</div>
+  </div>`;
+}
+function apOpenPolicy(){
+  lmModal(`${apPolicyHtml()}<div class="lm-form-actions" style="margin-top:14px;"><button type="button" class="btn small" onclick="window.print()">Print</button><button type="button" class="btn small" data-modal-cancel>Close</button></div>`);
+  $("#lm-modal-card").classList.add("wide", "ap-modal");
+}
+document.addEventListener("click", e => { if(e.target.closest("[data-ap-open]")) apOpenPolicy(); });
+
+/* =====================================================================
+   SCHEDULING · TEAM AVAILABILITY & PERSONAL RULES (Nov 23 2026)
+   Per person: weekly availability (employee_availability), personal rules
+   (staff_schedule_rules), one-off days off (employee_availability_exceptions),
+   PTO/sick (pto_sick_requests) and every availability change
+   (employee_availability_history, written by a trigger).
+   Compared with hours actually worked here (store-team, last 60 days).
+   ===================================================================== */
+const AV_DAYS = [1,2,3,4,5,6,0];                       // Mon..Sun, values are day_of_week (0 = Sun)
+const AV_DAY_NAME = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const AV_DOW_KEY = ["sun","mon","tue","wed","thu","fri","sat"];
+let avData = {};                                       // locId -> { team, avail, rules, hist, exc, pto, loadedAt }
+let avFilter = "all";
+const avMin = t => { if(!t) return null; const [h,m] = String(t).slice(0,5).split(":").map(Number); return h*60 + m; };
+const avHm = t => { if(!t) return ""; const [h,m] = String(t).slice(0,5).split(":").map(Number); return `${((h + 11) % 12) + 1}${m ? ":" + String(m).padStart(2,"0") : ""}${h < 12 ? "a" : "p"}`; };
+const av1 = n => (Math.round(n * 10) / 10).toLocaleString("en-US");
+
+async function avFetch(locId){
+  if(!tdTeam[locId]) tdTeam[locId] = await lmFn("store-team", { location_id: locId });
+  const team = (tdTeam[locId]?.members || []).filter(m => m.square_team_member_id);
+  const ids = team.map(m => m.square_team_member_id);
+  const since = lmAddDays(lmToday(), -90), ahead = lmAddDays(lmToday(), 60);
+  const none = Promise.resolve({ data: [] });
+  const [av, ru, hi, ex, pto, rules] = await Promise.all([
+    ids.length ? sb.from("employee_availability").select("*").in("square_team_member_id", ids) : none,
+    ids.length ? sb.from("staff_schedule_rules").select("*").in("square_team_member_id", ids) : none,
+    ids.length ? sb.from("employee_availability_history").select("*").in("square_team_member_id", ids).gte("changed_at", since).order("changed_at", { ascending:false }) : none,
+    ids.length ? sb.from("employee_availability_exceptions").select("*").in("square_team_member_id", ids).gte("exception_date", since).lte("exception_date", ahead).order("exception_date") : none,
+    sb.from("pto_sick_requests").select("*").eq("location_id", locId).gte("shift_date", since).order("shift_date", { ascending:false }),
+    sb.from("location_scheduling_rules").select("*").eq("location_id", locId).maybeSingle(),
+  ]);
+  avData[locId] = { team, avail: av.data || [], rules: ru.data || [], hist: hi.data || [], exc: ex.data || [], pto: pto.data || [], store: rules.data || null, loadedAt: Date.now() };
+  return avData[locId];
+}
+async function avLoad(locId, force){
+  if(!locId) return;
+  if(!force && avData[locId] && Date.now() - avData[locId].loadedAt < 60000) return avRender(locId);
+  if($("#av-body")) $("#av-body").innerHTML = `<div class="empty-note">Loading your team's availability…</div>`;
+  try{ await avFetch(locId); avRender(locId); }
+  catch(err){ if($("#av-body")) $("#av-body").innerHTML = `<div class="empty-note lm-error">Couldn't load availability (${lmEsc(err.message)}).</div>`; }
+}
+
+function avStoreDay(store, dow){ return store?.store_hours?.[AV_DOW_KEY[dow]] || null; }
+// hours someone is available on a weekday (null = no record for that day)
+function avDayHours(row, store){
+  if(!row) return null;
+  if(!row.available) return 0;
+  const h = avStoreDay(store, row.day_of_week);
+  const st = avMin(row.start_time) ?? avMin(h?.staff_open || h?.open), en = avMin(row.end_time) ?? avMin(h?.staff_close || h?.close);
+  if(st == null || en == null) return 10;           // "all day" with no store hours set: count a 10-hour day
+  return Math.max(0, (en - st) / 60);
+}
+function avPerson(locId, m){
+  const d = avData[locId], tm = m.square_team_member_id, t = lmToday(), since30 = lmAddDays(t, -30);
+  const rows = d.avail.filter(a => a.square_team_member_id === tm);
+  const byDow = Object.fromEntries(rows.map(r => [r.day_of_week, r]));
+  const availHrs = rows.length ? AV_DAYS.reduce((a, dow) => a + (avDayHours(byDow[dow], d.store) || 0), 0) : null;
+  const availDays = rows.filter(r => r.available).length;
+  const worked = Number(m.hours_60d || 0) / (60/7);   // average hours a week here, last 60 days
+  const rule = d.rules.find(r => r.square_team_member_id === tm) || null;
+  const hist = d.hist.filter(h => h.square_team_member_id === tm);
+  const changeDays = new Set(hist.filter(h => h.old_available != null || h.old_start != null || h.old_end != null).map(h => String(h.changed_at).slice(0,10)));
+  const firstSet = hist.length && !changeDays.size;
+  const exc = d.exc.filter(e => e.square_team_member_id === tm);
+  const excPast = exc.filter(e => e.exception_date <= t), excAhead = exc.filter(e => e.exception_date > t);
+  const pto = d.pto.filter(p => p.square_team_member_id === tm || (p.employee_name && p.employee_name === m.name));
+  const sick = pto.filter(p => p.leave_type === "sick"), paid = pto.filter(p => p.leave_type !== "sick");
+  const util = availHrs ? worked / availHrs : null;
+  const recentChange = hist.find(h => h.old_available != null || h.old_start != null || h.old_end != null);
+  const flags = [];
+  if(!rows.length) flags.push(["none", "No availability on file", "neutral"]);
+  if(util != null && availHrs >= 10 && util < 0.5 && worked < 20) flags.push(["util", `Open ${av1(availHrs)} hrs, working ${av1(worked)}`, worked < 10 ? "serious" : "warn"]);
+  if(changeDays.size >= 3) flags.push(["changes", `Changed availability ${changeDays.size}× in 90 days`, "warn"]);
+  if(excPast.length >= 4) flags.push(["off", `${excPast.length} days off asked in 90 days`, "warn"]);
+  const target = rule?.target_hours_week ?? rule?.min_hours_week;
+  if(target && worked < target * 0.75) flags.push(["under", `Averaging ${av1(worked)} of ${av1(target)} hrs`, "warn"]);
+  if(recentChange && lmAddDays(String(recentChange.changed_at).slice(0,10), 14) >= t) flags.push(["new", "Availability changed in the last 2 weeks", "good"]);
+  return { m, tm, rows, byDow, availHrs, availDays, worked, util, rule, hist, changeDays: changeDays.size, firstSet, excPast, excAhead, sick, paid, flags };
+}
+
+function avRender(locId){
+  const d = avData[locId]; if(!d || !$("#av-body")) return;
+  const people = d.team.slice().sort((a,b) => a.name.localeCompare(b.name)).map(m => avPerson(locId, m));
+  const flagged = people.filter(p => p.flags.some(f => ["util","changes","off","under"].includes(f[0])));
+  const noFile = people.filter(p => !p.rows.length).length;
+  $("#av-k").innerHTML = [
+    ["On file", `${people.length - noFile} of ${people.length}`, noFile ? `${noFile} with no availability yet` : "Everyone has availability"],
+    ["Under-used", people.filter(p => p.flags.some(f => f[0] === "util")).length, "Under 20 hrs a week and under half their availability"],
+    ["Frequent changes", people.filter(p => p.flags.some(f => f[0] === "changes")).length, "3+ availability changes in 90 days"],
+    ["Days off asked, 90 days", people.reduce((a,p) => a + p.excPast.length, 0), `Not counting ${people.reduce((a,p) => a + p.sick.length + p.paid.length, 0)} PTO / sick days`],
+  ].map(([l,v,s]) => `<div class="card kpi"><div class="label">${l}</div><div class="value tabular">${v}</div><div class="delta">${lmEsc(s)}</div></div>`).join("");
+  const list = avFilter === "flagged" ? flagged : avFilter === "none" ? people.filter(p => !p.rows.length) : people;
+  $("#av-filters").innerHTML = [["all","Everyone",people.length],["flagged","Needs a look",flagged.length],["none","No availability",noFile]]
+    .map(([k,l,n]) => `<button type="button" data-av-filter="${k}" aria-pressed="${k===avFilter}">${l}<span class="n">${n}</span></button>`).join("");
+  $("#av-body").innerHTML = list.length ? `<div class="lm-table-wrap"><table class="lm-table av-table">
+    <thead><tr><th>Team member</th><th>Availability</th><th class="num">Open hrs/wk</th><th class="num">Worked hrs/wk</th><th>Use</th><th class="num">Changes<br>90 days</th><th class="num">Days off<br>asked, 90d</th><th class="num">PTO / sick<br>90 days</th><th>Rules</th></tr></thead>
+    <tbody>${list.map(p => {
+      const pct = p.util == null ? null : Math.round(p.util * 100);
+      return `<tr class="av-row ${p.flags.some(f => ["util","changes","off","under"].includes(f[0])) ? "flag" : ""}" data-av-open="${lmEsc(p.tm)}">
+        <td><b>${lmEsc(p.m.name)}</b><div class="hint">${lmEsc(p.m.job_title || "")}</div>${p.flags.length ? `<div class="av-flags">${p.flags.map(f => `<span class="chip ${f[2]}">${lmEsc(f[1])}</span>`).join("")}</div>` : ""}</td>
+        <td><div class="av-week">${AV_DAYS.map(dow => { const r = p.byDow[dow]; const cls = !r ? "u" : !r.available ? "n" : (r.start_time || r.end_time) ? "w" : "y";
+          return `<span class="av-d ${cls}" title="${AV_DAY_NAME[dow]}: ${!r ? "not set" : !r.available ? "not available" : r.start_time || r.end_time ? avHm(r.start_time) + "–" + avHm(r.end_time) : "all day"}">${AV_DAY_NAME[dow][0]}</span>`; }).join("")}</div></td>
+        <td class="num">${p.availHrs == null ? "—" : av1(p.availHrs)}</td>
+        <td class="num">${av1(p.worked)}</td>
+        <td>${pct == null ? `<span class="hint">—</span>` : `<div class="av-use"><i style="width:${Math.min(100,pct)}%; background:${pct < 50 ? "#B23A2E" : pct < 75 ? "#F2A900" : "#2F7A52"}"></i></div><span class="hint">${pct}%</span>`}</td>
+        <td class="num">${p.changeDays || (p.firstSet ? "set" : "0")}</td>
+        <td class="num">${p.excPast.length}${p.excAhead.length ? `<div class="hint">+${p.excAhead.length} ahead</div>` : ""}</td>
+        <td class="num">${p.paid.length + p.sick.length ? `${p.paid.length} / ${p.sick.length}` : "—"}</td>
+        <td class="hint">${p.rule ? [p.rule.target_hours_week && `${av1(p.rule.target_hours_week)}h target`, p.rule.max_hours_week && `max ${av1(p.rule.max_hours_week)}h`, p.rule.max_days_week && `${p.rule.max_days_week} days`, p.rule.no_opens && "no opens", p.rule.no_closes && "no closes", p.rule.prefer && `prefers ${p.rule.prefer}s`].filter(Boolean).join(" · ") || "Set" : "—"}</td>
+      </tr>`; }).join("")}</tbody></table></div>
+    <div class="empty-note" style="padding-bottom:0;">Worked hours = average per week at this store over the last 60 days, from Square. Use = worked ÷ open hours. Days off asked = one-off unavailable days, not PTO or sick. Tap a person to edit their availability and rules.</div>`
+    : `<div class="empty-note">Nobody here.</div>`;
+}
+
+function avDayRowHtml(dow, r, store){
+  const mode = !r ? "unset" : !r.available ? "no" : (r.start_time || r.end_time) ? "window" : "all";
+  const h = avStoreDay(store, dow);
+  return `<div class="av-ed-row" data-dow="${dow}">
+    <b>${AV_DAY_NAME[dow]}</b>
+    <select class="av-mode"><option value="unset" ${mode==="unset"?"selected":""}>Not set</option><option value="all" ${mode==="all"?"selected":""}>Available all day</option><option value="window" ${mode==="window"?"selected":""}>Available from…</option><option value="no" ${mode==="no"?"selected":""}>Not available</option></select>
+    <input type="time" class="av-st" value="${r?.start_time ? String(r.start_time).slice(0,5) : (h?.staff_open || "")}" ${mode==="window"?"":"hidden"}>
+    <input type="time" class="av-en" value="${r?.end_time ? String(r.end_time).slice(0,5) : (h?.staff_close || "")}" ${mode==="window"?"":"hidden"}>
+  </div>`;
+}
+function avOpen(tm){
+  const locId = currentDetailLocId, d = avData[locId]; if(!d) return;
+  const m = d.team.find(x => x.square_team_member_id === tm); if(!m) return;
+  const p = avPerson(locId, m), r = p.rule || {};
+  const histHtml = p.hist.length ? `<table class="lm-mini-table"><tr><th>When</th><th>Day</th><th>Before</th><th>After</th></tr>${p.hist.map(h => {
+      const fmt = (av, s, e) => av == null && s == null ? "not set" : av === false ? "not available" : (s || e) ? `${avHm(s)}–${avHm(e)}` : "all day";
+      return `<tr><td>${lmFmtDate(String(h.changed_at).slice(0,10))}</td><td>${AV_DAY_NAME[h.day_of_week] || ""}</td><td>${fmt(h.old_available, h.old_start, h.old_end)}</td><td><b>${fmt(h.new_available, h.new_start, h.new_end)}</b></td></tr>`; }).join("")}</table>`
+    : `<div class="empty-note">No changes in the last 90 days.</div>`;
+  const excRows = p.excPast.concat(p.excAhead).sort((a,b) => b.exception_date.localeCompare(a.exception_date));
+  lmModal(`<h3>${lmEsc(m.name)}: availability & rules</h3>
+    <div class="sub">Open ${p.availHrs == null ? "—" : av1(p.availHrs)} hrs/week · worked ${av1(p.worked)} hrs/week here (last 60 days)${p.util != null ? ` · ${Math.round(p.util*100)}% of their availability` : ""}</div>
+    <div class="lm-modal-section">Weekly availability</div>
+    <div class="av-ed">${AV_DAYS.map(dow => avDayRowHtml(dow, p.byDow[dow], d.store)).join("")}</div>
+    <div class="lm-modal-section">Their rules</div>
+    <form class="lm-form" id="av-rule-form" onsubmit="return false">
+      <div><label>Target hours / week</label><input type="number" id="av-target" min="0" max="60" step="0.5" value="${r.target_hours_week ?? ""}" placeholder="e.g. 24"></div>
+      <div><label>Minimum hours / week</label><input type="number" id="av-min" min="0" max="60" step="0.5" value="${r.min_hours_week ?? ""}"></div>
+      <div><label>Maximum hours / week</label><input type="number" id="av-max" min="0" max="60" step="0.5" value="${r.max_hours_week ?? ""}"><div class="help">Store cap: ${d.store?.max_weekly_hours ?? "none"}</div></div>
+      <div><label>Max days / week</label><input type="number" id="av-days" min="1" max="7" value="${r.max_days_week ?? ""}"></div>
+      <div><label>Prefers</label><select id="av-prefer"><option value="">No preference</option>${["open","mid","close"].map(k => `<option value="${k}" ${r.prefer===k?"selected":""}>${k === "open" ? "Opens" : k === "mid" ? "Mids" : "Closes"}</option>`).join("")}</select></div>
+      <div><label>Can't work</label><label class="av-chk"><input type="checkbox" id="av-noopen" ${r.no_opens?"checked":""}> Opens</label> <label class="av-chk"><input type="checkbox" id="av-noclose" ${r.no_closes?"checked":""}> Closes</label></div>
+      <div class="wide"><label>Notes</label><input type="text" id="av-notes" value="${lmEsc(r.notes || "")}" placeholder="School schedule, second job, ride…"></div>
+    </form>
+    <div class="lm-form-actions"><span class="err"></span><button type="button" class="btn small" data-modal-cancel>Close</button><button type="button" class="btn primary small" id="av-save">Save availability & rules</button></div>
+    <div class="lm-modal-section">One-off days off <span class="hint" style="font-weight:400;">(not PTO or sick)</span></div>
+    <form class="lm-form" id="av-exc-form" onsubmit="return false">
+      <div><label>Date</label><input type="date" id="av-exc-date"></div>
+      <div><label>Reason</label><input type="text" id="av-exc-reason" placeholder="Wedding, exam…"></div>
+      <div class="wide" style="text-align:right;"><button type="button" class="btn small" id="av-exc-add">+ Add day off</button></div>
+    </form>
+    ${excRows.length ? `<table class="lm-mini-table"><tr><th>Date</th><th>Reason</th><th></th></tr>${excRows.map(e => `<tr><td>${lmFmtDate(e.exception_date)}, ${e.exception_date.slice(0,4)}${e.exception_date > lmToday() ? " <span class='chip neutral'>ahead</span>" : ""}</td><td>${lmEsc(e.reason || "")}</td><td><button type="button" class="ev-link" data-av-exc-del="${e.id}">Remove</button></td></tr>`).join("")}</table>` : `<div class="empty-note">None in the last 90 days or the next 60.</div>`}
+    <div class="lm-modal-section">PTO & sick, last 90 days</div>
+    ${p.paid.length + p.sick.length ? `<table class="lm-mini-table"><tr><th>Date</th><th>Type</th><th>Hours</th></tr>${p.paid.concat(p.sick).sort((a,b) => b.shift_date.localeCompare(a.shift_date)).map(x => `<tr><td>${lmFmtDate(x.shift_date)}</td><td>${x.leave_type === "sick" ? "Sick" : "PTO"}</td><td>${x.hours ?? ""}</td></tr>`).join("")}</table>` : `<div class="empty-note">None.</div>`}
+    <div class="lm-modal-section">Availability changes, last 90 days</div>
+    ${histHtml}`);
+  $("#lm-modal-card").classList.add("wide");
+  $$(".av-mode", $("#lm-modal-card")).forEach(s => s.addEventListener("change", () => {
+    const row = s.closest(".av-ed-row"); row.querySelector(".av-st").hidden = row.querySelector(".av-en").hidden = s.value !== "window";
+  }));
+  $("#av-save").addEventListener("click", async e => {
+    const btn = e.currentTarget; btn.disabled = true;
+    const ups = [];
+    $$(".av-ed-row", $("#lm-modal-card")).forEach(row => {
+      const dow = Number(row.dataset.dow), mode = row.querySelector(".av-mode").value;
+      if(mode === "unset") return;
+      const st = row.querySelector(".av-st").value || null, en = row.querySelector(".av-en").value || null;
+      if(mode === "window" && (!st || !en)) return;
+      ups.push({ square_team_member_id: tm, employee_name: m.name, location_id: locId, day_of_week: dow, available: mode !== "no",
+        start_time: mode === "window" ? st : null, end_time: mode === "window" ? en : null, updated_at: new Date().toISOString(), updated_by_staff_id: myStaff.id });
+    });
+    const num = id => { const v = $(id).value; return v === "" ? null : Number(v); };
+    const rule = { square_team_member_id: tm, location_id: locId, target_hours_week: num("#av-target"), min_hours_week: num("#av-min"), max_hours_week: num("#av-max"),
+      max_days_week: num("#av-days"), prefer: $("#av-prefer").value || null, no_opens: $("#av-noopen").checked, no_closes: $("#av-noclose").checked,
+      notes: $("#av-notes").value.trim() || null, updated_at: new Date().toISOString(), updated_by: myStaff.id };
+    const [a, b] = await Promise.all([
+      ups.length ? sb.from("employee_availability").upsert(ups, { onConflict: "square_team_member_id,day_of_week" }) : Promise.resolve({}),
+      sb.from("staff_schedule_rules").upsert(rule, { onConflict: "square_team_member_id" }),
+    ]);
+    btn.disabled = false;
+    const err = a.error || b.error;
+    if(err) return tdErr(`Couldn't save: ${err.message}`);
+    lmModalClose(); avLoad(locId, true);
+  });
+  $("#av-exc-add").addEventListener("click", async () => {
+    const date = $("#av-exc-date").value; if(!date) return tdErr("Pick a date.");
+    const { error } = await sb.from("employee_availability_exceptions").insert({ square_team_member_id: tm, employee_name: m.name, location_id: locId, exception_date: date, reason: $("#av-exc-reason").value.trim() || null, created_by_staff_id: myStaff.id });
+    if(error) return tdErr(`Couldn't save: ${error.message}`);
+    await avLoad(locId, true); avOpen(tm);
+  });
+  $$("[data-av-exc-del]", $("#lm-modal-card")).forEach(b => b.addEventListener("click", async () => {
+    const { error } = await sb.from("employee_availability_exceptions").delete().eq("id", b.dataset.avExcDel);
+    if(error) return tdErr(`Couldn't remove: ${error.message}`);
+    await avLoad(locId, true); avOpen(tm);
+  }));
+}
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-av-open]"); if(o && o.closest("#sec-lmgm")) return avOpen(o.dataset.avOpen);
+  const f = e.target.closest("[data-av-filter]"); if(f){ avFilter = f.dataset.avFilter; avRender(currentDetailLocId); }
+  if(e.target.closest("#av-refresh")) avLoad(currentDetailLocId, true);
+});
+
+/* =====================================================================
+   SUGGEST A SCHEDULE — fills the week from the store's rules (headcount,
+   hours, templates, caps) and each person's availability, rules, days off
+   and PTO. Nothing is saved until the LM picks what to keep.
+   ===================================================================== */
+async function sgSuggest(){
+  const loc = currentTcLocation; if(!loc) return;
+  const r = scheduleRules || {};
+  const days = [...Array(7)].map((_,i) => addDaysClient(scheduleWeekStart, i));
+  const missing = days.filter(d => !scDayHours(d) || r.headcount_target?.[scDow(d)] == null);
+  if(missing.length === 7){
+    lmModal(`<h3>Suggest a schedule</h3><div class="sub">To build a suggestion I need this store's hours and how many people you want each day.</div>
+      <div class="lm-form-actions"><button type="button" class="btn small" data-modal-cancel>Not now</button><button type="button" class="btn primary small" id="sg-rules">Set up store hours & headcount</button></div>`);
+    $("#sg-rules").addEventListener("click", () => { lmModalClose(); scOpenRules(); });
+    return;
+  }
+  if(!avData[loc.id]) await avFetch(loc.id);
+  await ensureJobsLoaded();
+  const team = (tdTeam[loc.id]?.members || []).filter(m => m.square_team_member_id);
+  const ids = team.map(m => m.square_team_member_id);
+  const prules = avData[loc.id]?.rules || [];
+  const pendingQ = ids.length ? await sb.from("employee_availability_requests").select("*").eq("status","new").eq("request_type","one_off").gte("exception_date", days[0]).lte("exception_date", days[6]) : { data: [] };
+  const pending = (pendingQ.data || []).filter(q => q.new_available === false);
+  const len = Number(r.default_shift_hours) || 8;
+  // templates: the store's, or opener / mid / closer built from store hours
+  const tplFor = d => {
+    const h = scDayHours(d), so = scMin(h.staff_open || h.open), sc = scMin(h.staff_close || h.close), o = scMin(h.open), c = scMin(h.close);
+    let tpls = (Array.isArray(r.shift_templates) ? r.shift_templates : []).map(t => ({ name:t.name, start:t.start, end:t.end, job_id:t.job_id }));
+    if(!tpls.length){
+      const L = Math.min(len*60, sc - so);
+      tpls = [{ name:"Opener", start:scFmt(so), end:scFmt(so + L) }, { name:"Closer", start:scFmt(sc - L), end:scFmt(sc) }];
+      if(sc - so > L + 60){ const mid = Math.round(((so + sc) / 2 - L/2) / 30) * 30; tpls.splice(1, 0, { name:"Mid", start:scFmt(mid), end:scFmt(mid + L) }); }
+    }
+    return tpls.map(t => ({ ...t, isOpen: o != null && scMin(t.start) <= o, isClose: c != null && scMin(t.end) >= c, hrs: ((scMin(t.end) - scMin(t.start) + 1440) % 1440) / 60 }));
+  };
+  const S = {};                                       // tm -> running state
+  team.forEach(m => { S[m.square_team_member_id] = { hrs: 0, days: new Set(), closes: 0, shifts: [] }; });
+  scheduleShifts.forEach(s => { const st = S[s.team_member_id]; if(st){ st.hrs += shiftHours(s); st.days.add(s.date); st.shifts.push({ date:s.date, start:s.start_time, end:s.end_time }); } });
+  const isCloseShift = s => { const c = scMin(scDayHours(s.date)?.close); return c != null && scMin(s.end) >= c; };
+  team.forEach(m => { const st = S[m.square_team_member_id]; st.closes = st.shifts.filter(isCloseShift).length; });
+  const rule = tm => prules.find(x => x.square_team_member_id === tm) || {};
+  const availRow = (tm, d) => scAvail.find(a => a.square_team_member_id === tm && a.day_of_week === new Date(d + "T12:00:00Z").getUTCDay());
+  const why = [];
+  function check(m, d, t){
+    const tm = m.square_team_member_id, st = S[tm], pr = rule(tm), a = availRow(tm, d);
+    if(st.days.has(d)) return null;
+    if(scExceptions.some(x => x.square_team_member_id === tm && x.exception_date === d)) return null;
+    if(scPto.some(x => (x.square_team_member_id === tm || x.employee_name === m.name) && x.shift_date === d)) return null;
+    if(pending.some(x => x.square_team_member_id === tm && x.exception_date === d)) return null;
+    if(a && !a.available) return null;
+    if(a && (a.start_time || a.end_time)){ if(scMin(t.start) < scMin(a.start_time) || scMin(t.end) > scMin(a.end_time)) return null; }
+    if(pr.no_opens && t.isOpen) return null;
+    if(pr.no_closes && t.isClose) return null;
+    const cap = Math.min(pr.max_hours_week ?? Infinity, r.max_weekly_hours ?? Infinity);
+    if(st.hrs + t.hrs > cap + 0.01) return null;
+    if(r.max_daily_hours && t.hrs > Number(r.max_daily_hours)) return null;
+    if(pr.max_days_week && st.days.size >= pr.max_days_week) return null;
+    if(t.isClose && r.max_closing_shifts_per_week && st.closes >= Number(r.max_closing_shifts_per_week)) return null;
+    if(r.max_consecutive_days){ let run = 1; for(let k = 1; k <= 7; k++){ if(st.days.has(addDaysClient(d, -k))) run++; else break; } for(let k = 1; k <= 7; k++){ if(st.days.has(addDaysClient(d, k))) run++; else break; } if(run > Number(r.max_consecutive_days)) return null; }
+    if(r.min_rest_hours){
+      const rest = Number(r.min_rest_hours) * 60;
+      const prev = st.shifts.find(s => s.date === addDaysClient(d, -1)), next = st.shifts.find(s => s.date === addDaysClient(d, 1));
+      if(prev && 1440 - scMin(prev.end) + scMin(t.start) < rest) return null;
+      if(next && 1440 - scMin(t.end) + scMin(next.start) < rest) return null;
+    }
+    const target = pr.target_hours_week ?? pr.min_hours_week ?? 24;
+    let score = (target - st.hrs) * 2 - st.days.size;
+    const notes = [];
+    if(target - st.hrs > 0) notes.push(`${av1(target - st.hrs)} hrs short of ${av1(target)}`); else notes.push(`at ${av1(st.hrs)} of ${av1(target)} hrs`);
+    if(pr.prefer && ((pr.prefer === "open" && t.isOpen) || (pr.prefer === "close" && t.isClose) || (pr.prefer === "mid" && !t.isOpen && !t.isClose))){ score += 6; notes.push(`prefers ${pr.prefer}s`); }
+    if(a){ score += 4; notes.push(a.start_time ? `available ${avHm(a.start_time)}–${avHm(a.end_time)}` : "available all day"); } else notes.push("no availability on file");
+    return { score, note: notes.join(" · ") };
+  }
+  const props = [];
+  days.forEach(d => {
+    const dow = scDow(d), target = r.headcount_target?.[dow], h = scDayHours(d);
+    if(!h || target == null){ why.push(`${fmtDateShort(d)}: skipped (no store hours or headcount set for ${dow})`); return; }
+    const tpls = tplFor(d);
+    const have = scheduleShifts.filter(s => s.date === d);
+    let need = Math.max(0, Number(target) - new Set(have.map(s => s.team_member_id || s.id)).size);
+    const isO = s => { const o = scMin(h.open); return o != null && scMin(s.start_time) <= o; }, isC = s => { const c = scMin(h.close); return c != null && scMin(s.end_time) >= c; };
+    let needO = Math.max(0, (r.min_openers ?? 1) - have.filter(isO).length), needC = Math.max(0, (r.min_closers ?? 1) - have.filter(isC).length);
+    const opens = tpls.filter(t => t.isOpen), closes = tpls.filter(t => t.isClose), mids = tpls.filter(t => !t.isOpen && !t.isClose);
+    const slots = [];
+    while(need > 0 && needO > 0 && opens.length){ slots.push(opens[0]); need--; needO--; }
+    while(need > 0 && needC > 0 && closes.length){ slots.push(closes[0]); need--; needC--; }
+    const cycle = mids.length ? mids.concat(opens, closes) : opens.concat(closes);
+    let i = 0; while(need > 0 && cycle.length){ slots.push(cycle[i % cycle.length]); i++; need--; }
+    slots.forEach(t => {
+      const ranked = team.map(m => ({ m, c: check(m, d, t) })).filter(x => x.c).sort((a,b) => b.c.score - a.c.score);
+      const pick = ranked[0];
+      if(pick){
+        const st = S[pick.m.square_team_member_id];
+        st.hrs += t.hrs; st.days.add(d); st.shifts.push({ date:d, start:t.start, end:t.end }); if(t.isClose) st.closes++;
+      }
+      props.push({ d, t, tm: pick?.m.square_team_member_id || null, note: pick ? pick.c.note : "Nobody available and within their rules", alts: ranked.slice(0, 6).map(x => x.m.square_team_member_id) });
+    });
+  });
+  const name = tm => team.find(m => m.square_team_member_id === tm)?.name || "Open shift";
+  const jobs = scheduleJobs || [];
+  const tplJob = props.find(p => p.t.job_id)?.t.job_id;
+  lmModal(`<h3>Suggested schedule · week of ${fmtDateShort(days[0])}</h3>
+    <div class="sub">Built from this store's headcount, hours and caps, plus each person's availability, rules, days off and PTO${pending.length ? ` (and ${pending.length} pending day-off request${pending.length===1?"":"s"}, treated as off)` : ""}. Uncheck anything you don't want, or swap the person. Nothing is saved until you add them.</div>
+    ${why.length ? `<div class="empty-note" style="padding:0 0 8px;">${why.map(lmEsc).join("<br>")}</div>` : ""}
+    ${!tplJob && jobs.length > 1 ? `<div class="lm-form" style="margin-bottom:8px;"><div><label>Job for these shifts</label><select id="sg-job">${jobs.map(j => `<option value="${j.id}">${lmEsc(j.title)}</option>`).join("")}</select></div></div>` : ""}
+    ${props.length ? `<div class="lm-table-wrap"><table class="lm-table sg-table"><thead><tr><th></th><th>Day</th><th>Shift</th><th>Who</th><th>Why</th></tr></thead><tbody>
+      ${props.map((p, i) => `<tr class="${p.tm ? "" : "open"}"><td><input type="checkbox" class="sg-on" data-i="${i}" checked></td><td><b>${new Date(p.d + "T12:00:00Z").toLocaleDateString("en-US", { weekday:"short", timeZone:"UTC" })}</b><div class="hint">${fmtDateShort(p.d)}</div></td><td><b>${lmEsc(p.t.name)}</b><div class="hint">${avHm(p.t.start)}–${avHm(p.t.end)} · ${av1(p.t.hrs)}h</div></td>
+        <td><select class="sg-who" data-i="${i}"><option value="">Open shift</option>${team.slice().sort((a,b) => a.name.localeCompare(b.name)).map(m => `<option value="${lmEsc(m.square_team_member_id)}" ${m.square_team_member_id === p.tm ? "selected" : ""}>${lmEsc(m.name)}${p.alts.includes(m.square_team_member_id) ? "" : " (outside their availability or rules)"}</option>`).join("")}</select></td>
+        <td class="hint">${lmEsc(p.note)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty-note">This week already meets every day's headcount. Nothing to add.</div>`}
+    <div class="lm-modal-section">Hours after these shifts</div>
+    <div class="sg-hours">${team.slice().sort((a,b) => S[b.square_team_member_id].hrs - S[a.square_team_member_id].hrs).map(m => { const st = S[m.square_team_member_id], tgt = rule(m.square_team_member_id).target_hours_week ?? rule(m.square_team_member_id).min_hours_week;
+      return `<div class="sg-h"><span>${lmEsc(m.name)}</span><div class="av-use"><i style="width:${Math.min(100, st.hrs / Math.max(tgt || 40, 1) * 100)}%; background:${tgt && st.hrs < tgt * 0.75 ? "#F2A900" : "#284A70"}"></i></div><span class="hint">${av1(st.hrs)}h${tgt ? ` / ${av1(tgt)}` : ""}</span></div>`; }).join("")}</div>
+    <div class="lm-form-actions"><span class="err"></span><button type="button" class="btn small" data-modal-cancel>Cancel</button>${props.length ? `<button type="button" class="btn primary small" id="sg-add">Add checked shifts as drafts</button>` : ""}</div>`);
+  $("#lm-modal-card").classList.add("wide");
+  const add = $("#sg-add"); if(!add) return;
+  add.addEventListener("click", async () => {
+    const chosen = $$(".sg-on", $("#lm-modal-card")).filter(c => c.checked).map(c => { const i = Number(c.dataset.i); return { ...props[i], tm: $(`.sg-who[data-i="${i}"]`).value || null }; });
+    if(!chosen.length) return tdErr("Nothing is checked.");
+    add.disabled = true;
+    const jobSel = $("#sg-job")?.value;
+    let ok = 0;
+    for(const p of chosen){
+      const job = p.t.job_id || tplJob || jobSel || (jobs.length === 1 ? jobs[0].id : null);
+      if(!job){ add.disabled = false; return tdErr("Pick a job for these shifts."); }
+      add.textContent = `Adding ${ok + 1} of ${chosen.length}…`;
+      const saved = await scSave({ job_id: job, date: p.d, start_time: p.t.start, end_time: p.t.end, team_member_id: p.tm || undefined }, `Adding ${p.t.name} ${fmtDateShort(p.d)}`);
+      if(saved) ok++;
+    }
+    lmModalClose();
+    $("#lmgm-sched-status").textContent = `${ok} of ${chosen.length} suggested shifts added as drafts. Review them, then Publish week.`;
+    await loadScheduleWeek();
+  });
+}
+
+/* =====================================================================
+   STORE HEALTH — GM / exec roll-up across every store you manage:
+   attendance points, timecard requests, PTO & availability requests,
+   and scheduling issues (availability on file, frequent changes, people
+   working well under their availability, store rules missing).
+   ===================================================================== */
+let shBusy = false, shRows = null;
+async function shLoad(force){
+  if(shBusy) return;
+  if(shRows && !force) return shRender();
+  shBusy = true;
+  const locs = (myLocations || []).filter(l => l.type !== "mobile");
+  $("#sh-status").hidden = false;
+  $("#sh-status").textContent = locs.length ? `Loading ${locs.length} store${locs.length === 1 ? "" : "s"}…` : "No stores assigned to you.";
+  const t = lmToday(), ids = locs.map(l => l.id);
+  try{
+    const none = Promise.resolve({ data: [] });
+    const [pts, tc, avr, ptoReq, pips] = await Promise.all([
+      ids.length ? sb.from("attendance_points").select("*").in("location_id", ids).gte("occurred_on", lmAddDays(t, -400)) : none,
+      sb.from("timecard_correction_pending_counts").select("location_id,pending_count"),
+      ids.length ? sb.from("employee_availability_requests").select("location_id,status,created_at").in("location_id", ids).eq("status","new") : none,
+      ids.length ? sb.from("employee_pto_requests").select("location_id,status").in("location_id", ids).eq("status","new") : none,
+      ids.length ? sb.from("pips").select("staff_id,location_id,status").in("location_id", ids).in("status", ["active","extended"]) : none,
+    ]);
+    let done = 0;
+    const per = await Promise.all(locs.map(async l => {
+      let d = null, err = null;
+      try{ d = await avFetch(l.id); }catch(e){ err = e.message; }
+      done++; $("#sh-status").textContent = `Loading stores… ${done} of ${locs.length}`;
+      return { l, d, err };
+    }));
+    shRows = per.map(({ l, d, err }) => {
+      const members = tdTeam[l.id]?.members || [];
+      const nameOf = sid => members.find(m => m.staff_id === sid)?.name || "Team member";
+      const lp = (pts.data || []).filter(p => p.location_id === l.id);
+      const byStaff = {};
+      lp.forEach(p => (byStaff[p.staff_id] = byStaff[p.staff_id] || []).push(p));
+      const standings = Object.entries(byStaff).map(([sid, evs]) => ({ sid, name: nameOf(sid), pts: tdActivePoints(evs, t) })).filter(x => x.pts > 0);
+      const recentEv = lp.filter(p => !p.voided && p.occurred_on >= lmAddDays(t, -30));
+      const people = d ? d.team.map(m => avPerson(l.id, m)) : [];
+      const sick30 = (d?.pto || []).filter(p => p.leave_type === "sick" && p.shift_date >= lmAddDays(t, -30)).length;
+      const pto30 = (d?.pto || []).filter(p => p.leave_type !== "sick" && p.shift_date >= lmAddDays(t, -30)).length;
+      const rulesSet = !!(d?.store?.store_hours && d?.store?.headcount_target);
+      const flags = [];
+      standings.forEach(s => { if(s.pts >= 3){ const [lab, cls] = tdStanding(s.pts); flags.push({ who: s.name, sid: s.sid, kind: "Attendance", text: `${s.pts} points · ${lab}`, cls, rank: s.pts }); } });
+      people.forEach(p => p.flags.forEach(f => { if(["util","changes","off","under"].includes(f[0])) flags.push({ who: p.m.name, sid: p.m.staff_id, kind: "Scheduling", text: f[1], cls: f[2], rank: f[0] === "util" ? 2.5 : 2 }); }));
+      const sickBy = {};
+      (d?.pto || []).filter(p => p.leave_type === "sick" && p.shift_date >= lmAddDays(t, -30)).forEach(p => { const k = p.employee_name || p.square_team_member_id; sickBy[k] = (sickBy[k] || 0) + 1; });
+      Object.entries(sickBy).forEach(([k, n]) => { if(n >= 3) flags.push({ who: k, kind: "Sick days", text: `${n} sick days in 30 days`, cls: "warn", rank: 2 }); });
+      (pips.data || []).filter(p => p.location_id === l.id).forEach(p => flags.push({ who: nameOf(p.staff_id), sid: p.staff_id, kind: "PIP", text: p.status === "extended" ? "PIP extended" : "On an active PIP", cls: p.status === "extended" ? "serious" : "warn", rank: 3 }));
+      return {
+        l, err, people, flags: flags.sort((a,b) => b.rank - a.rank),
+        pts3: standings.filter(s => s.pts >= 3).length, pts5: standings.filter(s => s.pts >= 5).length, events30: recentEv.length,
+        tc: (tc.data || []).find(x => x.location_id === l.id)?.pending_count || 0,
+        avReq: (avr.data || []).filter(x => x.location_id === l.id).length,
+        ptoReq: (ptoReq.data || []).filter(x => x.location_id === l.id).length,
+        sick30, pto30, rulesSet,
+        noAvail: people.filter(p => !p.rows.length).length,
+        changers: people.filter(p => p.changeDays >= 3).length,
+        under: people.filter(p => p.flags.some(f => f[0] === "util")).length,
+        pips: (pips.data || []).filter(p => p.location_id === l.id).length,
+      };
+    });
+    shRender();
+  }catch(e){
+    $("#sh-status").innerHTML = `<span class="lm-error">Couldn't load Store Health (${lmEsc(e.message)}).</span>`;
+  }finally{ shBusy = false; }
+}
+function shScore(r){
+  // 0–100, higher is healthier. Each issue costs points, capped per area.
+  const n = Math.max(r.people.length, 1);
+  let s = 100;
+  s -= Math.min(30, r.pts3 * 8 + r.pts5 * 6);
+  s -= Math.min(15, r.tc * 3);
+  s -= Math.min(15, (r.avReq + r.ptoReq) * 3);
+  s -= Math.min(15, r.noAvail / n * 30);
+  s -= Math.min(15, (r.changers + r.under) * 4);
+  if(!r.rulesSet) s -= 10;
+  return Math.max(0, Math.round(s));
+}
+function shRender(){
+  if(!shRows) return;
+  $("#sh-status").hidden = true;
+  const tot = k => shRows.reduce((a, r) => a + (r[k] || 0), 0);
+  $("#sh-kpis").innerHTML = [
+    ["At 3+ attendance points", tot("pts3"), `${tot("pts5")} at 5+ · ${tot("events30")} events logged in 30 days`],
+    ["Timecard requests waiting", tot("tc"), "Across every store"],
+    ["PTO & availability requests", tot("ptoReq") + tot("avReq"), `${tot("ptoReq")} PTO · ${tot("avReq")} availability`],
+    ["Scheduling flags", tot("noAvail") + tot("changers") + tot("under"), `${tot("noAvail")} no availability · ${tot("changers")} frequent changes · ${tot("under")} under-used`],
+  ].map(([l,v,s]) => `<div class="card kpi"><div class="label">${l}</div><div class="value tabular">${v}</div><div class="delta">${lmEsc(s)}</div></div>`).join("");
+  const cell = (n, warnAt, badAt) => `<td class="num"><span class="sh-n ${n >= badAt ? "bad" : n >= warnAt ? "warn" : n ? "" : "zero"}">${n}</span></td>`;
+  $("#sh-table").innerHTML = `<div class="lm-table-wrap"><table class="lm-table sh-table"><thead><tr>
+      <th>Store</th><th>Health</th><th class="num">3+ pts</th><th class="num">Timecards</th><th class="num">PTO reqs</th><th class="num">Avail. reqs</th><th class="num">Sick / PTO<br>30 days</th><th class="num">No avail.<br>on file</th><th class="num">Frequent<br>changes</th><th class="num">Under-used</th><th>Store rules</th><th></th></tr></thead>
+    <tbody>${shRows.slice().sort((a,b) => shScore(a) - shScore(b)).map(r => { const sc = shScore(r);
+      return `<tr><td><b>${lmEsc(r.l.name)}</b>${r.err ? `<div class="hint lm-error">Team didn't load: ${lmEsc(r.err)}</div>` : `<div class="hint">${r.people.length} people</div>`}</td>
+        <td><div class="sh-score"><div class="av-use"><i style="width:${sc}%; background:${sc < 60 ? "#B23A2E" : sc < 80 ? "#F2A900" : "#2F7A52"}"></i></div><b>${sc}</b></div></td>
+        ${cell(r.pts3, 1, 3)}${cell(r.tc, 1, 5)}${cell(r.ptoReq, 1, 4)}${cell(r.avReq, 1, 4)}
+        <td class="num">${r.sick30} / ${r.pto30}</td>
+        ${cell(r.noAvail, 1, Math.max(3, Math.ceil(r.people.length / 2)))}${cell(r.changers, 1, 3)}${cell(r.under, 1, 3)}
+        <td>${r.rulesSet ? `<span class="chip good">Set</span>` : `<span class="chip warn">Missing</span>`}</td>
+        <td><button type="button" class="btn small" data-sh-open="${r.l.id}">Open store →</button></td></tr>`; }).join("")}</tbody></table></div>
+    <div class="empty-note" style="padding-bottom:0;">Health starts at 100 and drops for attendance standings, waiting requests, missing availability, frequent availability changes, people working under half their availability, and missing store scheduling rules.</div>`;
+  const flags = shRows.flatMap(r => r.flags.map(f => ({ ...f, store: r.l.name, locId: r.l.id }))).sort((a,b) => b.rank - a.rank);
+  const kinds = ["All", ...new Set(flags.map(f => f.kind))];
+  const cur = $("#sh-people").dataset.kind || "All";
+  const list = cur === "All" ? flags : flags.filter(f => f.kind === cur);
+  $("#sh-people").innerHTML = `<div class="av-filters">${kinds.map(k => `<button type="button" data-sh-kind="${lmEsc(k)}" aria-pressed="${k === cur}">${lmEsc(k)}<span class="n">${k === "All" ? flags.length : flags.filter(f => f.kind === k).length}</span></button>`).join("")}</div>
+    ${list.length ? `<div class="lm-table-wrap"><table class="lm-table"><thead><tr><th>Person</th><th>Store</th><th>Area</th><th>Issue</th><th></th></tr></thead><tbody>
+      ${list.map(f => `<tr><td><b>${lmEsc(f.who)}</b></td><td class="muted">${lmEsc(f.store)}</td><td>${lmEsc(f.kind)}</td><td><span class="chip ${f.cls}">${lmEsc(f.text)}</span></td>
+        <td><button type="button" class="ev-link" data-sh-go="${f.locId}" data-sh-view="${f.kind === "Scheduling" || f.kind === "Sick days" ? "scheduling" : "teamdev"}" data-sh-anchor="${f.kind === "Attendance" ? "lm-anchor-points" : f.kind === "PIP" ? "lm-anchor-roster" : "av-anchor"}">Open →</button></td></tr>`).join("")}
+      </tbody></table></div>` : `<div class="empty-note">Nothing flagged. Every store is in good shape on these measures.</div>`}`;
+}
+function shGo(locId, view, anchor){
+  window.dispatchEvent(new CustomEvent("lm:openStore", { detail: { locId } }));
+  setTimeout(() => window.__commandDeckGate.openLmView(view, anchor), 60);
+}
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-sh-open]"); if(o) return shGo(o.dataset.shOpen, "dashboard");
+  const g = e.target.closest("[data-sh-go]"); if(g) return shGo(g.dataset.shGo, g.dataset.shView, g.dataset.shAnchor);
+  const k = e.target.closest("[data-sh-kind]"); if(k){ $("#sh-people").dataset.kind = k.dataset.shKind; shRender(); }
+  if(e.target.closest("#sh-refresh")) shLoad(true);
+});
+window.__shLoad = shLoad;
+
+/* --- Academy title: Barista 1 = level 1+ in all three competencies (first 90 days) --- */
+function acLevels(d, sid){ const g = c => Number((d.statuses||[]).find(x => x.staff_id === sid && x.competency === c)?.current_level ?? 0); return [g("leadership"), g("craft"), g("customer_care")]; }
+function acTitle(d, m){
+  const n = Math.min(...acLevels(d, m.staff_id));
+  if(m.role && m.role !== "team_member") return n ? `Level ${n}` : "";
+  return n ? `Barista ${n}` : "";
+}
+function acPathHtml(d, m, probDays){
+  if(m.role && m.role !== "team_member") return "";
+  const lv = acLevels(d, m.staff_id);
+  if(Math.min(...lv) >= 1) return "";
+  if(!m.hire_date) return `<div class="ac-path">On the path to Barista 1 · no hire date on file</div>`;
+  const day = Math.max(0, tdDays(m.hire_date, lmToday())), of = probDays ?? 90;
+  return `<div class="ac-path"><span class="av-use"><i style="width:${Math.min(100, day / of * 100)}%; background:#F2A900"></i></span>Day ${Math.min(day, of)} of ${of} toward Barista 1${day > of ? ` <b style="color:#B23A2E;">· ${day - of} days past 90 and not yet Barista 1</b>` : ""} · earned automatically when they're verified, signed off and complete their first 90 days</div>`;
+}
+
 /* ---------------- Profile ---------------- */
 function tdOpenProfile(staffId){
   const locId = currentDetailLocId, m = (tdTeam[locId]?.members || []).find(x => x.staff_id === staffId);
@@ -6688,6 +7327,7 @@ function tdOpenProfile(staffId){
       <button type="button" class="btn small" data-td-open="writeup" data-for="${staffId}">Write-up</button>
       <button type="button" class="btn small" data-td-open="points" data-for="${staffId}">Log attendance</button>
       <button type="button" class="btn small" data-td-open="pip" data-for="${staffId}">New PIP</button>
+      <a class="btn small" href="academy.html?as=${encodeURIComponent(staffId)}" target="_blank" rel="noopener" title="Open the Academy exactly as ${lmEsc(m.name)} sees it (read-only)">Their Academy view ↗</a>
     </div>
     <div id="ta-prof"><div class="ta-prof"><div class="row">Loading team assessment…</div></div></div>
     <dl class="lm-dl">
@@ -6695,7 +7335,7 @@ function tdOpenProfile(staffId){
       <dt>Probation</dt><dd>${probEnd ? (probEnd >= t ? `Ends ${lmFmtDate(probEnd)} (in ${tdDays(t, probEnd)} days)` : `Completed ${lmFmtDate(probEnd)}`) : "—"}</dd>
       <dt>Hours here, 60 days</dt><dd>${m.hours_60d ? `${lmNum(m.hours_60d)} hrs over ${m.shifts_60d} shifts · last ${lmFmtDate(m.last_shift)}` : "No shifts here in 60 days"}</dd>
       <dt>Hours on record</dt><dd>${m.lifetime_hours ? `${lmNum(m.lifetime_hours)} hrs · PTO tier ${ptoTier} (${ptoHrs} hrs/yr)` : "None logged"} <span class="muted">· official balances live in Gusto</span></dd>
-      <dt>Academy</dt><dd>Leadership ${lvl("leadership")} · Craft ${lvl("craft")} · Customer Care ${lvl("customer_care")}</dd>
+      <dt>Academy</dt><dd>Leadership ${lvl("leadership")} · Craft ${lvl("craft")} · Customer Care ${lvl("customer_care")}${acTitle(d, m) ? `<span class="ac-title">${acTitle(d, m)}</span>` : (m.role === "team_member" || !m.role ? `<span class="ac-title none">Not yet Barista 1</span>` : "")}${acPathHtml(d, m, h.probation_days)}</dd>
       <dt>Attendance</dt><dd>${active} active points · <span class="chip ${scls}">${standing}</span></dd>
       <dt>Harassment training</dt><dd>${(() => { const s = tdTrainingStatus(m.hire_date, h.harassment_training_on, t);
         const last = h.harassment_training_on ? `Last completed ${lmFmtDate(h.harassment_training_on)}, ${h.harassment_training_on.slice(0,4)}` : "No completion on file";
@@ -8524,6 +9164,7 @@ function closeShiftModal(){
 }
 
 $("#lmgm-sched-add-btn").addEventListener("click", () => openShiftModal(null));
+$("#sg-suggest-btn").addEventListener("click", async e => { const b = e.currentTarget; b.disabled = true; const t = b.textContent; b.textContent = "Working it out…"; try{ await sgSuggest(); }catch(err){ $("#lmgm-sched-status").textContent = "Couldn't build a suggestion: " + err.message; } b.disabled = false; b.textContent = t; });
 $("#lmgm-sched-cancel-btn").addEventListener("click", closeShiftModal);
 $("#lmgm-sched-form-modal").addEventListener("click", (e) => { if(e.target.id === "sched-form-modal") closeShiftModal(); });
 
