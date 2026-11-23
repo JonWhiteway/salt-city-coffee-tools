@@ -150,9 +150,9 @@ ul.tight{margin:0;padding-left:18px;display:grid;gap:4px}
     if (!q) { fail("We couldn't find this proposal."); return; }
     var e = q.event, t = q.terms;
     var first = String(e.name || "").trim().split(/\s+/)[0];
-    document.getElementById("h1").textContent = "Prepared for " + first;
+    document.getElementById("h1").textContent = "Prepared for " + (e.company || first);
     document.getElementById("lede").textContent = e.event_type + " · " + dlong(e.event_date);
-    document.title = "Espresso Bar Proposal for " + e.name + " — Salt City Coffee";
+    document.title = "Espresso Bar Proposal for " + (e.company || e.name) + " — Salt City Coffee";
     var h = hrs(e.service_start, e.service_end) || t.included_hours;
     var guests = e.guests || e.headcount;
     var accepted = q.status === "accepted";
@@ -182,7 +182,7 @@ ul.tight{margin:0;padding-left:18px;display:grid;gap:4px}
         '<div><span class="lab">Service</span><b>' + (e.service_start ? esc(tm(e.service_start) + "–" + tm(e.service_end)) : esc(e.timeframe || "TBD")) + ' · ' + h + ' hrs</b></div>' +
         '<div><span class="lab">Guests</span><b>Up to ' + esc(guests) + '</b></div>' +
       '</div>' +
-      '<p class="muted" style="margin:-4px 0 16px">Set-up begins 1 hour before service; tear-down at the end of the event. Prepared for ' + esc(e.name) + ' · ' + esc(e.email) + (e.phone ? ' · ' + esc(e.phone) : '') + '</p>' +
+      '<p class="muted" style="margin:-4px 0 16px">Set-up begins 1 hour before service; tear-down at the end of the event. Prepared for ' + (e.company ? esc(e.company) + ' · attn: ' : '') + esc(e.name) + ' · ' + esc(e.email) + (e.phone ? ' · ' + esc(e.phone) : '') + '</p>' +
 
       '<div class="two">' +
         '<div class="card"><span class="lab">What\'s included</span><ul class="tight">' +

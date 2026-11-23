@@ -263,15 +263,15 @@ function renderEvents() {
   var counts = {}; S.events.forEach(function (e) { counts[e.status] = (counts[e.status] || 0) + 1; });
   var open = (counts.new || 0) + (counts.contacted || 0) + (counts.quoted || 0);
   var q = S.q.toLowerCase();
-  var list = S.events.filter(inFilter).filter(function (e) { return !q || [e.name, e.email, e.event_location, e.event_type].join(" ").toLowerCase().indexOf(q) >= 0; });
+  var list = S.events.filter(inFilter).filter(function (e) { return !q || [e.name, e.company, e.email, e.event_location, e.event_type].join(" ").toLowerCase().indexOf(q) >= 0; });
   if (S.filter === "completed" || S.filter === "all") list.sort(function (a, b) { return (b.event_date || "").localeCompare(a.event_date || ""); });
   var chips = [["open", "Open " + open], ["new", "New " + (counts.new || 0)], ["upcoming", "Booked " + (counts.booked || 0)], ["completed", "Done " + (counts.completed || 0)], ["lost", "Lost"], ["all", "All"]];
   $("#app").innerHTML = '<div class="layout"><div>' +
     '<div class="chipsel">' + chips.map(function (c) { return '<button type="button" data-f="' + c[0] + '" aria-pressed="' + (S.filter === c[0]) + '">' + c[1] + '</button>'; }).join("") + '</div>' +
-    '<input class="inp" id="q" placeholder="Search name, email, venue" value="' + esc(S.q) + '" style="margin-bottom:10px">' +
+    '<input class="inp" id="q" placeholder="Search name, company, email, venue" value="' + esc(S.q) + '" style="margin-bottom:10px">' +
     '<div class="list" id="list">' + (list.map(function (e) {
-      return '<button class="item" data-id="' + e.id + '" aria-current="' + (S.cur === e.id) + '"><span class="top"><span class="nm">' + esc(e.name) + '</span><span class="st ' + e.status + '">' + LABEL[e.status] + '</span></span>' +
-        '<span class="sub">' + dfmt(e.event_date, { weekday: "short", month: "short", day: "numeric", year: "numeric" }) + ' · ' + esc(e.event_type === "Other" ? (e.event_type_other || "Other") : e.event_type) + ' · ' + esc(e.headcount) + ' guests</span>' +
+      return '<button class="item" data-id="' + e.id + '" aria-current="' + (S.cur === e.id) + '"><span class="top"><span class="nm">' + esc(e.company || e.name) + '</span><span class="st ' + e.status + '">' + LABEL[e.status] + '</span></span>' +
+        (e.company ? '<span class="sub">Contact: ' + esc(e.name) + '</span>' : '') + '<span class="sub">' + dfmt(e.event_date, { weekday: "short", month: "short", day: "numeric", year: "numeric" }) + ' · ' + esc(e.event_type === "Other" ? (e.event_type_other || "Other") : e.event_type) + ' · ' + esc(e.headcount) + ' guests</span>' +
         (e.quote_amount ? '<span class="sub">' + money(e.quote_amount) + (e.event_lead_id ? ' · lead: ' + esc((S.staff.find(function (s) { return s.id === e.event_lead_id; }) || {}).name || "") : '') + '</span>' : '') + '</button>';
     }).join("") || '<div class="empty">Nothing here.</div>') + '</div></div>' +
     '<div id="detail">' + (S.cur ? '<div class="card"><p class="muted">Loading…</p></div>' : '<div class="card empty">Pick ' + (document.documentElement.classList.contains("nolist") ? 'a request from the list' : 'an event on the left') + '.</div>') + '</div></div>';
@@ -323,7 +323,7 @@ function renderDetail(d) {
   // header
   html += '<div class="card"><div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap"><div style="min-width:0">' +
     '<div class="lab">' + esc(ev.event_type === "Other" ? (ev.event_type_other || "Other") : ev.event_type) + (d.client && d.hist.length ? ' · returning client (' + d.hist.length + ' past)' : '') + '</div>' +
-    '<h2 style="font-family:var(--f-display);font-weight:400;font-size:26px;margin:2px 0;letter-spacing:.04em">' + esc(ev.name) + '</h2>' +
+    '<h2 style="font-family:var(--f-display);font-weight:400;font-size:26px;margin:2px 0;letter-spacing:.04em">' + esc(ev.company || ev.name) + '</h2>' + (ev.company ? '<div class="muted"><b>Point of contact:</b> ' + esc(ev.name) + '</div>' : '') +
     '<div class="muted">' + dfmt(ev.event_date, { weekday: "long", month: "long", day: "numeric", year: "numeric" }) + ' · ' + (ev.service_start ? tm(ev.service_start) + "–" + tm(ev.service_end) + ' (' + h + ' hrs)' : esc(ev.timeframe)) + ' · ' + esc(ev.headcount) + ' guests</div>' +
     '<div class="muted">' + esc(ev.venue_address || ev.event_location) + (ev.distance_miles != null ? ' · ' + ev.distance_miles + ' mi from roastery' : ' · distance pending') + '</div>' +
     '<div class="muted"><a href="mailto:' + esc(ev.email) + '">' + esc(ev.email) + '</a> · ' + esc(ev.phone) + '</div></div>' +
@@ -337,6 +337,9 @@ function renderDetail(d) {
 
   // edit event basics
   html += '<div class="sec"><h2>Event details</h2><span class="sp"><button class="secondary" id="saveEv">Save details</button></span></div><div class="card">' +
+    '<div class="row2"><div class="field"><label>Company / organization</label><input id="e_company" value="' + esc(ev.company) + '" placeholder="Blank for a personal event"></div>' +
+    '<div class="field"><label>Point of contact</label><input id="e_name" value="' + esc(ev.name) + '"></div></div>' +
+    '<div class="row2"><div class="field"><label>Contact email</label><input id="e_email" value="' + esc(ev.email) + '"></div><div class="field"><label>Contact phone</label><input id="e_phone" value="' + esc(ev.phone) + '"></div></div>' +
     '<div class="row3"><div class="field"><label>Date</label><input type="date" id="e_date" value="' + esc(ev.event_date) + '"></div>' +
     '<div class="field"><label>Start</label><input type="time" id="e_start" value="' + esc((ev.service_start || "").slice(0, 5)) + '"></div>' +
     '<div class="field"><label>End</label><input type="time" id="e_end" value="' + esc((ev.service_end || "").slice(0, 5)) + '"></div></div>' +
@@ -475,7 +478,7 @@ function mergeFor(d) {
   var changes = (q.flags || []).filter(function (f) { return f.level === "change" && CLIENT_CHANGE[f.title]; }).map(function (f) { return CLIENT_CHANGE[f.title](); });
   var lbl = ev.event_type === "Other" ? (ev.event_type_other || "event") : ev.event_type === "Corporate/Workplace" ? "workplace event" : ev.event_type === "Festival/Fair/Market" ? "event" : ev.event_type;
   return {
-    first_name: first, name: ev.name, event_label: String(lbl).toLowerCase(),
+    first_name: first, name: ev.name, company: ev.company || "", company_line: ev.company ? " for " + ev.company : "", event_label: String(lbl).toLowerCase(),
     event_date_long: dfmt(ev.event_date, { weekday: "long", month: "long", day: "numeric", year: "numeric" }),
     timeframe: ev.service_start ? tm(ev.service_start) + "–" + tm(ev.service_end) : ev.timeframe, venue: ev.venue_address || ev.event_location,
     guests: guests(ev.headcount) || ev.headcount, package_name: base.label || "Espresso bar package",
@@ -540,7 +543,7 @@ function wireDetail(d) {
   $("#lead").addEventListener("change", function () { upd({ event_lead_id: this.value || null }, "Event lead updated"); });
   $("#copyLead").addEventListener("click", function () { copy(leadLink(ev), "Event-sheet link copied. Text it to the event lead."); });
   $("#saveEv").addEventListener("click", function () {
-    var patch = { event_date: $("#e_date").value, service_start: $("#e_start").value || null, service_end: $("#e_end").value || null, venue_address: $("#e_addr").value.trim(), headcount: $("#e_head").value.trim(), internal_notes: $("#e_notes").value.trim() || null };
+    var patch = { company: $("#e_company").value.trim() || null, name: $("#e_name").value.trim() || ev.name, email: $("#e_email").value.trim().toLowerCase() || ev.email, phone: $("#e_phone").value.trim() || null, event_date: $("#e_date").value, service_start: $("#e_start").value || null, service_end: $("#e_end").value || null, venue_address: $("#e_addr").value.trim(), headcount: $("#e_head").value.trim(), internal_notes: $("#e_notes").value.trim() || null };
     var miles = $("#e_miles").value; if (miles !== "" && Number(miles) !== Number(ev.distance_miles) && patch.venue_address === (ev.venue_address || ev.event_location)) patch.distance_miles = Number(miles);
     var ex = $("#e_exempt").value === "1";
     var p = d.client && !!d.client.tax_exempt !== ex ? sb.from("mb_clients").update({ tax_exempt: ex, updated_at: new Date().toISOString() }).eq("id", d.client.id).then(must) : Promise.resolve();
@@ -647,7 +650,7 @@ function renderClients() {
   var q = (S.cq || "").toLowerCase();
   var list = S.clients.filter(function (c) { return !q || [c.name, c.organization, c.email].join(" ").toLowerCase().indexOf(q) >= 0; }).sort(function (a, b) { return (b._last || "").localeCompare(a._last || ""); });
   $("#app").innerHTML = '<div class="layout"><div><input class="inp" id="cq" placeholder="Search clients" value="' + esc(S.cq || "") + '" style="margin-bottom:10px"><div class="list">' +
-    list.map(function (c) { return '<button class="item" data-c="' + c.id + '" aria-current="' + (S.curClient === c.id) + '"><span class="top"><span class="nm">' + esc(c.name) + '</span>' + (c._n > 1 ? '<span class="st booked">' + c._n + ' events</span>' : '') + '</span><span class="sub">' + esc(c.organization || c.client_type || "") + (c._last ? ' · last ' + dfmt(c._last) : '') + '</span></button>'; }).join("") +
+    list.map(function (c) { return '<button class="item" data-c="' + c.id + '" aria-current="' + (S.curClient === c.id) + '"><span class="top"><span class="nm">' + esc(c.organization || c.name) + '</span>' + (c._n > 1 ? '<span class="st booked">' + c._n + ' events</span>' : '') + '</span><span class="sub">' + esc(c.organization ? c.name : (c.client_type || "")) + (c._last ? ' · last ' + dfmt(c._last) : '') + '</span></button>'; }).join("") +
     '</div></div><div id="cdetail">' + (S.curClient ? '' : '<div class="card empty">Pick a client. Profiles were built from ' + S.clients.length + ' clients across past contracts and booking requests.</div>') + '</div></div>';
   $("#cq").addEventListener("input", function () { S.cq = this.value; var p = this.selectionStart; renderClients(); $("#cq").focus(); $("#cq").setSelectionRange(p, p); });
   $$("[data-c]").forEach(function (b) { b.addEventListener("click", function () { S.curClient = b.dataset.c; renderClients(); }); });
@@ -663,20 +666,51 @@ function clientDetail(id) {
     if (gr.length && gr[0] !== Number(setv("gratuity_pct"))) watch.push("Gratuity was " + Math.round(gr[0] * 100) + "% last time; now " + Math.round(Number(setv("gratuity_pct")) * 100) + "%.");
     if (tr.length && Number(tr[0]) !== Number(setv("travel_rate"))) watch.push("Travel was $" + Number(tr[0]).toFixed(2) + "/mi; now $" + Number(setv("travel_rate")).toFixed(2) + "/mi, counted both ways past " + setv("travel_free_miles") + " mi.");
     if (hist.some(function (h) { return h.tax_exempt; }) && !c.tax_exempt) watch.push("Past contracts were tax exempt. Get their certificate on file and mark the profile tax exempt.");
-    $("#cdetail").innerHTML = '<div class="card"><div class="row2"><div class="field"><label>Name</label><input id="c_name" value="' + esc(c.name) + '"></div><div class="field"><label>Organization</label><input id="c_org" value="' + esc(c.organization) + '"></div></div>' +
+    $("#cdetail").innerHTML = '<div class="card"><div class="row2"><div class="field"><label>Company / organization</label><input id="c_org" value="' + esc(c.organization) + '" placeholder="Blank for a personal client"></div><div class="field"><label>Point of contact</label><input id="c_name" value="' + esc(c.name) + '"></div></div>' +
       '<div class="row3"><div class="field"><label>Email</label><input id="c_email" value="' + esc(c.email) + '"></div><div class="field"><label>Phone</label><input id="c_phone" value="' + esc(c.phone) + '"></div>' +
       '<div class="field"><label>Type</label><select id="c_type">' + ["wedding", "corporate", "university", "party", "festival", "nonprofit", "other"].map(function (t) { return '<option' + (t === c.client_type ? ' selected' : '') + '>' + t + '</option>'; }).join("") + '</select></div></div>' +
       '<label class="lab" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="c_ex"' + (c.tax_exempt ? ' checked' : '') + '> Tax exempt (certificate on file)</label>' +
       '<div class="field"><label>Notes</label><textarea id="c_notes">' + esc(c.notes) + '</textarea></div><div class="actions"><button class="primary" id="c_save">Save profile</button><span class="muted">' + c._n + ' events · ' + money(c._spent) + ' in past contracts</span></div></div>' +
       (watch.length ? '<div class="flags" style="margin-bottom:12px">' + watch.map(function (w) { return '<div class="flag change"><b>Cost change</b>' + esc(w) + '</div>'; }).join("") + '</div>' : '') +
       '<div class="sec"><h2>Past contracts</h2></div><div class="card">' + historyHtml(hist, false) + '</div>' +
-      '<div class="sec"><h2>In the desk</h2></div><div class="card">' + (c._events.length ? c._events.map(function (e) { return '<div><a href="?id=' + e.id + '" data-ev="' + e.id + '">' + dfmt(e.event_date) + ' · ' + esc(e.name) + '</a> <span class="st ' + e.status + '">' + LABEL[e.status] + '</span> ' + money(e.quote_amount) + '</div>'; }).join("") : '<p class="muted" style="margin:0">No booking requests yet.</p>') + '</div>';
+      '<div class="sec"><h2>In the desk</h2><span class="sp"><button class="primary" id="c_addev">+ Add event</button></span></div><div id="c_newev"></div><div class="card">' + (c._events.length ? c._events.map(function (e) { return '<div><a href="?id=' + e.id + '" data-ev="' + e.id + '">' + dfmt(e.event_date) + ' · ' + esc(e.name) + '</a> <span class="st ' + e.status + '">' + LABEL[e.status] + '</span> ' + money(e.quote_amount) + '</div>'; }).join("") : '<p class="muted" style="margin:0">No booking requests yet.</p>') + '</div>';
     $("#c_save").addEventListener("click", function () {
       sb.from("mb_clients").update({ name: $("#c_name").value.trim(), organization: $("#c_org").value.trim() || null, email: $("#c_email").value.trim().toLowerCase() || null, phone: $("#c_phone").value.trim() || null, client_type: $("#c_type").value, tax_exempt: $("#c_ex").checked, notes: $("#c_notes").value.trim() || null, updated_at: new Date().toISOString() }).eq("id", id)
         .then(must).then(function () { toast("Profile saved"); loadClients(); }).catch(fail);
     });
+    $("#c_addev").addEventListener("click", function () { addEventForm(c); });
     $$("[data-ev]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); S.cur = a.dataset.ev; S.tab = "events"; S.filter = "all"; $$(".tabs button[data-tab]").forEach(function (x) { x.setAttribute("aria-pressed", String(x.dataset.tab === "events")); }); renderEvents(); }); });
   }).catch(fail);
+}
+
+// ---- Add an event for an existing client (rpc mb_add_event) ----
+var EV_TYPES = ["Wedding", "Corporate/Workplace", "Party", "Festival/Fair/Market", "Other"];
+function addEventForm(c) {
+  var guess = c.client_type === "wedding" ? "Wedding" : ["corporate", "university", "nonprofit"].indexOf(c.client_type) >= 0 ? "Corporate/Workplace" : c.client_type === "party" ? "Party" : c.client_type === "festival" ? "Festival/Fair/Market" : "Other";
+  var last = (c._events || []).slice(-1)[0] || {};
+  $("#c_newev").innerHTML = '<div class="card" style="border:2px solid #F2A900"><h3 style="margin:0 0 8px">New event for ' + esc(c.organization || c.name) + '</h3>' +
+    '<div class="row2"><div class="field"><label>Company / organization</label><input id="n_company" value="' + esc(c.organization) + '" placeholder="Blank for a personal event"></div><div class="field"><label>Point of contact</label><input id="n_name" value="' + esc(c.name) + '"></div></div>' +
+    '<div class="row2"><div class="field"><label>Contact email</label><input id="n_email" value="' + esc(c.email) + '"></div><div class="field"><label>Contact phone</label><input id="n_phone" value="' + esc(c.phone) + '"></div></div>' +
+    '<div class="row3"><div class="field"><label>Event date</label><input type="date" id="n_date"></div><div class="field"><label>Time</label><input id="n_time" placeholder="e.g. 9am–11am"></div><div class="field"><label>Guests</label><input id="n_head" placeholder="e.g. 120"></div></div>' +
+    '<div class="row2"><div class="field"><label>Venue street address</label><input id="n_loc" value="' + esc(last.venue_address || last.event_location || "") + '"></div>' +
+    '<div class="field"><label>Event type</label><select id="n_type">' + EV_TYPES.map(function (t) { return '<option' + (t === guess ? ' selected' : '') + '>' + t + '</option>'; }).join("") + '</select><input id="n_other" placeholder="What kind of event?" style="margin-top:4px"' + (guess === "Other" ? '' : ' hidden') + '></div></div>' +
+    '<div class="field"><label>Notes</label><textarea id="n_notes" placeholder="What they asked for, menu, anything special"></textarea></div>' +
+    '<div class="actions"><button class="primary" id="n_save">Create event &amp; draft quote</button><button class="secondary" id="n_cancel">Cancel</button></div></div>';
+  $("#n_type").addEventListener("change", function () { $("#n_other").hidden = this.value !== "Other"; });
+  $("#n_cancel").addEventListener("click", function () { $("#c_newev").innerHTML = ""; });
+  $("#c_newev").scrollIntoView({ behavior: "smooth", block: "start" }); $("#n_date").focus();
+  $("#n_save").addEventListener("click", function () {
+    var btn = this; if (!$("#n_date").value) { toast("Pick an event date", "err"); return; }
+    var type = $("#n_type").value === "Other" ? ($("#n_other").value.trim() || "Other") : $("#n_type").value;
+    btn.disabled = true; btn.textContent = "Creating…";
+    sb.rpc("mb_add_event", { p_client: c.id, p_event_date: $("#n_date").value, p_location: $("#n_loc").value, p_timeframe: $("#n_time").value, p_event_type: type,
+      p_headcount: $("#n_head").value, p_notes: $("#n_notes").value, p_company: $("#n_company").value, p_name: $("#n_name").value, p_email: $("#n_email").value, p_phone: $("#n_phone").value })
+      .then(must).then(function (id) {
+        toast("Event created with a draft quote");
+        S.tab = "events"; S.filter = "all"; $$(".tabs button[data-tab]").forEach(function (x) { x.setAttribute("aria-pressed", String(x.dataset.tab === "events")); });
+        return loadEvents(id);
+      }).catch(function (e) { btn.disabled = false; btn.textContent = "Create event & draft quote"; fail(e); });
+  });
 }
 
 // ---------------- pricing & emails ----------------
@@ -703,7 +737,7 @@ function renderPricing() {
       '<div class="sec"><h2>Add-ons, kegs &amp; drip</h2><span class="sp"><button class="secondary" id="addAddonRow">+ Add</button><button class="primary" id="saveAddons">Save</button></span></div><div class="card scroll"><table class="tbl" id="addons"><thead><tr><th>Name</th><th>Type</th><th>Unit</th><th>Price</th><th>By level</th><th>Serves</th><th>Tax</th><th>On</th></tr></thead><tbody>' +
         S.addons.map(addonRow).join("") + '</tbody></table><p class="muted" style="margin:0;font-size:13px">"By level" overrides the price by package level, e.g. 1:25, 2:50, 3:75.</p></div>' +
       '<div class="sec"><h2>Email templates</h2><span class="sp"><button class="primary" id="saveTpl">Save templates</button></span></div><div class="card">' +
-        '<p class="muted" style="margin:0;font-size:13.5px">Merge fields: {{first_name}}, {{event_label}}, {{event_date_long}}, {{timeframe}}, {{venue}}, {{guests}}, {{package_name}}, {{service_hours}}, {{total}}, {{deposit}}, {{balance}}, {{deposit_due}}, {{balance_due}}, {{gratuity_pct}}, {{quote_link}}, {{invoice_link}}, {{survey_link}}, {{lead_line}}, {{book_again_line}}, {{personal_line}}, {{changes_note}}, {{maria_name}}, {{maria_phone}}</p>' +
+        '<p class="muted" style="margin:0;font-size:13.5px">Merge fields: {{first_name}}, {{company}}, {{company_line}}, {{event_label}}, {{event_date_long}}, {{timeframe}}, {{venue}}, {{guests}}, {{package_name}}, {{service_hours}}, {{total}}, {{deposit}}, {{balance}}, {{deposit_due}}, {{balance_due}}, {{gratuity_pct}}, {{quote_link}}, {{invoice_link}}, {{survey_link}}, {{lead_line}}, {{book_again_line}}, {{personal_line}}, {{changes_note}}, {{maria_name}}, {{maria_phone}}</p>' +
         tpls.map(function (r) { return '<div class="field"><label>' + esc(r.label) + '</label>' + (/subject$/.test(r.key) ? '<input data-tpl="' + r.key + '" value="' + esc(r.value) + '">' : '<textarea class="tpl" data-tpl="' + r.key + '">' + esc(r.value) + '</textarea>') + '</div>'; }).join("") +
       '</div>' +
     '</div></div>';

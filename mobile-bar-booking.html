@@ -107,9 +107,13 @@ h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 10v
   <div class="stage"><h2>About you</h2><span class="badge">All required</span></div>
   <div class="card">
     <div class="field" data-field="name">
-      <label for="name">Name<span class="req" aria-hidden="true">*</span></label>
-      <input type="text" id="name" name="name" autocomplete="name" required maxlength="200">
+      <label for="name">Point of contact<span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="name" name="name" autocomplete="name" required maxlength="200" placeholder="Your name">
       <div class="err" role="alert">This is a required question</div>
+    </div>
+    <div class="field" data-field="company">
+      <label for="company">Company or organization <span style="font-weight:400;opacity:.7">(optional)</span></label>
+      <input type="text" id="company" name="company" autocomplete="organization" maxlength="200" placeholder="Leave blank for a personal event">
     </div>
     <div class="row2">
       <div class="field" data-field="phone">
@@ -279,7 +283,7 @@ h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 10v
       return;
     }
     var payload = {
-      p_name: val("name"), p_phone: val("phone"), p_email: val("email"), p_event_date: val("event_date"),
+      p_name: val("name"), p_company: val("company"), p_phone: val("phone"), p_email: val("email"), p_event_date: val("event_date"),
       p_location: val("location"), p_timeframe: val("timeframe"), p_event_type: eventType,
       p_event_type_other: eventType === "Other" ? val("event_type_other") : null,
       p_headcount: val("headcount"), p_heard_about: val("heard_about"), p_menu_item: val("menu_item"),

@@ -129,7 +129,7 @@ dl.kv dd{margin:0;overflow-wrap:anywhere}
   function render(d) {
     if (!d) { app.innerHTML = '<div class="msg err">This event link isn\'t valid anymore. Ask Maria for a new one.</div>'; return; }
     var e = d.event, today = new Date().toISOString().slice(0, 10);
-    document.getElementById("h1").textContent = e.name;
+    document.getElementById("h1").textContent = e.company || e.name;
     document.getElementById("lede").textContent = e.event_type + " · " + dlong(e.event_date);
     var when = e.service_start ? tm(e.service_start) + "–" + tm(e.service_end) : (e.timeframe || "TBD");
     var pk = (d.package || []).map(function (l) { return '<li><b>' + esc(l.label) + '</b>' + (l.detail ? '<br><span class="muted">' + esc(l.detail) + '</span>' : '') + '</li>'; }).join("");
@@ -145,7 +145,7 @@ dl.kv dd{margin:0;overflow-wrap:anywhere}
         '<dt>When</dt><dd><b>' + esc(dlong(e.event_date)) + '</b><br>' + esc(when) + ' · arrive 1 hour early</dd>' +
         '<dt>Where</dt><dd>' + esc(e.venue) + '<br><a href="https://maps.google.com/?q=' + encodeURIComponent(e.venue || "") + '" target="_blank" rel="noopener">Open in Maps</a></dd>' +
         '<dt>Guests</dt><dd>' + esc(e.headcount) + '</dd>' +
-        '<dt>Client</dt><dd>' + esc(e.name) + (e.phone ? '<br><a href="tel:' + esc(e.phone) + '">' + esc(e.phone) + '</a>' : '') + '</dd>' +
+        (e.company ? '<dt>Company</dt><dd>' + esc(e.company) + '</dd>' : '') + '<dt>Point of contact</dt><dd>' + esc(e.name) + (e.phone ? '<br><a href="tel:' + esc(e.phone) + '">' + esc(e.phone) + '</a>' : '') + '</dd>' +
         (e.menu_item ? '<dt>Excited about</dt><dd>' + esc(e.menu_item) + '</dd>' : '') +
         (e.additional_info ? '<dt>Client notes</dt><dd>' + esc(e.additional_info).replace(/\n/g, "<br>") + '</dd>' : '') +
         (e.internal_notes ? '<dt>Team notes</dt><dd>' + esc(e.internal_notes).replace(/\n/g, "<br>") + '</dd>' : '') +
