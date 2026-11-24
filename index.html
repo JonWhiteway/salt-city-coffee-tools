@@ -1593,6 +1593,7 @@ body::before{display:none !important;}
     <ul class="nav-list" id="nav-portal-item">
       <li><button class="nav-item" data-section="lmgm"><span class="nav-dot"></span>LM / GM / PM / Bookkeeper Portal</button></li>
       <li class="sa-nav-pm" style="display:none;"><a class="nav-item nav-link" href="staff-admin.html"><span class="nav-dot"></span>Staff &amp; Locations <span class="nav-ext">↗</span></a></li>
+      <li class="hiring-nav" style="display:none;"><a class="nav-item nav-link" href="hiring.html" title="Applicants from saltcitycoffee.com/pages/careers"><span class="nav-dot"></span>Hiring <span class="nav-ext">↗</span></a></li>
     </ul>
     <div class="lm-nav-group" id="lm-nav-group" hidden>
       <ul class="nav-list">
@@ -2485,6 +2486,10 @@ body::before{display:none !important;}
         <a class="td-tool td-tool-lead" id="td-assess-link" href="assess.html">
           <div class="ttitle">Team Assessment ↗</div>
           <div class="tsub">Rate the whole team, one after another</div>
+        </a>
+        <a class="td-tool td-tool-lead hiring-nav" href="hiring.html" style="display:none;">
+          <div class="ttitle">Hiring ↗</div>
+          <div class="tsub">Applicants from the careers page for your store</div>
         </a>
       </div>
       <div class="empty-note" id="td-status" style="padding-top:0;">Loading this store's team…</div>
@@ -5287,6 +5292,7 @@ async function initApp(){
   // Staff Admin (PINs, locations, roles) is COO / Production Manager only.
   $$(".sa-nav").forEach(el => el.style.display = myStaff.role === "coo" ? "" : "none");
   $$(".sa-nav-pm").forEach(el => el.style.display = myStaff.role === "production_manager" ? "" : "none");
+  $$(".hiring-nav").forEach(el => el.style.display = ["gm","location_manager","production_manager","coo","ceo","cbo"].includes(myStaff.role) ? "" : "none");
   if(EXEC_ROLES.includes(myStaff.role)) setTimeout(mbLoad, 0);  // fills the "new requests" badge
   $$(".exec-nav-group .exec-only").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
   $$(".exec-nav-group .gm-only").forEach(el => el.style.display = myStaff.role === "gm" ? "" : "none");
