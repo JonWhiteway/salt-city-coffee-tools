@@ -251,6 +251,45 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
 .btn.green{background:#2F7A52 !important; color:#fff !important; box-shadow:none !important;}
 </style>
 <style>.btn.navy{background:var(--sd-navy,#284A70);color:var(--sd-cream,#F0E7DA);box-shadow:none}.btn.green{color:#fff}</style>
+<style id="refresh-css">
+/* ---------- Barista refresh (existing team) ---------- */
+.refresh-pagehead{border-bottom-color:var(--sd-gold,#F2A900) !important;}
+.refresh-kpis{display:flex;gap:10px;flex-wrap:wrap}
+.refresh-kpis>div{background:var(--sd-surface,#FBFAF7);border:1px solid var(--sd-line,#D6D2C4);border-radius:12px;padding:8px 12px;min-width:86px;text-align:center}
+.refresh-kpis b{display:block;font-family:var(--sd-display);font-size:24px;font-weight:400;line-height:1}
+.refresh-kpis span{font-family:var(--sd-label);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.refresh-kpis .bad b{color:var(--red)}
+.card.trainee.refresh{border-left:6px solid var(--sd-gold,#F2A900) !important;background:linear-gradient(180deg,#FFFBF0,var(--sd-surface,#FBFAF7) 60%) !important}
+.rbars{display:grid;gap:5px;margin:10px 0 6px}
+.rbars>div{display:grid;grid-template-columns:70px 1fr 44px;align-items:center;gap:8px;font-size:12px}
+.rbars span{font-family:var(--sd-label);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.rbars .bar{margin:0}
+.rbars b{text-align:right;font-variant-numeric:tabular-nums}
+.rscores{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.rsc{display:inline-block;font-family:var(--sd-label);font-weight:700;font-size:10.5px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;background:#EEE8DE;color:var(--ink-2)}
+.rsc.b1{background:#F8E1DE;color:#8E2B21}.rsc.b2{background:#FBEFD2;color:#7A5600}.rsc.b3{background:#DDEFE3;color:#1E5238}.rsc.b4{background:#284A70;color:#F0E7DA}
+.rpillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px}
+.rpillar,.rbcol{border:1px solid var(--sd-line,#D6D2C4);border-radius:12px;padding:10px 12px;background:#fff}
+.rph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.rph b{font-family:var(--sd-label);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.rbeh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--sd-line-soft,#E4E0D5)}
+.rbeh.c{padding:4px 0;font-size:13px}
+.rlv{flex:0 0 auto;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:#EEE8DE;color:var(--ink-3);white-space:nowrap}
+.rlv.l1{background:#F8E1DE;color:#8E2B21}.rlv.l2{background:#FBEFD2;color:#7A5600}.rlv.l3{background:#DDEFE3;color:#1E5238}.rlv.l4{background:#284A70;color:#F0E7DA}
+.rnote{margin-top:6px;color:var(--ink-2);font-style:italic}
+.rhist{width:100%;margin-top:8px;font-size:12.5px;border-collapse:collapse}.rhist td{padding:5px 6px;border-top:1px solid var(--sd-line-soft,#E4E0D5)}
+.rbench{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.rblevel{border-top:1px dashed var(--sd-line,#D6D2C4);padding-top:6px;margin-top:6px}
+.rblevel.met{background:linear-gradient(90deg,rgba(47,122,82,.08),transparent)}
+.rblevel.draft{opacity:.62}
+.rbl{font-family:var(--sd-label);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px}
+.rtest{align-items:center}
+a.btn{text-decoration:none}
+.rtest .row{gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.rstage{border-top:1px solid var(--sd-line-soft,#E4E0D5);padding:8px 0}
+.rstage summary{cursor:pointer}
+.alert.green-alert{background:var(--sd-yes-soft,#DDEFE3);color:var(--sd-yes,#2F7A52);border-color:var(--sd-yes,#2F7A52)}
+</style>
 </head>
 <body>
 <div id="app"><div class="loading">Loading…</div></div>
@@ -314,9 +353,10 @@ async function init(){
   S.loc = locs.find(l => l.id === params.get('loc')) || locs.find(l => l.id === saved) || locs[0] || null;
   if (!S.loc){ shell(); document.getElementById('main').innerHTML = `<div class="card">You aren't assigned to a store yet. Ask Jon to add you on Team &amp; Locations.</div>`; return; }
   await loadStore();
-  const t = params.get('t');
-  if (t && S.tracks.find(x => x.id === t)) openTrack(t, params.get('s'));
-  else renderBoard();
+  const t = params.get('t'), r = params.get('r');
+  if (t && S.tracks.find(x => x.id === t)) { openTrack(t, params.get('s')); rKick(); }
+  else if (r) { await rKick(); if (S.refresh.some(m => m.staff_id === r)) openRefresh(r); else renderBoard(); }
+  else { renderBoard(); rKick(); }
   setInterval(refresh, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
 }
@@ -334,7 +374,7 @@ function shell(){
   <main id="main"></main>`;
 }
 
-async function switchLoc(id){ S.loc = S.locs.find(l => l.id === id); try { localStorage.setItem('training_loc', id); } catch(e){} S.track = null; await loadStore(); renderBoard(); }
+async function switchLoc(id){ S.loc = S.locs.find(l => l.id === id); try { localStorage.setItem('training_loc', id); } catch(e){} S.track = null; S.rStaff = null; await loadStore(); renderBoard(); rKick(); }
 
 async function loadStore(){
   const { data: tracks } = await sb.from('training_tracks').select('*').eq('location_id', S.loc.id).order('start_date', { ascending:false });
@@ -346,7 +386,7 @@ async function loadStore(){
 }
 
 async function refresh(){
-  if (!S.loc || document.querySelector('#ov.show')) return;
+  if (!S.loc || document.querySelector('#ov.show') || S.rStaff) return;
   if (S.track){ await loadTrack(S.track.id); renderTrack(); }
   else { await loadStore(); renderBoard(); }
 }
@@ -376,7 +416,7 @@ function attention(t){
 
 /* ---------------- board ---------------- */
 function renderBoard(){
-  S.track = null; history.replaceState(null, '', 'training.html');
+  S.track = null; S.rStaff = null; history.replaceState(null, '', 'training.html');
   shell();
   const active = S.tracks.filter(t => ['active','paused'].includes(t.status));
   const done = S.tracks.filter(t => !['active','paused'].includes(t.status));
@@ -389,7 +429,7 @@ function renderBoard(){
   document.getElementById('main').innerHTML = `
   <div class="page-head row" style="justify-content:space-between;align-items:flex-end">
     <div><div class="eyebrow">Barista Beginner · ${esc(S.loc.name)}</div><h1>Trainees</h1>
-      <div class="sub">Pick a name to open their schedule, the trainer notes and the sign-offs.</div></div>
+      <div class="sub">New hires in their first 90 days. Pick a name to open their schedule, the trainer notes and the sign-offs. Your existing team's refresh is further down.</div></div>
     <button class="btn" onclick="startModal()">+ Start training</button>
   </div>
   ${alerts.length ? `<div class="card"><h2>Needs attention</h2>${alerts.map(a => `<div class="alert ${a[0] === 'amber' ? 'amber' : ''}" style="cursor:pointer" onclick="openTrack('${a[2]}')">${a[1]}</div>`).join('')}</div>` : ''}
@@ -411,7 +451,8 @@ function renderBoard(){
         ${t.locked ? '<span class="chip late">Locked 15 min</span>' : ''}<button class="btn ${t.has_pin ? 'ghost' : ''} sm" onclick="pinModal('${t.id}')">${t.has_pin ? 'Reset PIN' : 'Set PIN'}</button></div>`).join('') || '<div class="muted small">No staff assigned to this store.</div>'}</div>
     </div>
   </div>
-  ${done.length ? `<details class="card"><summary style="cursor:pointer;font-weight:700">Finished or stopped (${done.length})</summary><div class="grid" style="margin-top:12px">${done.map(trackCard).join('')}</div></details>` : ''}`;
+  ${done.length ? `<details class="card"><summary style="cursor:pointer;font-weight:700">Finished or stopped (${done.length})</summary><div class="grid" style="margin-top:12px">${done.map(trackCard).join('')}</div></details>` : ''}
+  <div id="refresh-wrap">${refreshSection()}</div>`;
 }
 
 function trackCard(t){
@@ -488,6 +529,7 @@ async function loadTrack(id){
   S.days = S.days.filter(x => x.track_id !== id).concat(d.data || []);
 }
 async function openTrack(id, stage){
+  S.rStaff = null;
   await loadTrack(id);
   const cur = currentStage(id);
   S.stage = stage || (cur ? cur.stage : 'd1');
@@ -764,6 +806,229 @@ async function doCheckin(b){
   try { await rpc('training_checkin', { p_track: S.track.id, p_stage: S.stage, p_confidence: CI.c, p_clicked: document.getElementById('ci-a').value, p_fuzzy: document.getElementById('ci-b').value, p_trainer_rating: CI.r });
     closeModal(); await loadTrack(S.track.id); renderTrack(); toast('Thanks!'); }
   catch(e){ showErr(errMsg(e)); b.disabled = false; }
+}
+
+/* ---------------- Barista refresh: existing team (Nov 24 2026) ----------------
+   Everyone at the store who isn't a manager and isn't in new-hire training.
+   Deadline Dec 31 2026: refresh checklist (the Barista Beginner sign-offs; training-track
+   sign-offs count automatically), Espresso & Milk approval + 30/60/90 quizzes
+   (barista_refresh_tests, mirrored into team_assessments.checks by a trigger), and a manager
+   assessment with all 9 Barista 1 behaviors at Meets (3+).
+   Growth benchmarks (academy_benchmarks): 3 behaviors per competency per Academy level.
+   A level's benchmark is met when all 3 are rated 3+. */
+const REFRESH_DUE = '2026-12-31';
+const R_LEVELS = [[1,'Not yet'],[2,'Developing'],[3,'Meets standard'],[4,'Exceptional']];
+const R_PILLARS = [['leadership','Leadership','L'],['craft','Craft','C'],['customer_care','Customer Care','CC']];
+const R_NOTE_KEY = { leadership:'lead', craft:'craft', customer_care:'care' };
+const R_TESTS = [['espresso','Espresso & Milk approval','Pulls shots and steams milk to standard for a manager'],['q30','30-day quiz','Menu, recipes and standards'],['q60','60-day quiz','Menu, recipes and standards'],['q90','90-day quiz','Menu, recipes and standards']];
+const R_MANAGER_ROLES = ['gm','location_manager','production_manager','bookkeeper','coo','ceo','cbo'];
+Object.assign(S, { refresh:[], rAssess:{}, rSigned:{}, rTests:{}, rLevels:{}, bench:[], rItems:[], rStaff:null, rLoaded:false });
+
+async function fnCall(name, payload){
+  const { data:{ session } } = await sb.auth.getSession();
+  const r = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${session?.access_token || ''}`, 'apikey':SUPABASE_ANON_KEY }, body: JSON.stringify(payload) });
+  const b = await r.json().catch(() => ({})); if (!r.ok) throw new Error(b.error || `Request failed (${r.status})`); return b;
+}
+function rBuildItems(){
+  const st = Object.fromEntries(S.stages.map(s => [s.key, s])), seen = new Set(), out = [];
+  S.items.slice().sort((a, b) => ((st[a.stage]?.sort ?? 99) - (st[b.stage]?.sort ?? 99)) || a.sort - b.sort).forEach(it => (it.signoffs || []).forEach(so => {
+    if (!so?.id || seen.has(so.id)) return; seen.add(so.id);
+    out.push({ key: so.id, text: so.text, stage: it.stage, label: st[it.stage]?.label || it.stage, title: st[it.stage]?.title || '' });
+  }));
+  S.rItems = out;
+}
+async function loadRefresh(){
+  S.rLoaded = false;
+  if (!S.rItems.length) rBuildItems();
+  let members = [];
+  try { members = (await fnCall('store-team', { location_id: S.loc.id })).members || []; } catch(e){ S.rError = errMsg(e); members = []; }
+  const inTraining = new Set(S.tracks.filter(t => ['active','paused'].includes(t.status)).map(t => t.staff_id));
+  S.refresh = members.filter(m => !R_MANAGER_ROLES.includes(m.role) && !inTraining.has(m.staff_id) && m.staff_id !== S.me.id)
+    .sort((a, b) => (a.hire_date || '9999').localeCompare(b.hire_date || '9999') || a.name.localeCompare(b.name));
+  members.forEach(m => { if (m.staff_id && !S.names[m.staff_id]) S.names[m.staff_id] = m.name; });
+  const ids = S.refresh.map(m => m.staff_id);
+  const none = Promise.resolve({ data: [] });
+  const [a, s, t, x, lv, bm] = await Promise.all([
+    ids.length ? sb.from('team_assessments').select('*').in('staff_id', ids).eq('voided', false).order('assessed_at', { ascending:false }) : none,
+    ids.length ? sb.from('barista_refresh_signoffs').select('*').in('staff_id', ids) : none,
+    ids.length ? sb.rpc('ta_training_signoffs', { p_staff: ids }) : none,
+    ids.length ? sb.from('barista_refresh_tests').select('*').in('staff_id', ids) : none,
+    ids.length ? sb.from('academy_status').select('staff_id,competency,current_level').in('staff_id', ids) : none,
+    S.bench.length ? Promise.resolve({ data: S.bench }) : sb.from('academy_benchmarks').select('*').order('level').order('competency').order('sort'),
+  ]);
+  S.bench = bm.data || [];
+  ids.forEach(id => { S.rAssess[id] = []; S.rSigned[id] = {}; S.rTests[id] = {}; S.rLevels[id] = {}; });
+  (a.data || []).forEach(r => S.rAssess[r.staff_id].push(r));
+  (t.data || []).forEach(r => { S.rSigned[r.staff_id][r.item_key] = { by: r.signed_by, at: r.signed_at, src: 'training' }; });
+  (s.data || []).forEach(r => { S.rSigned[r.staff_id][r.item_key] = { by: r.signed_by, at: r.signed_at, src: 'refresh' }; });
+  (x.data || []).forEach(r => { S.rTests[r.staff_id][r.test_key] = r; });
+  (lv.data || []).forEach(r => { S.rLevels[r.staff_id][r.competency] = r.current_level; });
+  S.rLoaded = true;
+}
+const rLatest = id => (S.rAssess[id] || [])[0] || null;
+const rBench = (level, comp) => S.bench.filter(b => b.level === level && b.competency === comp).sort((x, y) => x.sort - y.sort);
+const rAvg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+function rState(id){
+  const a = rLatest(id), sg = S.rSigned[id] || {}, tests = S.rTests[id] || {};
+  const done = S.rItems.filter(i => sg[i.key]).length, total = S.rItems.length;
+  const passed = R_TESTS.filter(([k]) => tests[k] || a?.checks?.[k]).length;
+  const b1 = S.bench.filter(b => b.level === 1).map(b => b.key);
+  const vals = a ? b1.map(k => Number(a.ratings?.[k])) : [];
+  let status = 'none';
+  if (a){
+    if (vals.some(v => v === 1)) status = 'flagged';
+    else if (vals.every(v => v >= 3) && passed === 4 && done === total && total > 0) status = 'verified';
+    else status = 'progress';
+  }
+  const left = [];
+  if (!a) left.push('manager assessment');
+  else { const below = vals.filter(v => !(v >= 3)).length; if (below) left.push(`${below} behavior${below > 1 ? 's' : ''} below Meets`); }
+  if (passed < 4) left.push(`${4 - passed} test${4 - passed > 1 ? 's' : ''}`);
+  if (done < total) left.push(`${total - done} checklist item${total - done > 1 ? 's' : ''}`);
+  return { a, done, total, passed, status, left };
+}
+const R_CHIP = { verified:['verified','Verified'], progress:['open','In progress'], flagged:['late','Flagged for coaching'], none:['open','Not assessed'] };
+const rChip = st => `<span class="chip ${R_CHIP[st][0]}">${R_CHIP[st][1]}</span>`;
+const rDaysLeft = () => Math.round((new Date(REFRESH_DUE + 'T12:00:00') - new Date(todayISO() + 'T12:00:00')) / 864e5);
+function rPillarAvg(a, comp){ return a ? rAvg(rBench(1, comp).map(b => Number(a.ratings?.[b.key])).filter(Number.isFinite)) : null; }
+const rBand = v => v == null ? '' : v < 1.75 ? 'b1' : v < 2.75 ? 'b2' : v < 3.5 ? 'b3' : 'b4';
+
+function refreshSection(){
+  if (!S.rLoaded) return `<div class="card refresh-head muted">Loading the refresh list…</div>`;
+  const list = S.refresh, dl = rDaysLeft();
+  const st = list.map(m => rState(m.staff_id));
+  const ver = st.filter(x => x.status === 'verified').length, flag = st.filter(x => x.status === 'flagged').length, na = st.filter(x => x.status === 'none').length;
+  return `<div class="page-head row refresh-pagehead" style="justify-content:space-between;align-items:flex-end;margin-top:26px">
+      <div><div class="eyebrow">Barista refresh · existing team · ${esc(S.loc.name)}</div><h1>Refresh</h1>
+        <div class="sub">Everyone here who isn't a manager or in new-hire training. By <b>Dec 31</b> each person needs the refresh checklist, the Espresso &amp; Milk approval, the 30/60/90-day quizzes, and a manager assessment at Meets standard on all 9 behaviors.</div></div>
+      <div class="refresh-kpis"><div><b>${ver}</b><span>of ${list.length} verified</span></div><div><b>${dl >= 0 ? dl : 0}</b><span>${dl >= 0 ? 'days left' : 'past due'}</span></div>${flag ? `<div class="bad"><b>${flag}</b><span>flagged</span></div>` : ''}${na ? `<div><b>${na}</b><span>not assessed</span></div>` : ''}</div>
+    </div>
+    ${S.rError ? `<div class="alert">Couldn't load this store's team (${esc(S.rError)}).</div>` : ''}
+    <div class="grid">${list.map((m, i) => refreshCard(m, st[i])).join('') || `<div class="card muted">Nobody on the refresh list at ${esc(S.loc.name)}.</div>`}</div>`;
+}
+function refreshCard(m, s){
+  const a = s.a;
+  return `<div class="card trainee refresh" onclick="openRefresh('${m.staff_id}')">
+    <div class="row" style="justify-content:space-between"><div class="name">${esc(m.name)}</div>${rChip(s.status)}</div>
+    <div class="small muted">${esc(m.job_title || 'Barista')}${m.hire_date ? ` · since ${fmtD(m.hire_date)}` : ''}</div>
+    <div class="rbars">
+      <div><span>Checklist</span><div class="bar"><span style="width:${s.total ? Math.round(100 * s.done / s.total) : 0}%"></span></div><b>${s.done}/${s.total}</b></div>
+      <div><span>Tests</span><div class="bar"><span style="width:${s.passed * 25}%"></span></div><b>${s.passed}/4</b></div>
+    </div>
+    <div class="rscores">${a ? R_PILLARS.map(([k, , sh]) => { const v = rPillarAvg(a, k); return `<span class="rsc ${rBand(v)}" title="${esc(k)}">${sh} ${v == null ? '–' : v.toFixed(1)}</span>`; }).join('') + `<span class="small muted">${fmtT(a.assessed_at).split(',')[0]}</span>` : `<span class="small muted">No manager assessment yet</span>`}</div>
+    ${s.status !== 'verified' && s.left.length ? `<div class="small" style="margin-top:6px;color:var(--ink-3)">To go: ${esc(s.left.join(' · '))}</div>` : ''}
+  </div>`;
+}
+
+async function openRefresh(staffId){
+  if (!S.rLoaded) await loadRefresh();
+  if (!S.refresh.some(m => m.staff_id === staffId)) return renderBoard();
+  S.track = null; S.rStaff = staffId; renderRefresh(); window.scrollTo(0, 0);
+}
+function renderRefresh(){
+  const id = S.rStaff, m = S.refresh.find(x => x.staff_id === id); if (!m) return renderBoard();
+  history.replaceState(null, '', `training.html?loc=${S.loc.id}&r=${id}`);
+  shell();
+  const back = document.querySelector('.top-actions');
+  if (back) back.insertAdjacentHTML('afterbegin', `<button class="site-btn" onclick="S.rStaff=null;renderBoard()">&larr; All trainees</button>`);
+  const s = rState(id), a = s.a, tests = S.rTests[id] || {}, sg = S.rSigned[id] || {}, dl = rDaysLeft();
+  const hist = S.rAssess[id] || [];
+  const stages = [...new Set(S.rItems.map(i => i.stage))];
+  document.getElementById('main').innerHTML = `
+  <div class="page-head">
+    <div class="eyebrow">Barista refresh · ${esc(S.loc.name)}</div>
+    <h1>${esc(m.name)}</h1>
+    <div class="sub">${esc(m.job_title || 'Barista')}${m.hire_date ? ` · with us since ${fmtD(m.hire_date)}` : ''} · due <b>Dec 31</b>${dl >= 0 ? ` (${dl} days)` : ' · <b style="color:var(--red)">past due</b>'} · ${rChip(s.status)}</div>
+  </div>
+  ${s.status === 'verified' ? `<div class="alert green-alert">✓ Verified: meets the Barista 1 standard. This counts as Barista 1 in the Academy.</div>` : s.left.length ? `<div class="alert amber">Still to go: ${esc(s.left.join(' · '))}</div>` : ''}
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><h2 style="margin:0">Manager assessment</h2><div class="small muted">${a ? `Last scored ${fmtT(a.assessed_at)} by ${esc(nm(a.assessed_by))}` : 'Not assessed yet.'} · 1 Not yet · 2 Developing · 3 Meets standard · 4 Exceptional</div></div>
+      <a class="btn sm" href="assess.html?loc=${encodeURIComponent(S.loc.id)}&staff=${encodeURIComponent(id)}" target="_blank" rel="noopener">${a ? 'Re-assess' : 'Assess'} ↗</a>
+    </div>
+    <div class="rpillars">${R_PILLARS.map(([k, label]) => { const v = rPillarAvg(a, k), note = a?.notes?.[R_NOTE_KEY[k]];
+      return `<div class="rpillar"><div class="rph"><b>${label}</b><span class="rsc ${rBand(v)}">${v == null ? '–' : v.toFixed(1)}</span></div>
+        ${rBench(1, k).map(b => rBehavior(b, a)).join('')}
+        ${note ? `<div class="small rnote">“${esc(note)}”</div>` : ''}</div>`; }).join('')}</div>
+    ${hist.length > 1 ? `<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">History · ${hist.length} assessments</summary>
+      <table class="rhist">${hist.map(h => `<tr><td>${fmtT(h.assessed_at)}</td><td class="muted">${esc(nm(h.assessed_by))}</td>${R_PILLARS.map(([k, , sh]) => { const v = rPillarAvg(h, k); return `<td><span class="rsc ${rBand(v)}">${sh} ${v == null ? '–' : v.toFixed(1)}</span></td>`; }).join('')}</tr>`).join('')}</table></details>` : ''}
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 2px">Growth benchmarks</h2>
+    <div class="small muted" style="margin-bottom:10px">Three behaviors per competency at each Academy level, from their latest manager assessment. A level's benchmark is met when all three are at Meets standard (3) or better.</div>
+    <div class="rbench">${R_PILLARS.map(([k, label]) => { const cur = (S.rLevels[id] || {})[k] || 0;
+      return `<div class="rbcol"><div class="rph"><b>${label}</b><span class="small muted">Academy level ${cur}</span></div>
+        ${[1,2,3].map(lv => { const bs = rBench(lv, k); if (!bs.length) return '';
+          const draft = bs.some(b => !b.approved), vals = bs.map(b => Number(a?.ratings?.[b.key]));
+          const met = !draft && vals.every(v => v >= 3), rated = vals.filter(Number.isFinite).length;
+          return `<div class="rblevel ${met ? 'met' : ''} ${draft ? 'draft' : ''}"><div class="rbl">Barista ${lv}${met ? ' <span class="chip verified">Met</span>' : draft ? ' <span class="chip open">Draft</span>' : rated ? ` <span class="small muted">${vals.filter(v => v >= 3).length}/3 at 3+</span>` : ' <span class="small muted">not rated</span>'}</div>
+            ${bs.map(b => rBehavior(b, a, true)).join('')}</div>`; }).join('')}</div>`; }).join('')}</div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 2px">Tests · due Dec 31</h2>
+    <div class="small muted" style="margin-bottom:8px">Record each one when they pass it. Scores are optional.</div>
+    ${R_TESTS.map(([k, t, d]) => { const r = tests[k], viaA = !r && a?.checks?.[k];
+      return `<div class="list-row rtest"><div><b>${esc(t)}</b><div class="small muted">${esc(d)}</div></div>
+        <div class="row">${r ? `<span class="chip verified">Passed ${fmtD(r.passed_on)}${r.score != null ? ` · ${esc(r.score)}%` : ''}</span><span class="small muted">${esc(first(r.recorded_by))}</span><button class="btn ghost sm" onclick="rUndoTest('${k}')">Undo</button>`
+          : viaA ? `<span class="chip verified">Passed</span><span class="small muted">marked on the assessment</span><button class="btn ghost sm" onclick="rTestModal('${k}')">Add score</button>`
+          : `${dl < 0 ? '<span class="chip late">Past due</span>' : ''}<button class="btn sm" onclick="rTestModal('${k}')">Record pass</button>`}</div></div>`; }).join('')}
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Refresh checklist</h2><b>${s.done} of ${s.total}</b></div>
+    <div class="small muted" style="margin-bottom:8px">The Barista Beginner sign-offs. Check each one as you see them do it. Anything signed off in their new-hire training counts automatically.</div>
+    ${stages.map(stg => { const its = S.rItems.filter(i => i.stage === stg), d = its.filter(i => sg[i.key]).length;
+      return `<details class="rstage" ${d < its.length ? 'open' : ''}><summary><b>${esc(its[0].label)}</b> · ${esc(its[0].title)} <span class="small muted">${d}/${its.length}</span></summary>
+        ${its.map(i => { const x = sg[i.key], lock = x && x.src === 'training';
+          return `<label class="so"><input type="checkbox" ${x ? 'checked' : ''} ${lock ? 'disabled' : ''} onchange="rSign('${i.key}', this.checked, this)"><span>${esc(i.text)}${x ? `<div class="by">✓ ${esc(first(x.by))} · ${fmtT(x.at)}${lock ? ' · from training' : ''}</div>` : ''}</span></label>`; }).join('')}</details>`; }).join('')}
+  </div>`;
+}
+function rBehavior(b, a, compact){
+  const v = Number(a?.ratings?.[b.key]); const has = Number.isFinite(v) && v > 0;
+  return `<div class="rbeh ${compact ? 'c' : ''}"><div><b>${esc(b.title)}</b>${compact ? '' : `<div class="small muted">${esc(b.description)}</div>`}</div>
+    <span class="rlv ${has ? 'l' + v : ''}" title="${has ? esc(R_LEVELS[v - 1][1]) : 'Not rated'}">${has ? `${v} · ${esc(R_LEVELS[v - 1][1])}` : '—'}</span></div>`;
+}
+async function rReload(){ const id = S.rStaff; await loadRefresh(); S.rStaff = id; renderRefresh(); }
+async function rSign(key, on, el){
+  el.disabled = true;
+  const id = S.rStaff;
+  const { error } = on
+    ? await sb.from('barista_refresh_signoffs').insert({ staff_id: id, item_key: key, location_id: S.loc.id, signed_by: S.me.id })
+    : await sb.from('barista_refresh_signoffs').delete().eq('staff_id', id).eq('item_key', key);
+  if (error){ toast(errMsg(error)); }
+  await rReload();
+}
+function rTestModal(k){
+  const t = R_TESTS.find(x => x[0] === k), cur = (S.rTests[S.rStaff] || {})[k];
+  openModal(`<h2>${esc(t[1])}</h2><div class="muted small">${esc(nm(S.rStaff))} · Barista refresh</div>
+    <label class="f">Date passed</label><input class="inp" type="date" id="rt-date" value="${cur?.passed_on || todayISO()}">
+    <label class="f">Score (%) <span class="muted">optional</span></label><input class="inp" type="number" id="rt-score" min="0" max="100" value="${cur?.score ?? ''}">
+    <label class="f">Note <span class="muted">optional</span></label><input class="inp" id="rt-note" value="${esc(cur?.note || '')}">
+    <div class="err" id="merr"></div>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn green" onclick="rSaveTest('${k}', this)">Save as passed</button></div>`);
+}
+async function rSaveTest(k, b){
+  b.disabled = true;
+  const sc = document.getElementById('rt-score').value;
+  const { error } = await sb.from('barista_refresh_tests').upsert({ staff_id: S.rStaff, test_key: k, location_id: S.loc.id, passed_on: document.getElementById('rt-date').value || todayISO(),
+    score: sc === '' ? null : Number(sc), note: document.getElementById('rt-note').value.trim() || null, recorded_by: S.me.id, recorded_at: new Date().toISOString() }, { onConflict: 'staff_id,test_key' });
+  if (error){ b.disabled = false; return showErr(errMsg(error)); }
+  closeModal(); toast('Saved'); await rReload();
+}
+async function rUndoTest(k){
+  if (!confirm('Remove this passed test?')) return;
+  const { error } = await sb.from('barista_refresh_tests').delete().eq('staff_id', S.rStaff).eq('test_key', k);
+  if (error) toast(errMsg(error));
+  await rReload();
+}
+
+function rKick(){
+  S.rLoaded = false; S.rError = null;
+  const paint = () => { const w = document.getElementById('refresh-wrap'); if (w && !S.track && !S.rStaff) w.innerHTML = refreshSection(); };
+  return loadRefresh().then(paint).catch(e => { S.rLoaded = true; S.rError = errMsg(e); paint(); });
 }
 
 /* ---------------- trainee's own read-only view ---------------- */
