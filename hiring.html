@@ -66,6 +66,12 @@
   .note{border-left:3px solid var(--line);padding:4px 10px;margin:6px 0;font-size:14px}
   .note.status{border-color:var(--gold);color:var(--mute)}
   .note small{color:var(--mute);display:block;font-size:12px}
+  .ivchip{display:inline-block;margin-top:4px;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;background:#eef2f7;color:var(--navy);white-space:nowrap}
+  .ivchip.d-hire{background:#DDEFE3;color:#1f6b40}.ivchip.d-maybe{background:#FBEFD2;color:#7a5600}.ivchip.d-no{background:#F8E1DE;color:#9b2c22}
+  .ivrow{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;text-decoration:none;color:inherit}
+  .ivrow:hover{background:#f7f9fc}
+  .ivscore{white-space:nowrap;font-size:13px;text-align:right}
+  a.b.ivstart{display:inline-block;text-decoration:none;font-size:14px;padding:8px 14px;border-radius:6px;background:var(--navy);color:#fff}
   .entity{background:#fff4d6;border-left:4px solid var(--gold);padding:8px 12px;margin-top:8px;font-size:14px}
   /* positions */
   .card{background:#fff;border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:8px;padding:14px 16px;margin-bottom:10px}
@@ -283,6 +289,8 @@ aside h3{font-family:var(--sd-label) !important; font-weight:700; font-size:10.5
 .grid2 label.toggle,.card h4 .toggle{font-family:var(--sd-body) !important; font-weight:500 !important; font-size:13px !important; letter-spacing:0 !important; text-transform:none !important; color:#284A70 !important;}
 input[type=checkbox]{accent-color:#284A70;}
 #appsWrap{overflow-x:auto; border-radius:14px;}
+a.b.ivstart{background:#F2A900 !important; color:#284A70 !important; border-radius:999px !important; font-family:var(--sd-label) !important; font-weight:700; font-size:11.5px !important; letter-spacing:.14em; text-transform:uppercase; box-shadow:0 3px 0 #B57F00; padding:9px 16px !important;}
+.ivchip{font-family:var(--sd-label); letter-spacing:.06em;}
 
 </style>
 </head>
@@ -335,7 +343,7 @@ const STATUSES = ['new','reviewing','interview','offer','hired','declined','with
 const ACTIVE = ['new','reviewing','interview','offer'];
 const DAYS = [['mon','Mon'],['tue','Tue'],['wed','Wed'],['thu','Thu'],['fri','Fri'],['sat','Sat'],['sun','Sun']];
 const SLOTS = [['am','Morning'],['mid','Midday'],['pm','Evening']];
-let S = { apps: [], posts: [], plocs: [], locs: [], cl: [], staff: {}, admin: false, full: false, statusF: 'active', current: null };
+let S = { apps: [], ivs: {}, posts: [], plocs: [], locs: [], cl: [], staff: {}, admin: false, full: false, statusF: 'active', current: null };
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -357,8 +365,10 @@ async function init(){
   S.locs = locs.data || []; S.cl = cl.data || [];
   (staff.data || []).forEach(s => S.staff[s.id] = s.name);
   if (S.admin) document.querySelector('[data-tab=posts]').hidden = false;
+  const qs = new URLSearchParams(location.search), sf = qs.get('s');
+  if (sf && ['active','all',...STATUSES].includes(sf)) S.statusF = sf;
   await Promise.all([loadApps(), loadPosts()]);
-  const id = new URLSearchParams(location.search).get('a'); if (id) openApp(id);
+  const id = qs.get('a'); if (id) openApp(id);
 }
 
 // ---------------- applicants ----------------
@@ -366,6 +376,8 @@ async function loadApps(){
   const { data, error } = await sb.from('job_applications').select('*').order('created_at', { ascending: false }).limit(1000);
   if (error) { $('#appsWrap').innerHTML = `<div class="empty">Couldn't load applications: ${esc(error.message)}</div>`; return; }
   S.apps = data || [];
+  const iv = await sb.from('job_interviews').select('id,application_id,interviewer_id,guide,status,decision,rating_leadership,rating_craft,rating_customer_care,summary,submitted_at,updated_at').order('updated_at', { ascending: false });
+  S.ivs = {}; (iv.data || []).forEach(x => (S.ivs[x.application_id] = S.ivs[x.application_id] || []).push(x));
   const myLocs = [...new Set(S.apps.flatMap(a => a.location_ids))];
   const fl = $('#fLoc'), keep = fl.value;
   fl.innerHTML = '<option value="">All my locations</option>' + S.cl.filter(c => myLocs.includes(c.location_id) || S.full).map(c => `<option value="${c.location_id}">${esc(c.public_name)}</option>`).join('');
@@ -405,9 +417,24 @@ function renderApps(){
       <td class="hide-m">${a.location_ids.map(l => `<span class="chip">${esc(shortLoc(l))}</span>`).join('')}</td>
       <td class="hide-m">${miniAvail(a.availability)}</td>
       <td>${ago(a.created_at)}</td>
-      <td><span class="pill s-${a.status}">${a.status}</span></td></tr>`).join('') + '</tbody></table>';
+      <td><span class="pill s-${a.status}">${a.status}</span>${ivChip(a.id)}</td></tr>`).join('') + '</tbody></table>';
 }
 
+const DEC = { hire: 'Hire', maybe: 'Maybe', no: 'No' };
+const ivScore = x => `L${x.rating_leadership ?? '–'} · C${x.rating_craft ?? '–'} · CC${x.rating_customer_care ?? '–'}`;
+function ivChip(id){
+  const x = (S.ivs[id] || []).find(v => v.status === 'submitted'); if (!x) return '';
+  return `<br><span class="ivchip d-${x.decision}" title="Latest interview: ${esc(ivScore(x))}">${esc(ivScore(x))} · ${DEC[x.decision] || ''}</span>`;
+}
+function ivSection(a){
+  const list = S.ivs[a.id] || [];
+  const rows = list.map(x => `<a class="ivrow" href="interview.html?i=${x.id}">
+      <span><b>${esc(S.staff[x.interviewer_id] || 'Someone')}</b> <span class="muted">· ${x.guide} guide · ${x.status === 'submitted' ? new Date(x.submitted_at).toLocaleDateString() : 'draft, ' + ago(x.updated_at).toLowerCase()}</span>
+      ${x.summary ? `<br><span class="muted" style="font-size:13px">${esc(x.summary)}</span>` : ''}</span>
+      <span class="ivscore">${x.status === 'submitted' ? `${esc(ivScore(x))} <span class="ivchip d-${x.decision}">${DEC[x.decision]}</span>` : '<span class="chip">Draft</span>'}</span></a>`).join('');
+  return `<h3>Interviews</h3>${rows || '<div class="muted" style="font-size:14px">No interviews yet.</div>'}
+    <div style="margin-top:8px"><a class="b ivstart" href="interview.html?a=${a.id}${list.some(x => x.status === 'draft') ? '' : '&new=1'}">${list.some(x => x.status === 'draft') ? 'Continue interview' : 'Start interview'} ↗</a></div>`;
+}
 async function openApp(id){
   const a = S.apps.find(x => x.id === id); if (!a) return;
   S.current = a;
@@ -437,6 +464,8 @@ async function openApp(id){
       </label>
       ${hiredLoc ? `<div class="entity">Onboard in Gusto under <b>${esc(hiredLoc.legal_entity)}</b>.</div>` : ''}
     </div>
+
+    ${ivSection(a)}
 
     <h3>Locations they'd work at</h3>
     <div>${a.location_ids.map(l => `<span class="chip">${esc(locName(l))}</span>`).join('')}</div>

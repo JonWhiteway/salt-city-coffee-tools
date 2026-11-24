@@ -1220,6 +1220,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 .mb-status-pick{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
 .mb-status-pick button{font:inherit; font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer;}
 .mb-status-pick button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+.hiring-new-badge[hidden]{display:none !important;}
 .mb-nav-badge{margin-left:auto; min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:var(--critical); color:#fff; font-size:11px; font-weight:800; line-height:20px; text-align:center;}
 
 /* write-ups (corrective step 1) */
@@ -1593,8 +1594,9 @@ body::before{display:none !important;}
     <ul class="nav-list" id="nav-portal-item">
       <li><button class="nav-item" data-section="lmgm"><span class="nav-dot"></span>LM / GM / PM / Bookkeeper Portal</button></li>
       <li class="sa-nav-pm" style="display:none;"><a class="nav-item nav-link" href="staff-admin.html"><span class="nav-dot"></span>Staff &amp; Locations <span class="nav-ext">↗</span></a></li>
-      <li class="hiring-nav" style="display:none;"><a class="nav-item nav-link" href="hiring.html" title="Applicants from saltcitycoffee.com/pages/careers"><span class="nav-dot"></span>Hiring <span class="nav-ext">↗</span></a></li>
+      <li class="hiring-nav hiring-nav-side" style="display:none;"><a class="nav-item nav-link" href="hiring.html" title="Applicants from saltcitycoffee.com/pages/careers"><span class="nav-dot"></span>Hiring <span class="nav-ext">↗</span></a></li>
     </ul>
+
     <div class="lm-nav-group" id="lm-nav-group" hidden>
       <ul class="nav-list">
         <li><button class="nav-item lm-nav" data-lmview="dashboard"><span class="nav-dot"></span>Store Dashboard</button></li>
@@ -1626,6 +1628,8 @@ body::before{display:none !important;}
       <li><button class="nav-item" data-section="crm"><span class="nav-dot"></span>Customer Journey &amp; Marketing</button></li>
       <li class="mb-nav" style="display:none;"><button class="nav-item" data-section="mobilebar"><span class="nav-dot"></span>Mobile Bar Desk</button></li>
       <li class="sa-nav" style="display:none;"><a class="nav-item nav-link" href="staff-admin.html" title="PINs, location assignments, roles, and who no longer works here"><span class="nav-dot"></span>Staff &amp; Locations <span class="nav-ext">↗</span></a></li>
+      <li class="hiring-nav-group" style="display:none;"><a class="nav-item nav-link" href="hiring.html" title="Applicants from saltcitycoffee.com/pages/careers"><span class="nav-dot"></span>Hiring<span class="hiring-new-badge mb-nav-badge" hidden title="New applicants"></span></a></li>
+      <li class="hiring-nav-group" style="display:none;"><a class="nav-item nav-link" href="hiring.html?s=interview" title="Applicants you're interviewing"><span class="nav-dot"></span>Interviews</a></li>
     </ul>
     </div>
     <div class="coo-nav-group">
@@ -5293,6 +5297,15 @@ async function initApp(){
   $$(".sa-nav").forEach(el => el.style.display = myStaff.role === "coo" ? "" : "none");
   $$(".sa-nav-pm").forEach(el => el.style.display = myStaff.role === "production_manager" ? "" : "none");
   $$(".hiring-nav").forEach(el => el.style.display = ["gm","location_manager","production_manager","coo","ceo","cbo"].includes(myStaff.role) ? "" : "none");
+  // GMs and above get their own Hiring group near the top of the sidebar, with a count of new applicants.
+  const hiringLead = ["gm","coo","ceo","cbo"].includes(myStaff.role);
+  $$(".hiring-nav-group").forEach(el => el.style.display = hiringLead ? "" : "none");
+  if(hiringLead){
+    $$(".hiring-nav-side").forEach(el => el.style.display = "none");
+    sb.from("job_applications").select("id", { count: "exact", head: true }).eq("status", "new").then(({ count }) => {
+      $$(".hiring-new-badge").forEach(b => { b.hidden = !count; b.textContent = count || ""; });
+    });
+  }
   if(EXEC_ROLES.includes(myStaff.role)) setTimeout(mbLoad, 0);  // fills the "new requests" badge
   $$(".exec-nav-group .exec-only").forEach(el => el.style.display = EXEC_ROLES.includes(myStaff.role) ? "" : "none");
   $$(".exec-nav-group .gm-only").forEach(el => el.style.display = myStaff.role === "gm" ? "" : "none");
