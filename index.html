@@ -1,4 +1,6 @@
+<meta charset="utf-8">
 <title>Salt City Command Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#244A71">
 <link rel="icon" href="/logo.svg" type="image/svg+xml">
@@ -1230,6 +1232,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 .mb-status-pick button{font:inherit; font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer;}
 .mb-status-pick button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
 .hiring-new-badge[hidden]{display:none !important;}
+@media (max-width:760px){ input:not([type=checkbox]):not([type=radio]), select, textarea{font-size:16px !important;} }
 .mb-nav-badge{margin-left:auto; min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:var(--critical); color:#fff; font-size:11px; font-weight:800; line-height:20px; text-align:center;}
 
 /* write-ups (corrective step 1) */
@@ -1339,6 +1342,7 @@ code{font-family:var(--font-mono);font-size:.9em;background:rgba(13,27,42,.055);
 #app-root .nm-stores,.lm-modal-card .nm-stores{display:flex; flex-wrap:wrap; gap:6px 4px;}
 
 #gate-wrap .loc-tiles{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+@media (max-width:560px){ #gate-wrap .login-wrap{padding:16px;} #gate-wrap .login-card{padding:22px 18px;} #gate-wrap .staff-tile .nm{font-size:14px; line-height:1.15; letter-spacing:.02em; overflow-wrap:normal; hyphens:none;} #gate-wrap .staff-tile{padding:12px 12px; min-height:0;} }
 #gate-wrap .staff-tile.is-last{border-color:var(--rd-navy,#284A70); box-shadow:0 0 0 2px rgba(242,169,0,.45);}
 #gate-wrap .pin-email{display:grid; gap:6px; max-width:280px; margin:0 auto 16px;}
 #gate-wrap .pin-email label, #gate-wrap .pin-email-lbl{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3);}
@@ -1675,6 +1679,7 @@ body::before{display:none !important;}
       <li class="gm-only"><a class="nav-item nav-link" href="walkthrough.html" target="_blank" rel="noopener" title="Score a cafe walk-through (opens the walk-through page)"><span class="nav-dot"></span>Walk-Through Audit<span class="nav-ext" aria-hidden="true">↗</span></a></li>
       <li class="exec-only"><button class="nav-item" data-section="lmgm" data-audits="secret_shopper"><span class="nav-dot"></span>Secret Shopper</button></li>
       <li class="exec-only"><button class="nav-item" data-section="academy"><span class="nav-dot"></span>Academy Engagement</button></li>
+      <li class="exec-only"><a class="nav-item nav-link" href="benchmarks.html" title="Edit the Academy benchmarks and role rules"><span class="nav-dot"></span>Academy Benchmarks <span class="nav-ext">↗</span></a></li>
       <li><a class="nav-item nav-link" href="hr-cases.html" title="Confidential harassment & discrimination complaints sent to you"><span class="nav-dot"></span>Complaints <span id="hc-nav-count" class="chip critical" style="display:none; margin-left:6px; padding:1px 7px;"></span></a></li>
     </ul>
     </div>
@@ -10437,7 +10442,7 @@ const taWhen = ts => { const d = taDay(ts); return d ? `${lmFmtDate(d)}, ${d.sli
 const taInitials = n => String(n||"?").split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join("");
 
 async function taLoadItems(){
-  if(!taBench){ const { data } = await sb.from("academy_benchmarks").select("*").order("level").order("competency").order("sort"); taBench = data || []; }
+  if(!taBench){ const { data } = await sb.from("academy_benchmarks").select("*").eq("role_track","barista").order("level").order("competency").order("sort"); taBench = data || []; }
   if(taItems) return taItems;
   const [{ data: items }, { data: stages }] = await Promise.all([
     sb.from("training_plan_items").select("id,stage,sort,signoffs").order("sort"),

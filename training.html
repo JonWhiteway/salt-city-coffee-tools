@@ -863,7 +863,7 @@ async function loadRefresh(){
     ids.length ? sb.rpc('ta_training_signoffs', { p_staff: ids }) : none,
     ids.length ? sb.from('barista_refresh_tests').select('*').in('staff_id', ids) : none,
     ids.length ? sb.from('academy_status').select('staff_id,competency,current_level').in('staff_id', ids) : none,
-    S.bench.length ? Promise.resolve({ data: S.bench }) : sb.from('academy_benchmarks').select('*').order('level').order('competency').order('sort'),
+    S.bench.length ? Promise.resolve({ data: S.bench }) : sb.from('academy_benchmarks').select('*').eq('role_track','barista').order('level').order('competency').order('sort'),
   ]);
   S.bench = bm.data || [];
   ids.forEach(id => { S.rAssess[id] = []; S.rSigned[id] = {}; S.rTests[id] = {}; S.rLevels[id] = {}; });
