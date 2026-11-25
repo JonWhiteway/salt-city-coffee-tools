@@ -180,6 +180,15 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); }
 .adm .vcard .del { justify-self: start; margin-top: 6px; border: 1px solid var(--no); color: var(--no); background: transparent; border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .done p + p { margin-top: -4px; }
 </style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#244A71">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Command Deck">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
 <div class="hero">
@@ -530,6 +539,13 @@ footer { margin-top: 26px; font-size: 13px; color: var(--muted); }
   }
   boot().catch(function () { bad("Something went wrong", "Check your connection and reload this page."); });
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function (e) { console.warn('SW registration failed', e); });
+    });
+  }
 </script>
 </body>
 </html>

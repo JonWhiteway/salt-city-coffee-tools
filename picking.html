@@ -1,0 +1,2837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salt City Coffee — Picking</title>
+<style>
+  :root {
+      --ink:#241F18; --ink-soft:#5A5245; --paper:#F7F4EC; --card:#FFFFFF;
+      --line:#E1D9C4; --accent:#EB6834; --accent-soft:#FCE3D4;
+      --warn:#B8860B; --warn-soft:#F7EBC9; --good:#0CA30C; --good-soft:#DCF3DC; --radius:10px;
+    }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  header {
+    padding: 22px 20px 18px;
+    border-bottom: 1px solid var(--line);
+    border-top: 6px solid var(--accent);
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 5;
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-row img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+    object-position: center;
+    box-shadow: 0 2px 8px rgba(35, 75, 110, 0.25);
+  }
+  .header-text h1 { margin: 0 0 2px; }
+  .header-text p { margin: 0; }
+  header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 3px;
+    letter-spacing: -0.01em;
+    color: var(--accent);
+  }
+  header p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 0 0 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  main { padding: 16px; max-width: min(94vw, 1200px); margin: 0 auto 60px; }
+  .inv-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 640px) {
+    .inv-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 960px) {
+    .inv-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .inv-row { margin-bottom: 0; }
+  .order-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 8px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .order-card:active { border-color: var(--accent); }
+  .order-card.status-submitted { border-left-color: #c0392b; background: #fdecea; }
+  .order-card.status-picking { border-left-color: #d68910; background: #fef5e0; }
+  .order-card.status-fulfilled { border-left-color: #6d5a9e; background: #f0edf7; }
+  .order-card.status-enroute { border-left-color: #1a73a8; background: #e6f1fa; }
+  .order-card.received { border-left-color: #1e8449; background: #e6f6ec; }
+  .order-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .order-card-top h2 { font-size: 19px; margin: 0; font-weight: 700; }
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .badge.submitted { background: #fdecea; color: #c0392b; }
+  .badge.picking { background: #fef5e0; color: #b8760b; }
+  .badge.fulfilled { background: #f0edf7; color: #6d5a9e; }
+  .badge.enroute { background: #e6f1fa; color: #1a73a8; }
+  .badge.delivered { background: #e6f6ec; color: #1e8449; }
+  .order-card p { margin: 0; font-size: 15px; color: var(--ink-soft); }
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  @media (min-width: 640px) {
+    .home-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 960px) {
+    .home-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .home-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 46px 24px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(28, 31, 26, 0.05);
+    transition: border-color .15s, transform .1s, box-shadow .15s;
+  }
+  .home-btn:active { transform: scale(0.98); }
+  .home-btn:hover { box-shadow: 0 4px 16px rgba(28, 31, 26, 0.09); }
+  .home-btn-a { border-top: 5px solid var(--accent); }
+  .home-btn-b { border-top: 5px solid #6d5a9e; }
+  .home-btn-c { border-top: 5px solid #d68910; }
+  .home-btn-icon { font-size: 34px; line-height: 1; }
+  .home-btn-label { font-size: 17px; font-weight: 700; color: var(--ink); }
+  .home-btn-sub { font-size: 13px; color: var(--ink-soft); }
+  .cafe-btn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (min-width: 640px) {
+    .cafe-btn-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .cafe-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 28px 14px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .cafe-btn:active { border-color: var(--accent); }
+  .cafe-btn-name { font-size: 18px; font-weight: 700; color: var(--ink); }
+  .cafe-btn-count { font-size: 14px; color: var(--ink-soft); font-weight: 600; }
+  .filter-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .filter-banner button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .nav-link {
+    display: inline-block;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  .inv-row {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .inv-row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .inv-row-top h3 { font-size: 15px; margin: 0 0 3px; font-weight: 600; }
+  .inv-row-top p { font-size: 13px; color: var(--ink-soft); margin: 0; }
+  .inv-qty {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .inv-qty .num { font-size: 20px; font-weight: 700; line-height: 1; }
+  .inv-qty .unit { font-size: 11px; color: var(--ink-soft); }
+  .inv-add-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 8px 0 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .inv-add-box {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .inv-add-box input[type="number"] {
+    width: 70px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .inv-add-box select {
+    flex: 1;
+    min-width: 140px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    font-size: 13px;
+    background: white;
+  }
+  .inv-add-box button.confirm {
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .inv-add-box button.cancel {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px 4px;
+  }
+  .hist-row {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .hist-row .delta {
+    font-size: 17px;
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 48px;
+  }
+  .hist-row .delta.pos { color: var(--accent); }
+  .hist-row .delta.neg { color: var(--warn); }
+  .hist-info { flex: 1; }
+  .hist-info .source { font-size: 13px; font-weight: 600; margin: 0 0 2px; }
+  .hist-info .meta { font-size: 12px; color: var(--ink-soft); margin: 0; }
+  .board-wrap {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .board-col {
+    flex: 0 0 260px;
+    width: 260px;
+  }
+  .board-col-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0 2px 8px;
+    position: sticky;
+    top: 0;
+  }
+  .board-col-header h2 { font-size: 15px; margin: 0; font-weight: 700; }
+  .board-col-header span { font-size: 12px; color: var(--ink-soft); font-weight: 600; }
+  .order-card .timestamp {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: 2px 0 0;
+  }
+  .settings-block {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .settings-block p.label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 8px;
+  }
+  .settings-block .row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .settings-block input {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  .settings-block button {
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .settings-block .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-soft);
+  }
+  .empty-state p { font-size: 15px; margin: 0; }
+  .line-item {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: background .15s, border-color .15s;
+  }
+  .line-item.done {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .line-info h3 { font-size: 15px; margin: 0 0 3px; font-weight: 600; }
+  .line-info p { font-size: 13px; color: var(--ink-soft); margin: 0; }
+  .line-info .bin {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 1px 6px;
+    margin-right: 6px;
+  }
+  .pick-btn {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    background: var(--card);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--ink-soft);
+    transition: all .15s;
+  }
+  .pick-btn.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .submit-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  }
+  .submit-bar button {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    display: block;
+    padding: 18px;
+    border-radius: var(--radius);
+    border: none;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--ink);
+    color: white;
+  }
+  .submit-bar button:disabled {
+    background: var(--line);
+    color: var(--ink-soft);
+    cursor: default;
+  }
+  .progress-text {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--ink);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all .25s;
+    pointer-events: none;
+    z-index: 20;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .line-item-wrap { margin-bottom: 10px; }
+  .line-item-wrap .line-item { margin-bottom: 0; border-radius: var(--radius) var(--radius) 0 0; }
+  .line-item-wrap.no-note .line-item { border-radius: var(--radius); }
+  .note-row {
+    border: 1px solid var(--line);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 8px 16px;
+    background: var(--paper);
+  }
+  .note-btn {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .note-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--warn);
+  }
+  .note-chip span.dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--warn);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .note-chip .edit-note {
+    background: none; border: none; color: var(--ink-soft);
+    font-size: 12px; text-decoration: underline; cursor: pointer;
+    margin-left: auto; padding: 0; flex-shrink: 0;
+  }
+  .note-input-row { display: flex; gap: 8px; }
+  .note-input-row textarea {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: none;
+    min-height: 38px;
+  }
+  .note-input-row button {
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .logo-mark {
+    display: block;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    box-shadow: 0 2px 8px rgba(35, 75, 110, 0.25);
+    object-fit: cover;
+    object-position: center;
+  }
+  .login-wrap {
+    max-width: 340px;
+    margin: 12vh auto 0;
+    padding: 32px 28px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(28, 31, 26, 0.06);
+  }
+  .login-wrap h2 { font-size: 20px; margin: 0 0 4px; text-align: center; letter-spacing: -0.01em; }
+  .login-wrap p.sub { text-align: center; color: var(--ink-soft); font-size: 13px; margin: 0 0 24px; }
+  .login-wrap input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--card);
+    font-size: 17px;
+    margin-bottom: 14px;
+  }
+  .login-wrap button {
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .login-wrap button:hover { background: #1b3a57; }
+  .login-wrap .error { color: var(--warn); font-size: 13px; text-align: center; margin: 0 0 12px; }
+  .signout-link {
+    background: none; border: none; color: var(--ink-soft);
+    font-size: 12px; text-decoration: underline; cursor: pointer; padding: 0;
+  }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+
+:root {
+  --ink:#241F18; --ink-soft:#5A5245; --paper:#F7F4EC; --card:#FFFFFF;
+  --line:#E1D9C4; --accent:#EB6834; --accent-soft:#FCE3D4;
+  --warn:#B8860B; --warn-soft:#F7EBC9; --good:#0CA30C; --good-soft:#DCF3DC;
+  --radius:10px;
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA;
+  --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent-ink:#FFFFFF; --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --serious:#C15A34; --critical:#D03B3B; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --font-display:'Oswald','Arial Narrow',sans-serif;
+  --font-body:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+html { -webkit-text-size-adjust:100%; }
+body {
+  background:var(--bg); color:var(--ink); font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4 { font-family:var(--font-display); font-weight:600; color:var(--ink); }
+button,input,select,textarea { font-family:inherit; }
+::selection { background:var(--accent-soft); color:var(--ink); }
+:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+header { border-top-color:var(--accent) !important; }
+header h1 { color:var(--ink) !important; font-family:var(--font-display); letter-spacing:.01em; text-transform:uppercase; }
+button.primary, .save-btn, .back-btn.primary, .cart-bar button, .submit-bar button,
+.login-wrap button, .login-wrap .submit-btn {
+  background:var(--accent); color:#fff;
+}
+button.primary:hover, .save-btn:hover, .cart-bar button:hover, .submit-bar button:hover,
+.login-wrap button:hover { background:#D95727; }
+.item-row.has-qty { border-color:var(--accent); background:var(--accent-soft); }
+.chip.active, .filter-banner { border-color:var(--accent); }
+.chip.active { background:var(--accent); color:#fff; }
+.search-row input:focus, input:focus, select:focus, textarea:focus { border-color:var(--accent); }
+.home-btn, .cafe-btn, .order-card, .item-row, .inv-row, .hist-row, .card-block {
+  box-shadow:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+}
+.home-btn-a, .home-btn-b, .home-btn-c, .home-btn,
+.home-btn-a:hover, .home-btn-b:hover, .home-btn-c:hover { border-top-color:var(--accent); }
+a, .nav-link, .back-btn, .item-info .price, .qty-stepper button { color:var(--accent); }
+.badge.delivered, .badge.paid { background:var(--good-soft); color:var(--good); }
+.badge.picking { background:var(--warn-soft); color:#8A6500; }
+.badge.submitted { background:var(--serious-soft); color:var(--serious); }
+
+/* Keep operational status colors meaningful while using the Command Deck palette. */
+.order-card.status-submitted { border-left-color:var(--serious); }
+.order-card.status-picking { border-left-color:var(--warn); }
+.order-card.status-fulfilled { border-left-color:var(--caramel); }
+.order-card.status-shipped, .order-card.status-enroute { border-left-color:var(--accent); }
+.order-card.status-delivered, .order-card.received { border-left-color:var(--good); }
+.home-btn-b, .home-btn-c { border-top-color:var(--caramel); }
+
+</style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#244A71">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Command Deck">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+<header id="app-header">
+  <h1>Warehouse picking</h1>
+  <p>Loading&hellip;</p>
+</header>
+<main id="app-main"></main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON';
+// Replace with wherever the operations manual actually lives (Google Doc, etc.)
+const LOGO_DATA_URI = 'data:image/png;base64,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';
+const OPERATIONS_MANUAL_URL = 'PASTE_MANUAL_URL_HERE';
+// Replace with your deployed process-invoice function's URL
+const PROCESS_INVOICE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co/functions/v1/process-invoice';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let state = null; // { locationsById, locationsByName, items, itemsById, inventory, orders, roasteryId, chatWebhookUrl, editingNote }
+let currentStaff = null; // { id, name, role }
+let passwordRecoveryMode = false;
+const PIN_PREFIX = 'sc-pin-'; // must match the Command Deck
+let workerName = null;
+let orderReturnHash = '';
+let invLandingMode = 'browse';
+let autoRefreshTimer = null;
+
+function ensureWorkerName() {
+  // Identity now comes from the real login, not a separate prompt.
+  workerName = currentStaff?.name || 'Unknown';
+  return workerName;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1400);
+}
+
+async function loadState() {
+  const [
+    { data: locations, error: locationsError },
+    { data: items, error: itemsError },
+    { count: pendingInvoiceCount }
+  ] = await Promise.all([
+    db.from('locations').select('id, name, type'),
+    db.from('items').select('id, name, unit, vendor, category, warehouse_location, sku, salt_city_item_number, storage_zone, is_perishable'),
+    db.from('invoice_uploads').select('id', { count: 'exact', head: true }).eq('status', 'pending_review')
+  ]);
+
+  if (locationsError) {
+    console.error('Failed to load locations:', locationsError);
+    throw new Error('Failed to load locations: ' + locationsError.message);
+  }
+  if (itemsError) {
+    console.error('Failed to load items:', itemsError);
+    throw new Error('Failed to load items: ' + itemsError.message);
+  }
+
+  const roastery = locations.find(l => l.name === 'Roastery');
+  if (!roastery) {
+    console.error('No location named "Roastery" found — check the locations table.');
+    throw new Error('Roastery location not found');
+  }
+
+  const { data: inventoryRows, error: inventoryError } = await db
+    .from('inventory_levels')
+    .select('item_id, quantity_on_hand')
+    .eq('location_id', roastery.id);
+
+  if (inventoryError) {
+    console.error('Failed to load inventory levels:', inventoryError);
+    throw new Error('Failed to load inventory levels: ' + inventoryError.message);
+  }
+
+  const { data: orderRows, error: ordersError } = await db
+    .from('orders')
+    .select(`
+      id, status, for_location_id, order_date, created_at, picking_by, picking_started_at,
+      received_at, received_by, order_type, emergency_reason, emergency_note,
+      fulfilled_by, fulfilled_at, enroute_by, enroute_started_at, transfer_from_location_id,
+      order_line_items ( id, item_id, quantity_ordered, quantity_on_hand, quantity_par, picked, note )
+    `)
+    .order('created_at', { ascending: false });
+
+  if (ordersError) {
+    console.error('Failed to load orders:', ordersError);
+    throw new Error('Failed to load orders: ' + ordersError.message);
+  }
+
+  const locationsById = Object.fromEntries(locations.map(l => [l.id, l]));
+
+  state = {
+    locationsById,
+    items: items.map(i => ({
+      id: i.id,
+      name: i.name,
+      unit: i.unit,
+      vendor: i.vendor,
+      category: i.category,
+      bin: i.warehouse_location,
+      sku: i.sku,
+      scItemNumber: i.salt_city_item_number,
+      storageZone: i.storage_zone,
+      isPerishable: i.is_perishable
+    })),
+    inventory: Object.fromEntries(inventoryRows.map(r => [r.item_id, r.quantity_on_hand])),
+    roasteryId: roastery.id,
+    orders: orderRows.map(o => ({
+      id: o.id,
+      locationId: o.for_location_id,
+      location: locationsById[o.for_location_id]?.name || 'Unknown location',
+      status: o.status,
+      orderDate: o.order_date,
+      createdAt: o.created_at,
+      pickingBy: o.picking_by,
+      pickingStartedAt: o.picking_started_at,
+      receivedAt: o.received_at,
+      receivedBy: o.received_by,
+      orderType: o.order_type,
+      emergencyReason: o.emergency_reason,
+      emergencyNote: o.emergency_note,
+      fulfilledBy: o.fulfilled_by,
+      fulfilledAt: o.fulfilled_at,
+      enrouteBy: o.enroute_by,
+      enrouteStartedAt: o.enroute_started_at,
+      transferFromLocationId: o.transfer_from_location_id,
+      lines: o.order_line_items.map(l => ({
+        lineId: l.id,
+        itemId: l.item_id,
+        qtyOrdered: l.quantity_ordered,
+        quantityOnHand: l.quantity_on_hand,
+        quantityPar: l.quantity_par,
+        picked: l.picked,
+        note: l.note
+      }))
+    })),
+    chatWebhookUrl: localStorage.getItem('sc-chat-webhook') || '',
+    pendingInvoiceCount: pendingInvoiceCount || 0,
+    editingNote: null
+  };
+}
+
+function itemById(id) {
+  return state.items.find(i => i.id === id);
+}
+
+function statusLabel(status) {
+  return { submitted: 'To pick', picking: 'In progress', fulfilled: 'Picked \u2014 staged', enroute: 'Enroute', delivered: 'Delivered' }[status];
+}
+
+function formatStamp(iso) {
+  return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+function orderCardHtml(o) {
+  const total = o.lines.length;
+  const picked = o.lines.filter(l => l.picked).length;
+  const statusNote = o.status === 'enroute' && o.enrouteBy
+    ? ` \u00b7 ${o.enrouteBy} driving`
+    : o.status === 'delivered' && o.receivedBy
+      ? ` \u00b7 received by ${o.receivedBy}`
+      : isReceiptQueued(o.id) ? ` \u00b7 syncing` : '';
+  const cardStatusClass = o.status === 'delivered' ? 'received' : `status-${o.status}`;
+  const isEmergency = o.orderType === 'emergency';
+  const isTransfer = o.orderType === 'transfer';
+  const hasPerishable = o.lines.some(l => itemById(l.itemId)?.isPerishable);
+  const sourceLocation = isTransfer ? state.locationsById[o.transferFromLocationId]?.name : null;
+
+  const titleHtml = isEmergency
+    ? `<span style="color:var(--warn);">EMERGENCY \u2014 </span>${o.location}`
+    : isTransfer
+      ? `<span style="color:var(--accent);">TRANSFER \u2014 </span>${sourceLocation || '?'} \u2192 ${o.location}`
+      : o.location;
+
+  return `
+    <div class="order-card ${cardStatusClass}" style="${isEmergency ? 'border-left-color: var(--warn); border-left-width: 6px;' : hasPerishable ? 'border-left-color: #1a73a8; border-left-width: 6px;' : ''}" onclick="openOrder('${o.id}')">
+      <div class="order-card-top">
+        <h2>${titleHtml}</h2>
+        <span class="badge ${o.status}">${statusLabel(o.status)}</span>
+      </div>
+      ${isEmergency ? `<p style="color:var(--warn); font-weight:700;">${o.emergencyReason}</p>` : ''}
+      ${hasPerishable ? `<p style="color:#1a73a8; font-weight:700;">\u26a0 Contains perishable \u2014 prioritize pick</p>` : ''}
+      <p>${picked}/${total} items picked${o.status === 'picking' && o.pickingBy ? ` \u00b7 ${o.pickingBy}` : ''}${statusNote}</p>
+      <p class="timestamp">${formatStamp(o.createdAt)}</p>
+    </div>
+  `;
+}
+
+function renderOrderList() {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goHome()">&larr; Home</button>
+    <h1>All locations</h1>
+    <p>${state.orders.filter(o => o.status !== 'delivered').length} open ticket(s) \u00b7 ${currentStaff.name} <button class="signout-link" onclick="signOut()">Sign out</button></p>
+  `;
+  const main = document.getElementById('app-main');
+
+  const settingsBlock = `
+    <div class="settings-block">
+      <p class="label">Google Chat alerts</p>
+      <div class="row">
+        <input id="webhook-input" placeholder="Paste your Apps Script relay URL" value="${state.chatWebhookUrl || ''}" />
+        <button onclick="saveWebhookUrl()">Save</button>
+      </div>
+      <div class="row">
+        <button onclick="testChatWebhook()" style="width:100%">Send test message</button>
+      </div>
+      <p class="hint">Paste the web app URL from the Apps Script relay (not the raw Google Chat webhook \u2014 that one gets blocked by the browser).</p>
+    </div>
+  `;
+
+  if (state.orders.length === 0) {
+    main.innerHTML = `<div class="empty-state"><p>No orders yet.</p></div>` + settingsBlock;
+    return;
+  }
+
+  // Group into one column per location, oldest order at the top of each
+  // column (first in, first picked).
+  const columns = [];
+  state.orders.forEach(o => {
+    let col = columns.find(c => c.location === o.location);
+    if (!col) { col = { location: o.location, orders: [] }; columns.push(col); }
+    col.orders.push(o);
+  });
+  columns.forEach(col => col.orders.sort((a, b) => {
+    const priority = (o) => {
+      if (o.orderType === 'emergency') return 0;
+      if (o.lines.some(l => itemById(l.itemId)?.isPerishable)) return 1;
+      return 2;
+    };
+    const aPriority = priority(a);
+    const bPriority = priority(b);
+    if (aPriority !== bPriority) return aPriority - bPriority;
+    return new Date(a.createdAt) - new Date(b.createdAt);
+  }));
+  columns.sort((a, b) => a.location.localeCompare(b.location));
+
+  main.innerHTML = `
+    <div class="board-wrap">
+      ${columns.map(col => `
+        <div class="board-col">
+          <div class="board-col-header">
+            <h2>${col.location}</h2>
+            <span>${col.orders.length}</span>
+          </div>
+          ${col.orders.map(orderCardHtml).join('')}
+        </div>
+      `).join('')}
+    </div>
+  ` + settingsBlock;
+}
+
+async function saveWebhookUrl() {
+  state.chatWebhookUrl = document.getElementById('webhook-input').value.trim();
+  localStorage.setItem('sc-chat-webhook', state.chatWebhookUrl);
+  toast('Webhook saved (this browser only)');
+}
+
+async function postToChat(message) {
+  if (!state.chatWebhookUrl) return { ok: false, reason: 'no-url' };
+  try {
+    const res = await fetch(state.chatWebhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ text: message })
+    });
+    // The relay always responds HTTP 200 — the real result is in its JSON body.
+    let body;
+    try { body = await res.json(); } catch (_) { body = null; }
+    return { ok: res.ok && body && body.ok === true, status: res.status, body };
+  } catch (err) {
+    console.error('Google Chat relay call failed:', err);
+    return { ok: false, reason: 'network-or-cors', error: err };
+  }
+}
+
+async function testChatWebhook() {
+  await saveWebhookUrl();
+  toast('Sending test message\u2026');
+  const result = await postToChat('Test message from the Salt City Coffee picking app \u2014 if you see this in Chat, direct calls work.');
+  if (result.ok) {
+    toast('Sent! Check Google Chat.');
+  } else {
+    toast('Failed \u2014 see console (F12)');
+  }
+}
+
+async function openOrder(orderId) {
+  location.hash = orderId;
+  const me = ensureWorkerName();
+  const order = state.orders.find(o => o.id === orderId);
+  if (order) orderReturnHash = `cafe:${order.location}`;
+
+  if (order && order.status === 'submitted') {
+    // Atomic claim: only succeeds if the order is still 'submitted' at the
+    // moment this runs — if two pickers tap it at once, only one wins.
+    const { data, error } = await db
+      .from('orders')
+      .update({ status: 'picking', picking_by: me, picking_started_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .eq('status', 'submitted')
+      .select('status, picking_by, picking_started_at');
+
+    if (!error && data && data.length > 0) {
+      order.status = data[0].status;
+      order.pickingBy = data[0].picking_by;
+      order.pickingStartedAt = data[0].picking_started_at;
+    } else {
+      // Someone else claimed it a moment before us — pull the real current state.
+      const { data: fresh } = await db
+        .from('orders').select('status, picking_by, picking_started_at').eq('id', orderId).single();
+      if (fresh) {
+        order.status = fresh.status;
+        order.pickingBy = fresh.picking_by;
+        order.pickingStartedAt = fresh.picking_started_at;
+      }
+    }
+  }
+
+  renderOrderDetail(orderId);
+}
+
+async function releaseOrder(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return;
+
+  const { error } = await db
+    .from('orders')
+    .update({ status: 'submitted', picking_by: null, picking_started_at: null })
+    .eq('id', orderId);
+
+  if (error) {
+    console.error('Failed to release order:', error);
+    toast('Failed to release \u2014 see console');
+    return;
+  }
+
+  order.status = 'submitted';
+  order.pickingBy = null;
+  order.pickingStartedAt = null;
+  toast('Ticket released');
+  goBack();
+}
+
+function renderOrderDetail(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return renderOrderList();
+
+  const lockedByOther = order.status === 'picking' && order.pickingBy && order.pickingBy !== workerName;
+  const iHoldIt = order.status === 'picking' && order.pickingBy === workerName;
+
+  const stagePerson = order.status === 'picking' ? order.pickingBy
+    : order.status === 'fulfilled' ? order.fulfilledBy
+    : order.status === 'enroute' ? order.enrouteBy
+    : order.status === 'delivered' ? order.receivedBy
+    : null;
+
+  const sourceLocation = order.orderType === 'transfer' ? state.locationsById[order.transferFromLocationId]?.name : null;
+  const detailTitle = order.orderType === 'emergency'
+    ? `EMERGENCY \u2014 ${order.location}`
+    : order.orderType === 'transfer'
+      ? `TRANSFER \u2014 ${sourceLocation || '?'} \u2192 ${order.location}`
+      : order.location;
+
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goBack()">&larr; ${order.location}</button>
+    <h1>${detailTitle}</h1>
+    <p>Order status: ${statusLabel(order.status)}${stagePerson ? ` \u00b7 ${stagePerson}` : ''}</p>
+  `;
+
+  const picked = order.lines.filter(l => l.picked).length;
+  const total = order.lines.length;
+  const allDone = picked === total;
+
+  const main = document.getElementById('app-main');
+  main.innerHTML = `
+    ${order.orderType === 'emergency' ? `
+      <div class="filter-banner" style="border-color:var(--warn); background:var(--warn-soft); color:var(--warn); flex-direction:column; align-items:flex-start;">
+        <span style="font-weight:800;">Reason: ${order.emergencyReason || 'Not specified'}</span>
+        ${order.emergencyNote ? `<span style="margin-top:4px;">${order.emergencyNote}</span>` : ''}
+      </div>
+    ` : ''}
+    ${lockedByOther ? `
+      <div class="filter-banner" style="border-color:var(--warn); background:var(--warn-soft); color:var(--warn);">
+        <span>Being picked by ${order.pickingBy}${order.pickingStartedAt ? ' \u2014 started ' + new Date(order.pickingStartedAt).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) : ''}</span>
+      </div>
+    ` : ''}
+    ${iHoldIt ? `
+      <div class="filter-banner">
+        <span>You\u2019re picking this ticket</span>
+        <button onclick="releaseOrder('${order.id}')">Release</button>
+      </div>
+    ` : ''}
+    <p class="progress-text">${picked} of ${total} items picked</p>
+    ${order.lines.map(line => {
+      const item = itemById(line.itemId);
+      const editing = state.editingNote === `${order.id}:${line.itemId}`;
+      return `
+        <div class="line-item-wrap ${!line.note && !editing ? 'no-note' : ''}">
+          <div class="line-item ${line.picked ? 'done' : ''}">
+            <div class="line-info">
+              <h3><span class="bin">${item.bin}</span>${item.name}</h3>
+              <p>${line.qtyOrdered} ${item.unit}${line.qtyOrdered > 1 ? 's' : ''}${line.quantityPar != null ? ` to bring to par (${line.quantityPar})` : ''}${line.quantityOnHand != null ? ` \u2014 had ${line.quantityOnHand}` : ''} &middot; ${state.inventory[item.id]} in warehouse</p>
+            </div>
+            <button class="pick-btn ${line.picked ? 'checked' : ''}" ${lockedByOther || order.status !== 'picking' && order.status !== 'submitted' ? 'disabled' : ''} onclick="togglePick('${order.id}', '${line.itemId}')">
+              ${line.picked ? '&#10003;' : ''}
+            </button>
+          </div>
+          <div class="note-row">
+            ${lockedByOther ? '' : editing ? `
+              <div class="note-input-row">
+                <textarea id="note-input-${line.itemId}" placeholder="e.g. only 2 left, out of stock, damaged case&hellip;">${line.note || ''}</textarea>
+                <button onclick="saveNote('${order.id}', '${line.itemId}')">Save</button>
+              </div>
+            ` : line.note ? `
+              <div class="note-chip">
+                <span class="dot"></span>
+                <span>${line.note}</span>
+                <button class="edit-note" onclick="editNote('${order.id}', '${line.itemId}')">Edit</button>
+              </div>
+            ` : `
+              <button class="note-btn" onclick="editNote('${order.id}', '${line.itemId}')">+ Flag an issue</button>
+            `}
+            ${lockedByOther && line.note ? `<div class="note-chip"><span class="dot"></span><span>${line.note}</span></div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('')}
+    <div style="height: 90px"></div>
+    <div class="submit-bar">
+      ${order.status === 'fulfilled' ? `
+        <div class="filter-banner" style="position:static; margin-bottom:10px; flex-direction:column; align-items:flex-start;">
+          <span style="font-weight:700;">Picked by ${order.fulfilledBy || 'someone'}${order.fulfilledAt ? ' \u00b7 ' + new Date(order.fulfilledAt).toLocaleString(undefined, {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : ''}</span>
+          <span style="margin-top:2px;">Waiting to go out for delivery</span>
+        </div>
+        <div class="on-hand-row" style="margin-bottom:10px; justify-content:center;">
+          <label for="enroute-name-${order.id}">Driver</label>
+          <input id="enroute-name-${order.id}" type="text" placeholder="Driver name" style="width:140px;" value="${workerName || ''}" />
+        </div>
+        <button onclick="startDelivery('${order.id}')" style="width:100%; padding:15px; border-radius:var(--radius); border:none; font-size:16px; font-weight:700; cursor:pointer; background:var(--accent); color:white; margin-bottom:10px;">
+          Start delivery
+        </button>
+      ` : ''}
+      ${order.status === 'enroute' ? `
+        <div class="filter-banner" style="position:static; margin-bottom:10px;">
+          <span>Enroute \u2014 ${order.enrouteBy || 'someone'}${order.enrouteStartedAt ? ' \u00b7 started ' + new Date(order.enrouteStartedAt).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) : ''}</span>
+        </div>
+        ${isReceiptQueued(order.id) ? `
+          <div class="filter-banner" style="position:static; margin-bottom:10px; border-color:var(--warn); background:var(--warn-soft); color:var(--warn);">
+            <span>Receipt saved on this device \u2014 will sync once back online</span>
+          </div>
+        ` : `
+          <div class="on-hand-row" style="margin-bottom:10px; justify-content:center;">
+            <label for="receipt-name-${order.id}">Received by</label>
+            <input id="receipt-name-${order.id}" type="text" placeholder="Manager name" style="width:140px;" value="${(localStorage.getItem('sc-last-receiver-name')||'').replace(/"/g,'&quot;')}" />
+          </div>
+          <button onclick="confirmReceipt('${order.id}')" style="width:100%; padding:15px; border-radius:var(--radius); border:none; font-size:16px; font-weight:700; cursor:pointer; background:var(--accent); color:white; margin-bottom:10px;">
+            Confirm receipt
+          </button>
+        `}
+      ` : ''}
+      ${order.status === 'delivered' ? `
+        <div class="filter-banner" style="position:static; margin-bottom:10px; flex-direction:column; align-items:flex-start;">
+          <span style="font-weight:700;">Delivered \u2014 received by ${order.receivedBy || 'someone'}</span>
+          ${order.receivedAt ? `<span style="margin-top:2px;">${new Date(order.receivedAt).toLocaleString(undefined, {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span>` : ''}
+        </div>
+      ` : ''}
+      <button ${lockedByOther || !allDone || order.status !== 'picking' && order.status !== 'submitted' ? 'disabled' : ''} onclick="fulfillOrder('${order.id}')" style="${order.status === 'fulfilled' || order.status === 'enroute' || order.status === 'delivered' ? 'display:none;' : ''}">
+        ${lockedByOther ? 'Locked by another picker' : allDone ? 'Confirm & update inventory' : `Pick all items to continue`}
+      </button>
+    </div>
+  `;
+}
+
+function getReceiptQueue() {
+  try { return JSON.parse(localStorage.getItem('sc-pending-receipts') || '[]'); }
+  catch (e) { return []; }
+}
+
+function setReceiptQueue(q) {
+  localStorage.setItem('sc-pending-receipts', JSON.stringify(q));
+}
+
+function isReceiptQueued(orderId) {
+  return getReceiptQueue().some(p => p.orderId === orderId);
+}
+
+async function tryConfirmReceipt(payload) {
+  try {
+    const { error: orderErr } = await db
+      .from('orders')
+      .update({ status: 'delivered', received_at: payload.receivedAt, received_by: payload.receivedBy })
+      .eq('id', payload.orderId);
+    if (orderErr) throw orderErr;
+
+    for (const line of payload.lines) {
+      // Atomic — no read-then-write race window (see add-atomic-inventory-writes.sql)
+      const { error: invErr } = await db.rpc('adjust_inventory', {
+        p_location_id: payload.locationId,
+        p_item_id: line.itemId,
+        p_delta: line.qty
+      });
+      if (invErr) throw invErr;
+
+      await db.from('ledger_transactions').insert({
+        location_id: payload.locationId,
+        item_id: line.itemId,
+        quantity_delta: line.qty,
+        source: payload.orderType === 'transfer' ? 'transfer_in' : 'cafe_delivery_received',
+        reference_id: payload.orderId
+      });
+    }
+
+    const order = state.orders.find(o => o.id === payload.orderId);
+    if (order) { order.status = 'delivered'; order.receivedAt = payload.receivedAt; order.receivedBy = payload.receivedBy; }
+    return true;
+  } catch (err) {
+    console.error('Confirm receipt failed \u2014 queued for retry:', err);
+    return false;
+  }
+}
+
+async function confirmReceipt(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  const input = document.getElementById(`receipt-name-${orderId}`);
+  const receivedBy = (input?.value || '').trim() || 'Unknown';
+  localStorage.setItem('sc-last-receiver-name', receivedBy);
+
+  const payload = {
+    orderId,
+    locationId: order.locationId,
+    orderType: order.orderType,
+    receivedBy,
+    receivedAt: new Date().toISOString(),
+    lines: order.lines.map(l => ({ itemId: l.itemId, qty: l.qtyOrdered }))
+  };
+
+  const ok = await tryConfirmReceipt(payload);
+  if (ok) {
+    toast('Receipt confirmed');
+  } else {
+    const q = getReceiptQueue();
+    q.push(payload);
+    setReceiptQueue(q);
+    toast('No connection \u2014 saved on this device, will sync automatically');
+  }
+  renderOrderDetail(orderId);
+}
+
+async function flushPendingReceipts() {
+  const q = getReceiptQueue();
+  if (q.length === 0) return;
+  const stillPending = [];
+  for (const payload of q) {
+    const ok = await tryConfirmReceipt(payload);
+    if (!ok) stillPending.push(payload);
+  }
+  setReceiptQueue(stillPending);
+}
+
+window.addEventListener('online', flushPendingReceipts);
+
+function editNote(orderId, itemId) {
+  state.editingNote = `${orderId}:${itemId}`;
+  renderOrderDetail(orderId);
+  setTimeout(() => document.getElementById(`note-input-${itemId}`)?.focus(), 0);
+}
+
+async function saveNote(orderId, itemId) {
+  const order = state.orders.find(o => o.id === orderId);
+  const line = order.lines.find(l => l.itemId === itemId);
+  const item = itemById(itemId);
+  const text = document.getElementById(`note-input-${itemId}`).value.trim();
+
+  const { error } = await db
+    .from('order_line_items')
+    .update({ note: text || null })
+    .eq('id', line.lineId);
+
+  if (error) {
+    console.error('Failed to save note:', error);
+    toast('Failed to save note — see console');
+    return;
+  }
+
+  line.note = text || null;
+  state.editingNote = null;
+  if (text) {
+    toast('Issue noted');
+    const result = await postToChat(`Issue flagged \u2014 ${order.location}, ${item.name}: ${text}`);
+    if (!result.ok && state.chatWebhookUrl) {
+      console.warn('Note saved, but Google Chat post failed:', result);
+    }
+  }
+  renderOrderDetail(orderId);
+}
+
+async function togglePick(orderId, itemId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (order.status === 'picking' && order.pickingBy && order.pickingBy !== workerName) {
+    toast(`Locked by ${order.pickingBy}`);
+    return;
+  }
+  const line = order.lines.find(l => l.itemId === itemId);
+  const newPicked = !line.picked;
+
+  const { error: lineError } = await db
+    .from('order_line_items')
+    .update({ picked: newPicked })
+    .eq('id', line.lineId);
+
+  if (lineError) {
+    console.error('Failed to update pick state:', lineError);
+    toast('Failed to save — see console');
+    return;
+  }
+
+  line.picked = newPicked;
+
+  if (order.status === 'submitted' && newPicked) {
+    const { error: orderError } = await db
+      .from('orders')
+      .update({ status: 'picking' })
+      .eq('id', order.id);
+    if (!orderError) order.status = 'picking';
+  }
+
+  renderOrderDetail(orderId);
+}
+
+async function fulfillOrder(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+
+  // A transfer pulls from its own real source location; every other
+  // order type has always meant "picked from the Roastery/Warehouse" —
+  // unchanged behavior for weekly/emergency orders.
+  const sourceLocationId = order.orderType === 'transfer' ? order.transferFromLocationId : state.roasteryId;
+  const ledgerSource = order.orderType === 'transfer' ? 'transfer_out' : 'warehouse_pick';
+
+  for (const line of order.lines) {
+    // Atomic — no read-then-write race window, and no reliance on the
+    // locally cached state.inventory value (see add-atomic-inventory-writes.sql)
+    const { error: invError } = await db.rpc('adjust_inventory', {
+      p_location_id: sourceLocationId,
+      p_item_id: line.itemId,
+      p_delta: -line.qtyOrdered
+    });
+    if (invError) { console.error('Inventory update failed:', invError); continue; }
+
+    // The local inventory cache only ever represents Roastery's stock
+    // (that's all the Warehouse Inventory view shows) — only update it
+    // when this fulfillment actually drew from Roastery.
+    if (sourceLocationId === state.roasteryId) {
+      state.inventory[line.itemId] = (state.inventory[line.itemId] || 0) - line.qtyOrdered;
+    }
+
+    await db.from('ledger_transactions').insert({
+      location_id: sourceLocationId,
+      item_id: line.itemId,
+      quantity_delta: -line.qtyOrdered,
+      source: ledgerSource,
+      reference_id: order.id
+    });
+
+    await db
+      .from('order_line_items')
+      .update({ quantity_fulfilled: line.qtyOrdered })
+      .eq('id', line.lineId);
+  }
+
+  const fulfilledAt = new Date().toISOString();
+  const { error: statusError } = await db
+    .from('orders')
+    .update({ status: 'fulfilled', picking_by: null, picking_started_at: null, fulfilled_by: workerName, fulfilled_at: fulfilledAt })
+    .eq('id', order.id);
+  if (!statusError) {
+    order.status = 'fulfilled';
+    order.pickingBy = null;
+    order.pickingStartedAt = null;
+    order.fulfilledBy = workerName;
+    order.fulfilledAt = fulfilledAt;
+  }
+
+  toast('Inventory updated \u2014 order picked and staged');
+  renderOrderDetail(orderId);
+}
+
+async function startDelivery(orderId) {
+  const nameInput = document.getElementById(`enroute-name-${orderId}`);
+  const driverName = (nameInput?.value || '').trim() || ensureWorkerName();
+
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return;
+
+  const enrouteStartedAt = new Date().toISOString();
+
+  // Same atomic-claim pattern as picking: only succeeds if the order is
+  // still 'fulfilled' at this exact moment, preventing two drivers from
+  // both claiming the same delivery.
+  const { data, error } = await db
+    .from('orders')
+    .update({ status: 'enroute', enroute_by: driverName, enroute_started_at: enrouteStartedAt })
+    .eq('id', orderId)
+    .eq('status', 'fulfilled')
+    .select('status, enroute_by, enroute_started_at');
+
+  if (error || !data || data.length === 0) {
+    console.error('Failed to start delivery (already claimed?):', error);
+    toast('Could not start delivery \u2014 refreshing');
+    await loadState();
+    renderOrderDetail(orderId);
+    return;
+  }
+
+  order.status = data[0].status;
+  order.enrouteBy = data[0].enroute_by;
+  order.enrouteStartedAt = data[0].enroute_started_at;
+
+  toast(`Delivery started \u2014 ${driverName}`);
+  renderOrderDetail(orderId);
+}
+
+function routeTo(id) {
+  if (id === '' || id == null) renderHome();
+  else if (id === 'board') renderOrderList();
+  else if (id === 'warehouse') renderWarehouseHome();
+  else if (id === 'cafeorders') renderCafeOrdersHome();
+  else if (id === 'inventory') renderInventory();
+  else if (id === 'invoices') renderInvoices();
+  else if (id === 'locations') renderLocationList();
+  else if (id.startsWith('cafe:')) renderCafeLocationOrders(id.slice('cafe:'.length));
+  else if (id.startsWith('item:')) renderItemHistory(id.slice('item:'.length));
+  else if (id.startsWith('location:')) renderLocationHistory(id.slice('location:'.length));
+  else if (id && state.orders.find(o => o.id === id)) renderOrderDetail(id);
+  else renderHome();
+}
+
+function goBack() {
+  const target = orderReturnHash || 'cafeorders';
+  location.hash = encodeURIComponent(target);
+  routeTo(target);
+}
+
+function goHome() {
+  location.hash = '';
+  renderHome();
+}
+
+function renderHome() {
+  document.getElementById('app-header').innerHTML = `
+    <div class="header-row">
+      <img src="${LOGO_DATA_URI}" alt="Salt City Coffee" />
+      <div class="header-text">
+        <h1>Salt City Coffee</h1>
+        <p>${currentStaff.name} <button class="signout-link" onclick="signOut()">Sign out</button></p>
+      </div>
+    </div>
+  `;
+  document.getElementById('app-main').innerHTML = `
+    <div class="home-grid">
+      <button class="home-btn home-btn-a" onclick="goToWarehouseHome()">
+        <span class="home-btn-label">Warehouse Inventory</span>
+      </button>
+      <button class="home-btn home-btn-b" onclick="goToCafeOrdersHome()">
+        <span class="home-btn-label">Cafe Orders</span>
+      </button>
+    </div>
+    <p style="text-align:center; margin-top:20px;">
+      <a class="nav-link" href="${OPERATIONS_MANUAL_URL}" target="_blank" rel="noopener">Operations Manual</a>
+    </p>
+  `;
+}
+
+function goToWarehouseHome() {
+  location.hash = 'warehouse';
+  renderWarehouseHome();
+}
+
+function renderWarehouseHome() {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goHome()">&larr; Home</button>
+    <h1>Warehouse Inventory</h1>
+  `;
+  document.getElementById('app-main').innerHTML = `
+    <div class="home-grid">
+      <button class="home-btn home-btn-a" onclick="goToInventory('add')">
+        <span class="home-btn-label">Add Inventory</span>
+        <span class="home-btn-sub">Log a Sysco delivery or restock</span>
+      </button>
+      <button class="home-btn home-btn-b" onclick="goToInventory('confirm')">
+        <span class="home-btn-label">Confirm Inventory</span>
+        <span class="home-btn-sub">Do a physical count / correction</span>
+      </button>
+      <button class="home-btn home-btn-c" onclick="goToInvoices()">
+        <span class="home-btn-label">Delivery Invoices</span>
+        <span class="home-btn-sub">${state.pendingInvoiceCount ? `${state.pendingInvoiceCount} awaiting review` : 'Upload a photo or PDF'}</span>
+      </button>
+    </div>
+  `;
+}
+
+function goToInvoices() {
+  location.hash = 'invoices';
+  renderInvoices();
+}
+
+let invoiceUploading = false;
+let editingInvoiceVendorId = null;
+let editingLineItemId = null;
+let lineEditSearchQuery = '';
+let lineEditSelectedItemId = null;
+let addingItemToInvoiceId = null;
+let addItemSearchQuery = '';
+let addItemSelectedId = null;
+let invoiceExpandedState = new Map(); // invoiceId -> boolean, overrides the status-based default once toggled
+
+function toggleInvoiceExpanded(invoiceId, defaultState) {
+  const current = invoiceExpandedState.has(invoiceId) ? invoiceExpandedState.get(invoiceId) : defaultState;
+  invoiceExpandedState.set(invoiceId, !current);
+  refreshInvoicesPreservingScroll();
+}
+
+async function refreshInvoicesPreservingScroll() {
+  // renderInvoices() briefly collapses the whole screen to a short
+  // "Loading..." placeholder before repopulating — without this, that
+  // collapse yanks anyone scrolled down back toward the top.
+  const scrollY = window.scrollY;
+  await renderInvoices();
+  window.scrollTo(0, scrollY);
+}
+
+async function renderInvoices() {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goToWarehouseHome()">&larr; Warehouse Inventory</button>
+    <h1>Delivery Invoices</h1>
+    <p>Upload a photo or PDF now \u2014 the production manager reviews it later</p>
+  `;
+
+  const main = document.getElementById('app-main');
+  main.innerHTML = `
+    <div class="settings-block" style="margin-top:0; padding-top:0; border-top:none;">
+      <p class="label">Upload a new invoice</p>
+      <div class="row">
+        <input type="file" id="invoice-file" accept="application/pdf,image/*" style="flex:1;" />
+      </div>
+      <div class="row">
+        <input type="text" id="invoice-vendor" placeholder="Vendor (e.g. Sysco, local bakery)" />
+      </div>
+      <div class="row">
+        <select id="invoice-location" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--line);">
+          <option value="">Roastery (default)</option>
+          ${Object.values(state.locationsById).filter(l => l.name !== 'Roastery').map(l => `<option value="${l.id}">${l.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="row">
+        <button onclick="uploadInvoice()" style="width:100%" ${invoiceUploading ? 'disabled' : ''}>
+          ${invoiceUploading ? 'Uploading\u2026' : 'Upload'}
+        </button>
+      </div>
+    </div>
+    <div id="invoice-list"><p style="color:var(--ink-soft); font-size:13px;">Loading invoices\u2026</p></div>
+  `;
+
+  const { data: invoices, error } = await db
+    .from('invoice_uploads')
+    .select('*, locations(name)')
+    .order('created_at', { ascending: false });
+
+  const listEl = document.getElementById('invoice-list');
+  if (error) {
+    console.error('Failed to load invoices:', error);
+    listEl.innerHTML = `<p style="color:var(--warn); font-size:13px;">Couldn't load invoices \u2014 see console.</p>`;
+    return;
+  }
+  if (!invoices || invoices.length === 0) {
+    listEl.innerHTML = `<div class="empty-state"><p>No invoices uploaded yet.</p></div>`;
+    return;
+  }
+
+  const rows = await Promise.all(invoices.map(async (inv) => {
+    const { data: signed } = await db.storage.from('invoices').createSignedUrl(inv.file_path, 3600);
+    const url = signed?.signedUrl || '#';
+    const date = new Date(inv.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const locationLabel = inv.locations?.name || 'Roastery';
+    const isLmOwned = locationLabel !== 'Roastery'; // uploaded by a cafe/bakery — that manager owns review, this is tracking-only
+
+    const vendorDisplay = inv.vendor_note || inv.extracted_vendor || 'Unlabeled vendor';
+    const vendorHtml = (!isLmOwned && editingInvoiceVendorId === inv.id) ? `
+      <div style="display:flex; gap:8px; align-items:center; flex:1;">
+        <input type="text" id="vendor-edit-${inv.id}" value="${vendorDisplay.replace(/"/g, '&quot;')}" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid var(--line); font-size:15px; font-weight:700;" />
+        <button class="inv-add-btn" onclick="saveInvoiceVendor('${inv.id}')">Save</button>
+        <button class="inv-add-btn" onclick="cancelEditInvoiceVendor()">Cancel</button>
+      </div>
+    ` : isLmOwned ? `
+      <h2>${vendorDisplay}</h2>
+    ` : `
+      <h2>${vendorDisplay} <button onclick="openEditInvoiceVendor('${inv.id}')" style="background:none; border:none; color:var(--ink-soft); font-size:11px; text-decoration:underline; cursor:pointer; font-weight:400;">edit</button></h2>
+    `;
+
+    let lineItemsHtml = '';
+    let unresolvedCount = 0;
+    if (inv.extraction_status === 'done') {
+      const { data: lines } = await db.from('invoice_line_items').select('*, items(name, unit)').eq('invoice_id', inv.id);
+      if (lines && lines.length > 0) {
+        unresolvedCount = lines.filter(li => !li.applied_to_inventory && !li.dismissed).length;
+        lineItemsHtml = `
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">
+            <p style="font-size:12px; font-weight:700; color:var(--ink-soft); margin:0 0 8px;">
+              Extracted${inv.extracted_date ? ` \u00b7 ${inv.extracted_date}` : ''}
+            </p>
+            ${lines.map(li => renderInvoiceLineItem(li, isLmOwned)).join('')}
+          </div>
+        `;
+      }
+    } else if (inv.extraction_status === 'processing') {
+      lineItemsHtml = `<p style="font-size:12px; color:var(--ink-soft); margin-top:8px;">Reading invoice\u2026</p>`;
+    } else if (inv.extraction_status === 'failed') {
+      lineItemsHtml = `<p style="font-size:12px; color:var(--warn); margin-top:8px;">Couldn't read this automatically \u2014 review manually.</p>`;
+    }
+
+    const addItemHtml = (inv.status === 'pending_review' && !isLmOwned) ? renderAddItemSection(inv.id) : '';
+
+    const defaultExpanded = inv.status === 'pending_review';
+    const isEditingThis = editingInvoiceVendorId === inv.id || addingItemToInvoiceId === inv.id;
+    const isExpanded = isEditingThis || (invoiceExpandedState.has(inv.id) ? invoiceExpandedState.get(inv.id) : defaultExpanded);
+
+    const detailsHtml = `
+      <p>Uploaded by ${inv.uploaded_by || 'Unknown'} \u00b7 ${date}</p>
+      <p><a href="${url}" target="_blank" rel="noopener" class="nav-link" style="display:inline; margin:6px 0 0;">View file &rarr;</a></p>
+      ${lineItemsHtml}
+      ${addItemHtml}
+      ${isLmOwned ? `
+        <p style="font-size:12px; color:var(--ink-soft); margin-top:10px; font-style:italic;">Handled by ${locationLabel} \u2014 shown here for tracking only.</p>
+      ` : inv.status === 'pending_review' ? (
+        unresolvedCount > 0 ? `
+          <p style="font-size:12px; color:var(--warn); margin-top:10px;">
+            ${unresolvedCount} item(s) still need Apply or Dismiss before this can be marked reviewed.
+          </p>
+        ` : `
+          <button class="inv-add-btn" style="margin-top:8px;" onclick="markInvoiceReviewed('${inv.id}')">Mark reviewed</button>
+        `
+      ) : `
+        <p style="font-size:12px; color:var(--ink-soft); margin-top:6px;">Reviewed by ${inv.reviewed_by || 'someone'} \u00b7 ${inv.reviewed_at ? new Date(inv.reviewed_at).toLocaleDateString() : ''}</p>
+      `}
+      <button class="inv-add-btn" style="margin-top:8px; color:var(--warn);" onclick="deleteInvoice('${inv.id}', '${inv.file_path.replace(/'/g, "\\'")}')">Delete invoice</button>
+    `;
+
+    const summaryLine = isLmOwned
+      ? (inv.status === 'pending_review' ? `Awaiting review by ${locationLabel}` : `Reviewed by ${inv.reviewed_by || 'someone'}`)
+      : inv.status === 'pending_review'
+        ? (unresolvedCount > 0 ? `${unresolvedCount} item(s) need attention` : 'Ready to mark reviewed')
+        : `Reviewed by ${inv.reviewed_by || 'someone'}`;
+
+    return `
+      <div class="order-card" style="cursor:default;">
+        <div class="order-card-top">
+          ${vendorHtml}
+          <span class="badge ${inv.status === 'pending_review' ? 'submitted' : 'fulfilled'}">${inv.status === 'pending_review' ? 'Needs review' : 'Reviewed'}</span>
+        </div>
+        <p style="margin:0 0 4px; font-size:12px; font-weight:700; color:var(--accent);">\u2192 ${locationLabel}</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="toggleInvoiceExpanded('${inv.id}', ${defaultExpanded})">
+          <p style="margin:0;">${date} \u00b7 ${summaryLine}</p>
+          <button class="inv-add-btn" style="flex-shrink:0;" onclick="event.stopPropagation(); toggleInvoiceExpanded('${inv.id}', ${defaultExpanded})">${isExpanded ? '\u25b4 Hide' : '\u25be Show'}</button>
+        </div>
+        ${isExpanded ? detailsHtml : ''}
+      </div>
+    `;
+  }));
+
+  listEl.innerHTML = rows.join('');
+}
+
+function renderAddItemSection(invoiceId) {
+  if (addingItemToInvoiceId !== invoiceId) {
+    return `<button class="inv-add-btn" style="margin-top:10px;" onclick="openAddItemToInvoice('${invoiceId}')">+ Add item</button>`;
+  }
+
+  const searchResults = addItemSearchQuery.trim()
+    ? state.items.filter(i => i.name.toLowerCase().includes(addItemSearchQuery.trim().toLowerCase())).slice(0, 6)
+    : [];
+  const selectedItem = addItemSelectedId ? itemById(addItemSelectedId) : null;
+
+  return `
+    <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line); font-size:13px;">
+      <p style="font-size:12px; font-weight:700; color:var(--ink-soft); margin:0 0 6px;">Add a missed or extra item</p>
+      <input type="text" id="add-item-search-${invoiceId}" value="${addItemSearchQuery.replace(/"/g, '&quot;')}" placeholder="Search catalog\u2026" oninput="onAddItemSearchChange('${invoiceId}', this.value)" style="width:100%; padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-size:13px; margin-bottom:6px;" />
+      ${searchResults.length > 0 ? `
+        <div style="max-height:140px; overflow-y:auto; margin-bottom:6px;">
+          ${searchResults.map(item => `
+            <div onclick="selectAddItem('${item.id}')" style="padding:6px 8px; border-radius:6px; cursor:pointer; ${addItemSelectedId === item.id ? 'background:var(--accent-soft);' : ''}">
+              ${item.name}
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+      ${selectedItem ? `<p style="font-size:13px; font-weight:600; margin:0 0 6px;">Selected: ${selectedItem.name}</p>` : ''}
+      <div style="display:flex; gap:6px; margin-bottom:8px;">
+        <input type="number" id="add-item-qty-${invoiceId}" placeholder="Qty" style="flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--line);" />
+        <input type="number" id="add-item-price-${invoiceId}" placeholder="Unit $ (optional)" style="flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--line);" />
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="confirm" onclick="saveAddItemToInvoice('${invoiceId}')" style="background:var(--ink); color:white; border:none; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:700; cursor:pointer;">Add</button>
+        <button class="cancel" onclick="cancelAddItemToInvoice()" style="background:none; border:none; color:var(--ink-soft); font-size:13px; cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+  `;
+}
+
+function openAddItemToInvoice(invoiceId) {
+  addingItemToInvoiceId = invoiceId;
+  addItemSearchQuery = '';
+  addItemSelectedId = null;
+  refreshInvoicesPreservingScroll();
+}
+
+function cancelAddItemToInvoice() {
+  addingItemToInvoiceId = null;
+  addItemSearchQuery = '';
+  addItemSelectedId = null;
+  refreshInvoicesPreservingScroll();
+}
+
+async function onAddItemSearchChange(invoiceId, value) {
+  addItemSearchQuery = value;
+  await refreshInvoicesPreservingScroll();
+  const input = document.getElementById(`add-item-search-${invoiceId}`);
+  if (input) { input.focus(); const len = input.value.length; input.setSelectionRange(len, len); }
+}
+
+function selectAddItem(itemId) {
+  addItemSelectedId = itemId;
+  refreshInvoicesPreservingScroll();
+}
+
+async function saveAddItemToInvoice(invoiceId) {
+  if (!addItemSelectedId) {
+    toast('Pick an item first');
+    return;
+  }
+  const qtyVal = document.getElementById(`add-item-qty-${invoiceId}`).value;
+  const priceVal = document.getElementById(`add-item-price-${invoiceId}`).value;
+  const qty = qtyVal === '' ? null : parseFloat(qtyVal);
+
+  if (!qty || qty <= 0) {
+    toast('Enter a quantity');
+    return;
+  }
+
+  const item = itemById(addItemSelectedId);
+  const { error } = await db.from('invoice_line_items').insert({
+    invoice_id: invoiceId,
+    raw_text: `${item.name} (added manually)`,
+    quantity: qty,
+    unit_price: priceVal === '' ? null : parseFloat(priceVal),
+    matched_item_id: addItemSelectedId,
+    match_confidence: 1
+  });
+
+  if (error) {
+    console.error('Failed to add item to invoice:', error);
+    toast('Failed to add item \u2014 see console');
+    return;
+  }
+
+  addingItemToInvoiceId = null;
+  addItemSearchQuery = '';
+  addItemSelectedId = null;
+  toast('Item added');
+  refreshInvoicesPreservingScroll();
+}
+
+function renderInvoiceLineItem(li, readOnly) {
+  const editing = !readOnly && editingLineItemId === li.id;
+
+  if (editing) {
+    const searchResults = lineEditSearchQuery.trim()
+      ? state.items.filter(i => i.name.toLowerCase().includes(lineEditSearchQuery.trim().toLowerCase())).slice(0, 6)
+      : [];
+    const selectedItem = lineEditSelectedItemId ? itemById(lineEditSelectedItemId) : (li.matched_item_id ? itemById(li.matched_item_id) : null);
+
+    return `
+      <div style="padding:10px 0; border-bottom:1px solid var(--line); font-size:13px;">
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <input type="text" id="line-edit-text-${li.id}" value="${(li.raw_text || '').replace(/"/g, '&quot;')}" placeholder="Item description" style="flex:2; padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-size:13px;" />
+          <input type="number" id="line-edit-qty-${li.id}" value="${li.quantity ?? ''}" placeholder="Qty" style="flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-size:13px;" />
+          <input type="number" id="line-edit-price-${li.id}" value="${li.unit_price ?? ''}" placeholder="Unit $" style="flex:1; padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-size:13px;" />
+        </div>
+        <p style="font-size:12px; color:var(--ink-soft); margin:0 0 4px;">Catalog match:</p>
+        <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+          <span style="font-size:13px; font-weight:600;">${selectedItem ? selectedItem.name : 'No item selected'}</span>
+        </div>
+        <input type="text" id="line-edit-search-${li.id}" value="${lineEditSearchQuery.replace(/"/g, '&quot;')}" placeholder="Search catalog to change match\u2026" oninput="onLineEditSearchChange('${li.id}', this.value)" style="width:100%; padding:6px 8px; border-radius:6px; border:1px solid var(--line); font-size:13px; margin-bottom:6px;" />
+        ${searchResults.length > 0 ? `
+          <div style="max-height:140px; overflow-y:auto; margin-bottom:8px;">
+            ${searchResults.map(item => `
+              <div onclick="selectLineEditItem('${li.id}', '${item.id}')" style="padding:6px 8px; border-radius:6px; cursor:pointer; font-size:13px; ${lineEditSelectedItemId === item.id ? 'background:var(--accent-soft);' : ''}">
+                ${item.name}
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+        <div style="display:flex; gap:8px;">
+          <button class="confirm" onclick="saveLineItemEdit('${li.id}')" style="background:var(--ink); color:white; border:none; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:700; cursor:pointer;">Save</button>
+          <button class="cancel" onclick="cancelLineItemEdit()" style="background:none; border:none; color:var(--ink-soft); font-size:13px; cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    `;
+  }
+
+  const missingQtyForApply = !li.applied_to_inventory && !li.dismissed && li.matched_item_id && !li.quantity;
+
+  return `
+    <div style="padding:6px 0; border-bottom:1px solid var(--line); font-size:13px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div style="flex:1;">
+          <div>${li.raw_text}${li.quantity ? ` \u2014 qty ${li.quantity}` : ''}${li.unit_price ? ` @ $${li.unit_price}` : ''}</div>
+          <div style="font-size:12px; color:${li.matched_item_id ? 'var(--ink-soft)' : 'var(--warn)'};">
+            ${li.matched_item_id ? `\u2192 ${li.items?.name} (${Math.round(li.match_confidence * 100)}% match)` : 'No catalog match found'}
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
+          ${li.applied_to_inventory ? `
+            <span style="font-size:12px; color:var(--accent); font-weight:700;">Applied \u2713</span>
+          ` : li.dismissed ? `
+            <span style="font-size:12px; color:var(--ink-soft); font-weight:700;">Dismissed</span>
+          ` : readOnly ? `
+            <span style="font-size:12px; color:var(--ink-soft); font-weight:700;">Pending</span>
+          ` : `
+            <button class="inv-add-btn" onclick="openLineItemEdit('${li.id}')">Edit</button>
+            ${li.matched_item_id && li.quantity ? `<button class="inv-add-btn" onclick="applyInvoiceLineToInventory('${li.id}')">Apply</button>` : ''}
+            <button class="inv-add-btn" onclick="dismissLineItem('${li.id}')">Dismiss</button>
+          `}
+        </div>
+      </div>
+      ${missingQtyForApply && !readOnly ? `
+        <p style="font-size:12px; color:var(--warn); margin:4px 0 0;">Enter a quantity (tap Edit) before this can be applied \u2014 or Dismiss it if it shouldn't be added.</p>
+      ` : ''}
+    </div>
+  `;
+}
+
+async function dismissLineItem(lineItemId) {
+  const { error } = await db.from('invoice_line_items').update({ dismissed: true }).eq('id', lineItemId);
+  if (error) {
+    console.error('Failed to dismiss line item:', error);
+    toast('Failed to dismiss \u2014 see console');
+    return;
+  }
+  toast('Dismissed');
+  refreshInvoicesPreservingScroll();
+}
+
+function openEditInvoiceVendor(invoiceId) {
+  editingInvoiceVendorId = invoiceId;
+  refreshInvoicesPreservingScroll();
+  setTimeout(() => document.getElementById(`vendor-edit-${invoiceId}`)?.focus(), 0);
+}
+
+function cancelEditInvoiceVendor() {
+  editingInvoiceVendorId = null;
+  refreshInvoicesPreservingScroll();
+}
+
+async function saveInvoiceVendor(invoiceId) {
+  const input = document.getElementById(`vendor-edit-${invoiceId}`);
+  const newVendor = input.value.trim();
+
+  const { error } = await db.from('invoice_uploads').update({ vendor_note: newVendor || null }).eq('id', invoiceId);
+  if (error) {
+    console.error('Failed to update vendor:', error);
+    toast('Failed to save vendor \u2014 see console');
+    return;
+  }
+
+  editingInvoiceVendorId = null;
+  toast('Vendor updated');
+  refreshInvoicesPreservingScroll();
+}
+
+function openLineItemEdit(lineItemId) {
+  editingLineItemId = lineItemId;
+  lineEditSearchQuery = '';
+  lineEditSelectedItemId = null;
+  refreshInvoicesPreservingScroll();
+}
+
+function cancelLineItemEdit() {
+  editingLineItemId = null;
+  lineEditSearchQuery = '';
+  lineEditSelectedItemId = null;
+  refreshInvoicesPreservingScroll();
+}
+
+async function onLineEditSearchChange(lineItemId, value) {
+  lineEditSearchQuery = value;
+  await refreshInvoicesPreservingScroll();
+  const input = document.getElementById(`line-edit-search-${lineItemId}`);
+  if (input) { input.focus(); const len = input.value.length; input.setSelectionRange(len, len); }
+}
+
+function selectLineEditItem(lineItemId, itemId) {
+  lineEditSelectedItemId = itemId;
+  refreshInvoicesPreservingScroll();
+}
+
+async function saveLineItemEdit(lineItemId) {
+  const rawText = document.getElementById(`line-edit-text-${lineItemId}`).value.trim();
+  const qtyVal = document.getElementById(`line-edit-qty-${lineItemId}`).value;
+  const priceVal = document.getElementById(`line-edit-price-${lineItemId}`).value;
+
+  const updates = {
+    raw_text: rawText || '(unreadable)',
+    quantity: qtyVal === '' ? null : parseFloat(qtyVal),
+    unit_price: priceVal === '' ? null : parseFloat(priceVal)
+  };
+
+  // Only touch the match if the person actually picked something new —
+  // otherwise leave the original match (and its confidence) untouched.
+  if (lineEditSelectedItemId) {
+    updates.matched_item_id = lineEditSelectedItemId;
+    updates.match_confidence = 1; // manually confirmed, not a fuzzy guess anymore
+  }
+
+  const { error } = await db.from('invoice_line_items').update(updates).eq('id', lineItemId);
+  if (error) {
+    console.error('Failed to save line item edit:', error);
+    toast('Failed to save \u2014 see console');
+    return;
+  }
+
+  editingLineItemId = null;
+  lineEditSearchQuery = '';
+  lineEditSelectedItemId = null;
+  toast('Line item updated');
+  refreshInvoicesPreservingScroll();
+}
+
+async function applyInvoiceLineToInventory(lineItemId) {
+  const { data: line, error: lineError } = await db
+    .from('invoice_line_items')
+    .select('*, invoice_uploads(location_id)')
+    .eq('id', lineItemId)
+    .single();
+
+  if (lineError || !line || !line.matched_item_id || !line.quantity) {
+    toast('Cannot apply this line \u2014 see console');
+    console.error('applyInvoiceLineToInventory: invalid line', lineError);
+    return;
+  }
+
+  // An invoice belongs to whichever location uploaded it; invoices from
+  // before location-scoping existed default to Roastery, same as before.
+  const targetLocationId = line.invoice_uploads?.location_id || state.roasteryId;
+  const isRoastery = targetLocationId === state.roasteryId;
+  const ledgerSource = isRoastery ? 'sysco_received_roastery' : 'sysco_received_direct';
+
+  // Atomic — no read-then-write race window (see add-atomic-inventory-writes.sql)
+  await db.rpc('adjust_inventory', {
+    p_location_id: targetLocationId,
+    p_item_id: line.matched_item_id,
+    p_delta: line.quantity
+  });
+
+  await db.from('ledger_transactions').insert({
+    location_id: targetLocationId,
+    item_id: line.matched_item_id,
+    quantity_delta: line.quantity,
+    source: ledgerSource,
+    reference_id: line.invoice_id
+  });
+
+  await db.from('invoice_line_items').update({ applied_to_inventory: true, confirmed: true }).eq('id', lineItemId);
+
+  toast('Added to inventory');
+  refreshInvoicesPreservingScroll();
+}
+
+async function uploadInvoice() {
+  const fileInput = document.getElementById('invoice-file');
+  const vendorInput = document.getElementById('invoice-vendor');
+  const locationSelect = document.getElementById('invoice-location');
+  const file = fileInput.files[0];
+
+  if (!file) {
+    toast('Choose a file first');
+    return;
+  }
+
+  invoiceUploading = true;
+  refreshInvoicesPreservingScroll();
+
+  const me = ensureWorkerName();
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `${Date.now()}-${safeName}`;
+
+  const { error: uploadError } = await db.storage.from('invoices').upload(path, file);
+
+  if (uploadError) {
+    console.error('Invoice upload failed:', uploadError);
+    toast('Upload failed \u2014 see console');
+    invoiceUploading = false;
+    refreshInvoicesPreservingScroll();
+    return;
+  }
+
+  const { data: inserted, error: insertError } = await db.from('invoice_uploads').insert({
+    file_path: path,
+    original_filename: file.name,
+    vendor_note: vendorInput.value.trim() || null,
+    uploaded_by: me,
+    status: 'pending_review',
+    location_id: locationSelect.value || null
+  }).select('id').single();
+
+  invoiceUploading = false;
+
+  if (insertError) {
+    console.error('Failed to record invoice upload:', insertError);
+    toast('File uploaded, but failed to save record \u2014 see console');
+  } else {
+    toast('Invoice uploaded \u2014 reading it now\u2026');
+    // Fire-and-forget: extraction happens in the background, the review
+    // list will show "processing" and pick up results on next refresh.
+    fetch(PROCESS_INVOICE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invoice_id: inserted.id })
+    }).catch(err => console.error('Failed to trigger invoice extraction:', err));
+  }
+
+  refreshInvoicesPreservingScroll();
+}
+
+async function markInvoiceReviewed(invoiceId) {
+  const me = ensureWorkerName();
+  const { error } = await db
+    .from('invoice_uploads')
+    .update({ status: 'reviewed', reviewed_by: me, reviewed_at: new Date().toISOString() })
+    .eq('id', invoiceId);
+
+  if (error) {
+    console.error('Failed to mark invoice reviewed:', error);
+    toast('Failed to update \u2014 see console');
+    return;
+  }
+  toast('Marked as reviewed');
+  refreshInvoicesPreservingScroll();
+}
+
+async function deleteInvoice(invoiceId, filePath) {
+  // Safeguard: if any line item already applied a quantity to real
+  // inventory, deleting the invoice record wouldn't undo that — the
+  // quantity stays sitting in inventory_levels/ledger_transactions with
+  // no trace of where it came from. Warn clearly instead of silently
+  // leaving that behind.
+  const { data: lines } = await db
+    .from('invoice_line_items')
+    .select('id, applied_to_inventory')
+    .eq('invoice_id', invoiceId);
+
+  const appliedCount = (lines || []).filter(l => l.applied_to_inventory).length;
+
+  const warning = appliedCount > 0
+    ? `${appliedCount} item(s) on this invoice were already applied to inventory. Deleting the invoice will NOT reverse those quantities \u2014 they'll stay in your inventory with no record of this invoice. Delete anyway?`
+    : 'Delete this invoice? This cannot be undone.';
+
+  if (!confirm(warning)) return;
+
+  if (filePath) {
+    const { error: storageError } = await db.storage.from('invoices').remove([filePath]);
+    if (storageError) console.error('Failed to delete invoice file (continuing anyway):', storageError);
+  }
+
+  const { error } = await db.from('invoice_uploads').delete().eq('id', invoiceId);
+  if (error) {
+    console.error('Failed to delete invoice:', error);
+    toast('Failed to delete \u2014 see console');
+    return;
+  }
+
+  toast('Invoice deleted');
+  refreshInvoicesPreservingScroll();
+}
+
+function goToInventory(mode) {
+  invLandingMode = mode || invLandingMode || 'browse';
+  location.hash = 'inventory';
+  renderInventory();
+}
+
+function goToCafeOrdersHome() {
+  location.hash = 'cafeorders';
+  renderCafeOrdersHome();
+}
+
+function renderCafeOrdersHome() {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goHome()">&larr; Home</button>
+    <h1>Cafe Orders</h1>
+  `;
+  const cafeLocations = Object.values(state.locationsById)
+    .filter(l => l.type === 'cafe' || l.type === 'mobile' || l.type === 'bakery' || l.type === 'production')
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const openCountByLocation = {};
+  state.orders.forEach(o => {
+    if (o.status !== 'delivered') {
+      openCountByLocation[o.location] = (openCountByLocation[o.location] || 0) + 1;
+    }
+  });
+
+  document.getElementById('app-main').innerHTML = `
+    <div class="cafe-btn-grid">
+      ${cafeLocations.map(l => `
+        <button class="cafe-btn" onclick="goToCafeLocation('${l.name.replace(/'/g, "\\'")}')">
+          <span class="cafe-btn-name">${l.name}</span>
+          <span class="cafe-btn-count">${openCountByLocation[l.name] || 0} open</span>
+        </button>
+      `).join('')}
+    </div>
+    <button class="home-btn home-btn-b" style="margin-top:20px;" onclick="goToLocationList()">
+      <span class="home-btn-label">Order History</span>
+    </button>
+    <a class="nav-link" style="display:block; margin-top:16px; text-align:center;" onclick="location.hash='board'; renderOrderList();">View all locations at once &rarr;</a>
+  `;
+}
+
+function goToCafeLocation(locationName) {
+  location.hash = `cafe:${encodeURIComponent(locationName)}`;
+  renderCafeLocationOrders(locationName);
+}
+
+function goToLocationList() {
+  location.hash = 'locations';
+  renderLocationList();
+}
+
+function renderCafeLocationOrders(locationName) {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goToCafeOrdersHome()">&larr; Cafe Orders</button>
+    <h1>${locationName}</h1>
+  `;
+  const orders = state.orders
+    .filter(o => o.location === locationName && o.status !== 'delivered')
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+  const main = document.getElementById('app-main');
+  if (orders.length === 0) {
+    main.innerHTML = `<div class="empty-state"><p>No open orders for ${locationName}.</p></div>`;
+    return;
+  }
+  main.innerHTML = orders.map(orderCardHtml).join('');
+}
+
+function renderLocationList() {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goToCafeOrdersHome()">&larr; Cafe Orders</button>
+    <h1>Order history by cafe</h1>
+    <p>Select a location</p>
+  `;
+
+  const main = document.getElementById('app-main');
+  const counts = {};
+  state.orders.forEach(o => { counts[o.location] = (counts[o.location] || 0) + 1; });
+
+  const names = Object.keys(counts).sort();
+
+  if (names.length === 0) {
+    main.innerHTML = `<div class="empty-state"><p>No orders placed yet.</p></div>`;
+    return;
+  }
+
+  main.innerHTML = names.map(name => `
+    <div class="order-card" onclick="goToLocationHistory('${name}')">
+      <div class="order-card-top">
+        <h2>${name}</h2>
+      </div>
+      <p>${counts[name]} order${counts[name] === 1 ? '' : 's'} on record</p>
+    </div>
+  `).join('');
+}
+
+function goToLocationHistory(locationName) {
+  location.hash = `location:${encodeURIComponent(locationName)}`;
+  renderLocationHistory(locationName);
+}
+
+let expandedHistoryOrderId = null;
+
+function renderLocationHistory(locationName) {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goToLocationList()">&larr; All locations</button>
+    <h1>${locationName}</h1>
+    <p>Order history</p>
+  `;
+
+  const main = document.getElementById('app-main');
+  const orders = state.orders
+    .filter(o => o.location === locationName)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  if (orders.length === 0) {
+    main.innerHTML = `<div class="empty-state"><p>No orders on record for this location.</p></div>`;
+    return;
+  }
+
+  main.innerHTML = orders.map(o => {
+    const date = new Date(o.createdAt).toLocaleDateString(undefined, {
+      month: 'short', day: 'numeric', year: 'numeric'
+    });
+    const expanded = expandedHistoryOrderId === o.id;
+    return `
+      <div class="order-card" onclick="toggleHistoryOrder('${o.id}', '${locationName.replace(/'/g, "\\'")}')">
+        <div class="order-card-top">
+          <h2>${date}</h2>
+          <span class="badge ${o.status}">${statusLabel(o.status)}</span>
+        </div>
+        <p>${o.lines.length} item${o.lines.length === 1 ? '' : 's'} ${expanded ? '\u2013 tap to collapse' : '\u2013 tap to view'}</p>
+        ${expanded ? `
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">
+            ${o.lines.map(l => {
+              const item = itemById(l.itemId);
+              return `<p style="font-size:13px; color:var(--ink-soft); margin:0 0 4px;">${l.qtyOrdered} ${item ? item.name : 'Unknown item'}${l.quantityOnHand != null ? ` (${l.quantityOnHand} on hand` : ''}${l.quantityPar != null ? `, par ${l.quantityPar})` : l.quantityOnHand != null ? ')' : ''}</p>`;
+            }).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleHistoryOrder(orderId, locationName) {
+  expandedHistoryOrderId = expandedHistoryOrderId === orderId ? null : orderId;
+  renderLocationHistory(locationName);
+}
+
+function goToItemHistory(itemId) {
+  location.hash = `item:${itemId}`;
+  renderItemHistory(itemId);
+}
+
+const SOURCE_LABELS = {
+  warehouse_pick: 'Picked for order',
+  sysco_received_roastery: 'Sysco delivery received',
+  sysco_received_direct: 'Sysco delivery received (direct)',
+  manual_adjustment: 'Manual adjustment'
+};
+
+async function renderItemHistory(itemId) {
+  const item = itemById(itemId);
+  if (!item) return renderInventory();
+
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goToInventory()">&larr; Inventory</button>
+    <h1>${item.name}</h1>
+    <p>Full movement history</p>
+  `;
+
+  const main = document.getElementById('app-main');
+  main.innerHTML = `<div class="empty-state"><p>Loading history\u2026</p></div>`;
+
+  const { data: rows, error } = await db
+    .from('ledger_transactions')
+    .select('id, quantity_delta, source, reference_id, created_at')
+    .eq('item_id', itemId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Failed to load history:', error);
+    main.innerHTML = `<div class="empty-state"><p>Couldn't load history \u2014 see console.</p></div>`;
+    return;
+  }
+
+  if (rows.length === 0) {
+    main.innerHTML = `<div class="empty-state"><p>No movement recorded yet for this item.</p></div>`;
+    return;
+  }
+
+  // For pick transactions, look up which cafe the order was for.
+  const orderIds = [...new Set(rows.filter(r => r.source === 'warehouse_pick' && r.reference_id).map(r => r.reference_id))];
+  let ordersById = {};
+  if (orderIds.length > 0) {
+    const { data: orders } = await db.from('orders').select('id, for_location_id').in('id', orderIds);
+    ordersById = Object.fromEntries((orders || []).map(o => [o.id, o]));
+  }
+
+  main.innerHTML = rows.map(r => {
+    const isPositive = r.quantity_delta > 0;
+    const date = new Date(r.created_at).toLocaleString(undefined, {
+      month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+    const order = ordersById[r.reference_id];
+    const location = order ? state.locationsById[order.for_location_id]?.name : null;
+
+    return `
+      <div class="hist-row">
+        <div class="delta ${isPositive ? 'pos' : 'neg'}">${isPositive ? '+' : ''}${r.quantity_delta}</div>
+        <div class="hist-info">
+          <p class="source">${SOURCE_LABELS[r.source] || r.source}${location ? ` \u2014 ${location}` : ''}</p>
+          <p class="meta">${date}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+let invCategory = 'All';
+let invZoneFilter = 'All';
+
+function setInvZoneFilter(zone) {
+  invZoneFilter = zone;
+  renderInventory();
+}
+let invAddingId = null;
+let invEditingId = null;
+let invEditingNameId = null;
+
+function renderInventory() {
+  const mode = invLandingMode || 'browse';
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="goToWarehouseHome()">&larr; Warehouse Inventory</button>
+    <h1>${mode === 'confirm' ? 'Confirm Inventory' : mode === 'add' ? 'Add Inventory' : 'Warehouse inventory'}</h1>
+    <p>${mode === 'confirm' ? 'Update any count that\u2019s changed, then move on' : mode === 'add' ? 'Find the item you just received' : `${state.items.length} item(s) tracked`}</p>
+  `;
+
+  const main = document.getElementById('app-main');
+  const categories = ['All', ...new Set(state.items.map(i => i.category || 'Other'))];
+  const allCategories = [...new Set(state.items.map(i => i.category).filter(Boolean))].sort();
+  const zoneFilterOptions = ['All', 'Unassigned', 'Warehouse', 'Roasting', 'Bakery', 'Production'];
+  let visibleItems = invCategory === 'All'
+    ? state.items
+    : state.items.filter(i => (i.category || 'Other') === invCategory);
+  if (invZoneFilter === 'Unassigned') {
+    visibleItems = visibleItems.filter(i => !i.storageZone);
+  } else if (invZoneFilter !== 'All') {
+    visibleItems = visibleItems.filter(i => i.storageZone === invZoneFilter);
+  }
+
+  const groups = [];
+  visibleItems.forEach(item => {
+    const cat = item.category || 'Other';
+    let group = groups.find(g => g.category === cat);
+    if (!group) { group = { category: cat, items: [] }; groups.push(group); }
+    group.items.push(item);
+  });
+
+  const invRow = (item) => {
+    const qty = state.inventory[item.id] ?? 0;
+    const adding = invAddingId === item.id;
+    const editing = invEditingId === item.id;
+    const editingName = invEditingNameId === item.id;
+    const confirmMode = mode === 'confirm' && !editingName;
+
+    return `
+      <div class="inv-row">
+        <div class="inv-row-top">
+          <div class="line-info">
+            ${editingName ? `
+              <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+                <input type="text" id="inv-name-${item.id}" value="${item.name.replace(/"/g, '&quot;')}" placeholder="Item name" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid var(--line); font-size:15px; font-weight:600;" />
+              </div>
+              <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+                <input type="text" id="inv-sku-${item.id}" value="${(item.sku||'').replace(/"/g, '&quot;')}" placeholder="SKU (optional)" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid var(--line); font-size:13px;" />
+              </div>
+              <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+                <select id="inv-zone-${item.id}" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid var(--line); font-size:13px; background:white;">
+                  <option value="" ${!item.storageZone ? 'selected' : ''}>No zone assigned</option>
+                  ${['Warehouse', 'Roasting', 'Bakery', 'Production'].map(z => `<option value="${z}" ${item.storageZone === z ? 'selected' : ''}>${z}</option>`).join('')}
+                </select>
+                <input type="text" id="inv-bin-${item.id}" value="${(item.bin||'').replace(/"/g, '&quot;')}" placeholder="Bin/shelf code" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid var(--line); font-size:13px;" />
+              </div>
+              <label style="display:flex; gap:6px; align-items:center; margin-bottom:6px; font-size:13px; cursor:pointer;">
+                <input type="checkbox" id="inv-perishable-${item.id}" ${item.isPerishable ? 'checked' : ''} />
+                Perishable \u2014 flag orders for pick priority
+              </label>
+              <div style="display:flex; gap:8px; align-items:center; margin-bottom:4px;">
+                <select id="inv-category-${item.id}" onchange="handleCategorySelectChange('${item.id}')" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid var(--line); font-size:13px; background:white;">
+                  <option value="">No category</option>
+                  ${allCategories.map(cat => `<option value="${cat.replace(/"/g, '&quot;')}" ${cat === item.category ? 'selected' : ''}>${cat}</option>`).join('')}
+                  <option value="__new__">+ Add new category\u2026</option>
+                </select>
+                <button class="confirm" onclick="confirmEditName('${item.id}')" style="background:var(--ink); color:white; border:none; border-radius:8px; padding:6px 12px; font-size:13px; font-weight:700; cursor:pointer;">Save</button>
+                <button class="cancel" onclick="cancelEditName()" style="background:none; border:none; color:var(--ink-soft); font-size:13px; cursor:pointer;">Cancel</button>
+              </div>
+            ` : `
+              <h3>${item.name}${item.vendor && item.vendor !== 'other' ? ` <span class="tag">${item.vendor}</span>` : ''} <button onclick="openEditName('${item.id}')" style="background:none; border:none; color:var(--ink-soft); font-size:12px; text-decoration:underline; cursor:pointer; font-weight:400;">edit</button></h3>
+            `}
+            <p>${item.scItemNumber ? `${item.scItemNumber} \u00b7 ` : ''}${item.storageZone ? `${item.storageZone} \u00b7 ` : ''}${item.bin ? `Bin ${item.bin}` : 'No bin assigned yet'}${item.sku ? ` \u00b7 SKU ${item.sku}` : ''}${item.category ? ` \u00b7 ${item.category}` : ''}</p>
+          </div>
+          <div class="inv-qty">
+            <div class="num">${qty}</div>
+            <div class="unit">${item.unit}${qty === 1 ? '' : 's'}</div>
+          </div>
+        </div>
+        ${confirmMode ? `
+          <div class="inv-add-box">
+            <span style="font-size:13px; color:var(--ink-soft);">Actual count:</span>
+            <input type="number" min="0" id="inv-confirm-${item.id}" value="${qty}" />
+            <button class="confirm" onclick="confirmEditCount('${item.id}')">Save</button>
+          </div>
+        ` : adding ? `
+          <div class="inv-add-box">
+            <input type="number" min="1" id="inv-qty-${item.id}" placeholder="qty" />
+            <select id="inv-source-${item.id}">
+              <option value="sysco_received_roastery">Sysco delivery</option>
+              <option value="manual_adjustment">Manual adjustment</option>
+            </select>
+            <button class="confirm" onclick="confirmAddStock('${item.id}')">Add</button>
+            <button class="cancel" onclick="cancelAddStock()">Cancel</button>
+          </div>
+        ` : editing ? `
+          <div class="inv-add-box">
+            <span style="font-size:13px; color:var(--ink-soft);">Correct total to:</span>
+            <input type="number" min="0" id="inv-edit-${item.id}" value="${qty}" />
+            <button class="confirm" onclick="confirmEditCount('${item.id}')">Save</button>
+            <button class="cancel" onclick="cancelEditCount()">Cancel</button>
+          </div>
+        ` : `
+          <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+            <button class="inv-add-btn" onclick="openAddStock('${item.id}')">+ Add stock received</button>
+            <button class="inv-add-btn" onclick="openEditCount('${item.id}')">Edit count</button>
+            <button class="inv-add-btn" onclick="goToItemHistory('${item.id}')">View history</button>
+          </div>
+        `}
+      </div>
+    `;
+  };
+
+  main.innerHTML = `
+    <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.03em; margin:0 0 6px;">New building zone</p>
+    <div class="chip-row" style="margin-bottom:14px;">
+      ${zoneFilterOptions.map(z => `
+        <button class="chip ${z === invZoneFilter ? 'active' : ''}" onclick="setInvZoneFilter('${z}')">${z}</button>
+      `).join('')}
+    </div>
+    <div class="chip-row">
+      ${categories.map(c => `
+        <button class="chip ${c === invCategory ? 'active' : ''}" onclick="setInvCategory('${c}')">${c}</button>
+      `).join('')}
+    </div>
+    ${groups.map(g => `
+      ${invCategory === 'All' ? `<div class="category-header">${g.category}</div>` : ''}
+      <div class="inv-grid">${g.items.map(invRow).join('')}</div>
+    `).join('')}
+  `;
+}
+
+function setInvCategory(cat) {
+  invCategory = cat;
+  invAddingId = null;
+  invEditingId = null;
+  invEditingNameId = null;
+  renderInventory();
+}
+
+function openEditName(itemId) {
+  invEditingNameId = itemId;
+  invAddingId = null;
+  invEditingId = null;
+  renderInventory();
+  setTimeout(() => {
+    const input = document.getElementById(`inv-name-${itemId}`);
+    if (input) { input.focus(); input.select(); }
+  }, 0);
+}
+
+function cancelEditName() {
+  invEditingNameId = null;
+  renderInventory();
+}
+
+function handleCategorySelectChange(itemId) {
+  const select = document.getElementById(`inv-category-${itemId}`);
+  if (select.value === '__new__') {
+    const newCat = prompt('New category name:');
+    if (newCat && newCat.trim()) {
+      const opt = document.createElement('option');
+      opt.value = newCat.trim();
+      opt.textContent = newCat.trim();
+      opt.selected = true;
+      select.insertBefore(opt, select.lastElementChild);
+    } else {
+      select.value = '';
+    }
+  }
+}
+
+async function confirmEditName(itemId) {
+  const nameInput = document.getElementById(`inv-name-${itemId}`);
+  const skuInput = document.getElementById(`inv-sku-${itemId}`);
+  const categorySelect = document.getElementById(`inv-category-${itemId}`);
+  const zoneSelect = document.getElementById(`inv-zone-${itemId}`);
+  const binInput = document.getElementById(`inv-bin-${itemId}`);
+  const perishableCheckbox = document.getElementById(`inv-perishable-${itemId}`);
+  const newName = nameInput.value.trim();
+  const newSku = skuInput.value.trim() || null;
+  const newCategory = categorySelect.value.trim() || null;
+  const newZone = zoneSelect.value || null;
+  const newBin = binInput.value.trim() || null;
+  const newIsPerishable = perishableCheckbox.checked;
+  if (!newName) {
+    nameInput.focus();
+    return;
+  }
+
+  const { error } = await db
+    .from('items')
+    .update({ name: newName, sku: newSku, category: newCategory, storage_zone: newZone, warehouse_location: newBin, is_perishable: newIsPerishable })
+    .eq('id', itemId);
+
+  if (error) {
+    console.error('Failed to save item details:', error);
+    toast(error.code === '23505' ? 'That SKU is already used by another item' : 'Failed to save — see console');
+    return;
+  }
+
+  const item = state.items.find(i => i.id === itemId);
+  if (item) { item.name = newName; item.sku = newSku; item.category = newCategory; item.storageZone = newZone; item.bin = newBin; item.isPerishable = newIsPerishable; }
+  toast('Item updated');
+  invEditingNameId = null;
+  renderInventory();
+}
+
+function openAddStock(itemId) {
+  invAddingId = itemId;
+  invEditingId = null;
+  invEditingNameId = null;
+  renderInventory();
+  setTimeout(() => document.getElementById(`inv-qty-${itemId}`)?.focus(), 0);
+}
+
+function cancelAddStock() {
+  invAddingId = null;
+  renderInventory();
+}
+
+function openEditCount(itemId) {
+  invEditingId = itemId;
+  invAddingId = null;
+  invEditingNameId = null;
+  renderInventory();
+  setTimeout(() => {
+    const input = document.getElementById(`inv-edit-${itemId}`);
+    if (input) { input.focus(); const len = input.value.length; input.setSelectionRange(len, len); }
+  }, 0);
+}
+
+function cancelEditCount() {
+  invEditingId = null;
+  renderInventory();
+}
+
+async function confirmEditCount(itemId) {
+  const input = document.getElementById(`inv-edit-${itemId}`) || document.getElementById(`inv-confirm-${itemId}`);
+  const newQty = parseInt(input.value, 10);
+  if (isNaN(newQty) || newQty < 0) {
+    input.focus();
+    return;
+  }
+
+  const currentQty = state.inventory[itemId] || 0;
+  const delta = newQty - currentQty;
+
+  const { error: invError } = await db
+    .from('inventory_levels')
+    .upsert(
+      { location_id: state.roasteryId, item_id: itemId, quantity_on_hand: newQty, last_updated: new Date().toISOString() },
+      { onConflict: 'location_id,item_id' }
+    );
+  if (invError) {
+    console.error('Inventory update failed:', invError);
+    toast('Failed to save count — see console');
+    return;
+  }
+
+  if (delta !== 0) {
+    await db.from('ledger_transactions').insert({
+      location_id: state.roasteryId,
+      item_id: itemId,
+      quantity_delta: delta,
+      source: 'manual_adjustment',
+      reference_id: null
+    });
+  }
+
+  state.inventory[itemId] = newQty;
+  const item = itemById(itemId);
+  toast(delta === 0 ? 'Count confirmed' : `Count corrected to ${newQty}`);
+  invEditingId = null;
+  renderInventory();
+}
+
+async function confirmAddStock(itemId) {
+  const qtyInput = document.getElementById(`inv-qty-${itemId}`);
+  const source = document.getElementById(`inv-source-${itemId}`).value;
+  const qty = parseInt(qtyInput.value, 10);
+  if (!qty || qty <= 0) {
+    qtyInput.focus();
+    return;
+  }
+
+  // Atomic — no read-then-write race window, and no reliance on the
+  // locally cached state.inventory value (see add-atomic-inventory-writes.sql)
+  const { error: invError } = await db.rpc('adjust_inventory', {
+    p_location_id: state.roasteryId,
+    p_item_id: itemId,
+    p_delta: qty
+  });
+  if (invError) {
+    console.error('Inventory update failed:', invError);
+    toast('Failed to add stock — see console');
+    return;
+  }
+
+  await db.from('ledger_transactions').insert({
+    location_id: state.roasteryId,
+    item_id: itemId,
+    quantity_delta: qty,
+    source,
+    reference_id: null
+  });
+
+  state.inventory[itemId] = (state.inventory[itemId] || 0) + qty;
+  const item = itemById(itemId);
+  toast(`+${qty} ${item.name} added`);
+  invAddingId = null;
+  renderInventory();
+}
+
+window.addEventListener('hashchange', () => {
+  routeTo(decodeURIComponent(location.hash.replace('#', '')));
+});
+
+let lastStateSignature = null;
+
+function computeStateSignature() {
+  // Cheap way to tell "did anything worth showing actually change" without
+  // a full diffing engine — just compare a snapshot of the data that
+  // drives what's on screen.
+  return JSON.stringify({
+    orders: state.orders,
+    inventory: state.inventory,
+    pendingInvoiceCount: state.pendingInvoiceCount
+  });
+}
+
+async function refreshCurrentView() {
+  // Always try to sync any offline-queued receipt confirmations, regardless
+  // of what's on screen or whether anything's focused.
+  flushPendingReceipts();
+
+  // Never interrupt someone actively typing, or with an inventory action box open.
+  const active = document.activeElement;
+  if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+  if (invAddingId || invEditingId || invEditingNameId || invoiceUploading) return;
+
+  try {
+    await loadState();
+    const newSignature = computeStateSignature();
+    if (newSignature === lastStateSignature) {
+      return; // nothing actually changed — skip the re-render entirely, no flash
+    }
+    lastStateSignature = newSignature;
+    routeTo(decodeURIComponent(location.hash.replace('#', '')));
+  } catch (err) {
+    // A transient failure during background refresh shouldn't crash the
+    // page — just skip this cycle and try again on the next one.
+    console.error('Background refresh failed, will retry next cycle:', err);
+  }
+}
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(refreshCurrentView, 6000);
+}
+
+function renderLoginScreen(errorMsg) {
+  document.getElementById('app-header').innerHTML = `<h1>Salt City Coffee</h1><p>Sign in \u2014 Production/Warehouse</p>`;
+  document.getElementById('app-main').innerHTML = `
+    <div class="login-wrap">
+      <img class="logo-mark" src="${LOGO_DATA_URI}" alt="Salt City Coffee" />
+      <h2>Sign in</h2>
+      <p class="sub">Use your email and the same 4-digit PIN as the Command Deck</p>
+      ${errorMsg ? `<p class="error">${errorMsg}</p>` : ''}
+      <input type="email" id="login-email" placeholder="Email" autocomplete="username" />
+      <input type="password" id="login-password" placeholder="4-digit PIN" inputmode="numeric" autocomplete="current-password" onkeydown="if(event.key==='Enter')attemptSignIn()" />
+      <button onclick="attemptSignIn()">Sign in</button>
+      <p style="text-align:center; margin-top:14px;">
+        <button class="signout-link" onclick="renderForgotPasswordScreen()" style="font-size:13px;">Forgot PIN?</button>
+      </p>
+    </div>
+  `;
+}
+
+function renderForgotPasswordScreen(message, isError) {
+  document.getElementById('app-header').innerHTML = `<h1>Salt City Coffee</h1><p>Reset your PIN</p>`;
+  document.getElementById('app-main').innerHTML = `
+    <div class="login-wrap">
+      <img class="logo-mark" src="${LOGO_DATA_URI}" alt="Salt City Coffee" />
+      <h2>Reset PIN</h2>
+      <p class="sub">Enter your email and we'll send you a link to set a new PIN</p>
+      ${message ? `<p class="${isError ? 'error' : 'sub'}">${message}</p>` : ''}
+      <input type="email" id="reset-email" placeholder="Email" autocomplete="username" />
+      <button onclick="sendPasswordResetEmail()">Send reset link</button>
+      <p style="text-align:center; margin-top:14px;">
+        <button class="signout-link" onclick="renderLoginScreen()" style="font-size:13px;">Back to sign in</button>
+      </p>
+    </div>
+  `;
+}
+
+async function sendPasswordResetEmail() {
+  const email = document.getElementById('reset-email').value.trim();
+  if (!email) return;
+
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo });
+
+  if (error) {
+    renderForgotPasswordScreen(error.message, true);
+    return;
+  }
+  renderForgotPasswordScreen('Check your email for a reset link. It may take a minute to arrive.', false);
+}
+
+function renderSetNewPasswordScreen() {
+  document.getElementById('app-header').innerHTML = `<h1>Salt City Coffee</h1><p>Set a new PIN</p>`;
+  document.getElementById('app-main').innerHTML = `
+    <div class="login-wrap">
+      <img class="logo-mark" src="${LOGO_DATA_URI}" alt="Salt City Coffee" />
+      <h2>Set a new PIN</h2>
+      <p class="sub">Pick a 4-digit PIN. It's the same PIN you'll use on the Command Deck.</p>
+      <p class="error" id="set-password-error" style="display:none;"></p>
+      <input type="password" id="new-password" placeholder="New 4-digit PIN" inputmode="numeric" maxlength="4" autocomplete="new-password" />
+      <input type="password" id="confirm-password" placeholder="Confirm PIN" inputmode="numeric" maxlength="4" autocomplete="new-password" />
+      <button onclick="submitNewPassword()">Set PIN</button>
+    </div>
+  `;
+}
+
+async function submitNewPassword() {
+  const newPassword = document.getElementById('new-password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+  const errorEl = document.getElementById('set-password-error');
+
+  if (!/^\d{4}$/.test(newPassword)) {
+    errorEl.textContent = 'Your PIN must be exactly 4 digits.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    errorEl.textContent = 'PINs don\u2019t match.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  // Same login as the Command Deck: the PIN is stored as "sc-pin-" + 4 digits.
+  const { error } = await db.auth.updateUser({ password: PIN_PREFIX + newPassword });
+  if (error) {
+    errorEl.textContent = error.message;
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  passwordRecoveryMode = false;
+  history.replaceState(null, '', window.location.pathname);
+  toast('PIN updated \u2014 use it here and on the Command Deck');
+  await bootstrapAfterAuth();
+}
+
+async function attemptSignIn() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return;
+
+  // Try the shared Command Deck PIN first ("sc-pin-" + 4 digits). Fall back to
+  // the typed value as-is so anyone still on an old password can get in.
+  let error = null;
+  if (/^\d{4}$/.test(password)) {
+    ({ error } = await db.auth.signInWithPassword({ email, password: PIN_PREFIX + password }));
+    if (!error) { await bootstrapAfterAuth(); return; }
+  }
+  ({ error } = await db.auth.signInWithPassword({ email, password }));
+  if (error) {
+    renderLoginScreen('Wrong email or PIN \u2014 try again.');
+    return;
+  }
+  await bootstrapAfterAuth();
+}
+
+async function signOut() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  await db.auth.signOut();
+  currentStaff = null;
+  state = null;
+  location.hash = '';
+  renderLoginScreen();
+}
+
+async function bootstrapAfterAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) {
+    renderLoginScreen();
+    return;
+  }
+
+  const { data: staffRow, error: staffError } = await db
+    .from('staff')
+    .select('id, name, role')
+    .eq('auth_user_id', session.user.id)
+    .maybeSingle();
+
+  if (staffError || !staffRow) {
+    document.getElementById('app-header').innerHTML = `<h1>Salt City Coffee</h1>`;
+    document.getElementById('app-main').innerHTML = `
+      <div class="login-wrap">
+        <p>Your login works, but no staff record has been set up for it yet.</p>
+        <p class="sub">Ask your COO to assign your role.</p>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    `;
+    return;
+  }
+
+  if (staffRow.role !== 'production_manager' && staffRow.role !== 'coo') {
+    document.getElementById('app-header').innerHTML = `<h1>Salt City Coffee</h1>`;
+    document.getElementById('app-main').innerHTML = `
+      <div class="login-wrap">
+        <p>This app is for Production Manager and COO accounts.</p>
+        <p class="sub">Location managers and GMs place orders in the ordering app instead.</p>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    `;
+    return;
+  }
+
+  currentStaff = { id: staffRow.id, name: staffRow.name, role: staffRow.role };
+
+  try {
+    await loadState();
+    lastStateSignature = computeStateSignature();
+    routeTo(decodeURIComponent(location.hash.replace('#', '')));
+    startAutoRefresh();
+  } catch (err) {
+    console.error('Failed to load app data:', err);
+    document.getElementById('app-header').innerHTML = `<h1>Salt City Coffee</h1>`;
+    document.getElementById('app-main').innerHTML = `
+      <div class="login-wrap">
+        <p>Something went wrong loading the app data.</p>
+        <p class="sub">${err.message || 'See the browser console for details.'}</p>
+        <button onclick="location.reload()">Try again</button>
+      </div>
+    `;
+  }
+}
+
+db.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    passwordRecoveryMode = true;
+    renderSetNewPasswordScreen();
+  }
+});
+
+(async function init() {
+  // Give onAuthStateChange a moment to fire for a recovery link before
+  // falling through to the normal login/session check.
+  await new Promise(resolve => setTimeout(resolve, 300));
+  if (passwordRecoveryMode) return;
+
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    await bootstrapAfterAuth();
+  } else {
+    renderLoginScreen();
+  }
+})();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function (e) { console.warn('SW registration failed', e); });
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Old ordering-app page names (from salt-city-coffee-systems) -> new pages
+/cafe-ordering-prototype.html      /ordering.html   301
+/picking-interface-prototype.html  /picking.html    301
+/wholesale-portal-prototype.html   /wholesale.html  301
+/systems-home.html                 /systems.html    301

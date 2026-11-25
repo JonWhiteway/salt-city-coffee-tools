@@ -261,6 +261,15 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea
 
 .sd-seal{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#284A70;box-shadow:0 0 0 2px #F0E7DA;flex:none}.sd-seal svg{width:17px;height:21px;display:block}
 </style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#244A71">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Command Deck">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
 <div class="topbar">
@@ -549,6 +558,13 @@ async function reportMode(id){
   if(params.get("report")) return reportMode(params.get("report"));
   locked("Leadership 360", "Open this page from a 360 link, the Academy or the Command Deck.");
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function (e) { console.warn('SW registration failed', e); });
+    });
+  }
 </script>
 </body>
 </html>

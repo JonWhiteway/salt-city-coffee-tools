@@ -168,6 +168,15 @@ html.embed.nolist .layout{grid-template-columns:minmax(0,1fr) !important}
 html.embed.nolist .layout > div:first-child{display:none !important}
 </style>
 <script>(function(){ var q = new URLSearchParams(location.search); if(q.get("embed")==="1"){ document.documentElement.classList.add("embed"); if(q.get("list")==="0") document.documentElement.classList.add("nolist"); } })();</script>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#244A71">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Command Deck">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
 <div class="hero">
@@ -780,6 +789,13 @@ function addonRow(a) {
     '<td><input data-k="serves" value="' + esc(a.serves || "") + '"></td><td><input type="checkbox" data-k="taxable"' + (a.taxable ? ' checked' : '') + '></td><td><input type="checkbox" data-k="active"' + (a.active ? ' checked' : '') + '></td></tr>';
 }
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function (e) { console.warn('SW registration failed', e); });
+    });
+  }
 </script>
 </body>
 </html>

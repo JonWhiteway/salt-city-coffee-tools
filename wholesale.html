@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salt City Coffee — Wholesale</title>
+<style>
+  :root {
+      --ink:#241F18; --ink-soft:#5A5245; --paper:#F7F4EC; --card:#FFFFFF;
+      --line:#E1D9C4; --accent:#EB6834; --accent-soft:#FCE3D4;
+      --warn:#B8860B; --warn-soft:#F7EBC9; --good:#0CA30C; --good-soft:#DCF3DC; --radius:10px;
+    }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  header {
+    padding: 22px 20px 18px;
+    border-bottom: 1px solid var(--line);
+    border-top: 6px solid var(--accent);
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 5;
+  }
+  header h1 { font-size: 24px; font-weight: 800; margin: 0 0 3px; letter-spacing: -0.01em; color: var(--accent); }
+  header p { margin: 0; font-size: 15px; color: var(--ink-soft); }
+  main { padding: 16px; max-width: min(94vw, 900px); margin: 0 auto 100px; }
+
+  .logo-mark { display: block; width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 16px; box-shadow: 0 2px 8px rgba(35, 75, 110, 0.25); object-fit: cover; object-position: center; }
+  .login-wrap { max-width: 340px; margin: 12vh auto 0; padding: 32px 28px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 20px rgba(28, 31, 26, 0.06); }
+  .login-wrap h2 { font-size: 20px; margin: 0 0 4px; text-align: center; letter-spacing: -0.01em; }
+  .login-wrap p.sub { text-align: center; color: var(--ink-soft); font-size: 13px; margin: 0 0 24px; }
+  .login-wrap input, .login-wrap textarea { width: 100%; padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--card); font-size: 17px; margin-bottom: 14px; font-family: inherit; }
+  .login-wrap button { width: 100%; padding: 16px; border-radius: var(--radius); border: none; background: var(--accent); color: white; font-size: 18px; font-weight: 700; cursor: pointer; transition: background .15s; }
+  .login-wrap button:hover { background: #1b3a57; }
+  .login-wrap .error { color: var(--warn); font-size: 13px; text-align: center; margin: 0 0 12px; }
+  .signout-link { background: none; border: none; color: var(--ink-soft); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 0; }
+
+  .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--ink); color: white; padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; opacity: 0; transition: all .25s; pointer-events: none; z-index: 20; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .home-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 8px; }
+  @media (min-width: 560px) { .home-grid { grid-template-columns: repeat(2, 1fr); } }
+  .home-btn { display: block; width: 100%; text-align: left; padding: 22px 20px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); cursor: pointer; border-top: 5px solid var(--accent); }
+  .home-btn h3 { margin: 0 0 4px; font-size: 18px; }
+  .home-btn p { margin: 0; font-size: 14px; color: var(--ink-soft); }
+
+  .field-label { font-size: 12px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; margin: 18px 0 8px; }
+  .search-row { position: relative; margin-bottom: 16px; }
+  .search-row input { width: 100%; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--card); font-size: 15px; }
+  .search-row input:focus { outline: none; border-color: var(--accent); }
+
+  .item-row { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: border-color .15s, background .15s; }
+  .item-row.has-qty { border-color: var(--accent); background: var(--accent-soft); }
+  .item-info h3 { font-size: 15px; margin: 0 0 3px; font-weight: 600; }
+  .item-info p { font-size: 13px; color: var(--ink-soft); margin: 0; }
+  .item-info .price { font-weight: 700; color: var(--accent); }
+  .qty-stepper { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .qty-stepper button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); font-size: 18px; font-weight: 700; color: var(--accent); cursor: pointer; }
+  .qty-stepper span { min-width: 20px; text-align: center; font-weight: 700; }
+
+  .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); padding: 14px 16px; box-shadow: 0 -4px 16px rgba(0,0,0,0.06); z-index: 8; }
+  .cart-bar button { width: 100%; max-width: 900px; margin: 0 auto; display: block; padding: 16px; border-radius: var(--radius); border: none; background: var(--accent); color: white; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .cart-bar button:disabled { background: var(--line); color: var(--ink-soft); cursor: not-allowed; }
+
+  .order-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; cursor: pointer; border-left: 5px solid var(--line); }
+  .order-card.status-submitted { border-left-color: #c0392b; }
+  .order-card.status-picking { border-left-color: #d68910; }
+  .order-card.status-fulfilled { border-left-color: #6d5a9e; }
+  .order-card.status-shipped { border-left-color: #1a73a8; }
+  .order-card.status-delivered { border-left-color: var(--good); }
+  .order-card.status-invoiced { border-left-color: #6b3fa0; }
+  .order-card.status-paid { border-left-color: var(--good); }
+  .order-card-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .order-card-top h3 { font-size: 17px; margin: 0; font-weight: 700; }
+  .order-card p { margin: 2px 0 0; font-size: 14px; color: var(--ink-soft); }
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.02em; }
+  .badge.submitted { background: #fdecea; color: #c0392b; }
+  .badge.picking { background: #fef5e0; color: #b8760b; }
+  .badge.fulfilled { background: #f0edf7; color: #6d5a9e; }
+  .badge.shipped { background: #e6f1fa; color: #1a73a8; }
+  .badge.delivered { background: var(--good-soft); color: var(--good); }
+  .badge.invoiced { background: #f2ecf9; color: #6b3fa0; }
+  .badge.paid { background: var(--good-soft); color: var(--good); }
+
+  .stage-track { display: flex; gap: 4px; margin: 14px 0 18px; }
+  .stage-track .seg { flex: 1; height: 6px; border-radius: 4px; background: var(--line); }
+  .stage-track .seg.done { background: var(--accent); }
+
+  .line-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .line-row:last-child { border-bottom: none; }
+  .line-row .name { font-weight: 600; }
+  .line-row .meta { color: var(--ink-soft); font-size: 13px; }
+  .total-row { display: flex; justify-content: space-between; padding: 14px 0 0; font-weight: 800; font-size: 16px; margin-top: 6px; border-top: 2px solid var(--ink); }
+
+  .back-btn { background: none; border: none; color: var(--accent); font-size: 15px; font-weight: 700; cursor: pointer; padding: 0 0 10px; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-soft); }
+  .save-btn { width: 100%; padding: 15px; border-radius: var(--radius); border: none; background: var(--accent); color: white; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+  .card-block { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+
+:root {
+  --ink:#241F18; --ink-soft:#5A5245; --paper:#F7F4EC; --card:#FFFFFF;
+  --line:#E1D9C4; --accent:#EB6834; --accent-soft:#FCE3D4;
+  --warn:#B8860B; --warn-soft:#F7EBC9; --good:#0CA30C; --good-soft:#DCF3DC;
+  --radius:10px;
+  --bg:#F7F4EC; --surface:#FFFFFF; --surface-alt:#EFE9DA;
+  --ink-2:#5A5245; --ink-3:#8B826F; --border:#E1D9C4; --border-soft:#EEE7D6;
+  --accent-ink:#FFFFFF; --caramel:#B9852E; --caramel-soft:#F3E2BC;
+  --serious:#C15A34; --critical:#D03B3B; --serious-soft:#F7DFCF; --critical-soft:#F8DADA;
+  --font-display:'Oswald','Arial Narrow',sans-serif;
+  --font-body:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+html { -webkit-text-size-adjust:100%; }
+body {
+  background:var(--bg); color:var(--ink); font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4 { font-family:var(--font-display); font-weight:600; color:var(--ink); }
+button,input,select,textarea { font-family:inherit; }
+::selection { background:var(--accent-soft); color:var(--ink); }
+:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+header { border-top-color:var(--accent) !important; }
+header h1 { color:var(--ink) !important; font-family:var(--font-display); letter-spacing:.01em; text-transform:uppercase; }
+button.primary, .save-btn, .back-btn.primary, .cart-bar button, .submit-bar button,
+.login-wrap button, .login-wrap .submit-btn {
+  background:var(--accent); color:#fff;
+}
+button.primary:hover, .save-btn:hover, .cart-bar button:hover, .submit-bar button:hover,
+.login-wrap button:hover { background:#D95727; }
+.item-row.has-qty { border-color:var(--accent); background:var(--accent-soft); }
+.chip.active, .filter-banner { border-color:var(--accent); }
+.chip.active { background:var(--accent); color:#fff; }
+.search-row input:focus, input:focus, select:focus, textarea:focus { border-color:var(--accent); }
+.home-btn, .cafe-btn, .order-card, .item-row, .inv-row, .hist-row, .card-block {
+  box-shadow:0 1px 2px rgba(36,31,24,.06),0 1px 1px rgba(36,31,24,.04);
+}
+.home-btn-a, .home-btn-b, .home-btn-c, .home-btn,
+.home-btn-a:hover, .home-btn-b:hover, .home-btn-c:hover { border-top-color:var(--accent); }
+a, .nav-link, .back-btn, .item-info .price, .qty-stepper button { color:var(--accent); }
+.badge.delivered, .badge.paid { background:var(--good-soft); color:var(--good); }
+.badge.picking { background:var(--warn-soft); color:#8A6500; }
+.badge.submitted { background:var(--serious-soft); color:var(--serious); }
+
+/* Keep operational status colors meaningful while using the Command Deck palette. */
+.order-card.status-submitted { border-left-color:var(--serious); }
+.order-card.status-picking { border-left-color:var(--warn); }
+.order-card.status-fulfilled { border-left-color:var(--caramel); }
+.order-card.status-shipped, .order-card.status-enroute { border-left-color:var(--accent); }
+.order-card.status-delivered, .order-card.received { border-left-color:var(--good); }
+.home-btn-b, .home-btn-c { border-top-color:var(--caramel); }
+
+</style>
+</head>
+<body>
+<header id="app-header"></header>
+<main id="app-main"></main>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://dwysvcprzvmhxrrnogqb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Xg_k2Kqg-I5NHDT4Ff7X1g_EYCQxUON';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const LOGO_DATA_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAACvCAYAAAAv+DamAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAjKADAAQAAAABAAAArwAAAACeB9TzAAAyI0lEQVR4Ae19...KOK4WRi/Pv2tg5WuQ5f0wRaj375o463Yzjgb6CgGZzTFBApBfchaG9dVx65TD9qqwiMODQyfaRTf3vDrxa8wTOTGhidp8n0vCGD8lRQhEDj8oKr5jfoRUdf5NtrR5yFCbQFllVh3T5K94LwLIz24o/rqFZA+uw8NBB03x3F/xo+afr+h5i59wEAPCsh21rx1SekYZ2vhxSkhv777/Jh+L+O1wrSQYf4fIOJ3nqVRfOKZfbpuXQKidIQPrnD9BQE28qOPmXF22Scv7I1goUh7ZSul1SGIuOiHzzIudmznenA62bM4HD3rN7Oaf91lHRwAIdjFmqhG4LAqprHBMq27jxk98Im6pB/l7G3V6pWA8QuJ4GF39diGfWMg65mw2hwgD/al8c0kfKG9x5s83qDMGYbf3TbR5dj/Xb/uzrVsIL2H5fSc9GrAyPjGL8yRE28ZErGin8NXSNNRrbNhbvxbKDjKkRXkQtbNr3zhg2Gc1WzHHe/Vwr88o2zMS1wBpyVVLwoPAtAUfAyTHsuUbvyUKUm3rXbx218cPeA+fDKBj8JCn8T0aSHiNuFiNyUb0Kkkvq+K8EKonqYjMAeOQCBQ2dX4yyEPwsdO1OUBHCNwCY7XOAO8f2dXzaKt8mYZgInvtc0Bg9kkyQod9G4c9t/oHwq3L8TC6QU4C+csTM+PRcVcnDVMixP/KUILSmWI5/DyTrzqrpcXE4LUQ9oOgxP+pMVFCPU9FPASYp5Di/xN6WGhF158dMn+9lQPvpCDGjDssvy/dkbgDN52qru1Zf0gy4kMdxzzLDR5jH3c4ajoMKinHEthYQIIft1F9BAwoPs+8PImULMT2NnshNzNJUbxjm1rf/jawQeHzjk+qAEj1ZOBMZ9TjQV4SoHZumdQi2sebdruCUDKsVguHYq5GL5xto4AdAZi3WcAwjGbh22i44oIu0SXJ8EbB2AtGhHwHmLegxV7A4h7FefUvBkqsl+xQgN3y4ftqcZdit4h8u+QAIzSBRRMk8EZVbJuUoGIaXhUiIwjeNgPjzNp2fOW2TrkMEVjQGuJ03/oW+44TM/S0SAdAQn9/gE6nw811064h0wFkwBEQKSqmwCGgEgVn0nYoQ6STGQQpAkkEEggkEAggUACgQQCCQQSCCQQSCCQQCCBQAKBBAIJBBIIJBBIIJBAIIFAAoEEAgkEEggkEEggkEAggUACgQQCCQQSCCQQSCCQQCCBQAKBBAIJBBIIJBBIID8S+F9wKeqS2qmiAwAAAABJRU5ErkJggg==';
+
+let currentCustomer = null;  // { id, companyName, contactName, contactEmail, contactPhone, billingAddress, shipToAddress }
+let appScreen = 'home';      // 'home' | 'order' | 'status' | 'history' | 'profile' | 'orderdetail'
+let state = null;            // { products, orders }
+let cart = {};                // { productId: qty }
+let cartSearchQuery = '';
+let openOrderId = null;
+let passwordRecoveryMode = false;
+let portalAutoRefreshTimer = null;
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1400);
+}
+
+function money(n) {
+  return '$' + Number(n || 0).toFixed(2);
+}
+
+// ---------------------------------------------------------------------------
+// Data loading
+// ---------------------------------------------------------------------------
+
+async function loadState() {
+  const { data: productRows, error: productError } = await db
+    .from('sellable_products')
+    .select('id, name')
+    .eq('wholesale_available', true)
+    .eq('is_active', true)
+    .order('name');
+
+  if (productError) {
+    console.error('Failed to load products:', productError);
+    throw new Error('Failed to load products: ' + productError.message);
+  }
+
+  const { data: defaultPrices, error: defaultPriceError } = await db
+    .from('wholesale_price_list')
+    .select('product_id, price');
+  if (defaultPriceError) console.error('Failed to load default prices:', defaultPriceError);
+
+  const { data: customerPrices, error: customerPriceError } = await db
+    .from('wholesale_customer_prices')
+    .select('product_id, price');
+  if (customerPriceError) console.error('Failed to load customer prices:', customerPriceError);
+
+  const defaultPriceByProduct = Object.fromEntries((defaultPrices || []).map(p => [p.product_id, p.price]));
+  const overridePriceByProduct = Object.fromEntries((customerPrices || []).map(p => [p.product_id, p.price]));
+
+  const products = productRows
+    .map(p => ({
+      id: p.id,
+      name: p.name,
+      price: overridePriceByProduct[p.id] ?? defaultPriceByProduct[p.id] ?? null
+    }))
+    .filter(p => p.price != null); // not orderable yet if no price is set
+
+  const { data: orderRows, error: ordersError } = await db
+    .from('orders')
+    .select(`
+      id, status, order_date, created_at, shipped_at, tracking_number, delivered_at,
+      invoiced_at, paid_at, quickbooks_invoice_number,
+      order_line_items ( id, product_id, quantity_ordered, unit_price, sellable_products ( name ) )
+    `)
+    .order('created_at', { ascending: false });
+
+  if (ordersError) {
+    console.error('Failed to load orders:', ordersError);
+    throw new Error('Failed to load orders: ' + ordersError.message);
+  }
+
+  state = {
+    products,
+    orders: orderRows.map(o => ({
+      id: o.id,
+      status: o.status,
+      orderDate: o.order_date,
+      createdAt: o.created_at,
+      shippedAt: o.shipped_at,
+      trackingNumber: o.tracking_number,
+      deliveredAt: o.delivered_at,
+      invoicedAt: o.invoiced_at,
+      paidAt: o.paid_at,
+      quickbooksInvoiceNumber: o.quickbooks_invoice_number,
+      lines: (o.order_line_items || []).map(l => ({
+        id: l.id,
+        productId: l.product_id,
+        name: l.sellable_products?.name || 'Item',
+        qty: l.quantity_ordered,
+        unitPrice: l.unit_price
+      })),
+      total: (o.order_line_items || []).reduce((sum, l) => sum + (l.unit_price || 0) * (l.quantity_ordered || 0), 0)
+    }))
+  };
+}
+
+function statusLabel(status) {
+  return {
+    submitted: 'Submitted', picking: 'Being picked', fulfilled: 'Picked — preparing to ship',
+    shipped: 'Shipped', delivered: 'Delivered', invoiced: 'Invoiced', paid: 'Paid'
+  }[status] || status;
+}
+
+const STAGE_ORDER = ['submitted', 'picking', 'fulfilled', 'shipped', 'delivered', 'invoiced', 'paid'];
+function stageIndex(status) {
+  const i = STAGE_ORDER.indexOf(status);
+  return i === -1 ? 0 : i;
+}
+
+// ---------------------------------------------------------------------------
+// Render dispatcher
+// ---------------------------------------------------------------------------
+
+function render() {
+  if (appScreen === 'home') return renderHomeScreen();
+  if (appScreen === 'order') return renderPlaceOrderScreen();
+  if (appScreen === 'status') return renderOrderListScreen(false);
+  if (appScreen === 'history') return renderOrderListScreen(true);
+  if (appScreen === 'orderdetail') return renderOrderDetailScreen();
+  if (appScreen === 'profile') return renderProfileScreen();
+}
+
+function renderHomeScreen() {
+  document.getElementById('app-header').innerHTML = `
+    <h1>Salt City Coffee — Wholesale</h1>
+    <p>${currentCustomer.companyName} <button class="signout-link" onclick="signOut()">Sign out</button></p>
+  `;
+  const openCount = state.orders.filter(o => !['delivered', 'invoiced', 'paid'].includes(o.status)).length;
+  document.getElementById('app-main').innerHTML = `
+    <div class="home-grid">
+      <button class="home-btn" onclick="appScreen='order'; render();">
+        <h3>Place an order</h3>
+        <p>Order from your available products</p>
+      </button>
+      <button class="home-btn" onclick="appScreen='status'; render();">
+        <h3>Order status</h3>
+        <p>${openCount} order${openCount === 1 ? '' : 's'} in progress</p>
+      </button>
+      <button class="home-btn" onclick="appScreen='history'; render();">
+        <h3>Order history</h3>
+        <p>Past orders and invoices</p>
+      </button>
+      <button class="home-btn" onclick="appScreen='profile'; render();">
+        <h3>Your profile</h3>
+        <p>Contact & shipping info</p>
+      </button>
+    </div>
+  `;
+}
+
+// ---------------------------------------------------------------------------
+// Place order
+// ---------------------------------------------------------------------------
+
+function renderPlaceOrderScreen() {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="appScreen='home'; cart={}; render();">&larr; Home</button>
+    <h1>Place an order</h1>
+    <p>${currentCustomer.companyName}</p>
+  `;
+
+  const filtered = state.products.filter(p => p.name.toLowerCase().includes(cartSearchQuery.toLowerCase()));
+  const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
+  const cartTotal = Object.entries(cart).reduce((sum, [pid, qty]) => {
+    const p = state.products.find(pr => pr.id === pid);
+    return sum + (p ? p.price * qty : 0);
+  }, 0);
+
+  const main = document.getElementById('app-main');
+  main.innerHTML = `
+    ${state.products.length === 0 ? `
+      <div class="empty-state"><p>No products are available to order yet — check back soon, or reach out to your Salt City contact.</p></div>
+    ` : `
+      <div class="search-row">
+        <input type="text" placeholder="Search products" value="${cartSearchQuery}" oninput="cartSearchQuery = this.value; renderPlaceOrderScreen();" />
+      </div>
+      ${filtered.map(p => {
+        const qty = cart[p.id] || 0;
+        return `
+          <div class="item-row ${qty > 0 ? 'has-qty' : ''}">
+            <div class="item-info">
+              <h3>${p.name}</h3>
+              <p class="price">${money(p.price)} / unit</p>
+            </div>
+            <div class="qty-stepper">
+              <button onclick="adjustCartQty('${p.id}', -1)">&minus;</button>
+              <span>${qty}</span>
+              <button onclick="adjustCartQty('${p.id}', 1)">+</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+      <div style="height: 90px"></div>
+      <div class="cart-bar">
+        <button ${cartCount === 0 ? 'disabled' : ''} onclick="submitWholesaleOrder()">
+          ${cartCount === 0 ? 'Add items to order' : `Place order — ${cartCount} item(s) · ${money(cartTotal)}`}
+        </button>
+      </div>
+    `}
+  `;
+}
+
+function adjustCartQty(productId, delta) {
+  const next = (cart[productId] || 0) + delta;
+  if (next <= 0) delete cart[productId];
+  else cart[productId] = next;
+  renderPlaceOrderScreen();
+}
+
+async function submitWholesaleOrder() {
+  const lines = Object.entries(cart).map(([productId, quantity]) => ({ product_id: productId, quantity }));
+  if (lines.length === 0) return;
+
+  const { data, error } = await db.rpc('place_wholesale_order', {
+    p_wholesale_customer_id: currentCustomer.id,
+    p_lines: lines
+  });
+
+  if (error) {
+    console.error('Failed to place order:', error);
+    toast('Could not place order — ' + error.message);
+    return;
+  }
+
+  cart = {};
+  cartSearchQuery = '';
+  toast('Order placed');
+  appScreen = 'status';
+  await loadState();
+  render();
+}
+
+// ---------------------------------------------------------------------------
+// Order status / history (list) + detail
+// ---------------------------------------------------------------------------
+
+function renderOrderListScreen(isHistory) {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="appScreen='home'; render();">&larr; Home</button>
+    <h1>${isHistory ? 'Order history' : 'Order status'}</h1>
+    <p>${currentCustomer.companyName}</p>
+  `;
+
+  const orders = state.orders.filter(o => isHistory
+    ? ['delivered', 'invoiced', 'paid'].includes(o.status)
+    : !['delivered', 'invoiced', 'paid'].includes(o.status));
+
+  const main = document.getElementById('app-main');
+  if (orders.length === 0) {
+    main.innerHTML = `<div class="empty-state"><p>${isHistory ? 'No completed orders yet.' : 'No orders in progress right now.'}</p></div>`;
+    return;
+  }
+
+  main.innerHTML = orders.map(o => `
+    <div class="order-card status-${o.status}" onclick="openOrderId='${o.id}'; appScreen='orderdetail'; render();">
+      <div class="order-card-top">
+        <h3>Order ${new Date(o.orderDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</h3>
+        <span class="badge ${o.status}">${statusLabel(o.status)}</span>
+      </div>
+      <p>${o.lines.length} item${o.lines.length === 1 ? '' : 's'} · ${money(o.total)}</p>
+      ${o.trackingNumber ? `<p>Tracking: ${o.trackingNumber}</p>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderOrderDetailScreen() {
+  const order = state.orders.find(o => o.id === openOrderId);
+  if (!order) { appScreen = 'status'; return renderOrderListScreen(false); }
+
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="appScreen = ['delivered','invoiced','paid'].includes('${order.status}') ? 'history' : 'status'; render();">&larr; Back</button>
+    <h1>Order ${new Date(order.orderDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</h1>
+    <p><span class="badge ${order.status}">${statusLabel(order.status)}</span></p>
+  `;
+
+  const idx = stageIndex(order.status);
+  const segments = STAGE_ORDER.map((s, i) => `<div class="seg ${i <= idx ? 'done' : ''}"></div>`).join('');
+
+  document.getElementById('app-main').innerHTML = `
+    <div class="stage-track">${segments}</div>
+    <div class="card-block">
+      ${order.lines.map(l => `
+        <div class="line-row">
+          <div>
+            <div class="name">${l.name}</div>
+            <div class="meta">${l.qty} &times; ${money(l.unitPrice)}</div>
+          </div>
+          <div>${money((l.unitPrice || 0) * l.qty)}</div>
+        </div>
+      `).join('')}
+      <div class="total-row"><span>Total</span><span>${money(order.total)}</span></div>
+    </div>
+    ${order.trackingNumber ? `<div class="card-block"><strong>Tracking number:</strong> ${order.trackingNumber}</div>` : ''}
+    ${order.quickbooksInvoiceNumber ? `<div class="card-block"><strong>Invoice:</strong> #${order.quickbooksInvoiceNumber}${order.status === 'paid' ? ' — paid' : ' — awaiting payment'}</div>` : ''}
+  `;
+}
+
+// ---------------------------------------------------------------------------
+// Profile
+// ---------------------------------------------------------------------------
+
+function renderProfileScreen() {
+  document.getElementById('app-header').innerHTML = `
+    <button class="back-btn" onclick="appScreen='home'; render();">&larr; Home</button>
+    <h1>Your profile</h1>
+    <p>${currentCustomer.companyName}</p>
+  `;
+
+  document.getElementById('app-main').innerHTML = `
+    <div class="card-block">
+      <p class="field-label" style="margin-top:0;">Contact name</p>
+      <input id="profile-contact-name" type="text" value="${currentCustomer.contactName || ''}" style="width:100%; padding:12px 14px; border-radius:var(--radius); border:1px solid var(--line); font-size:15px;" />
+      <p class="field-label">Contact email</p>
+      <input id="profile-contact-email" type="email" value="${currentCustomer.contactEmail || ''}" style="width:100%; padding:12px 14px; border-radius:var(--radius); border:1px solid var(--line); font-size:15px;" />
+      <p class="field-label">Contact phone</p>
+      <input id="profile-contact-phone" type="text" value="${currentCustomer.contactPhone || ''}" style="width:100%; padding:12px 14px; border-radius:var(--radius); border:1px solid var(--line); font-size:15px;" />
+      <p class="field-label">Billing address</p>
+      <textarea id="profile-billing-address" rows="2" style="width:100%; padding:12px 14px; border-radius:var(--radius); border:1px solid var(--line); font-size:15px; font-family:inherit;">${currentCustomer.billingAddress || ''}</textarea>
+      <p class="field-label">Ship-to address</p>
+      <textarea id="profile-ship-to-address" rows="2" style="width:100%; padding:12px 14px; border-radius:var(--radius); border:1px solid var(--line); font-size:15px; font-family:inherit;">${currentCustomer.shipToAddress || ''}</textarea>
+      <button class="save-btn" onclick="saveProfile()">Save changes</button>
+    </div>
+  `;
+}
+
+async function saveProfile() {
+  const contactName = document.getElementById('profile-contact-name').value.trim();
+  const contactEmail = document.getElementById('profile-contact-email').value.trim();
+  const contactPhone = document.getElementById('profile-contact-phone').value.trim();
+  const billingAddress = document.getElementById('profile-billing-address').value.trim();
+  const shipToAddress = document.getElementById('profile-ship-to-address').value.trim();
+
+  const { data, error } = await db.rpc('update_wholesale_profile', {
+    p_contact_name: contactName || null,
+    p_contact_email: contactEmail || null,
+    p_contact_phone: contactPhone || null,
+    p_billing_address: billingAddress || null,
+    p_ship_to_address: shipToAddress || null
+  });
+
+  if (error) {
+    console.error('Failed to save profile:', error);
+    toast('Could not save — see console');
+    return;
+  }
+
+  currentCustomer.contactName = data.contact_name;
+  currentCustomer.contactEmail = data.contact_email;
+  currentCustomer.contactPhone = data.contact_phone;
+  currentCustomer.billingAddress = data.billing_address;
+  currentCustomer.shipToAddress = data.ship_to_address;
+
+  toast('Profile updated');
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+function renderLoginScreen(errorMsg) {
+  document.querySelector('header').innerHTML = `<h1>Salt City Coffee</h1><p>Wholesale sign in</p>`;
+  document.getElementById('app-main').innerHTML = `
+    <div class="login-wrap">
+      <img class="logo-mark" src="${LOGO_DATA_URI}" alt="Salt City Coffee" />
+      <h2>Sign in</h2>
+      <p class="sub">Use the login Salt City set up for your account</p>
+      ${errorMsg ? `<p class="error">${errorMsg}</p>` : ''}
+      <input type="email" id="login-email" placeholder="Email" autocomplete="username" />
+      <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+      <button onclick="attemptSignIn()">Sign in</button>
+      <p style="text-align:center; margin-top:14px;">
+        <button class="signout-link" onclick="renderForgotPasswordScreen()" style="font-size:13px;">Forgot password?</button>
+      </p>
+    </div>
+  `;
+}
+
+function renderForgotPasswordScreen(message, isError) {
+  document.querySelector('header').innerHTML = `<h1>Salt City Coffee</h1><p>Reset your password</p>`;
+  document.getElementById('app-main').innerHTML = `
+    <div class="login-wrap">
+      <img class="logo-mark" src="${LOGO_DATA_URI}" alt="Salt City Coffee" />
+      <h2>Reset password</h2>
+      <p class="sub">Enter your email and we'll send you a reset link</p>
+      ${message ? `<p class="${isError ? 'error' : 'sub'}">${message}</p>` : ''}
+      <input type="email" id="reset-email" placeholder="Email" autocomplete="username" />
+      <button onclick="sendPasswordResetEmail()">Send reset link</button>
+      <p style="text-align:center; margin-top:14px;">
+        <button class="signout-link" onclick="renderLoginScreen()" style="font-size:13px;">Back to sign in</button>
+      </p>
+    </div>
+  `;
+}
+
+async function sendPasswordResetEmail() {
+  const email = document.getElementById('reset-email').value.trim();
+  if (!email) return;
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo });
+  if (error) { renderForgotPasswordScreen(error.message, true); return; }
+  renderForgotPasswordScreen('Check your email for a reset link. It may take a minute to arrive.', false);
+}
+
+function renderSetNewPasswordScreen() {
+  document.querySelector('header').innerHTML = `<h1>Salt City Coffee</h1><p>Set a new password</p>`;
+  document.getElementById('app-main').innerHTML = `
+    <div class="login-wrap">
+      <img class="logo-mark" src="${LOGO_DATA_URI}" alt="Salt City Coffee" />
+      <h2>Set a new password</h2>
+      <p class="sub">Choose a new password for your account</p>
+      <p class="error" id="set-password-error" style="display:none;"></p>
+      <input type="password" id="new-password" placeholder="New password" autocomplete="new-password" />
+      <input type="password" id="confirm-password" placeholder="Confirm new password" autocomplete="new-password" />
+      <button onclick="submitNewPassword()">Set password</button>
+    </div>
+  `;
+}
+
+async function submitNewPassword() {
+  const newPassword = document.getElementById('new-password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+  const errorEl = document.getElementById('set-password-error');
+
+  if (!newPassword || newPassword.length < 6) {
+    errorEl.textContent = 'Password must be at least 6 characters.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    errorEl.textContent = 'Passwords don’t match.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const { error } = await db.auth.updateUser({ password: newPassword });
+  if (error) {
+    errorEl.textContent = error.message;
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  passwordRecoveryMode = false;
+  history.replaceState(null, '', window.location.pathname);
+  toast('Password updated — you’re signed in');
+  await bootstrapAfterAuth();
+}
+
+async function attemptSignIn() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return;
+
+  const { error } = await db.auth.signInWithPassword({ email, password });
+  if (error) { renderLoginScreen(error.message); return; }
+  await bootstrapAfterAuth();
+}
+
+async function signOut() {
+  if (portalAutoRefreshTimer) clearInterval(portalAutoRefreshTimer);
+  await db.auth.signOut();
+  currentCustomer = null;
+  state = null;
+  appScreen = 'home';
+  cart = {};
+  cartSearchQuery = '';
+  renderLoginScreen();
+}
+
+async function bootstrapAfterAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { renderLoginScreen(); return; }
+
+  const { data: customerRow, error: customerError } = await db
+    .from('wholesale_customers')
+    .select('id, company_name, contact_name, contact_email, contact_phone, billing_address, ship_to_address, is_active')
+    .eq('auth_user_id', session.user.id)
+    .maybeSingle();
+
+  if (customerError || !customerRow) {
+    document.querySelector('header').innerHTML = `<h1>Salt City Coffee</h1>`;
+    document.getElementById('app-main').innerHTML = `
+      <div class="login-wrap">
+        <p>Your login works, but no wholesale account has been set up for it yet.</p>
+        <p class="sub">Reach out to your Salt City Coffee contact to get set up.</p>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    `;
+    return;
+  }
+
+  if (!customerRow.is_active) {
+    document.querySelector('header').innerHTML = `<h1>Salt City Coffee</h1>`;
+    document.getElementById('app-main').innerHTML = `
+      <div class="login-wrap">
+        <p>This wholesale account is currently inactive.</p>
+        <p class="sub">Reach out to your Salt City Coffee contact if this seems wrong.</p>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    `;
+    return;
+  }
+
+  currentCustomer = {
+    id: customerRow.id,
+    companyName: customerRow.company_name,
+    contactName: customerRow.contact_name,
+    contactEmail: customerRow.contact_email,
+    contactPhone: customerRow.contact_phone,
+    billingAddress: customerRow.billing_address,
+    shipToAddress: customerRow.ship_to_address
+  };
+
+  await loadState();
+  render();
+  startPortalAutoRefresh();
+}
+
+function startPortalAutoRefresh() {
+  if (portalAutoRefreshTimer) clearInterval(portalAutoRefreshTimer);
+  portalAutoRefreshTimer = setInterval(async () => {
+    if (!currentCustomer) return;
+    if (['status', 'orderdetail', 'history'].includes(appScreen)) {
+      await loadState();
+      render();
+    }
+  }, 6000);
+}
+
+db.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    passwordRecoveryMode = true;
+    renderSetNewPasswordScreen();
+  }
+});
+
+(async function init() {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  if (passwordRecoveryMode) return;
+
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    await bootstrapAfterAuth();
+  } else {
+    renderLoginScreen();
+  }
+})();
+</script>
+</body>
+</html>

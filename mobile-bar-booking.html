@@ -89,6 +89,15 @@ h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 10v
 .muted { color: var(--muted); }
 .foot { margin-top: 28px; font-family: var(--f-label); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); text-align: center; }
 </style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#244A71">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Command Deck">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
 <div class="hero" id="hero">
@@ -312,6 +321,13 @@ h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 10v
     });
   });
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function (e) { console.warn('SW registration failed', e); });
+    });
+  }
 </script>
 </body>
 </html>

@@ -1,4 +1,13 @@
 <title>Salt City Command Deck</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#244A71">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Command Deck">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
 /* ============================= TOKENS ============================= */
@@ -1594,6 +1603,8 @@ body::before{display:none !important;}
     <ul class="nav-list" id="nav-portal-item">
       <li><button class="nav-item" data-section="lmgm"><span class="nav-dot"></span>LM / GM / PM / Bookkeeper Portal</button></li>
       <li class="sa-nav-pm" style="display:none;"><a class="nav-item nav-link" href="staff-admin.html"><span class="nav-dot"></span>Staff &amp; Locations <span class="nav-ext">↗</span></a></li>
+      <li class="sa-nav-pm" style="display:none;"><a class="nav-item nav-link" href="picking.html"><span class="nav-dot"></span>Warehouse Picking <span class="nav-ext">↗</span></a></li>
+      <li class="sa-nav-pm" style="display:none;"><a class="nav-item nav-link" href="ordering.html"><span class="nav-dot"></span>Cafe &amp; Bakery Ordering <span class="nav-ext">↗</span></a></li>
       <li class="hiring-nav hiring-nav-side" style="display:none;"><a class="nav-item nav-link" href="hiring.html" title="Applicants from saltcitycoffee.com/pages/careers"><span class="nav-dot"></span>Hiring <span class="nav-ext">↗</span></a></li>
     </ul>
 
@@ -1605,6 +1616,7 @@ body::before{display:none !important;}
       <ul class="nav-list">
         <li><button class="nav-item lm-nav" data-lmview="ordering" data-anchor="lm-anchor-orders"><span class="nav-dot"></span>Open Orders</button></li>
         <li><button class="nav-item lm-nav" data-lmview="ordering" data-anchor="lm-anchor-stillneeds"><span class="nav-dot"></span>Still Needs</button></li>
+        <li><a class="nav-item nav-link" href="ordering.html" title="Place this week's cafe or bakery order"><span class="nav-dot"></span>Place an Order <span class="nav-ext">↗</span></a></li>
       </ul>
       <div class="nav-group-label">Performance</div>
       <ul class="nav-list">
@@ -1647,6 +1659,9 @@ body::before{display:none !important;}
       <li><button class="nav-item" data-section="coldbrewprod"><span class="nav-dot"></span>Cold Brew Production</button></li>
       <li><button class="nav-item" data-section="roastery"><span class="nav-dot"></span>Roastery</button></li>
       <li><button class="nav-item" data-section="productdev"><span class="nav-dot"></span>Product Development</button></li>
+      <li><a class="nav-item nav-link" href="ordering.html" title="Cafe and bakery weekly orders"><span class="nav-dot"></span>Cafe &amp; Bakery Ordering <span class="nav-ext">↗</span></a></li>
+      <li><a class="nav-item nav-link" href="picking.html" title="Warehouse picking, production and invoices"><span class="nav-dot"></span>Warehouse Picking <span class="nav-ext">↗</span></a></li>
+      <li><a class="nav-item nav-link" href="wholesale.html" title="The portal wholesale customers order from"><span class="nav-dot"></span>Wholesale Portal <span class="nav-ext">↗</span></a></li>
     </ul>
     </div>
     <div class="exec-nav-group" hidden>
@@ -2077,8 +2092,8 @@ body::before{display:none !important;}
 
         <div class="section-head"><h2>Order fulfillment tools</h2><span class="hint">Cafe orders, wholesale &amp; subscription, bagging, legacy worklist</span></div>
         <div class="grid cols-3">
-          <a class="link-card" href="https://salt-city-coffee-systems.netlify.app" target="_blank" rel="noopener">
-            <div><div class="lc-title">Cafe Orders →</div><div class="lc-sub">salt-city-coffee-systems.netlify.app — the warehouse inventory platform cafe orders already run through</div></div>
+          <a class="link-card" href="/picking.html" target="_blank" rel="noopener">
+            <div><div class="lc-title">Cafe Orders →</div><div class="lc-sub">Warehouse picking: the inventory platform cafe orders run through</div></div>
             <div class="arrow">↗</div>
           </a>
           <a class='link-card' href='https://salt-city-coffee-tools.netlify.app/wholesale-subscription' rel='noopener' target='_blank'>
@@ -2107,8 +2122,8 @@ body::before{display:none !important;}
         </div>
 
         <div class="section-head"><h2>Inventory Tracker</h2><span class="hint">The live picking / warehouse system</span></div>
-        <a class="link-card" href="https://salt-city-coffee-systems.netlify.app" target="_blank" rel="noopener">
-          <div><div class="lc-title">Open Inventory Tracker →</div><div class="lc-sub">salt-city-coffee-systems.netlify.app — par-level ordering, picking, delivery pipeline, invoice OCR</div></div>
+        <a class="link-card" href="/systems.html" target="_blank" rel="noopener">
+          <div><div class="lc-title">Open Inventory Tracker →</div><div class="lc-sub">Ordering &amp; picking — par-level ordering, picking, delivery pipeline, invoice OCR</div></div>
           <div class="arrow">↗</div>
         </a>
       </section>
@@ -2810,7 +2825,7 @@ body::before{display:none !important;}
       <div class="section-head"><h2>Wholesale platform orders</h2><span class="hint">The new wholesale platform's own orders — picked/fulfilled/shipped in the same ordering app as Cafe Orders, not the old Wholesale &amp; Subscription tool. Listed here for full visibility even though action happens in that app.</span></div>
       <div class="tc-toolbar">
         <span class="empty-note" style="padding:0;">Read-only — same picking app as Cafe Orders handles these.</span>
-        <a class="btn primary small" id="lmgm-pm-order-app-link" href="#" target="_blank" rel="noopener">Open ordering app →</a>
+        <a class="btn primary small" id="lmgm-pm-order-app-link" href="#" target="_blank" rel="noopener">Open warehouse picking →</a>
       </div>
       <div class="order-list" id="lmgm-pm-platform-list"></div>
       <div class="empty-note" id="lmgm-pm-platform-empty" hidden>No open wholesale platform orders.</div>
@@ -3800,12 +3815,12 @@ async function initOutgoingCards(){
     cafeHtml = outgoingCard(
       "Cafe Orders", emergencyCount ? `${emergencyCount} emergency order${emergencyCount===1?"":"s"} — highlighted below` : "No emergency orders open",
       totalOpen, (emergencyCount ? `<span class="chip critical">🚨 ${emergencyCount} emergency</span>` : "") + breakdown,
-      "https://salt-city-coffee-systems.netlify.app"
+      "/picking.html"
     );
   } else if(cafeResult.reason === "empty"){
-    cafeHtml = outgoingCard("Cafe Orders", "No open cafe orders right now", 0, "", "https://salt-city-coffee-systems.netlify.app");
+    cafeHtml = outgoingCard("Cafe Orders", "No open cafe orders right now", 0, "", "/picking.html");
   } else {
-    cafeHtml = outgoingCard("Cafe Orders", `Sample data · couldn't load cafe_orders_summary_public (${cafeResult.reason})`, "—", "", "https://salt-city-coffee-systems.netlify.app");
+    cafeHtml = outgoingCard("Cafe Orders", `Sample data · couldn't load cafe_orders_summary_public (${cafeResult.reason})`, "—", "", "/picking.html");
   }
 
   // Wholesale & Subscription — open counts + how many are close to/past the 72hr deadline
@@ -4682,7 +4697,8 @@ const ROLE_LABEL = { gm:"General Manager", location_manager:"Location Manager", 
 const EXEC_ROLES = ["coo","ceo","cbo"];
 const LM_NAV_ROLES = ["location_manager","gm","coo","ceo","cbo"];
 const PM_LINKS = {
-  cafe: "https://salt-city-coffee-systems.netlify.app",
+  cafe: "/picking.html",
+  order: "/ordering.html",
   wholesale: "https://salt-city-coffee-tools.netlify.app/wholesale-subscription.html",
   roastery: "https://salt-city-coffee-tools.netlify.app/roastery-production.html",
   bagging: "https://salt-city-coffee-tools.netlify.app/bagging.html",
@@ -5253,7 +5269,7 @@ function isoWeekKey(dateStr){
 
 async function initApp(){
   $("#lmgm-app-wrap").hidden = false;
-  $("#lmgm-lm-order-app-link").href = PM_LINKS.cafe;
+  $("#lmgm-lm-order-app-link").href = PM_LINKS.order;
 
   const { data: { user } } = await sb.auth.getUser();
   let { data: staffRow, error: staffErr } = await sb.from("staff").select("id,name,role").eq("auth_user_id", user.id).maybeSingle();
@@ -10756,4 +10772,11 @@ $("#ta-refresh").addEventListener("click", () => taLoadDash(true));
 document.querySelectorAll('.nav-item[data-section="teamassess"]').forEach(btn => btn.addEventListener("click", () => { if(!taPeople.length) taLoadDash(); else taRenderDash(); }));
 
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function (e) { console.warn('SW registration failed', e); });
+    });
+  }
 </script>
